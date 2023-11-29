@@ -1,0 +1,3 @@
+[submodule "manage_externals"]
+	path = manage_externals
+	url = https://github.com/ESMCI/manage_externals.git
