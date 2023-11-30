@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["nbscuid"]
+
+
+[project]
+name = "nbscuid"
+version = "0.0.10"
+authors = [
+  { name="Elena Romashkova", email="eromashkova@ucar.edu" },
+]
+description = "Notebook-Based, Super CUstomizable Infrastructure for Diagnostics"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]
+dependencies = [
+    "black",
+    "dask",
+    "dask-jobqueue",
+    "intake",
+    "intake-esm",
+    "jinja2",
+    "jupyter-book",
+    "pandas",
+    "papermill",
+    "xarray",
+    "pyyaml",
+    "ploomber==0.22.3"
+]
+
+[project.urls]
+repository = "https://github.com/rmshkv/nbscuid"
+documentation = "https://nbscuid.readthedocs.io"
+
+
+[project.scripts]
+nbscuid-run = "nbscuid.run:run"
+nbscuid-build = "nbscuid.build:build"

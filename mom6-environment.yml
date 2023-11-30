@@ -1,0 +1,26 @@
+name: mom6-tools-nbscuid
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - cartopy
+  - cftime
+  - dask
+  - distributed
+  - geocat-comp
+  - intake
+  - intake-esm
+  - intake-xarray
+  - ipykernel
+  - matplotlib
+  - nc-time-axis
+  - ncar-jobqueue
+  - netcdf4
+  - numpy
+  - pip
+  - python==3.11.4
+  - xarray
+  - yaml
+  - zarr
+  - pip:
+    - git+https://github.com/NCAR/mom6-tools.git
