@@ -1,7 +1,0 @@
-# nbscuid-built files
-**/computed_notebooks/**
-**/cache_data_path/**
-**/cache_metadata_path/**
-**/temp_data/**
-**/ncfiles/**
-**/test_product.txt

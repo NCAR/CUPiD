@@ -5,3 +5,9 @@
 **/temp_data/**
 **/ncfiles/**
 **/test_product.txt
+nbscuid.egg-info
+**/.ipynb_checkpoints
+**/__pycache__
+
+# Text editor temp files
+**/*.swp
