@@ -1,4 +1,4 @@
-# CUPiD: CESM Unified Postprocessing and Diagnostics
+# <img src="images/logo.png" alt="CUPiD Logo" width=100 /> CUPiD: CESM Unified Postprocessing and Diagnostics
 Python Framework for Generating Diagnostics from CESM
 
 ## Project Vision
