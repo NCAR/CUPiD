@@ -2,16 +2,22 @@
 Python Framework for Generating Diagnostics from CESM
 
 ## Project Vision
-- Framework that can be launched via CIME workflow or on its own
-- Run in an easy-to-generate conda environment
+
+CUPiD is a collaborative effort that unifies all CESM component diagnostics and provides
+
+- Python code that
+  1. runs in an easy-to-generate conda environment, and
+  1. can be launched via CIME workflow or independently
 - Diagnostics for single/multiple runs and single/multiple components
-- Incorporate postprocessing that other groups are working on
-- API to make it easy to support outside code
-- Provide ongoing support and software maintenance
+- Ability to call post-processing tools that other groups are working on
+- An API that makes it easy to include outside code
+- Ongoing support and software maintenance
 
 ## Installing
 
 To install CUPiD, you need to check out the code and then set up a few environments.
+The initial examples have hard-coded paths that require you to be on `casper`.
+
 The code relies on submodules to install `manage_externals` and then uses `manage_externals` for one more package,
 so the `git clone` process is a little more complicated than usual:
 
@@ -24,9 +30,13 @@ $ ./manage_externals/checkout_externals
 Then build the necessary conda environments with
 
 ```
-$ mamba env create -f nbscuid/dev-environment.yml
-$ mamba env create -f mom6-environment.yml
+$ conda env create -f nbscuid/dev-environment.yml
+$ conda env create -f mom6-environment.yml
 ```
+
+Note that `conda` now defaults to using `mamba` to solve environments;
+the `mom6-environment.yml` environment is complicated,
+so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
 
 ## Running
 
