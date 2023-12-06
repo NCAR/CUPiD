@@ -49,3 +49,7 @@ $ conda activate nbscuid-dev
 $ nbscuid-run config.yml
 $ nbscuid-build config.yml # Will build HTML from Jupyter Book
 ```
+
+After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/adf-mom6/computed_notebooks/adf-quick-run`
+or you can copy the entire `${CUPID_ROOT}/examples/adf-mom6/computed_notebooks/adf-quick-run/_build/html`
+directory to your local machine and look at `index.html` in a web browser.
