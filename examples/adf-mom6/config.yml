@@ -66,7 +66,7 @@ compute_notebooks:
         sname: *sname
         adf_path: ./ADF
         config_path: .
-        config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae_numcin3.001_vs_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+        config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
   
   surface:
     parameter_groups:
