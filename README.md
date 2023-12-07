@@ -31,7 +31,15 @@ Then build the necessary conda environments with
 
 ```
 $ conda env create -f nbscuid/dev-environment.yml
+$ which nbscuid-run
 $ conda env create -f mom6-environment.yml
+```
+
+IF `which nbscuid-run` returned the error `which: no nbscuid-run in ($PATH)`, then please run the following:
+
+```
+$ conda activate nbscuid-dev
+$ pip install -e .  # installs nbscuid
 ```
 
 Note that `conda` now defaults to using `mamba` to solve environments;
@@ -45,7 +53,6 @@ To test the package out, try to run `examples/adf-mom6`:
 
 ```
 $ conda activate nbscuid-dev
-$ pip install -e .  # installs nbscuid
 $ cd examples/adf-mom6
 $ nbscuid-run config.yml
 $ nbscuid-build config.yml # Will build HTML from Jupyter Book
