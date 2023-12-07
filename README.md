@@ -44,8 +44,9 @@ CUPiD currently provides two examples for generating diagnostics.
 To test the package out, try to run `examples/adf-mom6`:
 
 ```
-$ cd examples/adf-mom6
 $ conda activate nbscuid-dev
+$ pip install -e .  # installs nbscuid
+$ cd examples/adf-mom6
 $ nbscuid-run config.yml
 $ nbscuid-build config.yml # Will build HTML from Jupyter Book
 ```
