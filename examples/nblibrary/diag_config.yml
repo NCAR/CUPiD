@@ -1,0 +1,50 @@
+# case info
+Case:
+  CASEROOT: /glade/p/cesmdata/cseg/runs/cesm2_0/b.e23_alpha16b.BLT1850.ne30_t232.054/
+  CIMEROOT: /glade/work/hannay/cesm_tags/cesm2_3_alpha16g/cime/
+  OCN_DIAG_ROOT: ncfiles/
+  SNAME: diagtestcase
+
+# start and end dates to perform averages
+Avg:
+  end_date: '0101-01-01'
+  start_date: '0091-01-01'
+
+# cesm hist fname conventions
+Fnames:
+  rho2:   '.mom6.h.rho2.????-??.nc'
+  z:      '.mom6.h.z.????-??.nc'
+  native: '.mom6.h.native.????-??.nc'
+  sfc:    '.mom6.h.sfc.????-??.nc'
+  static: '.mom6.h.static.nc'
+
+# sections where transports are computed online
+# Format: file name stream (e.g., Drake_Passage), transport
+# component (umo or vmo), observational estimate (optional)
+Transports:
+  sections : {'h.Agulhas_Section': ['umo', 129.8, 143.6],
+              'h.Barents_Opening': ['vmo', 2.0],
+              'h.Bering_Strait': ['vmo', 0.7, 1.1],
+              'h.Davis_Strait': ['vmo', -2.1,-1.1],
+              'h.Denmark_Strait': ['vmo',-4.8,-2.0],
+              'h.Drake_Passage': ['umo',129.8,143.6],
+              'h.English_Channel': ['umo',0.01,0.1],
+              'h.Fram_Strait': ['vmo',-4.7,0.7],
+              'h.Florida_Bahamas': ['vmo',28.9,34.3],
+              'h.Florida_Bahamas_extended':['vmo',28.9,34.3],
+              'h.Florida_Cuba':['umo', None],
+              'h.Gibraltar_Strait':['umo',-1.0, 1.0],
+              'h.Iceland_Norway':['vmo',28.9,34.3],
+              'h.Indonesian_Throughflow':['vmo',-15.,-13.],
+              'h.Mozambique_Channel':['vmo',-25.6,-7.8],
+              'h.Pacific_undercurrent':['umo',24.5,28.3],
+              'h.Taiwan_Luzon':['umo',-3.0,-1.8],
+              'h.Windward_Passage':['vmo',-15.,5.],
+              'h.Robeson_Channel':['umo', None],
+              'h.Yucatan_Channel':['vmo', None],
+              'h.Bosporus_Strait':['vmo', None],
+           }
+
+# path to ocean-related datasets catalog
+oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+
