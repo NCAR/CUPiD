@@ -18,7 +18,8 @@ CUPiD is a collaborative effort that unifies all CESM component diagnostics and 
 To install CUPiD, you need to check out the code and then set up a few environments.
 The initial examples have hard-coded paths that require you to be on `casper`.
 
-The code relies on submodules to install `manage_externals` and then uses `manage_externals` for two more packages, so the `git clone` process is a little more complicated than usual:
+The code relies on submodules to install `manage_externals` and then uses `manage_externals` for a few packages that are still being developed,
+so the `git clone` process is a little more complicated than usual:
 
 ```
 $ git clone --recurse-submodules https://github.com/NCAR/CUPiD.git
@@ -32,7 +33,6 @@ Then build the necessary conda environments with
 $ conda env create -f nbscuid/dev-environment.yml
 $ conda activate nbscuid-dev
 $ which nbscuid-run
-$ conda deactivate
 $ conda env create -f mom6-environment.yml
 ```
 
