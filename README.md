@@ -39,8 +39,8 @@ $ conda env create -f mom6-environment.yml
 Notes:
 
 1. `conda` now defaults to using `mamba` to solve environments; the `mom6-environment.yml` environment is complicated, so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
-
-2. IF `which nbscuid-run` returned the error `which: no nbscuid-run in ($PATH)`, then please run the following:
+1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
+1. If `which nbscuid-run` returned the error `which: no nbscuid-run in ($PATH)`, then please run the following:
 
 ```
 $ conda activate nbscuid-dev
