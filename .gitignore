@@ -11,3 +11,5 @@ nbscuid.egg-info
 
 # Text editor temp files
 **/*.swp
+
+externals/

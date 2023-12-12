@@ -19,7 +19,7 @@ data_sources:
     ### look for your template notebooks in. It doesn't have to 
     ### be inside run_dir, or be specific to this project, as
     ### long as the notebooks are there
-    nb_path_root: ../externals/nblibrary
+    nb_path_root: ../nblibrary
 
 ######################
 # Computation Config #
@@ -64,7 +64,7 @@ compute_notebooks:
     parameter_groups:
       none:
         sname: *sname
-        adf_path: ./ADF
+        adf_path: ../../externals/ADF
         config_path: .
         config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
   
