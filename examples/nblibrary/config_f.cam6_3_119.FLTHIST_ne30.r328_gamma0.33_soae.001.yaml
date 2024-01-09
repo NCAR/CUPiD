@@ -199,7 +199,7 @@ diag_cam_baseline_climo:
     
 
     #Location of baseline CAM climatologies:
-    cam_climo_loc: /glade/scratch/richling/adf-output/ADF-data/climos/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
+    cam_climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/climos/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
 
     #model year when time series files should start:
     #Note:  Leaving this entry blank will make time series
@@ -226,7 +226,7 @@ diag_cam_baseline_climo:
     cam_overwrite_ts: false
 
     #Location where time series files are (or will be) stored:
-    cam_ts_loc: /glade/scratch/richling/adf-output/ADF-data/timeseries/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
+    cam_ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/timeseries/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
 
     case_nickname: ${diag_cam_baseline_climo.cam_case_name} 
 

@@ -1,4 +1,4 @@
-name: mom6-tools-nbscuid
+name: cupid-analysis
 channels:
   - conda-forge
   - nodefaults

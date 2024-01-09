@@ -30,21 +30,21 @@ $ ./manage_externals/checkout_externals
 Then build the necessary conda environments with
 
 ```
-$ conda env create -f nbscuid/dev-environment.yml
-$ conda activate nbscuid-dev
-$ which nbscuid-run
-$ conda env create -f mom6-environment.yml
+$ conda env create -f cupid/dev-environment.yml
+$ conda activate cupid-dev
+$ which cupid-run
+$ conda env create -f cupid-analysis.yml
 ```
 
 Notes:
 
-1. `conda` now defaults to using `mamba` to solve environments; the `mom6-environment.yml` environment is complicated, so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
+1. `conda` now defaults to using `mamba` to solve environments; the `cupid-analysis.yml` environment is complicated, so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
-1. If `which nbscuid-run` returned the error `which: no nbscuid-run in ($PATH)`, then please run the following:
+1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
 ```
-$ conda activate nbscuid-dev
-$ pip install -e .  # installs nbscuid
+$ conda activate cupid-dev
+$ pip install -e .  # installs cupid
 ```
 
 ## Running
@@ -53,10 +53,10 @@ CUPiD currently provides two examples for generating diagnostics.
 To test the package out, try to run `examples/adf-mom6`:
 
 ```
-$ conda activate nbscuid-dev
+$ conda activate cupid-dev
 $ cd examples/adf-mom6
-$ nbscuid-run config.yml
-$ nbscuid-build config.yml # Will build HTML from Jupyter Book
+$ cupid-run config.yml
+$ cupid-build config.yml # Will build HTML from Jupyter Book
 ```
 
 After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/adf-mom6/computed_notebooks/adf-quick-run`

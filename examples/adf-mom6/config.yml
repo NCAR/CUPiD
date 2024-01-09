@@ -15,7 +15,7 @@ data_sources:
     ### to be created in
     run_dir: .
 
-    # nb_path_root is the path to the folder that nbscuid will
+    # nb_path_root is the path to the folder that cupid will
     ### look for your template notebooks in. It doesn't have to 
     ### be inside run_dir, or be specific to this project, as
     ### long as the notebooks are there
@@ -33,7 +33,7 @@ computation_config:
     ### specify a different environment than the default for any
     ### notebook in NOTEBOOK CONFIG
 
-    default_kernel_name: mom6-tools-nbscuid
+    default_kernel_name: cupid-analysis
 
 
 ############# NOTEBOOK CONFIG #############

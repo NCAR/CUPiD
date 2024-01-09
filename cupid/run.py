@@ -4,7 +4,7 @@ import os
 from glob import glob
 import papermill as pm
 import intake
-import nbscuid.util
+import cupid.util
 import sys
 from dask.distributed import Client
 import dask
@@ -13,7 +13,7 @@ import ploomber
 
 def run():
     """
-    Main engine to set up running all the notebooks. Called by `nbscuid-run`.
+    Main engine to set up running all the notebooks. Called by `cupid-run`.
     
     Args:
         none
@@ -24,8 +24,8 @@ def run():
     
     # Get control structure
     config_path = str(sys.argv[1])
-    control = nbscuid.util.get_control_dict(config_path)    
-    nbscuid.util.setup_book(config_path)
+    control = cupid.util.get_control_dict(config_path)
+    cupid.util.setup_book(config_path)
             
     # Grab paths
     
@@ -88,10 +88,10 @@ def run():
     for nb, info in all_nbs.items():
         
         if "dependency" in info:
-            nbscuid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
+            cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
         
         else: 
-            nbscuid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag)
+            cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag)
     
     #####################################################################
     # Organizing scripts
@@ -109,14 +109,14 @@ def run():
         for script, info in all_scripts.items():
 
             if "dependency" in info:
-                nbscuid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag, dependency = info["dependency"])
+                cupid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag, dependency = info["dependency"])
 
             else:     
-                nbscuid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag)
+                cupid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag)
     
     # Run the full DAG
     
     dag.build()
         
     return None
-    
+
