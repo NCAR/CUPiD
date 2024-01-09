@@ -7,7 +7,7 @@ import yaml
 
 def build():
     """
-    Build a Jupyter book based on the TOC in config.yml. Called by `nbscuid-build`.
+    Build a Jupyter book based on the TOC in config.yml. Called by `cupid-build`.
     
     Args:
         none

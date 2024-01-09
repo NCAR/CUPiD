@@ -3,14 +3,16 @@ requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["nbscuid"]
+packages = ["cupid"]
 
 
 [project]
-name = "nbscuid"
-version = "0.0.10"
+name = "cupid"
+version = "0.0.1"
 authors = [
-  { name="Elena Romashkova", email="eromashkova@ucar.edu" },
+  { name="Lev Romashkov", email="eromashkova@ucar.edu" },
+  { name="Teagan King", email="tking@ucar.edu" },
+  { name="Michael Levy", email="mlevy@ucar.edu" },
 ]
 description = "Notebook-Based, Super CUstomizable Infrastructure for Diagnostics"
 readme = "README.md"
@@ -36,10 +38,10 @@ dependencies = [
 ]
 
 [project.urls]
-repository = "https://github.com/rmshkv/nbscuid"
+repository = "https://github.com/NCAR/CUPiD"
 documentation = "https://nbscuid.readthedocs.io"
 
 
 [project.scripts]
-nbscuid-run = "nbscuid.run:run"
-nbscuid-build = "nbscuid.build:build"
+cupid-run = "cupid.run:run"
+cupid-build = "cupid.build:build"

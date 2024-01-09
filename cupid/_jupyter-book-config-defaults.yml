@@ -5,7 +5,7 @@
 
 #######################################################################################
 # Book settings
-title: nbscuid default book
+title: cupid default book
 author: none
 copyright: '2023'
 
@@ -18,7 +18,7 @@ execute:
 latex:
   latex_engine: pdflatex
   latex_documents:
-    targetname: nbscuid-default.tex
+    targetname: cupid-default.tex
 
 # Add a bibtex file so that we can create citations
 # bibtex_bibfiles:
@@ -31,7 +31,7 @@ sphinx:
 
 # Information about where the book exists on the web
 # repository:
-#   url: https://github.com/rmshkv/nbscuid
+#   url: https://github.com/rmshkv/cupid
 #   path_to_book: notebooks
 #   branch: main
 
