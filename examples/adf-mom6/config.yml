@@ -9,14 +9,14 @@ data_sources:
     ### used as the name of the folder your computed notebooks are put in
     sname: &sname
       adf-quick-run
-    
+
     # run_dir is the path to the folder you want
     ### all the files associated with this configuration
     ### to be created in
     run_dir: .
 
     # nb_path_root is the path to the folder that cupid will
-    ### look for your template notebooks in. It doesn't have to 
+    ### look for your template notebooks in. It doesn't have to
     ### be inside run_dir, or be specific to this project, as
     ### long as the notebooks are there
     nb_path_root: ../nblibrary
@@ -25,7 +25,7 @@ data_sources:
 # Computation Config #
 ######################
 
-computation_config: 
+computation_config:
 
     # default_kernel_name is the name of the environment that
     ### the notebooks in this configuration will be run in by default.
@@ -47,7 +47,7 @@ computation_config:
 global_params:
     test_global_param: hello
 
-compute_notebooks:  
+compute_notebooks:
 
   # This is where all the notebooks you want run and their
   ### parameters are specified. Several examples of different
@@ -59,7 +59,7 @@ compute_notebooks:
     parameter_groups:
       none:
         sname: *sname
-  
+
   adf_quick_run:
     parameter_groups:
       none:
@@ -67,30 +67,30 @@ compute_notebooks:
         adf_path: ../../externals/ADF
         config_path: .
         config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
-  
+
   surface:
     parameter_groups:
       none:
         sname: *sname
 
 
-  
 
-  
+
+
 ########### JUPYTER BOOK CONFIG ###########
 
 ##################################
 # Jupyter Book Table of Contents #
 ##################################
 book_toc:
-    
+
   # See https://jupyterbook.org/en/stable/structure/configure.html for
   ## complete documentation of Jupyter book construction options
 
   format: jb-book
 
   # All filenames are notebook filename without the .ipynb, similar to above
-  
+
   root: index # root is the notebook that will be the homepage for the book
   parts:
 
@@ -114,10 +114,10 @@ book_toc:
 book_config_keys:
 
   title: Example project   # Title of your jupyter book
-  
+
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options
-        
+
 
 
 
