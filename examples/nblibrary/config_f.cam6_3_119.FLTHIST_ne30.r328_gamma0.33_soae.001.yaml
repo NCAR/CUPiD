@@ -51,9 +51,7 @@
 #
 ##==============================
 
-user: eromashkova
-
-diag_loc: /glade/scratch/${user}/adf-output/${diag_cam_climo.cam_case_name}/
+diag_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/regrid/${diag_cam_climo.cam_case_name}/
 
 climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
 ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
@@ -193,7 +191,7 @@ diag_cam_baseline_climo:
     cam_case_name: f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001
 
     #Location of CAM baseline history (h0) files:
-    cam_hist_loc: /glade/derecho/scratch/hannay/archive/${diag_cam_baseline_climo.cam_case_name}/atm/hist/
+    cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/${diag_cam_baseline_climo.cam_case_name}/atm/hist/
 
     yrs: ${diag_cam_baseline_climo.start_year}-${diag_cam_baseline_climo.end_year}
     
