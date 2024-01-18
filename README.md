@@ -30,15 +30,15 @@ $ ./manage_externals/checkout_externals
 Then build the necessary conda environments with
 
 ```
-$ conda env create -f cupid/dev-environment.yml
+$ mamba env create -f environments/dev-environment.yml
 $ conda activate cupid-dev
 $ which cupid-run
-$ conda env create -f cupid-analysis.yml
+$ mamba env create -f environments/cupid-analysis.yml
 ```
 
 Notes:
 
-1. `conda` now defaults to using `mamba` to solve environments; the `cupid-analysis.yml` environment is complicated, so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
+1. As of version 23.10.0, `conda` defaults to using `mamba` to solve environments. It still feels slower than running `mamba` directly, hence the recommendation to install with `mamba env create` rather than `conda env create`.
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 

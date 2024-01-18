@@ -1,0 +1,18 @@
+name: cupid-dev
+dependencies:
+    - python=3.11.4
+    - black
+    - dask
+    - dask-jobqueue
+    - intake
+    - intake-esm
+    - jinja2
+    - jupyter-book
+    - pandas
+    - papermill
+    - pip
+    - ploomber=0.22.3
+    - pyyaml
+    - xarray
+    - pip:
+      - -e ../
