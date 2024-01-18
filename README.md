@@ -50,15 +50,15 @@ $ pip install -e .  # installs cupid
 ## Running
 
 CUPiD currently provides two examples for generating diagnostics.
-To test the package out, try to run `examples/adf-mom6`:
+To test the package out, try to run `examples/coupled-model`:
 
 ```
 $ conda activate cupid-dev
-$ cd examples/adf-mom6
+$ cd examples/coupled-model
 $ cupid-run config.yml
 $ cupid-build config.yml # Will build HTML from Jupyter Book
 ```
 
-After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/adf-mom6/computed_notebooks/adf-quick-run`
-or you can copy the entire `${CUPID_ROOT}/examples/adf-mom6/computed_notebooks/adf-quick-run/_build/html`
+After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
+or you can copy the entire `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html`
 directory to your local machine and look at `index.html` in a web browser.

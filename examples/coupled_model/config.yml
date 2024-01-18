@@ -8,7 +8,7 @@ data_sources:
     # sname is any string used as a nickname for this configuration. It will be
     ### used as the name of the folder your computed notebooks are put in
     sname: &sname
-      adf-quick-run
+      quick-run
 
     # run_dir is the path to the folder you want
     ### all the files associated with this configuration
@@ -74,7 +74,10 @@ compute_notebooks:
         sname: *sname
 
 
-
+  land_comparision:
+    parameter_groups:
+      none:
+        sname: *sname
 
 
 ########### JUPYTER BOOK CONFIG ###########
@@ -103,10 +106,14 @@ book_toc:
       ### in compute_notebooks above, also without .ipynb
       chapters:
         - file: adf_quick_run
+
     - caption: Ocean
       chapters:
           - file: surface
 
+    - caption: Land
+      chapters:
+        - file: land_comparision
 
 #####################################
 # Keys for Jupyter Book _config.yml #
