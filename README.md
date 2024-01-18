@@ -62,3 +62,9 @@ $ cupid-build config.yml # Will build HTML from Jupyter Book
 After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
 or you can copy the entire `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html`
 directory to your local machine and look at `index.html` in a web browser.
+
+The easiest way to visualize the web page on a browser is to:
+1. open a new browser window that points to https://fastx.ucar.edu:3300/session/`
+2. open a default desktop icon
+3. select the browser client 
+4. type `firefox CUPiD/examples/coupled_model/computed_notebooks/quick-run/_build/html/index.html`, assuming your CUPiD is in your home directory 
