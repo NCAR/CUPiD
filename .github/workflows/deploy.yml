@@ -76,6 +76,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.repository == 'NCAR/CUPiD' && github.ref == 'refs/heads/main'
 
     environment:
       # makes sure the deployment shows up under "deployments" section on main github page
