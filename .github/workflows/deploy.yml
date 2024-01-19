@@ -45,7 +45,7 @@ jobs:
       - name: Set up conda environment
         uses: mamba-org/setup-micromamba@v1
         with:
-            environment-file: build_envs/docs.yml
+            environment-file: environments/docs.yml
             cache-environment: true
             cache-environment-key: "docs-${{env.TODAY}}"
             create-args: >-
