@@ -1,0 +1,12 @@
+name: cupid-docs
+channels:
+    - conda-forge
+dependencies:
+    - python>=3.9,<3.12
+    - ipykernel
+    - ipython
+    - jupyter_client
+    - sphinx-book-theme
+    - myst-nb
+    - sphinx-design
+    - nbsphinx

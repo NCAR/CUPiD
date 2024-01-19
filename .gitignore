@@ -13,3 +13,6 @@ cupid.egg-info
 **/*.swp
 
 externals/
+
+# Documentation
+/docs/_build/
