@@ -40,6 +40,7 @@ Notes:
 
 1. As of version 23.10.0, `conda` defaults to using `mamba` to solve environments.
 It still feels slower than running `mamba` directly, hence the recommendation to install with `mamba env create` rather than `conda env create`.
+If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
 (To see what version of conda you have installed, run `conda --version`.)
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
