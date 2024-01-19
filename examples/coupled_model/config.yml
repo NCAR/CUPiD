@@ -71,7 +71,13 @@ compute_notebooks:
   surface:
     parameter_groups:
       none:
-        sname: *sname
+        CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
+        cases:
+          - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+          - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+        type:
+          - 1850pAD
+          - 1850pSASU
 
 
   land_comparision:
