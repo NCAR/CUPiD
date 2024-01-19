@@ -71,6 +71,22 @@ compute_notebooks:
   surface:
     parameter_groups:
       none:
+        CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+        Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+        savefigs: False
+        mom6_tools_config:
+          start_date: '0091-01-01'
+          end_date: '0101-01-01'
+          Fnames:
+            native: 'mom6.h.native.????-??.nc'
+            static: 'mom6.h.static.nc'
+          oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+
+
+
+  land_comparision:
+    parameter_groups:
+      none:
         CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
         cases:
           - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
@@ -78,12 +94,6 @@ compute_notebooks:
         type:
           - 1850pAD
           - 1850pSASU
-
-
-  land_comparision:
-    parameter_groups:
-      none:
-        sname: *sname
 
 
 ########### JUPYTER BOOK CONFIG ###########
