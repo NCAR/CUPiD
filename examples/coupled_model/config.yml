@@ -68,7 +68,7 @@ compute_notebooks:
         config_path: .
         config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-  surface:
+  ocean_surface:
     parameter_groups:
       none:
         CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
@@ -84,7 +84,7 @@ compute_notebooks:
 
 
 
-  land_comparision:
+  land_comparison:
     parameter_groups:
       none:
         CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
@@ -125,11 +125,11 @@ book_toc:
 
     - caption: Ocean
       chapters:
-          - file: surface
+          - file: ocean_surface
 
     - caption: Land
       chapters:
-        - file: land_comparision
+        - file: land_comparison
 
 #####################################
 # Keys for Jupyter Book _config.yml #
