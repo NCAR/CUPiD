@@ -71,7 +71,7 @@ def run():
     #####################################################################
     # Ploomber - making a DAG
 
-    dag = ploomber.DAG(executor=ploomber.executors.Parallel())
+    dag = ploomber.DAG(executor=ploomber.executors.Serial())
 
 
     #####################################################################
