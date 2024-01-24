@@ -30,15 +30,18 @@ $ ./manage_externals/checkout_externals
 Then build the necessary conda environments with
 
 ```
-$ conda env create -f cupid/dev-environment.yml
+$ mamba env create -f environments/dev-environment.yml
 $ conda activate cupid-dev
 $ which cupid-run
-$ conda env create -f cupid-analysis.yml
+$ mamba env create -f environments/cupid-analysis.yml
 ```
 
 Notes:
 
-1. `conda` now defaults to using `mamba` to solve environments; the `cupid-analysis.yml` environment is complicated, so older versions of `conda` should be updated (`conda update -n base conda`) or you should use `mamba` instead.
+1. As of version 23.10.0, `conda` defaults to using `mamba` to solve environments.
+It still feels slower than running `mamba` directly, hence the recommendation to install with `mamba env create` rather than `conda env create`.
+If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
+(To see what version of conda you have installed, run `conda --version`.)
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
@@ -62,3 +65,14 @@ $ cupid-build config.yml # Will build HTML from Jupyter Book
 After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
 or you can copy the entire `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html`
 directory to your local machine and look at `index.html` in a web browser.
+
+### Looking at Output
+
+For users running on the NCAR super computers (derecho or casper), you can visualize the web page in a browser using the FastX service. FastX requires you to be on the internal NCAR network (either on-site or via the VPN, and can be accessed via the following steps:
+
+1. Open a new browser window that points to https://fastx.ucar.edu:3300/session/
+1. Open a default desktop icon.
+1. Select the browser client.
+1. Type `xterm` and hit enter to open a terminal.
+1. In the terminal, run `cd ${CUPID_ROOT}/examples/coupled_model/computed_notebooks/quick-run/_build/html` to enter the `html` directory.
+1. From the updated directory, run `firefox index.html &` to open a web browser pointed at the generated web page.

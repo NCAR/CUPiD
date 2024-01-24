@@ -1,6 +1,0 @@
-name: cupid-dev
-dependencies:
-    - python==3.11.4
-    - pip
-    - pip:
-      - -e ../

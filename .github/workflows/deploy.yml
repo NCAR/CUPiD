@@ -1,0 +1,103 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Build and Deploy
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v3
+
+      # get today's date and set it as an environment variable for env cache key
+      - name: Set environment variables
+        run: |
+            echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+
+      # set up micromamba environment w/ caching enabled
+      - name: Set up conda environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+            environment-file: environments/docs.yml
+            cache-environment: true
+            cache-environment-key: "docs-${{env.TODAY}}"
+            create-args: >-
+                python=3.11
+
+      # Install CUPiD from checked out source
+      - name: Install CUPiD
+        run: |
+          python -m pip install --no-deps -e .
+
+      # Just double checking that everything we installed is where we think it is
+      - name: conda list
+        run: |
+          conda list
+
+      # build the docs like normal
+      - name: make html
+        run: |
+          cd docs
+          make html
+
+      # Upload build directory for the deployment step
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: './docs/_build/html/'
+
+
+  deploy:
+    needs: build
+    if: github.repository == 'NCAR/CUPiD' && github.ref == 'refs/heads/main'
+
+    environment:
+      # makes sure the deployment shows up under "deployments" section on main github page
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

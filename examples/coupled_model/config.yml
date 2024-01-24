@@ -7,8 +7,7 @@
 data_sources:
     # sname is any string used as a nickname for this configuration. It will be
     ### used as the name of the folder your computed notebooks are put in
-    sname: &sname
-      quick-run
+    sname: quick-run
 
     # run_dir is the path to the folder you want
     ### all the files associated with this configuration
@@ -45,7 +44,7 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-    test_global_param: hello
+  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
 
 compute_notebooks:
 
@@ -57,27 +56,39 @@ compute_notebooks:
   ### notebook from nb_path_root, minus the .ipynb
   index:
     parameter_groups:
-      none:
-        sname: *sname
+      none: {}
 
   adf_quick_run:
     parameter_groups:
       none:
-        sname: *sname
         adf_path: ../../externals/ADF
         config_path: .
         config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-  surface:
+  ocean_surface:
     parameter_groups:
       none:
-        sname: *sname
+        Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+        savefigs: False
+        mom6_tools_config:
+          start_date: '0091-01-01'
+          end_date: '0101-01-01'
+          Fnames:
+            native: 'mom6.h.native.????-??.nc'
+            static: 'mom6.h.static.nc'
+          oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
 
-  land_comparision:
+
+  land_comparison:
     parameter_groups:
       none:
-        sname: *sname
+        cases:
+          - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+          - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+        type:
+          - 1850pAD
+          - 1850pSASU
 
 
 ########### JUPYTER BOOK CONFIG ###########
@@ -109,11 +120,11 @@ book_toc:
 
     - caption: Ocean
       chapters:
-          - file: surface
+          - file: ocean_surface
 
     - caption: Land
       chapters:
-        - file: land_comparision
+        - file: land_comparison
 
 #####################################
 # Keys for Jupyter Book _config.yml #
