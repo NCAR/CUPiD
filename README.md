@@ -66,10 +66,13 @@ After the last step is finished, you can use Jupyter to view generated notebooks
 or you can copy the entire `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html`
 directory to your local machine and look at `index.html` in a web browser.
 
-For users running on the NCAR super computers (derecho or casper), you can visualize the web page in a browser with the following steps:
-1. open a new browser window that points to https://fastx.ucar.edu:3300/session/
-1. open a default desktop icon
-1. select the browser client
-1. type `xterm` and hit enter to open a terminal
-1. In the terminal, run `cd ${CUPID_ROOT}/examples/coupled_model/computed_notebooks/quick-run/_build/html` to enter the `html` directory
-1. From the updated directory, run `firefox index.html &` to open a web browser pointed at the generated web page
+### Looking at Output
+
+For users running on the NCAR super computers (derecho or casper), you can visualize the web page in a browser using the FastX service. FastX requires you to be on the internal NCAR network (either on-site or via the VPN, and can be accessed via the following steps:
+
+1. Open a new browser window that points to https://fastx.ucar.edu:3300/session/
+1. Open a default desktop icon.
+1. Select the browser client.
+1. Type `xterm` and hit enter to open a terminal.
+1. In the terminal, run `cd ${CUPID_ROOT}/examples/coupled_model/computed_notebooks/quick-run/_build/html` to enter the `html` directory.
+1. From the updated directory, run `firefox index.html &` to open a web browser pointed at the generated web page.
