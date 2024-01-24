@@ -57,7 +57,7 @@ To test the package out, try to run `examples/coupled-model`:
 
 ```
 $ conda activate cupid-dev
-$ cd examples/coupled-model
+$ cd examples/coupled_model
 $ cupid-run config.yml
 $ cupid-build config.yml # Will build HTML from Jupyter Book
 ```
