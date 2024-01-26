@@ -1,0 +1,24 @@
+---
+
+aice:
+   - limits: [0.0, 1.0]
+   - title: "Sea Ice Concentration"
+hi: 
+   - limits: [0.0,5.0]
+   - title: "Sea Ice Thickness"
+hs:
+   - limits: [0.0,0.5]
+   - title:  "Snow Depth"
+Tsfc: 
+   - limits: [-30.0,10.0]
+   - title: "Surface Temperature"
+albsni: 
+   - limits: [0,100]
+   - title: "Snow Ice Albedo"
+flat: 
+   - limits: [-50.,50.]
+   - title: "Latent Heat Flux"
+fsens: 
+   - limits: [-50.,50.]
+   - title: "Sensible Heat Flux"
+
