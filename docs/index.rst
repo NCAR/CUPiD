@@ -6,3 +6,4 @@ CUPiD Documentation
    :hidden:
 
     Installation Guide <install.rst>
+    Adding Notebooks <addingnotebookstocollection.md>
