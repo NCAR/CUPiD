@@ -15,21 +15,17 @@
 		your_new_nb_name:
 			    parameter_groups:
 				    none:
-						param_specific_to_this_nb: some_value
-						another_param: another_value
+                        param_specific_to_this_nb: some_value
+                        another_param: another_value
    
 	If you just want the notebook run once on one set of parameters, keep the `parameter_groups: none:` notation as above. If you want the notebook executed multiple times with different parameter sets, the notation would look like this:
 
 		your_new_nb_name:
                 parameter_groups:
                     group_1:
-                        sname: *sname
-                        nb_number: 3
                         param_1: some_string
                         param_2: {key1: dict_entry1, key2: dict_entry2}
                     group_2:
-                        sname: *sname
-                        nb_number: 4
                         param_1: some_different_string
                         param_2: {key1: dict_entry3, key2: dict_entry4}
 
