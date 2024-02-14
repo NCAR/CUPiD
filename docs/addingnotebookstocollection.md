@@ -21,13 +21,13 @@
 	If you just want the notebook run once on one set of parameters, keep the `parameter_groups: none:` notation as above. If you want the notebook executed multiple times with different parameter sets, the notation would look like this:
 
 		your_new_nb_name:
-                	parameter_groups:
+   			parameter_groups:
    				group_1:
-                        		param_1: some_string
-                        		param_2: {key1: dict_entry1, key2: dict_entry2}
-                    		group_2:
-                        		param_1: some_different_string
-                        		param_2: {key1: dict_entry3, key2: dict_entry4}
+					param_1: some_string
+					param_2: {key1: dict_entry1, key2: dict_entry2}
+				group_2:
+					param_1: some_different_string
+					param_2: {key1: dict_entry3, key2: dict_entry4}
 
 
 6. If you'd like your new notebook included in the final Jupyter Book, add it to the Jupyter Book table of contents (`book_toc`). See [Jupyter Book's documentation](https://jupyterbook.org/en/stable/structure/toc.html) for different things you can do with this.
