@@ -128,5 +128,3 @@ html_logo = '_static/images/logos/logo.png'
 html_favicon = '_static/images/logos/logo.png'
 
 autoclass_content = 'both'
-
-
