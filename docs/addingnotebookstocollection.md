@@ -1,6 +1,6 @@
 # How to add diagnostics notebooks
 
-1. Put your new diagnostic notebook in the folder called `examples/nblibrary`.
+1. Put your new diagnostic notebook in the folder called `examples/nblibrary`. Generally, a good fit for a diagnostic notebook is one that reads in CESM output, does some processing, and outputs plots, values, and/or new files (images, data, etc.) that are useful for evaluating the run.
 2. In your notebook, move all variables you might want to change (paths to data, dates to select, etc.) to a cell near the top. For example:
 
 	    sname = "run_name"
@@ -10,7 +10,7 @@
 
 3. Tag this cell as `parameters`. This means that when the notebook is executed by `cupid`, a new cell will be inserted just below this one with all of the parameters you specify in `config.yml` (see step 4). To tag it, in Jupyter Lab, click on the cell and click the button with two gears in the top right ("Property Inspector"). Open "Common Tools." There, you can see a section called "Cell Tags." Click "Add Tag," and add one called `parameters` (exactly as written).
 
-4. Open `config.yml`. First, add your new notebook (as its name, minus the `.ipynb`) to the list of notebooks that will be computed (`compute_notebooks`). For example:
+4. Open `config.yml`. First, add your new notebook (as its name, minus the `.ipynb`) to the list of notebooks that will be computed (`compute_notebooks`). The notebooks will be executed in the order they are listed here. For example:
 
 		your_new_nb_name:
 			parameter_groups:
