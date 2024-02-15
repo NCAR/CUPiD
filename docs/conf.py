@@ -12,9 +12,26 @@
 import os
 import sys
 import datetime
+import re
+
 sys.path.insert(0, os.path.abspath('../..'))
 
 print("sys.path:", sys.path)
+
+# Copy README into docs
+# This is to allow us to remove the header image from the docs copy of README
+# without affecting the original README, but still pull the source README
+# into the docs build fresh each time.
+os.system('cp ../README.md ./README.md')
+
+# Remove any images from the first line of the README
+with open('README.md', 'r') as f:
+    readme1 = f.readline()
+    readme1 = re.sub('<.*?> ', '', readme1)
+    readme = f.read()
+
+with open('README.md', 'w') as f:
+    f.write(readme1+readme)
 
 # -- Project information -----------------------------------------------------
 
@@ -111,3 +128,5 @@ html_logo = '_static/images/logos/logo.png'
 html_favicon = '_static/images/logos/logo.png'
 
 autoclass_content = 'both'
+
+
