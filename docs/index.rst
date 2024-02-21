@@ -1,13 +1,8 @@
-CUPiD Documentation
-===================
-
 .. toctree::
    :maxdepth: 2
    :hidden:
 
-    README <README.md>
+    Home <home.rst>
     Adding Notebooks <addingnotebookstocollection.md>
 
-.. include:: README.md
-   :parser: myst
-
+.. include:: home.rst
