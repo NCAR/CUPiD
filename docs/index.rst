@@ -5,6 +5,7 @@ CUPiD Documentation
    :maxdepth: 2
    :hidden:
 
+    Home <README.rst>
     Adding Notebooks <addingnotebookstocollection.md>
 
 .. include:: README.md
