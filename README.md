@@ -1,4 +1,5 @@
 # <img src="images/logo.png" alt="CUPiD Logo" width=100 /> CUPiD: CESM Unified Postprocessing and Diagnostics
+
 Python Framework for Generating Diagnostics from CESM
 
 ## Project Vision
@@ -21,7 +22,7 @@ The initial examples have hard-coded paths that require you to be on `casper`.
 The code relies on submodules to install `manage_externals` and then uses `manage_externals` for a few packages that are still being developed,
 so the `git clone` process is a little more complicated than usual:
 
-```
+``` bash
 $ git clone --recurse-submodules https://github.com/NCAR/CUPiD.git
 $ cd CUPiD
 $ ./manage_externals/checkout_externals
@@ -29,7 +30,7 @@ $ ./manage_externals/checkout_externals
 
 Then build the necessary conda environments with
 
-```
+``` bash
 $ mamba env create -f environments/dev-environment.yml
 $ conda activate cupid-dev
 $ which cupid-run
@@ -45,7 +46,7 @@ If you do not have `mamba` installed, you can still use `conda`... it will just 
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
-```
+``` bash
 $ conda activate cupid-dev
 $ pip install -e .  # installs cupid
 ```
@@ -55,7 +56,7 @@ $ pip install -e .  # installs cupid
 CUPiD currently provides two examples for generating diagnostics.
 To test the package out, try to run `examples/coupled-model`:
 
-```
+``` bash
 $ conda activate cupid-dev
 $ cd examples/coupled_model
 $ cupid-run config.yml
@@ -68,7 +69,7 @@ directory to your local machine and look at `index.html` in a web browser.
 
 ### Looking at Output
 
-For users running on the NCAR super computers (derecho or casper), you can visualize the web page in a browser using the FastX service. FastX requires you to be on the internal NCAR network (either on-site or via the VPN, and can be accessed via the following steps:
+For users running on the NCAR super computers (derecho or casper), you can visualize the web page in a browser using the FastX service. FastX requires you to be on the internal NCAR network (either on-site or via the VPN), and can be accessed via the following steps:
 
 1. Open a new browser window that points to https://fastx.ucar.edu:3300/session/
 1. Open a default desktop icon.
