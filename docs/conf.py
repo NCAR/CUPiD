@@ -27,7 +27,7 @@ os.system('cp ../README.md ./README.md')
 # Remove any images from the first line of the README
 with open('README.md', 'r') as f:
     readme1 = f.readline()
-    readme1 = re.sub('<.*?> ', '', readme1)
+    readme1 = re.sub('<img.*?> ', '', readme1)
     readme = f.read()
 
 with open('README.md', 'w') as f:
