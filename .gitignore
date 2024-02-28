@@ -16,3 +16,4 @@ externals/
 
 # Documentation
 /docs/_build/
+/docs/README.md

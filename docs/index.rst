@@ -5,4 +5,8 @@ CUPiD Documentation
    :maxdepth: 2
    :hidden:
 
-    Installation Guide <install.rst>
+    Adding Notebooks <addingnotebookstocollection.md>
+
+.. include:: README.md
+   :parser: myst
+

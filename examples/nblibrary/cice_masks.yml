@@ -1,0 +1,70 @@
+---
+
+#****************************************************************
+# Boundary areas for regional masks:
+# Northern Hemisphere:
+#       Lab            Lab Sea
+#       GIN            GIN Sea
+#       Bar            Barents/Kara Sea
+#       ArcOc          Arctic Ocean
+#       Sib            Siberian Sea
+#       Beau           Beaufort Sea
+#       CArc           Central Arctic
+#       Bering         Bering Sea
+#       Okhotsk        Sea of Okhotsk
+#       Hudson         Hudson Bay
+#       CAArch         Canadian Archipelago
+#
+#Southern Hemisphere:
+#       Wed            Weddell Sea
+#       Ross           Ross Sea
+#       Ind            Indian sector
+#       Pac            Pacific sector
+#       BAm            Bellingshausen-Amundsen Sea
+#
+#******************************************************************
+Lab_lat: [50.,78.]
+Lab_lon: [284.,35.]
+GIN_lat: [65.,80.]
+GIN_lon1: [315.,360.]
+GIN_lon2: [0.,15.]
+Bar_lat: [66.,80.]
+Bar_long: [15.,100.]
+ArcOc_lat1: [80.,90.]
+ArcOc_lat2: ArcOc_lat1
+ArcOc_lat3: [68.,90.]
+ArcOc_long1: [243.,360.]
+ArcOc_long2: [0.,100.]
+ArcOc_long3: [100.,243.]
+Sib_lat: [68.,80.]
+Sib_long: [100.,192.]
+Beau_lat: [68.,80.]
+Beau_long: [192.,243.]
+CArc_lat: [80.,90.]
+CArc_long: [0.,360.]
+#---------------------------------------------------------------
+# These Arctic regions are more complicated geographically
+# and will be defined by polygons rather than min,max lat,lon
+#--------------------------------------------------------------
+Lab_poly_lat: [50., 64., 74., 78., 78., 50.]
+Lab_poly_long: [295., 292., 280., 280., 315., 315.]
+Bering_poly_lat: [56., 60., 68., 68., 58., 52.5, 52.5]
+Bering_poly_long: [162., 162., 178., 200., 204., 190., 180.]
+Okhotsk_poly_lat: [44., 44., 46., 51., 60., 64., 60., 55., 44.]
+Okhotsk_poly_long: [142., 145., 150., 157., 162., 168., 140., 133., 142.]
+Hudson_poly_lat: [50., 66., 66., 70., 70., 68., 62., 60., 50.]
+Hudson_poly_long: [265., 265., 274., 274., 290., 290., 292., 295., 295.]
+CAArch_poly_lat: [67., 80., 80., 70., 67.]
+CAArch_poly_long: [243., 243., 281., 281., 275.]
+# ------SH regions------------------
+Wed_lat: [-90.,-50.]
+Wed_long1: [300.,360.]
+Wed_long2: [0.,20.]
+Ross_lat: [-90.,-50.]
+Ross_long: [160.,220.]
+Ind_lat: [-90.,-50.]
+Ind_long: [20.,90.]
+Pac_lat: [-90.,-50.]
+Pac_long: [90.,160.]
+BAm_lat: [-90.,-50.]
+BAm_long: [220.,300.]

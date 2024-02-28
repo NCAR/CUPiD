@@ -90,6 +90,13 @@ compute_notebooks:
           - 1850pAD
           - 1850pSASU
 
+  seaice:
+    parameter_groups:
+      none:
+        cases:
+          - b.e23_alpha16g.BLT1850.ne30_t232.075
+          - b.e23_alpha16g.BLT1850.ne30_t232.078
+
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -125,6 +132,10 @@ book_toc:
     - caption: Land
       chapters:
         - file: land_comparison
+
+    - caption: SeaIce
+      chapters:
+        - file: seaice
 
 #####################################
 # Keys for Jupyter Book _config.yml #
