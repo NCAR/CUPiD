@@ -94,8 +94,8 @@ compute_notebooks:
     parameter_groups:
       none:
         cases:
-          - b.e23_alpha16g.BLT1850.ne30_t232.059
-          - b.e23_alpha16b.BLT1850.ne30_t232.054
+          - b.e23_alpha16g.BLT1850.ne30_t232.075
+          - b.e23_alpha16g.BLT1850.ne30_t232.078
 
 
 ########### JUPYTER BOOK CONFIG ###########
