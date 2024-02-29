@@ -8,9 +8,9 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
             sname = "run_name"
             data_path = "path/to/data"
             dates = {"start_date" = "01/01/01",
-	    			    "end_date" = "01/01/02"}
+                                    "end_date" = "01/01/02"}
 
-3. Tag this cell as `parameters`. This means that when the notebook is executed by `CUPiD`, a new cell will be inserted just below this one with all of the parameters specified in `config.yml` (see step 5). To tag it, in Jupyter Lab, click on the cell and click the button with two gears in the top right ("Property Inspector"). Open "Common Tools." There, you can see a section called "Cell Tags." Click "Add Tag," and add one called `parameters` (exactly as written). **If you don't want to fully set up CUPiD, stop here and we can integrate the notebook into a CUPiD workflow from here.**
+4. Tag this cell as `parameters`. This means that when the notebook is executed by `CUPiD`, a new cell will be inserted just below this one with all of the parameters specified in `config.yml` (see step 5). To tag it, in Jupyter Lab, click on the cell and click the button with two gears in the top right ("Property Inspector"). Open "Common Tools." There, you can see a section called "Cell Tags." Click "Add Tag," and add one called `parameters` (exactly as written). **If you don't want to fully set up CUPiD, stop here and we can integrate the notebook into a CUPiD workflow from here.**
 ---
 **If you want to run your notebook through the `CUPiD` workflow yourself, follow the rest of the instructions:**
 
