@@ -24,7 +24,7 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
                                         param_specific_to_this_nb: some_value
                                         another_param: another_value
    
-	If you just want the notebook run once on one set of parameters, keep the `parameter_groups: none:` notation as above. If you want the notebook executed multiple times with different parameter sets, the notation would look like this:
+        If you just want the notebook run once on one set of parameters, keep the `parameter_groups: none:` notation as above. If you want the notebook executed multiple times with different parameter sets, the notation would look like this:
 
                 your_new_nb_name:
                         parameter_groups:
