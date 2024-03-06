@@ -6,7 +6,6 @@ from glob import glob
 import papermill as pm
 import intake
 import cupid.util
-import sys
 from dask.distributed import Client
 import dask
 import time
@@ -17,13 +16,13 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
 @click.option("--time-series", "-ts", is_flag=True,
               help="Run time series generation scripts prior to diagnostics")
-def run(serial=False, time_series=False):
+@click.argument("config_path")
+def run(config_path, serial=False, time_series=False):
     """
     Main engine to set up running all the notebooks.
     """
 
     # Get control structure
-    config_path = str(sys.argv[1])
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
 
@@ -87,6 +86,7 @@ def run(serial=False, time_series=False):
 
     for nb, info in all_nbs.items():
 
+        global_params['serial'] = serial
         if "dependency" in info:
             cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
 
