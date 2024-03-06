@@ -38,37 +38,6 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
     # Notify user that script has started:
     print("\n  Generating time series files...")
 
-    """
-    # Check if baseline time-series files are being created:
-    if baseline:
-        # Use baseline settings, while converting them all
-        # to lists:
-        case_names = [self.get_baseline_info("cam_case_name", required=True)]
-        cam_ts_done = [self.get_baseline_info("cam_ts_done")]
-        cam_hist_locs = [self.get_baseline_info("cam_hist_loc")]
-        ts_dir = [self.get_baseline_info("cam_ts_loc", required=True)]
-        overwrite_ts = [self.get_baseline_info("cam_overwrite_ts")]
-        start_years = [self.climo_yrs["syear_baseline"]]
-        end_years = [self.climo_yrs["eyear_baseline"]]
-    else:
-        # Use test case settings, which are already lists:
-        case_names = self.get_cam_info("cam_case_name", required=True)
-        cam_ts_done = self.get_cam_info("cam_ts_done")
-        cam_hist_locs = self.get_cam_info("cam_hist_loc")
-        ts_dir = self.get_cam_info("cam_ts_loc", required=True)
-        overwrite_ts = self.get_cam_info("cam_overwrite_ts")
-        start_years = self.climo_yrs["syears"]
-        end_years = self.climo_yrs["eyears"]
-    # End if
-
-    # Read hist_str (component.hist_num) from the yaml file, or set to default
-    hist_str = self.get_basic_info("hist_str")
-    # If hist_str is not present, then default to 'cam.h0':
-    if not hist_str:
-        hist_str = "cam.h0"
-    # End if
-    """
-
     # get info about variable defaults
     res = self.variable_defaults
 
@@ -88,17 +57,13 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         start_year = start_years[case_idx]
         end_year = end_years[case_idx]
 
-        # Create path object for the CAM history file(s) location:
+        # Create path object for the history file(s) location:
         starting_location = Path(hist_locs[case_idx])
 
         # Check that path actually exists:
         if not starting_location.is_dir():
-            if baseline:
-                emsg = f"Provided baseline 'hist_loc' directory '{starting_location}' "
-                emsg += "not found.  Script is ending here."
-            else:
-                emsg = "Provided 'cam_hist_loc' directory '{starting_location}' not found."
-                emsg += " Script is ending here."
+            emsg = "Provided 'cam_hist_loc' directory '{starting_location}' not found."
+            emsg += " Script is ending here."
             # End if
 
             self.end_diag_fail(emsg)
