@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 print("sys.path:", sys.path)
 
-# Copy README and NCAR_tipsinto docs
+# Copy README and NCAR_tips into docs
 # This block allows us to remove the header image from any md files
 # without affecting the original version, but still pull the source
 # into the docs build fresh each time.

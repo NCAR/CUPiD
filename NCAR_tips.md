@@ -5,20 +5,28 @@ A few tips and tricks tailored for the CISL's compute environment.
 ## Running in Parallel
 
 There are two ways to request multiple cores on either casper or derecho.
-If you want to release the cores immediately after `cupid-run` finishes:
+Both cases are requesting 12 cores and 120 GB of memory.
+
+
+The recommended approach releases the cores immediately after `cupid-run` finishes:
 
 ```
 [login-node] $ conda activate cupid-dev
 (cupid-dev) [login-node] $ qcmd -l select=1:ncpus=12:mem=120GB -- cupid-run config.yml
 ```
 
-Alternatively, you can start an interactive session and remain on the compute nodes after CUPiD completes:
+Alternatively, you can start an interactive session and remain on the compute nodes after `cupid-run` completes:
 
 ```
 [login-node] $ qinteractive -l select=1:ncpus=12:mem=120GB
 [compute-node] $ conda activate cupid-dev
 (cupid-dev) [compute-node] $ cupid-run config.yml
 ```
+
+Notes:
+1. If you chose to run on derecho, specify the `develop` queue by adding the option `-q develop` to either `qcmd` or `qinteractive`
+   (the `develop` queue is a shared resource and you are charged by the core hour rather than the node hour).
+1. `cupid-build` is not computationally expensive, and can be run on a login node for either machine.
 
 ## Looking at Output
 
