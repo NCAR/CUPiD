@@ -17,3 +17,4 @@ externals/
 # Documentation
 /docs/_build/
 /docs/README.md
+/docs/NCAR_tips.md

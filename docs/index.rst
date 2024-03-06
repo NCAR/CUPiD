@@ -6,6 +6,7 @@ CUPiD Documentation
    :hidden:
 
     Adding Notebooks <addingnotebookstocollection.md>
+    Tips and Tricks for NCAR Machines <NCARtips.rst>
 
 .. include:: README.md
    :parser: myst
