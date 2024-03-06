@@ -45,6 +45,8 @@ computation_config:
 
 global_params:
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+  lc_kwargs:
+    threads_per_worker: 1
 
 compute_notebooks:
 

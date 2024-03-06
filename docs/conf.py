@@ -18,20 +18,21 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 print("sys.path:", sys.path)
 
-# Copy README into docs
-# This is to allow us to remove the header image from the docs copy of README
-# without affecting the original README, but still pull the source README
+# Copy README and NCAR_tips into docs
+# This block allows us to remove the header image from any md files
+# without affecting the original version, but still pull the source
 # into the docs build fresh each time.
-os.system('cp ../README.md ./README.md')
+for file in ['README.md', 'NCAR_tips.md']:
+  os.system(f'cp ../{file} ./')
 
-# Remove any images from the first line of the README
-with open('README.md', 'r') as f:
-    readme1 = f.readline()
-    readme1 = re.sub('<img.*?> ', '', readme1)
-    readme = f.read()
+  # Remove any images from the first line of the file
+  with open(file, 'r') as f:
+      file1 = f.readline()
+      file1 = re.sub('<img.*?> ', '', file1)
+      file_rest = f.read()
 
-with open('README.md', 'w') as f:
-    f.write(readme1+readme)
+  with open(file, 'w') as f:
+      f.write(file1+file_rest)
 
 # -- Project information -----------------------------------------------------
 
@@ -65,7 +66,7 @@ extensions = [
 
 intersphinx_mapping = {
     'dask': ('https://docs.dask.org/en/latest/', None),
-    'python': ('http://docs.python.org/3/', None),
+    'python': ('https://docs.python.org/3/', None),
     'numpy': ("https://numpy.org/doc/stable", None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
     'xarray': ('http://xarray.pydata.org/en/stable/', None),
