@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import click
 import os
 from glob import glob
 import papermill as pm
@@ -11,15 +12,14 @@ import dask
 import time
 import ploomber
 
-def run():
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
+@click.option("--time-series", "-ts", is_flag=True,
+              help="Run time series generation scripts prior to diagnostics")
+def run(serial=False, time_series=False):
     """
-    Main engine to set up running all the notebooks. Called by `cupid-run`.
-
-    Args:
-        none
-    Returns:
-        None
-
+    Main engine to set up running all the notebooks.
     """
 
     # Get control structure
