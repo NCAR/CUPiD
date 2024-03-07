@@ -1,4 +1,4 @@
-def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years):
+def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years, num_procs, diag_var_list):
     """
     Generate time series versions of the history file data.
 
@@ -64,9 +64,8 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         if not starting_location.is_dir():
             emsg = "Provided 'cam_hist_loc' directory '{starting_location}' not found."
             emsg += " Script is ending here."
-            # End if
 
-            self.end_diag_fail(emsg)
+            raise FileNotFoundError(emsg)
         # End if
 
         # Check if history files actually exist. If not then kill script:
@@ -75,7 +74,7 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
                 f"No history *{hist_str}.*.nc files found in '{starting_location}'."
             )
             emsg += " Script is ending here."
-            self.end_diag_fail(emsg)
+            raise FileNotFoundError(emsg)
         # End if
 
         # Create empty list:
@@ -179,7 +178,6 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         list_of_commands = []
         vars_to_derive = []
         # create copy of var list that can be modified for derivable variables
-        diag_var_list = self.diag_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
                 vres = res.get(var, {})
@@ -275,7 +273,7 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         # End variable loop
 
         # Now run the "ncrcat" subprocesses in parallel:
-        with mp.Pool(processes=self.num_procs) as mpool:
+        with mp.Pool(processes=num_procs) as mpool:
             _ = mpool.map(call_ncrcat, list_of_commands)
 
         if vars_to_derive:
