@@ -66,3 +66,32 @@ $ cupid-build config.yml # Will build HTML from Jupyter Book
 
 After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
 or you can view `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html/index.html` in a web browser.
+
+### CUPiD Options
+
+Most of CUPiD's configuration is done via the `config.yml` file, but there are a few command line options as well:
+
+```bash
+(cupid-dev) $ cupid-run -h
+Usage: cupid-run [OPTIONS] CONFIG_PATH
+
+  Main engine to set up running all the notebooks.
+
+Options:
+  -s, --serial        Do not use LocalCluster objects
+  -ts, --time-series  Run time series generation scripts prior to diagnostics
+  -h, --help          Show this message and exit.
+```
+
+By default, several of the example notebooks provided use a dask `LocalCluster` object to run in parallel.
+However, the `--serial` option will pass a logical flag to each notebook that can be used to skip starting the cluster.
+
+```py3
+# Spin up cluster (if running in parallel)
+client=None
+if not serial:
+  cluster = LocalCluster(**lc_kwargs)
+  client = Client(cluster)
+
+client
+```
