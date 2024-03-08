@@ -2,6 +2,7 @@
 
 import click
 import os
+import sys
 from glob import glob
 import papermill as pm
 import intake
@@ -21,6 +22,11 @@ def run(config_path, serial=False, time_series=False):
     """
     Main engine to set up running all the notebooks.
     """
+
+    # Abort if run with --time-series (until feature is added)
+    if time_series:
+        sys.tracebacklimit = 0
+        raise NotImplementedError("--time-series option not implemented yet")
 
     # Get control structure
     control = cupid.util.get_control_dict(config_path)
