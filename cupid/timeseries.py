@@ -26,12 +26,19 @@ def call_ncrcat(cmd):
         return subprocess.run(cmd, shell=False)
 
 
-def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years, num_procs, diag_var_list, serial):
+def create_time_series(component, derive_vars, case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years, height_dim, num_procs, diag_var_list, serial):
     """
     Generate time series versions of the history file data.
 
     Args
     ----
+     - component: str
+         name of component, eg 'cam'
+         # This could alternatively be made into a dictionary and encorporate values such as height_dim
+     - derive_vars: dict
+         information on derivable variables
+         eg, {'PRECT': ['PRECL','PRECC'],
+              'RESTOM': ['FLNT','FSNT']}
      - case_names: list, str
          name of simulaton case
      - hist_str: str
@@ -48,6 +55,8 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
          first year for desired range of years
      - end_years: list, str or int
          last year for desired range of years
+     - height_dim: str
+         name of height dimension for given component, eg 'lev'
      - num_procs: int
          number of processors
      - diag_var_list: list
@@ -59,9 +68,6 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
 
     # Notify user that script has started:
     print("\n  Generating time series files...")
-
-    # get info about variable defaults
-    res = self.variable_defaults
 
     # Loop over cases:
     for case_idx, case_name in enumerate(case_names):
@@ -128,9 +134,9 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
 
         # Check what kind of vertical coordinate (if any) is being used for this model run:
         # ------------------------
-        if "lev" in hist_file_ds:
+        if height_dim in hist_file_ds:
             # Extract vertical level attributes:
-            lev_attrs = hist_file_ds["lev"].attrs
+            lev_attrs = hist_file_ds[height_dim].attrs
 
             # First check if there is a "vert_coord" attribute:
             if "vert_coord" in lev_attrs:
@@ -154,20 +160,20 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
                         wmsg = (
                             "WARNING! Unable to determine the vertical coordinate"
                         )
-                        wmsg += f" type from the 'lev' long name, which is:\n'{lev_long_name}'."
+                        wmsg += f" type from the {height_dim} long name, which is:\n'{lev_long_name}'."
                         wmsg += "\nNo additional vertical coordinate information will be"
-                        wmsg += " transferred beyond the 'lev' dimension itself."
+                        wmsg += f" transferred beyond the {height_dim} dimension itself."
                         print(wmsg)
 
                         vert_coord_type = None
                     # End if
                 else:
                     # Print a warning, and assume hybrid levels (for now):
-                    wmsg = "WARNING!  No long name found for the 'lev' dimension,"
+                    wmsg = f"WARNING!  No long name found for the {height_dim} dimension,"
                     wmsg += (
                         " so no additional vertical coordinate information will be"
                     )
-                    wmsg += " transferred beyond the 'lev' dimension itself."
+                    wmsg += f" transferred beyond the {height_dim} dimension itself."
                     print(wmsg)
 
                     vert_coord_type = None
@@ -176,7 +182,7 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         else:
             # No level dimension found, so assume there is no vertical coordinate:
             vert_coord_type = None
-        # End if (lev existence)
+        # End if (lev, or height_dim, existence)
         # ------------------------
 
         # Check if time series directory exists, and if not, then create it:
@@ -202,9 +208,8 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         # create copy of var list that can be modified for derivable variables
         for var in diag_var_list:
             if var not in hist_file_var_list:
-                vres = res.get(var, {})
-                if "derivable_from" in vres:
-                    constit_list = vres["derivable_from"]
+                if var in derive_vars.keys():
+                    constit_list = derive_vars[var]
                     for constit in constit_list:
                         if constit not in diag_var_list:
                             diag_var_list.append(constit)
@@ -216,8 +221,8 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
                     print(msg)
                     continue
 
-            # Check if variable has a "lev" dimension according to first file:
-            has_lev = bool("lev" in hist_file_ds[var].dims)
+            # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
+            has_lev = bool(height_dim in hist_file_ds[var].dims)
 
             # Create full path name, file name template:
             # $cam_case_name.$hist_str.$variable.YYYYMM-YYYYMM.nc
@@ -251,7 +256,7 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
 
             if has_lev and vert_coord_type:
                 # For now, only add these variables if using CAM:
-                if "cam" in hist_str:
+                if "cam" in hist_str: # Could also use if "cam" in component
                     # PS might be in a different history file. If so, continue without error.
                     ncrcat_var_list = ncrcat_var_list + ",hyam,hybm,hyai,hybi"
 
@@ -295,9 +300,10 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
         # End variable loop
         
         if vars_to_derive:
-            self.derive_variables(
-                vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
-            )
+            if component == 'cam':
+                derive_cam_variables(
+                        vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
+                )
 
         if serial:
             call_ncrcat(list_of_commands)
@@ -313,3 +319,78 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
 
     # Notify user that script has ended:
     print("  ...time series file generation has finished successfully.")
+
+
+
+def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
+    """
+    Derive variables acccording to steps given here.  Since derivations will depend on the
+    variable, each variable to derive will need its own set of steps below.
+
+    Caution: this method assumes that there will be one time series file per variable
+
+    If the file for the derived variable exists, the kwarg `overwrite` determines
+    whether to overwrite the file (true) or exit with a warning message.
+    """
+
+    for var in vars_to_derive:
+        if var == "PRECT":
+            # PRECT can be found by simply adding PRECL and PRECC
+            # grab file names for the PRECL and PRECC files from the case ts directory
+            if glob.glob(os.path.join(ts_dir, "*PRECC*")) and glob.glob(
+                os.path.join(ts_dir, "*PRECL*")
+            ):
+                constit_files = sorted(glob.glob(os.path.join(ts_dir, "*PREC*")))
+            else:
+                ermsg = "PRECC and PRECL were not both present; PRECT cannot be calculated."
+                ermsg += " Please remove PRECT from diag_var_list or find the relevant CAM files."
+                raise FileNotFoundError(ermsg)
+            # create new file name for PRECT
+    prect_file = constit_files[0].replace("PRECC", "PRECT")
+    if Path(prect_file).is_file():
+        if overwrite:
+            Path(prect_file).unlink()
+        else:
+            print(
+                f"[{__name__}] Warning: PRECT file was found and overwrite is False. Will use existing file."
+            )
+            continue
+    # append PRECC to the file containing PRECL
+    os.system(f"ncks -A -v PRECC {constit_files[0]} {constit_files[1]}")
+    # create new file with the sum of PRECC and PRECL
+    os.system(
+        f"ncap2 -s 'PRECT=(PRECC+PRECL)' {constit_files[1]} {prect_file}"
+    )
+    if var == "RESTOM":
+    # RESTOM = FSNT-FLNT
+    # Have to be more precise than with PRECT because FSNTOA, FSTNC, etc are valid variables
+    if glob.glob(os.path.join(ts_dir, "*.FSNT.*")) and glob.glob(
+        os.path.join(ts_dir, "*.FLNT.*")
+    ):
+        input_files = [
+            sorted(glob.glob(os.path.join(ts_dir, f"*.{v}.*")))
+            for v in ["FLNT", "FSNT"]
+        ]
+        constit_files = []
+        for elem in input_files:
+            constit_files += elem
+    else:
+        ermsg = "FSNT and FLNT were not both present; RESTOM cannot be calculated."
+        ermsg += " Please remove RESTOM from diag_var_list or find the relevant CAM files."
+        raise FileNotFoundError(ermsg)
+    # create new file name for RESTOM
+    derived_file = constit_files[0].replace("FLNT", "RESTOM")
+    if Path(derived_file).is_file():
+        if overwrite:
+            Path(derived_file).unlink()
+        else:
+            print(
+                f"[{__name__}] Warning: RESTOM file was found and overwrite is False. Will use existing file."
+            )
+            continue
+    # append FSNT to the file containing FLNT
+    os.system(f"ncks -A -v FLNT {constit_files[0]} {constit_files[1]}")
+    # create new file with the difference of FLNT and FSNT
+    os.system(
+        f"ncap2 -s 'RESTOM=(FSNT-FLNT)' {constit_files[1]} {derived_file}"
+    )
