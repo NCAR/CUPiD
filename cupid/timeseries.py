@@ -1,3 +1,22 @@
+"""
+Timeseries generation tool adapted from ADF for general CUPiD use.
+"""
+
+# ++++++++++++++++++++++++++++++
+# Import standard python modules
+# ++++++++++++++++++++++++++++++
+
+import sys
+import glob
+import multiprocessing as mp
+import os
+import subprocess
+import xarray as xr
+
+import importlib
+
+from pathlib import Path
+
 def call_ncrcat(cmd):
         """This is an internal function to `create_time_series`
         It just wraps the subprocess.call() function, so it can be
