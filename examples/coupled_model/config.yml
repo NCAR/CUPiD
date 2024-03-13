@@ -48,6 +48,15 @@ global_params:
   lc_kwargs:
     threads_per_worker: 1
 
+timeseries:
+  serial: False
+  num_procs: 8
+  atm: ['ACTNI', 'ACTNL', 'ACTREI']
+  lnd: ['process_all']
+  ocn: ['process_all']
+  cice: ['process_all']
+  glc: ['process_all']
+
 compute_notebooks:
 
   # This is where all the notebooks you want run and their
