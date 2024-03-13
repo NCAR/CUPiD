@@ -1,4 +1,13 @@
-def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years, num_procs, diag_var_list):
+def call_ncrcat(cmd):
+        """This is an internal function to `create_time_series`
+        It just wraps the subprocess.call() function, so it can be
+        used with the multiprocessing Pool that is constructed below.
+        It is declared as global to avoid AttributeError.
+        """
+        return subprocess.run(cmd, shell=False)
+
+
+def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwrite_ts, start_years, end_years, num_procs, diag_var_list, serial):
     """
     Generate time series versions of the history file data.
 
@@ -20,20 +29,14 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
          first year for desired range of years
      - end_years: list, str or int
          last year for desired range of years
+     - num_procs: int
+         number of processors
+     - diag_var_list: list
+         list of variables to create diagnostics (or timeseries) from
+     - serial: bool
+         if True, run in serial; if False, run in parallel
     
     """
-
-    global call_ncrcat
-
-    def call_ncrcat(cmd):
-        """this is an internal function to `create_time_series`
-        It just wraps the subprocess.call() function, so it can be
-        used with the multiprocessing Pool that is constructed below.
-        It is declared as global to avoid AttributeError.
-        """
-        return subprocess.run(cmd, shell=False)
-
-    # End def
 
     # Notify user that script has started:
     print("\n  Generating time series files...")
@@ -271,16 +274,21 @@ def create_time_series(case_names, hist_str, hist_locs, ts_dir, ts_done, overwri
             list_of_commands.append(cmd)
 
         # End variable loop
-
-        # Now run the "ncrcat" subprocesses in parallel:
-        with mp.Pool(processes=num_procs) as mpool:
-            _ = mpool.map(call_ncrcat, list_of_commands)
-
+        
         if vars_to_derive:
             self.derive_variables(
                 vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
             )
-        # End with
+
+        if serial:
+            call_ncrcat(list_of_commands)
+        else:  # if not serial
+            # Now run the "ncrcat" subprocesses in parallel:
+            with mp.Pool(processes=num_procs) as mpool:
+                _ = mpool.map(call_ncrcat, list_of_commands)
+    
+            # End with
+            
 
     # End cases loop
 
