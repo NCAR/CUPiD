@@ -223,6 +223,9 @@ def create_time_series(
         list_of_commands = []
         vars_to_derive = []
         # create copy of var list that can be modified for derivable variables
+        if diag_var_list == ['process_all']:
+            print("generating time series for all variables")
+            diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
                 if var in derive_vars.keys():
