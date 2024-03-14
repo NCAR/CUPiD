@@ -86,6 +86,8 @@ def create_time_series(
     print("\n  Generating time series files...")
 
     # Loop over cases:
+    print(case_names)
+    print(enumerate(case_names))
     for case_idx, case_name in enumerate(case_names):
         # Check if particular case should be processed:
         if ts_done[case_idx]:
@@ -228,7 +230,7 @@ def create_time_series(
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
-                if var in derive_vars.keys():
+                if var in derive_vars.keys(): #TODO: dictionary implementation needs to be fixed with yaml file
                     constit_list = derive_vars[var]
                     for constit in constit_list:
                         if constit not in diag_var_list:

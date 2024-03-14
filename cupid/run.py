@@ -33,9 +33,6 @@ def run(config_path, serial=False, time_series=False):
 
     if time_series:
         sys.tracebacklimit = 0
-        # raise NotImplementedError("--time-series option not implemented yet")
-
-        print(os.getcwd())
         with open("config.yml") as stream:
             try:
                 config_contents = yaml.safe_load(stream)
@@ -46,24 +43,39 @@ def run(config_path, serial=False, time_series=False):
         # general timeseries arguments for all components
         num_procs = config_timeseries_contents['num_procs'] 
 
+        print("calling cam timeseries generation")
+        
+        print(config_timeseries_contents['atm_vars'])
+        print(config_timeseries_contents['derive_vars_cam'])
+        print(config_timeseries_contents['case_name'])
+        print(config_timeseries_contents['atm_hist_str'])
+        print(config_contents['global_params']['CESM_output_dir']+'/atm/hist/')
+        print(config_contents['global_params']['CESM_output_dir']+'/atm/tseries/')
+        print(config_timeseries_contents['ts_done'])
+        print(config_timeseries_contents['overwrite_ts'])
+        print(config_timeseries_contents['atm_start_years'])
+        print(config_timeseries_contents['atm_end_years'])
+
         # cam timeseries generation
-        timeseries.create_time_series(
+        cupid.timeseries.create_time_series(
             "cam",
-            config_timeseries_contents['atm'],
+            config_timeseries_contents['atm_vars'],
             config_timeseries_contents['derive_vars_cam'],
-            case_names, # TODO: need to define, or grab from compute_notebooks section of config file?
-            hist_str,  # TODO: need to define, or grab from compute_notebooks section of config file?
-            hist_locs, # TODO: need to define, or grab from compute_notebooks section of config file?
-            config_timeseries_contents['ts_dir'], # TODO, common directory and/or format for all components?
+            config_timeseries_contents['case_name'], # could also grab from compute_notebooks section of config file
+            config_timeseries_contents['atm_hist_str'],
+            config_contents['global_params']['CESM_output_dir']+'/atm/hist/', # could also grab from compute_notebooks section of config file
+            config_contents['global_params']['CESM_output_dir']+'/atm/tseries/',
             config_timeseries_contents['ts_done'],
             config_timeseries_contents['overwrite_ts'],
-            start_years, # TODO: need to define, could probably get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            end_years, # TODO: need to define, could probably get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            config_timeseries_contents['atm_start_years'], # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            config_timeseries_contents['atm_end_years'], # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev",
             num_procs,
             serial,
         )
 
+        import pdb
+        pdb.set_trace()
         # TODO: implement timeseries for other components
         #timeseries.create_time_series(
         #        component,
