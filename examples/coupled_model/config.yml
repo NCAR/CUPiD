@@ -49,8 +49,10 @@ global_params:
     threads_per_worker: 1
 
 timeseries:
-  serial: False
   num_procs: 8
+  ts_done: False
+  ts_dir: PICK_A_DIRECTORY
+  overwrite_ts: False
   atm: ['ACTNI', 'ACTNL', 'ACTREI']
   lnd: ['process_all']
   ocn: ['process_all']
@@ -88,8 +90,6 @@ compute_notebooks:
             native: 'mom6.h.native.????-??.nc'
             static: 'mom6.h.static.nc'
           oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
-
-
 
   land_comparison:
     parameter_groups:
