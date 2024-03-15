@@ -44,18 +44,6 @@ def run(config_path, serial=False, time_series=False):
         num_procs = config_timeseries_contents['num_procs'] 
 
         print("calling cam timeseries generation")
-        
-        print(config_timeseries_contents['atm_vars'])
-        print(config_timeseries_contents['derive_vars_cam'])
-        print(config_timeseries_contents['case_name'])
-        print(config_timeseries_contents['atm_hist_str'])
-        print(config_contents['global_params']['CESM_output_dir']+'/atm/hist/')
-        print(config_contents['global_params']['CESM_output_dir']+'/atm/tseries/')
-        print(config_timeseries_contents['ts_done'])
-        print(config_timeseries_contents['overwrite_ts'])
-        print(config_timeseries_contents['atm_start_years'])
-        print(config_timeseries_contents['atm_end_years'])
-
         # cam timeseries generation
         cupid.timeseries.create_time_series(
             "cam",
@@ -63,8 +51,9 @@ def run(config_path, serial=False, time_series=False):
             config_timeseries_contents['derive_vars_cam'],
             config_timeseries_contents['case_name'], # could also grab from compute_notebooks section of config file
             config_timeseries_contents['atm_hist_str'],
-            config_contents['global_params']['CESM_output_dir']+'/atm/hist/', # could also grab from compute_notebooks section of config file
-            config_contents['global_params']['CESM_output_dir']+'/atm/tseries/',
+            [config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/hist/'], # could also grab from compute_notebooks section of config file
+            #config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/tseries/',
+            ['/glade/derecho/scratch/tking/ts_test'+'/'+config_timeseries_contents['case_name']+'/atm/tseries/'],
             config_timeseries_contents['ts_done'],
             config_timeseries_contents['overwrite_ts'],
             config_timeseries_contents['atm_start_years'], # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date

@@ -29,8 +29,8 @@ def call_ncrcat(cmd):
 
 def create_time_series(
     component,
-    derive_vars,
     diag_var_list,
+    derive_vars,
     case_names,
     hist_str,
     hist_locs,
@@ -116,6 +116,9 @@ def create_time_series(
             raise FileNotFoundError(emsg)
         # End if
 
+        print('starting location:')
+        print(starting_location)
+
         # Check if history files actually exist. If not then kill script:
         if not list(starting_location.glob("*" + hist_str + ".*.nc")):
             emsg = f"No history *{hist_str}.*.nc files found in '{starting_location}'."
@@ -151,6 +154,7 @@ def create_time_series(
 
         # Check what kind of vertical coordinate (if any) is being used for this model run:
         # ------------------------
+        print('height dim')
         if height_dim in hist_file_ds:
             # Extract vertical level attributes:
             lev_attrs = hist_file_ds[height_dim].attrs
@@ -225,10 +229,15 @@ def create_time_series(
         list_of_commands = []
         vars_to_derive = []
         # create copy of var list that can be modified for derivable variables
+        print(diag_var_list)
         if diag_var_list == ['process_all']:
             print("generating time series for all variables")
             diag_var_list = hist_file_var_list
+        print('diag var list:')
+        print(diag_var_list)
         for var in diag_var_list:
+            print("VAR:")
+            print(var)
             if var not in hist_file_var_list:
                 if var in derive_vars.keys(): #TODO: dictionary implementation needs to be fixed with yaml file
                     constit_list = derive_vars[var]
@@ -243,12 +252,14 @@ def create_time_series(
                     print(msg)
                     continue
 
+            print('var is in list')
             # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
             has_lev = bool(height_dim in hist_file_ds[var].dims)
 
             # Create full path name, file name template:
             # $cam_case_name.$hist_str.$variable.YYYYMM-YYYYMM.nc
 
+            print('ts outfil str')
             ts_outfil_str = (
                 ts_dir[case_idx]
                 + os.sep
@@ -258,6 +269,8 @@ def create_time_series(
             # Check if files already exist in time series directory:
             ts_file_list = glob.glob(ts_outfil_str)
 
+            print('ts file list')
+            print(ts_file_list)
             # If files exist, then check if over-writing is allowed:
             if ts_file_list:
                 if not overwrite_ts[case_idx]:
@@ -276,6 +289,7 @@ def create_time_series(
             if "datesec" in hist_file_ds[var].dims:
                 ncrcat_var_list = ncrcat_var_list + ",datesec"
 
+            print('here')
             if has_lev and vert_coord_type:
                 # For now, only add these variables if using CAM:
                 if "cam" in hist_str:  # Could also use if "cam" in component
@@ -308,7 +322,9 @@ def create_time_series(
                         # End if PMID
                     # End if height
                 # End if cam
+                print('end if cam')
             # End if has_lev
+            print('end if has lev')
 
             cmd = (
                 ["ncrcat", "-O", "-4", "-h", "--no_cll_mth", "-v", ncrcat_var_list]
@@ -321,7 +337,8 @@ def create_time_series(
 
         # End variable loop
 
-        if vars_to_derive:
+        print('varstoderive')
+        if vars_to_derive!=[]:
             if component == "cam":
                 derive_cam_variables(
                     vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
@@ -329,14 +346,15 @@ def create_time_series(
 
         if serial:
             call_ncrcat(list_of_commands)
-        else:  # if not serial
+        if not serial:  # if not serial
             # Now run the "ncrcat" subprocesses in parallel:
             with mp.Pool(processes=num_procs) as mpool:
                 _ = mpool.map(call_ncrcat, list_of_commands)
-
             # End with
-
+        print('end mp or serial')
+        print('THERE IS SOME FAILURE HAPPENING HERE; MULTIPLE VARS ARE BEING RUN THROUGH AND MULTIPLE FILES CREATED')
     # End cases loop
+    print("end cases loop")
 
     # Notify user that script has ended:
     print("  ...time series file generation has finished successfully.")

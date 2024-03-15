@@ -51,10 +51,10 @@ global_params:
 timeseries:
   num_procs: 8
   ts_done: [False]
-  overwrite_ts: False
+  overwrite_ts: [False]
   case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
 
-  atm_vars: ['ACTNI', 'ACTNL', 'ACTREI']
+  atm_vars: ['ACTNI', 'ACTNL', 'ACTREI','ACTREL','AODDUST']
   derive_vars_cam: [] # {'PRECT':['PRECL','PRECC'], 'RESTOM':['FLNT','FSNT']}
   atm_hist_str: 'h0'
   atm_start_years: [2]
