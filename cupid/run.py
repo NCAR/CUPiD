@@ -17,8 +17,18 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
 @click.option("--time-series", "-ts", is_flag=True,
               help="Run time series generation scripts prior to diagnostics")
+# Options to turn components on or off
+@click.option("--all", "-a", is_flag=True, help="Run all component diagnostics")
+@click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics")
+@click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component diagnostics")
+@click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
+@click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
+@click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
+
 @click.argument("config_path")
-def run(config_path, serial=False, time_series=False):
+
+def run(config_path, serial=False, time_series=False, 
+        all=False, atmosphere=False, ocean=False, land=False, seaice=False, landice=False):
     """
     Main engine to set up running all the notebooks.
     """
@@ -83,16 +93,38 @@ def run(config_path, serial=False, time_series=False):
     # Organizing notebooks - holdover from manually managing dependencies before
 
     all_nbs = dict()
-
-    for nb, info in control['compute_notebooks'].items():
-
+    for nb, info in control['compute_notebooks']['infrastructure'].items():
         all_nbs[nb] = info
+    
+    if all:
+        for nb_category in control["compute_notebooks"].values():
+            for nb, info in nb_category.items():
+                all_nbs[nb] = info
+
+    else:
+        if atmosphere:
+            for nb, info in control['compute_notebooks']['atmosphere'].items():
+                all_nbs[nb] = info
+        if ocean:
+            for nb, info in control['compute_notebooks']['ocean'].items():
+                all_nbs[nb] = info
+        if land:
+            for nb, info in control['compute_notebooks']['land'].items():
+                all_nbs[nb] = info
+        if seaice:
+            for nb, info in control['compute_notebooks']['seaice'].items():
+                all_nbs[nb] = info
+        if landice:
+            for nb, info in control['compute_notebooks']['landice'].items():
+                all_nbs[nb] = info
+            
 
     # Setting up notebook tasks
 
     for nb, info in all_nbs.items():
 
         global_params['serial'] = serial
+        
         if "dependency" in info:
             cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
 
@@ -105,10 +137,28 @@ def run(config_path, serial=False, time_series=False):
     if 'compute_scripts' in control:
 
         all_scripts = dict()
-
-        for script, info in control['compute_scripts'].items():
-
-            all_scripts[script] = info
+            
+        if all:
+            for script_category in control["compute_scripts"]:
+                for script, info in nb_category.items():
+                    all_scripts[script] = info
+                    
+        else:
+            if atmosphere:
+                for script, info in control['compute_scripts']['atmosphere'].items():
+                    all_scripts[script] = info
+            if ocean:
+                for script, info in control['compute_scripts']['ocean'].items():
+                    all_scripts[script] = info
+            if land:
+                for script, info in control['compute_scripts']['land'].items():
+                    all_scripts[script] = info
+            if seaice:
+                for script, info in control['compute_scripts']['seaice'].items():
+                    all_scripts[script] = info
+            if landice:
+                for script, info in control['compute_scripts']['landice'].items():
+                    all_scripts[script] = info
 
         # Setting up script tasks
 

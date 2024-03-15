@@ -80,33 +80,47 @@ def get_control_dict(config_path):
     # theoretically ploomber should manage this kernel checking by itself, but this seems to add
     # the default kernel to info where necessary. currently a bit messy with copy pasting in 
     # script stuff.
+
+
     
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
     if default_kernel_name is not None:
         
-        for d in control["compute_notebooks"].values():
-            if "kernel_name" not in d:
-                d["kernel_name"] = default_kernel_name
-        
-        if "compute_scripts" in control:
-            for d in control["compute_scripts"].values():
+        for nb_category in control["compute_notebooks"].values():
+            for d in nb_category.values():
                 if "kernel_name" not in d:
                     d["kernel_name"] = default_kernel_name
         
-    else:
-        for nb, d in control["compute_notebooks"].items():
-            assert "kernel_name" in d, f"kernel information missing for {nb}.ipynb"
+        if "compute_scripts" in control:
+            for script_category in control["compute_scripts"].values():
+                for d in script_category.values():
+                    if "kernel_name" not in d:
+                        d["kernel_name"] = default_kernel_name
         
-        for script, d in control["compute_scripts"].items():
-            assert "kernel_name" in d, f"kernel information missing for {script}.py"
+    else:
 
-    for nb, d in control["compute_notebooks"].items():
-        manage_conda_kernel(d["kernel_name"]).ensure_installed()
+        for nb_category in control["compute_notebooks"].values():
+            for nb, d in nb_category.items():
+                assert "kernel_name" in d, f"kernel information missing for {nb}.ipynb"
+        
+        if "compute_scripts" in control:
+            for script_category in control["compute_scripts"].values():
+                for script, d in script_category.items():
+                    assert "kernel_name" in d, f"kernel information missing for {script}.py"
+    
+    ### currently this section tests the existence of the kernel of all notebooks regardless of whether
+    ### you're actually running it or not with the new flag system. we also may want to move this checking
+    ### elsewhere, such as later in run.py or in a separate function
+    
+    # for nb_category in control["compute_notebooks"].values():
+    #     for nb, d in nb_category.items():
+    #         manage_conda_kernel(d["kernel_name"]).ensure_installed()
 
-    if "compute_scripts" in control:
-        for script, d in control["compute_scripts"].items():
-            manage_conda_kernel(d["kernel_name"]).ensure_installed()
+    # if "compute_scripts" in control:
+    #     for script_category in control["compute_scripts"].values():
+    #         for script, d in script_category.items():
+    #             manage_conda_kernel(d["kernel_name"]).ensure_installed()
         
     return control
 
@@ -155,7 +169,7 @@ def setup_book(config_path):
     
     nb_path_root = os.path.expanduser(control['data_sources']['nb_path_root'])
     
-    compute_notebooks = [f"{nb_path_root}/{f}.ipynb" for f in control["compute_notebooks"].keys()]
+    compute_notebooks = [f"{nb_path_root}/{ik}.ipynb" for ok, ov in control["compute_notebooks"].items() for ik, iv in ov.items()]
 
     # get toc files; ignore glob expressions
     toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
