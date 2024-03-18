@@ -36,37 +36,51 @@ def run(config_path, serial=False, time_series=False):
         with open("config.yml") as stream:
             try:
                 config_contents = yaml.safe_load(stream)
-                config_timeseries_contents = config_contents['timeseries']
+                config_timeseries_contents = config_contents["timeseries"]
             except yaml.YAMLError as exc:
                 print(exc)
-        
+
         # general timeseries arguments for all components
-        num_procs = config_timeseries_contents['num_procs'] 
+        num_procs = config_timeseries_contents["num_procs"]
 
         print("calling cam timeseries generation")
         # cam timeseries generation
         cupid.timeseries.create_time_series(
             "cam",
-            config_timeseries_contents['atm_vars'],
-            config_timeseries_contents['derive_vars_cam'],
-            config_timeseries_contents['case_name'], # could also grab from compute_notebooks section of config file
-            config_timeseries_contents['atm_hist_str'],
-            [config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/hist/'], # could also grab from compute_notebooks section of config file
-            #config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/tseries/',
-            ['/glade/derecho/scratch/tking/ts_test'+'/'+config_timeseries_contents['case_name']+'/atm/tseries/'],
-            config_timeseries_contents['ts_done'],
-            config_timeseries_contents['overwrite_ts'],
-            config_timeseries_contents['atm_start_years'], # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents['atm_end_years'], # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            config_timeseries_contents["atm_vars"],
+            config_timeseries_contents["derive_vars_cam"],
+            [
+                config_timeseries_contents["case_name"]
+            ],  # could also grab from compute_notebooks section of config file
+            config_timeseries_contents["atm_hist_str"],
+            [
+                config_contents["global_params"]["CESM_output_dir"]
+                + "/"
+                + config_timeseries_contents["case_name"]
+                + "/atm/hist/"
+            ],  # could also grab from compute_notebooks section of config file
+            # config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/tseries/',
+            [
+                "/glade/derecho/scratch/tking/ts_test"
+                + "/"
+                + config_timeseries_contents["case_name"]
+                + "/atm/tseries/"
+            ],
+            config_timeseries_contents["ts_done"],
+            config_timeseries_contents["overwrite_ts"],
+            config_timeseries_contents[
+                "atm_start_years"
+            ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            config_timeseries_contents[
+                "atm_end_years"
+            ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev",
             num_procs,
             serial,
         )
 
-        import pdb
-        pdb.set_trace()
         # TODO: implement timeseries for other components
-        #timeseries.create_time_series(
+        # timeseries.create_time_series(
         #        component,
         #        diag_var_list,
         #        derive_vars,
