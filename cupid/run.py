@@ -49,31 +49,15 @@ def run(config_path, serial=False, time_series=False):
             "cam",
             config_timeseries_contents["atm_vars"],
             config_timeseries_contents["derive_vars_cam"],
-            [
-                config_timeseries_contents["case_name"]
-            ],  # could also grab from compute_notebooks section of config file
+            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
             config_timeseries_contents["atm_hist_str"],
-            [
-                config_contents["global_params"]["CESM_output_dir"]
-                + "/"
-                + config_timeseries_contents["case_name"]
-                + "/atm/hist/"
-            ],  # could also grab from compute_notebooks section of config file
-            # config_contents['global_params']['CESM_output_dir']+'/'+config_timeseries_contents['case_name']+'/atm/tseries/',
-            [
-                "/glade/derecho/scratch/tking/ts_test"
-                + "/"
-                + config_timeseries_contents["case_name"]
-                + "/atm/tseries/"
-            ],
+            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/atm/hist/"],  # could also grab from compute_notebooks section of config file
+            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/atm/proc/tseries/'],
+            # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
             config_timeseries_contents["ts_done"],
             config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents[
-                "atm_start_years"
-            ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents[
-                "atm_end_years"
-            ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            config_timeseries_contents["atm_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            config_timeseries_contents["atm_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev",
             num_procs,
             serial,
