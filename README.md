@@ -80,6 +80,12 @@ Usage: cupid-run [OPTIONS] CONFIG_PATH
 Options:
   -s, --serial        Do not use LocalCluster objects
   -ts, --time-series  Run time series generation scripts prior to diagnostics
+  -a, --all           Run all component diagnostics
+  -atm, --atmosphere  Run atmosphere component diagnostics
+  -ocn, --ocean       Run ocean component diagnostics
+  -lnd, --land        Run land component diagnostics
+  -ice, --seaice      Run sea ice component diagnostics
+  -glc, --landice     Run land ice component diagnostics
   -h, --help          Show this message and exit.
 ```
 

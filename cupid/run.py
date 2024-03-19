@@ -101,6 +101,10 @@ def run(config_path, serial=False, time_series=False,
     all_nbs = dict()
     for nb, info in control['compute_notebooks']['infrastructure'].items():
         all_nbs[nb] = info
+        
+    # automatically run all if not specified
+    if True not in [atmosphere, ocean, land, seaice, landice]:
+        all = True
     
     if all:
         for nb_category in control["compute_notebooks"].values():
