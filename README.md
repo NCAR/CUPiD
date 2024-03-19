@@ -69,7 +69,7 @@ or you can view `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-r
 
 ### CUPiD Options
 
-Most of CUPiD's configuration is done via the `config.yml` file, but there are a few command line options as well:
+Most of CUPiD's configuration is done via the `config.yml` file, but there are a few command line options as well.
 
 ```bash
 (cupid-dev) $ cupid-run -h
@@ -101,3 +101,5 @@ if not serial:
 
 client
 ```
+
+If no component flags are provided, `--all` will be assumed and all component diagnostics listed in `config.yml` will be executed. Multiple flags can be used together to select a group of components, for example: `cupid-run -ocn -ice config.yml`.
