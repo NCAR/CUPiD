@@ -11,6 +11,7 @@ from dask.distributed import Client
 import dask
 import time
 import ploomber
+import warnings
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -114,10 +115,20 @@ def run(config_path, serial=False, time_series=False,
     else:
         for comp_name, comp_bool in component_options.items():
             if comp_bool:
-                for nb, info in control['compute_notebooks'][comp_name].items():
-                    all_nbs[nb] = info
-            
+                if comp_name in control['compute_notebooks']:
+                    for nb, info in control['compute_notebooks'][comp_name].items():
+                        all_nbs[nb] = info
+                else:
+                    warnings.warn(f"No notebooks for {comp_name} component specified in config file.")
 
+    # Checking for existence of environments
+
+    for nb, info in all_nbs.copy().items():
+        if not control["env_check"][info["kernel_name"]]:
+            bad_env = info["kernel_name"]
+            warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run.")
+            all_nbs.pop(nb)
+    
     # Setting up notebook tasks
 
     for nb, info in all_nbs.items():
@@ -139,14 +150,25 @@ def run(config_path, serial=False, time_series=False,
             
         if all:
             for script_category in control["compute_scripts"]:
-                for script, info in nb_category.items():
+                for script, info in script_category.items():
                     all_scripts[script] = info
                     
         else:
             for comp_name, comp_bool in component_options.items():
                 if comp_bool:
-                    for script, info in control['compute_scripts'][comp_name].items():
-                        all_scripts[script] = info
+                    if comp_name in control['compute_scripts']:
+                        for script, info in control['compute_scripts'][comp_name].items():
+                            all_scripts[script] = info
+                    else:
+                        warnings.warn(f"No scripts for {comp_name} component specified in config file.")
+
+        # Checking for existence of environments
+    
+        for script, info in all_scripts.copy().items():
+            if not control["env_check"][info["kernel_name"]]:
+                bad_env = info["kernel_name"]
+                warnings.warn(f"Environment {bad_env} specified for {script}.py could not be found; {script}.py will not be run.")
+                all_scripts.pop(script)
                     
         # Setting up script tasks
 
