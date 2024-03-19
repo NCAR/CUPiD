@@ -172,7 +172,7 @@ diag_cam_climo:
     #Location where TEM files are stored:
     #If path not specified or commented out, skip TEM calculation
     #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
-    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/
+    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_climo.cam_case_name}
 
     #TEM history file number
     tem_hist_str: cam.h4
@@ -238,7 +238,7 @@ diag_cam_baseline_climo:
     #Location where TEM files are stored:
     #If path not specified or commented out, skip TEM calculation
     #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
-    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/
+    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_baseline_climo.cam_case_name}
 
     #TEM history file number
     tem_hist_str: cam.h4
