@@ -90,8 +90,14 @@ def run(config_path, serial=False, time_series=False,
 
 
     #####################################################################
-    # Organizing notebooks - holdover from manually managing dependencies before
+    # Organizing notebooks to run
 
+    component_options = {"atmosphere": atmosphere,
+                         "ocean": ocean,
+                         "land": land,
+                         "seaice": seaice,
+                         "landice": landice}
+    
     all_nbs = dict()
     for nb, info in control['compute_notebooks']['infrastructure'].items():
         all_nbs[nb] = info
@@ -102,21 +108,10 @@ def run(config_path, serial=False, time_series=False,
                 all_nbs[nb] = info
 
     else:
-        if atmosphere:
-            for nb, info in control['compute_notebooks']['atmosphere'].items():
-                all_nbs[nb] = info
-        if ocean:
-            for nb, info in control['compute_notebooks']['ocean'].items():
-                all_nbs[nb] = info
-        if land:
-            for nb, info in control['compute_notebooks']['land'].items():
-                all_nbs[nb] = info
-        if seaice:
-            for nb, info in control['compute_notebooks']['seaice'].items():
-                all_nbs[nb] = info
-        if landice:
-            for nb, info in control['compute_notebooks']['landice'].items():
-                all_nbs[nb] = info
+        for comp_name, comp_bool in component_options.items():
+            if comp_bool:
+                for nb, info in control['compute_notebooks'][comp_name].items():
+                    all_nbs[nb] = info
             
 
     # Setting up notebook tasks
@@ -144,22 +139,11 @@ def run(config_path, serial=False, time_series=False,
                     all_scripts[script] = info
                     
         else:
-            if atmosphere:
-                for script, info in control['compute_scripts']['atmosphere'].items():
-                    all_scripts[script] = info
-            if ocean:
-                for script, info in control['compute_scripts']['ocean'].items():
-                    all_scripts[script] = info
-            if land:
-                for script, info in control['compute_scripts']['land'].items():
-                    all_scripts[script] = info
-            if seaice:
-                for script, info in control['compute_scripts']['seaice'].items():
-                    all_scripts[script] = info
-            if landice:
-                for script, info in control['compute_scripts']['landice'].items():
-                    all_scripts[script] = info
-
+            for comp_name, comp_bool in component_options.items():
+                if comp_bool:
+                    for script, info in control['compute_scripts'][comp_name].items():
+                        all_scripts[script] = info
+                    
         # Setting up script tasks
 
         for script, info in all_scripts.items():

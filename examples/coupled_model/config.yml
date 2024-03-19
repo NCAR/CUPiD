@@ -34,7 +34,6 @@ computation_config:
 
     default_kernel_name: cupid-analysis
 
-
 ############# NOTEBOOK CONFIG #############
 
 ############################
@@ -104,7 +103,6 @@ compute_notebooks:
             begyr2: 245
             endyr2: 305
             nyears: 25
-
 
 ########### JUPYTER BOOK CONFIG ###########
 
