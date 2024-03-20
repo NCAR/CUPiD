@@ -4,15 +4,9 @@ Python Framework for Generating Diagnostics from CESM
 
 ## Project Vision
 
-CUPiD is a collaborative effort that unifies all CESM component diagnostics and provides
+CUPiD is a “one stop shop” that enables and integrates timeseries file generation, data standardization, diagnostics, and metrics from all CESM components.
 
-- Python code that
-  1. runs in an easy-to-generate conda environment, and
-  1. can be launched via CIME workflow or independently
-- Diagnostics for single/multiple runs and single/multiple components
-- Ability to call post-processing tools that other groups are working on
-- An API that makes it easy to include outside code
-- Ongoing support and software maintenance
+This collaborative effort aims to simplify the user experience of running diagnostics by calling post-processing tools directly from CUPiD, running all component diagnostics from the same tool as either part of the CIME workflow or independently, and sharing python code and a standard conda environment across components.
 
 ## Installing
 
@@ -95,3 +89,6 @@ if not serial:
 
 client
 ```
+
+### Timeseries File Generation
+CUPiD also has the capability to generate single variable timeseries files from history files for all components. To run timeseries, edit the `config.yml` file's timeseries section to fit your preferences, and then run `cupid-run config.yml -ts`. The timeseries generation will require the `nco` package, which can be installed with `module load nco` or via `conda install conda-forge::nco`.
