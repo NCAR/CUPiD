@@ -70,21 +70,21 @@ timeseries:
 
   ocn_vars: ['process_all']
   derive_vars_ocn: []
-  ocn_hist_str: 'h0'
+  ocn_hist_str: 'h'
   ocn_start_years: [2]
   ocn_end_years: [102]
   ocn_level: 'lev'
 
   ice_vars: ['process_all']
   derive_vars_ice: []
-  ice_hist_str: 'h0'
+  ice_hist_str: 'h'
   ice_start_years: [2]
   ice_end_years: [102]
   ice_level: 'lev'
 
   glc_vars: ['process_all']
   derive_vars_glc: []
-  glc_hist_str: 'h0'
+  glc_hist_str: 'h'
   glc_start_years: [2]
   glc_end_years: [102]
   glc_level: 'lev'
