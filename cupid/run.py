@@ -2,7 +2,6 @@
 
 import click
 import os
-import sys
 from glob import glob
 import papermill as pm
 import intake
@@ -31,14 +30,12 @@ def run(config_path, serial=False, time_series=False):
     Main engine to set up running all the notebooks.
     """
 
+    # Get control structure
+    control = cupid.util.get_control_dict(config_path)
+    cupid.util.setup_book(config_path)
+
     if time_series:
-        sys.tracebacklimit = 0
-        with open("config.yml") as stream:
-            try:
-                config_contents = yaml.safe_load(stream)
-                config_timeseries_contents = config_contents["timeseries"]
-            except yaml.YAMLError as exc:
-                print(exc)
+        config_timeseries_contents = control["timeseries"]
 
         # general timeseries arguments for all components
         num_procs = config_timeseries_contents["num_procs"]
@@ -142,10 +139,6 @@ def run(config_path, serial=False, time_series=False):
             num_procs,
             serial,
         )
-
-    # Get control structure
-    control = cupid.util.get_control_dict(config_path)
-    cupid.util.setup_book(config_path)
 
     # Grab paths
 
