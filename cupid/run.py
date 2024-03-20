@@ -40,8 +40,8 @@ def run(config_path, serial=False, time_series=False):
         # general timeseries arguments for all components
         num_procs = config_timeseries_contents["num_procs"]
 
-        print("calling cam timeseries generation")
-        # cam timeseries generation
+        print("calling atm timeseries generation")
+        # atm timeseries generation
         cupid.timeseries.create_time_series(
             "cam",
             config_timeseries_contents["atm_vars"],
