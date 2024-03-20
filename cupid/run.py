@@ -31,7 +31,7 @@ def run(config_path, serial=False, time_series=False):
     """
 
     # Get control structure
-    control = cupid.util.get_dict(config_path)
+    control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
 
    #####################################################################
