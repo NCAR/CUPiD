@@ -72,11 +72,11 @@ timeseries:
   ocn_start_years: [2]
   ocn_end_years: [102]
 
-  cice_vars: ['process_all']
-  derive_vars_cice: []
-  cice_hist_str: 'h0'
-  cice_start_years: [2]
-  cice_end_years: [102]
+  ice_vars: ['process_all']
+  derive_vars_ice: []
+  ice_hist_str: 'h0'
+  ice_start_years: [2]
+  ice_end_years: [102]
 
   glc_vars: ['process_all']
   derive_vars_glc: []
