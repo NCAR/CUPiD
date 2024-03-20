@@ -31,30 +31,39 @@ def run(config_path, serial=False, time_series=False):
     """
 
     # Get control structure
-    control = cupid.util.get_control_dict(config_path)
+    control = cupid.util.get_dict(config_path)
     cupid.util.setup_book(config_path)
 
+   #####################################################################
+    # Managing global parameters
+
+    global_params = dict()
+
+    if "global_params" in control:
+        global_params = control["global_params"]
+    ####################################################################
+
     if time_series:
-        config_timeseries_contents = control["timeseries"]
+        timeseries_params = control["timeseries"]
 
         # general timeseries arguments for all components
-        num_procs = config_timeseries_contents["num_procs"]
+        num_procs = timeseries_params["num_procs"]
 
         print("calling atm timeseries generation")
         # atm timeseries generation
         cupid.timeseries.create_time_series(
             "cam",
-            config_timeseries_contents["atm_vars"],
-            config_timeseries_contents["derive_vars_cam"],
-            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
-            config_timeseries_contents["atm_hist_str"],
-            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/atm/hist/"],  # could also grab from compute_notebooks section of config file
-            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/atm/proc/tseries/'],
+            timeseries_params["atm_vars"],
+            timeseries_params["derive_vars_cam"],
+            [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+            timeseries_params["atm_hist_str"],
+            [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + "/atm/hist/"],  # could also grab from compute_notebooks section of config file
+            [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+'/atm/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-            config_timeseries_contents["ts_done"],
-            config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents["atm_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents["atm_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params["ts_done"],
+            timeseries_params["overwrite_ts"],
+            timeseries_params["atm_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params["atm_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev",
             num_procs,
             serial,
@@ -64,17 +73,17 @@ def run(config_path, serial=False, time_series=False):
         # lnd timeseries generation
         cupid.timeseries.create_time_series(
             "lnd",
-            config_timeseries_contents["lnd_vars"],
-            config_timeseries_contents["derive_vars_lnd"],
-            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
-            config_timeseries_contents["lnd_hist_str"],
-            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/lnd/hist/"],  # could also grab from compute_notebooks section of config file
-            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/lnd/proc/tseries/'],
+            timeseries_params["lnd_vars"],
+            timeseries_params["derive_vars_lnd"],
+            [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+            timeseries_params["lnd_hist_str"],
+            [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + "/lnd/hist/"],  # could also grab from compute_notebooks section of config file
+            [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+'/lnd/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-            config_timeseries_contents["ts_done"],
-            config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents["lnd_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents["lnd_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params["ts_done"],
+            timeseries_params["overwrite_ts"],
+            timeseries_params["lnd_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params["lnd_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev", # TODO: land group will need to change this!
             num_procs,
             serial,
@@ -84,17 +93,17 @@ def run(config_path, serial=False, time_series=False):
         # ocn timeseries generation
         cupid.timeseries.create_time_series(
             "ocn",
-            config_timeseries_contents["ocn_vars"],
-            config_timeseries_contents["derive_vars_ocn"],
-            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
-            config_timeseries_contents["ocn_hist_str"],
-            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/ocn/hist/"],  # could also grab from compute_notebooks section of config file
-            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/ocn/proc/tseries/'],
+            timeseries_params["ocn_vars"],
+            timeseries_params["derive_vars_ocn"],
+            [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+            timeseries_params["ocn_hist_str"],
+            [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + "/ocn/hist/"],  # could also grab from compute_notebooks section of config file
+            [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+'/ocn/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-            config_timeseries_contents["ts_done"],
-            config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents["ocn_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents["ocn_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params["ts_done"],
+            timeseries_params["overwrite_ts"],
+            timeseries_params["ocn_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params["ocn_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev", # TODO: ocean group will need to change this!
             num_procs,
             serial,
@@ -104,17 +113,17 @@ def run(config_path, serial=False, time_series=False):
         # ice timeseries generation
         cupid.timeseries.create_time_series(
             "ice",
-            config_timeseries_contents["ice_vars"],
-            config_timeseries_contents["derive_vars_ice"],
-            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
-            config_timeseries_contents["ice_hist_str"],
-            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/ice/hist/"],  # could also grab from compute_notebooks section of config file
-            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/ice/proc/tseries/'],
+            timeseries_params["ice_vars"],
+            timeseries_params["derive_vars_ice"],
+            [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+            timeseries_params["ice_hist_str"],
+            [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + "/ice/hist/"],  # could also grab from compute_notebooks section of config file
+            [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+'/ice/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-            config_timeseries_contents["ts_done"],
-            config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents["ice_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents["ice_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params["ts_done"],
+            timeseries_params["overwrite_ts"],
+            timeseries_params["ice_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params["ice_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev", # TODO: ice group will need to change this!
             num_procs,
             serial,
@@ -124,17 +133,17 @@ def run(config_path, serial=False, time_series=False):
         # glc timeseries generation
         cupid.timeseries.create_time_series(
             "glc",
-            config_timeseries_contents["glc_vars"],
-            config_timeseries_contents["derive_vars_glc"],
-            [config_timeseries_contents["case_name"]],  # could also grab from compute_notebooks section of config file
-            config_timeseries_contents["glc_hist_str"],
-            [config_contents["global_params"]["CESM_output_dir"] + "/" + config_timeseries_contents["case_name"] + "/glc/hist/"],  # could also grab from compute_notebooks section of config file
-            [config_contents["global_params"]["CESM_output_dir"]+'/'+config_timeseries_contents['case_name']+'/glc/proc/tseries/'],
+            timeseries_params["glc_vars"],
+            timeseries_params["derive_vars_glc"],
+            [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+            timeseries_params["glc_hist_str"],
+            [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + "/glc/hist/"],  # could also grab from compute_notebooks section of config file
+            [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+'/glc/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-            config_timeseries_contents["ts_done"],
-            config_timeseries_contents["overwrite_ts"],
-            config_timeseries_contents["glc_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            config_timeseries_contents["glc_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params["ts_done"],
+            timeseries_params["overwrite_ts"],
+            timeseries_params["glc_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params["glc_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
             "lev", # TODO: glc group will need to change this!
             num_procs,
             serial,
@@ -176,14 +185,6 @@ def run(config_path, serial=False, time_series=False):
             cat_path = temp_data_path + "/" + cat_subset_name + ".json"
         else:
             cat_path = full_cat_path
-
-    #####################################################################
-    # Managing global parameters
-
-    global_params = dict()
-
-    if "global_params" in control:
-        global_params = control["global_params"]
 
     #####################################################################
     # Ploomber - making a DAG
