@@ -322,7 +322,7 @@ def create_time_series(
         # End variable loop
 
         if vars_to_derive != []:
-            if component == "cam":
+            if component == "atm":
                 derive_cam_variables(
                     vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
                 )
