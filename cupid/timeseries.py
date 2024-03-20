@@ -329,7 +329,7 @@ def create_time_series(
 
         if serial:
             call_ncrcat(list_of_commands)
-        if not serial:  # if not serial
+        else:  # if not serial
             # Now run the "ncrcat" subprocesses in parallel:
             with mp.Pool(processes=num_procs) as mpool:
                 _ = mpool.map(call_ncrcat, list_of_commands)
