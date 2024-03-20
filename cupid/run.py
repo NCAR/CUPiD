@@ -66,7 +66,7 @@ def run(config_path, serial=False, time_series=False):
             timeseries_params["overwrite_ts"],
             timeseries_params[f"{component}_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
             timeseries_params[f"{component}_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
-            timeseries_params[f"{component}_level"]
+            timeseries_params[f"{component}_level"],
             num_procs,
             serial,
         )
