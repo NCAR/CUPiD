@@ -169,6 +169,15 @@ diag_cam_climo:
     #Location where time series files are (or will be) stored:
     cam_ts_loc: ${ts_loc}${diag_cam_climo.cam_case_name}/${diag_cam_climo.yrs}/
 
+    #Location where TEM files are stored:
+    #If path not specified or commented out, skip TEM calculation
+    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
+    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_climo.cam_case_name}
+
+    #TEM history file number
+    tem_hist_str: cam.h4
+
+    overwrite_tem: false
 
     case_nickname: ${diag_cam_climo.cam_case_name}
 
@@ -225,6 +234,16 @@ diag_cam_baseline_climo:
 
     #Location where time series files are (or will be) stored:
     cam_ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/timeseries/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
+
+    #Location where TEM files are stored:
+    #If path not specified or commented out, skip TEM calculation
+    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
+    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_baseline_climo.cam_case_name}
+
+    #TEM history file number
+    tem_hist_str: cam.h4
+
+    overwrite_tem: false
 
     case_nickname: ${diag_cam_baseline_climo.cam_case_name} 
 
@@ -352,18 +371,5 @@ derived_var_list:
    
 
 #<Add more variables here.>
-
-# Options for TEM diagnostics (./averaging/create_TEM_files.py and ./plotting/temp.py)
-tem_info:
-    #Location where TEM files are stored:
-    #If path not specified or commented out, skip TEM calculation
-    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
-    tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/
-
-    #TEM history file number
-    hist_num: h4
-    
-    overwrite_tem_case: false
-    overwrite_tem_base: false
 
 #END OF FILE
