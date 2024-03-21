@@ -126,7 +126,8 @@ def run(config_path, serial=False, time_series=False,
     for nb, info in all_nbs.copy().items():
         if not control["env_check"][info["kernel_name"]]:
             bad_env = info["kernel_name"]
-            warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run.")
+            warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; 
+            {nb}.ipynb will not be run. See README.md for environment installation instructions.")
             all_nbs.pop(nb)
     
     # Setting up notebook tasks
