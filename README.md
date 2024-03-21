@@ -91,4 +91,4 @@ client
 ```
 
 ### Timeseries File Generation
-CUPiD also has the capability to generate single variable timeseries files from history files for all components. To run timeseries, edit the `config.yml` file's timeseries section to fit your preferences, and then run `cupid-run config.yml -ts`. The timeseries generation will require the `nco` package, which can be installed with `module load nco` or via `conda install conda-forge::nco`.
+CUPiD also has the capability to generate single variable timeseries files from history files for all components. To run timeseries, edit the `config.yml` file's timeseries section to fit your preferences, and then run `cupid-run config.yml -ts`.
