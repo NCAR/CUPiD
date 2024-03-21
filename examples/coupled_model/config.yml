@@ -61,30 +61,30 @@ timeseries:
   atm_end_years: [102]
   atm_level: 'lev'
 
-  lnd_vars: ['process_all']
+  lnd_vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
   derive_vars_lnd: []
   lnd_hist_str: 'h0'
   lnd_start_years: [2]
   lnd_end_years: [102]
   lnd_level: 'lev'
 
-  ocn_vars: ['process_all']
+  ocn_vars: ['taux', 'tauy'] # ['process_all']
   derive_vars_ocn: []
   ocn_hist_str: 'h'
   ocn_start_years: [2]
   ocn_end_years: [102]
   ocn_level: 'lev'
 
-  ice_vars: ['process_all']
+  ice_vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
   derive_vars_ice: []
   ice_hist_str: 'h'
   ice_start_years: [2]
   ice_end_years: [102]
   ice_level: 'lev'
 
-  glc_vars: ['process_all']
+  glc_vars: ['usurf', 'topg'] #['process_all']
   derive_vars_glc: []
-  glc_hist_str: 'h'
+  glc_hist_str: 'initial_hist'
   glc_start_years: [2]
   glc_end_years: [102]
   glc_level: 'lev'

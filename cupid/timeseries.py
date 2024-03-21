@@ -83,7 +83,7 @@ def create_time_series(
     """
 
     # Notify user that script has started:
-    print("\n  Generating time series files...")
+    print(f"\n  Generating {component} time series files...")
 
     # Loop over cases:
     for case_idx, case_name in enumerate(case_names):
@@ -225,9 +225,13 @@ def create_time_series(
         # create copy of var list that can be modified for derivable variables
         if diag_var_list == ["process_all"]:
             print("generating time series for all variables")
+            # TODO: this doesn't seem to be working for ocn...
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
+                if component == 'ocn':
+                    print('ocean vars seem to not be present in all files and thus cause errors')
+                    continue
                 if (
                     var in derive_vars.keys()
                 ):  # TODO: dictionary implementation needs to be fixed with yaml file
@@ -337,7 +341,7 @@ def create_time_series(
     # End cases loop
 
     # Notify user that script has ended:
-    print("  ...time series file generation has finished successfully.")
+    print(f"  ... {component} time series file generation has finished successfully.")
 
 
 def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):

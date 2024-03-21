@@ -52,7 +52,6 @@ def run(config_path, serial=False, time_series=False):
 
 
         for component in ['atm', 'ocn', 'lnd', 'ice', 'glc']:
-            print(f"calling {component} timeseries generation")
             cupid.timeseries.create_time_series(
             component,
             timeseries_params[f"{component}_vars"],
