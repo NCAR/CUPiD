@@ -73,7 +73,7 @@ timeseries:
   ocn:
     vars: ['taux', 'tauy'] # ['process_all']
     derive_vars: []
-    hist_str: 'h'
+    hist_str: 'h.frc'
     start_years: [2]
     end_years: [102]
     level: 'lev'
