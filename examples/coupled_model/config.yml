@@ -54,40 +54,45 @@ timeseries:
   overwrite_ts: [False]
   case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
 
-  atm_vars: ['ACTNI', 'ACTNL', 'ACTREI','ACTREL','AODDUST']
-  derive_vars_atm: [] # {'PRECT':['PRECL','PRECC'], 'RESTOM':['FLNT','FSNT']}
-  atm_hist_str: 'h0'
-  atm_start_years: [2]
-  atm_end_years: [102]
-  atm_level: 'lev'
+  atm:
+    vars: ['ACTNI', 'ACTNL', 'ACTREI','ACTREL','AODDUST']
+    derive_vars: [] # {'PRECT':['PRECL','PRECC'], 'RESTOM':['FLNT','FSNT']}
+    hist_str: 'h0'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
 
-  lnd_vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
-  derive_vars_lnd: []
-  lnd_hist_str: 'h0'
-  lnd_start_years: [2]
-  lnd_end_years: [102]
-  lnd_level: 'lev'
+  lnd:
+    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
+    derive_vars: []
+    hist_str: 'h0'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
 
-  ocn_vars: ['taux', 'tauy'] # ['process_all']
-  derive_vars_ocn: []
-  ocn_hist_str: 'h'
-  ocn_start_years: [2]
-  ocn_end_years: [102]
-  ocn_level: 'lev'
+  ocn:
+    vars: ['taux', 'tauy'] # ['process_all']
+    derive_vars: []
+    hist_str: 'h'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
 
-  ice_vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
-  derive_vars_ice: []
-  ice_hist_str: 'h'
-  ice_start_years: [2]
-  ice_end_years: [102]
-  ice_level: 'lev'
+  ice:
+    vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
+    derive_vars: []
+    hist_str: 'h'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
 
-  glc_vars: ['usurf', 'topg'] #['process_all']
-  derive_vars_glc: []
-  glc_hist_str: 'initial_hist'
-  glc_start_years: [2]
-  glc_end_years: [102]
-  glc_level: 'lev'
+  glc:
+    vars: ['usurf', 'topg'] #['process_all']
+    derive_vars: []
+    hist_str: 'initial_hist'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
 
 compute_notebooks:
 

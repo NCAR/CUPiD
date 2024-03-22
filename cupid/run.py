@@ -54,18 +54,18 @@ def run(config_path, serial=False, time_series=False):
         for component in ['atm', 'ocn', 'lnd', 'ice', 'glc']:
             cupid.timeseries.create_time_series(
             component,
-            timeseries_params[f"{component}_vars"],
-            timeseries_params[f"derive_vars_{component}"],
+            timeseries_params[component]["vars"],
+            timeseries_params[component]["derive_vars"],
             [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
-            timeseries_params[f"{component}_hist_str"],
+            timeseries_params[component]["hist_str"],
             [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + f"/{component}/hist/"],  # could also grab from compute_notebooks section of config file
             [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+f'/{component}/proc/tseries/'],
             # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
             timeseries_params["ts_done"],
             timeseries_params["overwrite_ts"],
-            timeseries_params[f"{component}_start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-            timeseries_params[f"{component}_end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
-            timeseries_params[f"{component}_level"],
+            timeseries_params[component]["start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+            timeseries_params[component]["end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+            timeseries_params[component]["level"],
             num_procs,
             serial,
         )
