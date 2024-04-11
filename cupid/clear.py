@@ -3,24 +3,7 @@ import os
 import sys
 import click
 import cupid.util
-
-def clearFolder(folderPath):
-    #Clears all contents in the specified folder at folderPath (i.e. computed_notebooks)
-    try:
-        # Iterate over all items in the folder
-        for item in os.listdir(folderPath):
-            itemPath = os.path.join(folderPath, item)
-            # If item is a file, delete it
-            if os.path.isfile(itemPath):
-                os.remove(itemPath)  
-            # If item is a directory, recursively clear it
-            elif os.path.isdir(itemPath):
-                clearFolder(itemPath)   
-        # After deleting all items, remove the folder itself
-        os.rmdir(folderPath)    
-        print(f"All contents in {folderPath} have been cleared.")
-    except Exception as e:
-        print(f"Error occurred while clearing contents in {folderPath}: {e}")
+import shutil
 
 def readConfigFile(config_path):
     #Given the file path to config.yml, this function reads the config file content and 
@@ -44,4 +27,6 @@ def readConfigFile(config_path):
 #Entry point to this script
 def clear(config_path):
     run_dir = readConfigFile(config_path)
-    clearFolder(run_dir)
+    #Delete the 'computed_notebooks' folder and all the contents inside of it
+    shutil.rmtree(run_dir)
+    print(f"All contents in {run_dir} have been cleared.")
