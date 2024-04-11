@@ -151,6 +151,11 @@ def run(config_path, serial=False, time_series=False,
     if 'compute_scripts' in control:
 
         all_scripts = dict()
+
+        # automatically run all if not specified
+        
+        if True not in [atmosphere, ocean, land, seaice, landice]:
+            all = True
             
         if all:
             for script_category in control["compute_scripts"].values():

@@ -101,16 +101,17 @@ def setup_book(config_path):
 
     # get list of computational notebooks
     
-    nb_path_root = os.path.expanduser(control['data_sources']['nb_path_root'])
-    
-    compute_notebooks = [f"{nb_path_root}/{ik}.ipynb" for ok, ov in control["compute_notebooks"].items() for ik, iv in ov.items()]
+    if 'compute_notebooks' in control:
 
-    # get toc files; ignore glob expressions
-    toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
-    copy_files = list(set(toc_files) - set(compute_notebooks))
+        nb_path_root = os.path.expanduser(control['data_sources']['nb_path_root'])
+        compute_notebooks = [f"{nb_path_root}/{ik}.ipynb" for ok, ov in control["compute_notebooks"].items() for ik, iv in ov.items()]
     
-    for src in copy_files:
-        shutil.copyfile(src, f"{output_dir}/{src}")
+        # get toc files; ignore glob expressions
+        toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
+        copy_files = list(set(toc_files) - set(compute_notebooks))
+        
+        for src in copy_files:
+            shutil.copyfile(src, f"{output_dir}/{src}")
         
         
 def get_toc_files(nb_path_root, toc_dict, include_glob=True):
