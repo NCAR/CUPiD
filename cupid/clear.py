@@ -24,18 +24,20 @@ def clearFolder(folderPath):
 def readConfigFile(config_path):
     #Given the file path to config.yml, this function reads the config file content and 
     #returns the val of the run_dir string with '/computed_notebooks' appended to it 
-    
-    #Obtain the contents of the config.yml file and extract the run_dir variable
-    control = cupid.util.get_control_dict(config_path)
-    run_dir = control['data_sources'].get('run_dir', None)
-    
-    if run_dir:
-        #Append '/computed_notebooks' to the run_dir value if it is not empty
-        fullPath = os.path.join(run_dir, 'computed_notebooks')
-        return fullPath
-    
-    else: #run_dir is empty/wasn't found in config file so return error
-        raise ValueError("'run_dir' was empty/not found in the config file.")
+    try:
+        #Obtain the contents of the config.yml file and extract the run_dir variable
+        control = cupid.util.get_control_dict(config_path)
+        run_dir = control['data_sources'].get('run_dir', None)
+        
+        if run_dir:
+            #Append '/computed_notebooks' to the run_dir value if it is not empty
+            fullPath = os.path.join(run_dir, 'computed_notebooks')
+            return fullPath
+        
+        else: #run_dir is empty/wasn't found in config file so return error
+            raise ValueError("'run_dir' was empty/not found in the config file.")
+    except:
+        raise FileNotFoundError(f"{config_path} not found")
 
 @click.command()
 @click.argument('config_path')
