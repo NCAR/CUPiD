@@ -33,8 +33,7 @@ computation_config:
     ### notebook in NOTEBOOK CONFIG
 
     default_kernel_name: cupid-analysis
-    
-    
+        
 ############# NOTEBOOK CONFIG #############
 
 ############################

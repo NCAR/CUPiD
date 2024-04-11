@@ -34,33 +34,27 @@ def get_control_dict(config_path):
 
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
-    env_check = dict()    
+    control["env_check"] = dict()
     
-    for nb_category in control["compute_notebooks"].values():
-        for nb, info in nb_category.items():
-            if "kernel_name" not in info:
-                if default_kernel_name is not None:
-                    info["kernel_name"] = default_kernel_name
-                else:
+    if "compute_notebooks" in control:
+        for nb_category in control["compute_notebooks"].values():
+            for nb, info in nb_category.items():
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
+                if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
-                    warnings.warn(f"No environment specified for {nb}.ipynb; assuming cupid-analysis environment.")
-            env_check[info["kernel_name"]] = None
-    
+                    warnings.warn(f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment.")
+                if info["kernel_name"] not in control["env_check"]:
+                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
+                    
     if "compute_scripts" in control:
         for script_category in control["compute_scripts"].values():
             for script, info in script_category.items():
-                if "kernel_name" not in info:
-                    if default_kernel_name is not None:
-                        info["kernel_name"] = default_kernel_name
-                    else:
-                        info["kernel_name"] = "cupid-analysis"
-                        warnings.warn(f"No environment specified for {script}.py; assuming cupid-analysis environment.")
-            env_check[info["kernel_name"]] = None
-
-    for environment in env_check.keys():
-        env_check[environment] = environment in jupyter_client.kernelspec.find_kernel_specs()
-
-    control["env_check"] = env_check
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
+                if info["kernel_name"] is None:
+                    info["kernel_name"] = "cupid-analysis"
+                    warnings.warn(f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment.")
+                if info["kernel_name"] not in control["env_check"]:
+                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
     
     return control
 
@@ -115,7 +109,6 @@ def setup_book(config_path):
     toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
     copy_files = list(set(toc_files) - set(compute_notebooks))
     
-
     for src in copy_files:
         shutil.copyfile(src, f"{output_dir}/{src}")
         

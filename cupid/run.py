@@ -92,55 +92,58 @@ def run(config_path, serial=False, time_series=False,
 
     #####################################################################
     # Organizing notebooks to run
-
+    
     component_options = {"atmosphere": atmosphere,
                          "ocean": ocean,
                          "land": land,
                          "seaice": seaice,
                          "landice": landice}
+
+    if 'compute_notebooks' in control:
     
-    all_nbs = dict()
-    for nb, info in control['compute_notebooks']['infrastructure'].items():
-        all_nbs[nb] = info
+        all_nbs = dict()
         
-    # automatically run all if not specified
-    if True not in [atmosphere, ocean, land, seaice, landice]:
-        all = True
-    
-    if all:
-        for nb_category in control["compute_notebooks"].values():
-            for nb, info in nb_category.items():
-                all_nbs[nb] = info
-
-    else:
-        for comp_name, comp_bool in component_options.items():
-            if comp_bool:
-                if comp_name in control['compute_notebooks']:
-                    for nb, info in control['compute_notebooks'][comp_name].items():
-                        all_nbs[nb] = info
-                else:
-                    warnings.warn(f"No notebooks for {comp_name} component specified in config file.")
-
-    # Checking for existence of environments
-
-    for nb, info in all_nbs.copy().items():
-        if not control["env_check"][info["kernel_name"]]:
-            bad_env = info["kernel_name"]
-            warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; 
-            {nb}.ipynb will not be run. See README.md for environment installation instructions.")
-            all_nbs.pop(nb)
-    
-    # Setting up notebook tasks
-
-    for nb, info in all_nbs.items():
-
-        global_params['serial'] = serial
+        for nb, info in control['compute_notebooks']['infrastructure'].items():
+            all_nbs[nb] = info
+            
+        # automatically run all if not specified
         
-        if "dependency" in info:
-            cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
-
+        if True not in [atmosphere, ocean, land, seaice, landice]:
+            all = True
+        
+        if all:
+            for nb_category in control["compute_notebooks"].values():
+                for nb, info in nb_category.items():
+                    all_nbs[nb] = info
+    
         else:
-            cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag)
+            for comp_name, comp_bool in component_options.items():
+                if comp_bool:
+                    if comp_name in control['compute_notebooks']:
+                        for nb, info in control['compute_notebooks'][comp_name].items():
+                            all_nbs[nb] = info
+                    else:
+                        warnings.warn(f"No notebooks for {comp_name} component specified in config file.")
+    
+        # Checking for existence of environments
+    
+        for nb, info in all_nbs.copy().items():
+            if not control["env_check"][info["kernel_name"]]:
+                bad_env = info["kernel_name"]
+                warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run. See README.md for environment installation instructions.")
+                all_nbs.pop(nb)
+        
+        # Setting up notebook tasks
+    
+        for nb, info in all_nbs.items():
+    
+            global_params['serial'] = serial
+            
+            if "dependency" in info:
+                cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
+    
+            else:
+                cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag)
 
     #####################################################################
     # Organizing scripts
@@ -150,7 +153,7 @@ def run(config_path, serial=False, time_series=False,
         all_scripts = dict()
             
         if all:
-            for script_category in control["compute_scripts"]:
+            for script_category in control["compute_scripts"].values():
                 for script, info in script_category.items():
                     all_scripts[script] = info
                     
