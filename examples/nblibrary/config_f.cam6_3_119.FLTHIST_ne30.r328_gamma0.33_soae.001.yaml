@@ -50,11 +50,10 @@
 #--------------------
 #
 ##==============================
-
-diag_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/regrid/${diag_cam_climo.cam_case_name}/
-
-climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
-ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
+diag_loc: ../local_cesm_output/${diag_cam_climo.cam_case_name}/regrid
+climo_loc: ../local_cesm_output/
+ts_loc: ../local_cesm_output/
+cam_hist_root: ../local_cesm_output/
 
 #This first set of variables specify basic info used by all diagnostic runs:
 diag_basic_info:
@@ -112,17 +111,10 @@ diag_basic_info:
 
     redo_plot: false
     
-    
-
-
-
-
-
-
 
 #This second set of variables provides info for the CAM simulation(s) being diagnosed:
 diag_cam_climo:
-
+    
     #Calculate climatologies?
     #If false, neither the climatology or time-series files will be created:
     calc_cam_climo: true
@@ -135,17 +127,16 @@ diag_cam_climo:
     cam_case_name: b.e23_alpha16b.BLT1850.ne30_t232.054
 
     #Location of CAM history (h0) files:
-    cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/${diag_cam_climo.cam_case_name}/atm/hist/
-
+    cam_hist_loc: ${cam_hist_root}/${diag_cam_climo.cam_case_name}/atm/hist/
     yrs: ${diag_cam_climo.start_year}-${diag_cam_climo.end_year}
 
     #Location of CAM climatologies: 
     cam_climo_loc: ${climo_loc}${diag_cam_climo.cam_case_name}/atm/proc/${diag_cam_climo.yrs}/
-
+   
     #model year when time series files should start:
     #Note:  Leaving this entry blank will make time series
     #       start at earliest available year.
-    start_year: 91
+    start_year: 100
 
     #model year when time series files should end:
     #Note:  Leaving this entry blank will make time series
@@ -167,12 +158,12 @@ diag_cam_climo:
     cam_overwrite_ts: false
 
     #Location where time series files are (or will be) stored:
-    cam_ts_loc: ${ts_loc}${diag_cam_climo.cam_case_name}/${diag_cam_climo.yrs}/
+    cam_ts_loc: ${ts_loc}/${diag_cam_climo.cam_case_name}/${diag_cam_climo.yrs}/
 
     #Location where TEM files are stored:
     #If path not specified or commented out, skip TEM calculation
-    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
-    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_climo.cam_case_name}
+    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below 
+    cam_tem_loc: ${cam_hist_root}/${diag_cam_climo.cam_case_name}/TEM/
 
     #TEM history file number
     tem_hist_str: cam.h4
@@ -180,8 +171,6 @@ diag_cam_climo:
     overwrite_tem: false
 
     case_nickname: ${diag_cam_climo.cam_case_name}
-
-
 
 
 #This third set of variables provide info for the CAM baseline climatologies.
@@ -200,18 +189,17 @@ diag_cam_baseline_climo:
     cam_case_name: f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001
 
     #Location of CAM baseline history (h0) files:
-    cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/${diag_cam_baseline_climo.cam_case_name}/atm/hist/
+    cam_hist_loc: ${cam_hist_root}/${diag_cam_baseline_climo.cam_case_name}/atm/hist/
 
     yrs: ${diag_cam_baseline_climo.start_year}-${diag_cam_baseline_climo.end_year}
     
-
     #Location of baseline CAM climatologies:
-    cam_climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/climos/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
+    cam_climo_loc: ${climo_loc}/${diag_cam_baseline_climo.cam_case_name}/climo
 
     #model year when time series files should start:
     #Note:  Leaving this entry blank will make time series
     #       start at earliest available year.
-    start_year: 1995
+    start_year: 2004
 
     #model year when time series files should end:
     #Note:  Leaving this entry blank will make time series
@@ -233,12 +221,13 @@ diag_cam_baseline_climo:
     cam_overwrite_ts: false
 
     #Location where time series files are (or will be) stored:
-    cam_ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/timeseries/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
+    cam_ts_loc: ${ts_loc}/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
 
     #Location where TEM files are stored:
     #If path not specified or commented out, skip TEM calculation
-    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below
-    cam_tem_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/TEM/${diag_cam_baseline_climo.cam_case_name}
+    #If no path, diagnostics wont run even if declared in averaging/plotting scripts below  
+    
+    cam_tem_loc: ${cam_hist_root}/${diag_cam_baseline_climo.cam_case_name}/TEM/
 
     #TEM history file number
     tem_hist_str: cam.h4
@@ -263,7 +252,7 @@ diag_cvdp_info:
     #  CGD systems path = /home/asphilli/CESM-diagnostics/CVDP/Release/v5.2.0/
     #  CISL systems path = /glade/u/home/asphilli/CESM-diagnostics/CVDP/Release/v5.2.0/
     #  github location = https://github.com/NCAR/CVDP-ncl
-    cvdp_codebase_loc: /glade/u/home/asphilli/CESM-diagnostics/CVDP/Release/v5.2.0/
+    cvdp_codebase_loc: ../local_cesm_output/
 
     # Location where cvdp codebase will be copied to and diagnostic plots will be stored
     cvdp_loc: ${diag_loc}
