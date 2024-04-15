@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+This script provides functionality to build a Jupyter book based on
+the configuration specified in a YAML file.
+
+The main function `build()` reads the configuration file provided as a command-line
+argument, extracts the necessary information such as the name of the book and the
+directory containing computed notebooks, and then proceeds to clean and build the
+Jupyter book using the `jupyter-book` command-line tool.
+"""
 
 import subprocess
 import sys

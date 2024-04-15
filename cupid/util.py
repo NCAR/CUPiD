@@ -1,3 +1,19 @@
+"""
+This module provides functions and classes for managing conda kernels,
+executing notebooks with custom engines, and creating tasks for Ploomber DAGs.
+
+Functions:
+    - get_control_dict(): Get the control dictionary from a configuration file.
+    - setup_book(): Setup run dir and output Jupyter book based on config.yaml
+    - get_toc_files(): Return a list of files in the '_toc.yml'.
+    - create_ploomber_nb_task(): Create a Ploomber task for running a notebook.
+    - create_ploomber_script_task(): Create a Ploomber task for running a script.
+
+Classes:
+    - ManageCondaKernel: Class for managing conda kernels.
+    - MdJinjaEngine: Class for using the Jinja Engine to run notebooks.
+"""
+
 import os
 import shutil
 from glob import glob

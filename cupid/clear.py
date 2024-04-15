@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+This script provides functionality to clear the contents of the 'computed_notebooks' folder
+at the location specified by the 'run_dir' variable in the 'config.yml' file.
+
+The main function `clear()` takes the path to the config.yml file as input, reads the config file
+to obtain the 'run_dir' variable, and then deletes the contents of the 'computed_notebooks' folder
+at that location.
+"""
+
 import os
 import shutil
 import click
