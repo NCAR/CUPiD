@@ -6,16 +6,12 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
 
-import sys
 import glob
 import multiprocessing as mp
 import os
 import subprocess
-import xarray as xr
-
-import importlib
-
 from pathlib import Path
+import xarray as xr
 
 
 def call_ncrcat(cmd):
@@ -50,7 +46,7 @@ def create_time_series(
     ----
      - component: str
          name of component, eg 'cam'
-         # This could alternatively be made into a dictionary and encorporate values such as height_dim
+         # This could also be made into a dict and encorporate values such as height_dim
      - derive_vars: dict
          information on derivable variables
          eg, {'PRECT': ['PRECL','PRECC'],
@@ -62,7 +58,7 @@ def create_time_series(
      - hist_locs: list, str
          location of CESM history files
      - ts_dir: list, str
-         location where time series files will be saved, or where pre-made time series files exist
+         location where time series files will be saved, or pre-made time series files exist
      - ts_done: list, boolean
          check if time series files already exist
      - overwrite_ts: list, boolean
@@ -327,7 +323,7 @@ def create_time_series(
 
         # End variable loop
 
-        if vars_to_derive != []:
+        if vars_to_derive:
             if component == "atm":
                 derive_cam_variables(
                     vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]

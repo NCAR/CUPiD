@@ -5,17 +5,16 @@ import pathlib
 import subprocess
 import json
 import sys
+from pathlib import Path
 import yaml
 import jupyter_client
 import papermill as pm
 import ploomber
 from papermill.engines import NBClientEngine
 from jinja2 import Template
-import dask
-from pathlib import Path
 
 
-class manage_conda_kernel(object):
+class ManageCondaKernel(object):
     """
     Manage conda kernels so they can be seen by `papermill`
     """
@@ -37,6 +36,7 @@ class manage_conda_kernel(object):
             return None
 
     def isinstalled(self):
+        """Check if kernel is installed"""
         return self.kernel_name in jupyter_client.kernelspec.find_kernel_specs()
 
     def ensure_installed(self):
@@ -61,9 +61,11 @@ class manage_conda_kernel(object):
         assert self.isinstalled()
 
 
-class md_jinja_engine(NBClientEngine):
+class MdJinjaEngine(NBClientEngine):
+    """Class for using the Jinja Engine to run notebooks"""
     @classmethod
     def execute_managed_notebook(cls, nb_man, kernel_name, **kwargs):
+        """Execute notebooks with papermill execution engine"""
         jinja_data = {} if "jinja_data" not in kwargs else kwargs["jinja_data"]
 
         # call the papermill execution engine:
@@ -75,6 +77,7 @@ class md_jinja_engine(NBClientEngine):
 
 
 def get_control_dict(config_path):
+    """Get control dictionary from configuration file"""
     try:
         with open(config_path, "r") as fid:
             control = yaml.safe_load(fid)
@@ -107,11 +110,11 @@ def get_control_dict(config_path):
             assert "kernel_name" in d, f"kernel information missing for {script}.py"
 
     for nb, d in control["compute_notebooks"].items():
-        manage_conda_kernel(d["kernel_name"]).ensure_installed()
+        ManageCondaKernel(d["kernel_name"]).ensure_installed()
 
     if "compute_scripts" in control:
         for script, d in control["compute_scripts"].items():
-            manage_conda_kernel(d["kernel_name"]).ensure_installed()
+            ManageCondaKernel(d["kernel_name"]).ensure_installed()
 
     return control
 
@@ -251,7 +254,7 @@ def create_ploomber_nb_task(
 
         parms_in["subset_kwargs"] = subset_kwargs
 
-        if cat_path != None:
+        if cat_path is not None:
             parms_in["path_to_cat"] = cat_path
 
         pm_params = {
@@ -260,7 +263,7 @@ def create_ploomber_nb_task(
             "cwd": nb_path_root,
         }
 
-        pm.engines.papermill_engines._engines["md_jinja"] = md_jinja_engine
+        pm.engines.papermill_engines._engines["md_jinja"] = MdJinjaEngine
 
         task = ploomber.tasks.NotebookRunner(
             Path(input_path),
@@ -274,7 +277,7 @@ def create_ploomber_nb_task(
 
         print(output_name)
 
-        if dependency != None:
+        if dependency is not None:
             raise NotImplementedError
             # set DAG dependency here
             # something with task.set_upstream(other_task?)
@@ -329,7 +332,7 @@ def create_ploomber_script_task(
 
         parms_in["subset_kwargs"] = subset_kwargs
 
-        if cat_path != None:
+        if cat_path is not None:
             parms_in["path_to_cat"] = cat_path
 
         task = ploomber.tasks.ScriptRunner(
@@ -340,7 +343,7 @@ def create_ploomber_script_task(
             name=output_name,
         )
 
-        if dependency != None:
+        if dependency is not None:
             raise NotImplementedError
             # set DAG dependency here
             # something with task.set_upstream(other_task?)

@@ -2,7 +2,6 @@
 
 import subprocess
 import sys
-import os
 import yaml
 
 
@@ -38,6 +37,7 @@ def build():
     #         remote_dir = control["publish_location"]["remote_dir"]
     # this seems more complicated than expected...people have mentioned paramiko library?
     # subprocess.run(["mkdir", "-p", remote_dir])
-    # subprocess.run(["scp", "-r", f"{run_dir}/computed_notebooks/{sname}/_build/html/*", f"{user}@{remote_mach}:{remote_dir}"])
+    # subprocess.run(["scp", "-r", f"{run_dir}/computed_notebooks/{sname}/_build/html/*",
+    #                 f"{user}@{remote_mach}:{remote_dir}"])
 
     return None

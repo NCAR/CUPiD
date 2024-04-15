@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 
-import click
 import os
-from glob import glob
-import papermill as pm
+import click
+import ploomber
 import intake
 import cupid.util
 import cupid.timeseries
-from dask.distributed import Client
-import dask
-import time
-import ploomber
-import yaml
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -70,15 +64,16 @@ def run(config_path, serial=False, time_series=False):
                     + timeseries_params["case_name"]
                     + f"/{component}/proc/tseries/"
                 ],
-                # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
+                # Note that timeseries output will eventually go in
+                # /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                 timeseries_params["ts_done"],
                 timeseries_params["overwrite_ts"],
                 timeseries_params[component][
                     "start_years"
-                ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+                ],
                 timeseries_params[component][
                     "end_years"
-                ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+                ],
                 timeseries_params[component]["level"],
                 num_procs,
                 serial,
@@ -101,7 +96,6 @@ def run(config_path, serial=False, time_series=False):
     cat_path = None
 
     if "path_to_cat_json" in control["data_sources"]:
-        use_catalog = True
         full_cat_path = os.path.realpath(
             os.path.expanduser(control["data_sources"]["path_to_cat_json"])
         )
