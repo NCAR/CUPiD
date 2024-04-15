@@ -229,8 +229,10 @@ def create_time_series(
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
-                if component == 'ocn':
-                    print('ocean vars seem to not be present in all files and thus cause errors')
+                if component == "ocn":
+                    print(
+                        "ocean vars seem to not be present in all files and thus cause errors"
+                    )
                     continue
                 if (
                     var in derive_vars.keys()
