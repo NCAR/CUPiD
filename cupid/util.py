@@ -4,6 +4,7 @@ from glob import glob
 import pathlib
 import subprocess
 import json
+import sys
 import yaml
 import jupyter_client
 import papermill as pm
@@ -29,8 +30,12 @@ class md_jinja_engine(NBClientEngine):
 
 
 def get_control_dict(config_path):
-    with open(config_path, "r") as fid:
-        control = yaml.safe_load(fid)
+    try:
+        with open(config_path, "r") as fid:
+            control = yaml.safe_load(fid)
+    except FileNotFoundError:
+        print(f"ERROR: {config_path} not found")
+        sys.exit(1)
 
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 

@@ -46,3 +46,4 @@ documentation = "https://nbscuid.readthedocs.io"
 [project.scripts]
 cupid-run = "cupid.run:run"
 cupid-build = "cupid.build:build"
+cupid-clear = "cupid.clear:clear"

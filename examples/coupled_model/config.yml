@@ -47,6 +47,52 @@ global_params:
   lc_kwargs:
     threads_per_worker: 1
 
+timeseries:
+  num_procs: 8
+  ts_done: [False]
+  overwrite_ts: [False]
+  case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
+
+  atm:
+    vars: ['ACTNI', 'ACTNL', 'ACTREI','ACTREL','AODDUST']
+    derive_vars: [] # {'PRECT':['PRECL','PRECC'], 'RESTOM':['FLNT','FSNT']}
+    hist_str: 'h0'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
+
+  lnd:
+    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
+    derive_vars: []
+    hist_str: 'h0'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
+
+  ocn:
+    vars: ['taux', 'tauy'] # ['process_all']
+    derive_vars: []
+    hist_str: 'h.frc'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
+
+  ice:
+    vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
+    derive_vars: []
+    hist_str: 'h'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
+
+  glc:
+    vars: ['usurf', 'topg'] #['process_all']
+    derive_vars: []
+    hist_str: 'initial_hist'
+    start_years: [2]
+    end_years: [102]
+    level: 'lev'
+
 compute_notebooks:
 
   # This is where all the notebooks you want run and their
@@ -60,6 +106,7 @@ compute_notebooks:
       index:
         parameter_groups:
           none: {}
+
     atmosphere:
       adf_quick_run:
         parameter_groups:
@@ -67,6 +114,7 @@ compute_notebooks:
             adf_path: ../../../externals/ADF
             config_path: .
             config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+
     ocean:
       ocean_surface:
         parameter_groups:
@@ -80,8 +128,7 @@ compute_notebooks:
                 native: 'mom6.h.native.????-??.nc'
                 static: 'mom6.h.static.nc'
               oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
-    
-    
+ 
     land:
       land_comparison:
         parameter_groups:
@@ -92,6 +139,7 @@ compute_notebooks:
             type:
               - 1850pAD
               - 1850pSASU
+
     seaice:
       seaice:
         parameter_groups:
@@ -104,7 +152,6 @@ compute_notebooks:
             begyr2: 245
             endyr2: 305
             nyears: 25
-
 
 ########### JUPYTER BOOK CONFIG ###########
 
