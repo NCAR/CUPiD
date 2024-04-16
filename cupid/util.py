@@ -101,51 +101,48 @@ def setup_book(config_path):
 
     # get list of computational notebooks
     
-    if 'compute_notebooks' in control:
+    # if 'compute_notebooks' in control:
 
-        nb_path_root = os.path.expanduser(control['data_sources']['nb_path_root'])
-        compute_notebooks = [f"{nb_path_root}/{ik}.ipynb" for ok, ov in control["compute_notebooks"].items() for ik, iv in ov.items()]
+    #     nb_path_root = os.path.realpath(os.path.expanduser(control['data_sources']['nb_path_root']))
+    #     # the below won't work for index, unless we put it in an infrastructure folder and change that elsewhere
+    #     compute_notebooks = [f"{nb_path_root}/{ok}/{ik}.ipynb" for ok, ov in control["compute_notebooks"].items() for ik, iv in ov.items()]
     
-        # get toc files; ignore glob expressions
-        toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
-        copy_files = list(set(toc_files) - set(compute_notebooks))
+    #     # get toc files; ignore glob expressions
+    #     toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
+    #     copy_files = list(set(toc_files) - set(compute_notebooks))
         
-        for src in copy_files:
-            shutil.copyfile(src, f"{output_dir}/{src}")
+    #     for src in copy_files:
+    #         #shutil.copyfile(src, f"{output_dir}/{src}")
+    #         pass
         
         
-def get_toc_files(nb_path_root, toc_dict, include_glob=True):
-    """return a list of files in the _toc.yml"""
+# def get_toc_files(nb_path_root, toc_dict, include_glob=True):
+#     """return a list of files in the _toc.yml"""
 
-    def _toc_files(toc_dict, file_list=[]):
-        for key, value in toc_dict.items():
+#     def _toc_files(toc_dict, file_list=[]):
+#         for key, value in toc_dict.items():
             
-            if key in ["root", "file", "glob"]:
-                if not include_glob and key == "glob":
-                    continue
-                file = (
-                    glob(f"{nb_path_root}/{value}")
-                    if key == "glob"
-                    else [
-                        f"{nb_path_root}/{value}.{ext}"
-                        for ext in ["ipynb", "md"]
-                        if os.path.exists(f"{nb_path_root}/{value}.{ext}")
-                    ]
-                )
+#             if key in ["root", "file", "glob"]:
+#                 if not include_glob and key == "glob":
+#                     continue
+#                 if key == "glob":    
+#                     file = glob(f"{nb_path_root}/{value}")
+#                 else:
+#                     file = [f"{nb_path_root}/{value}.{ext}" for ext in ["ipynb", "md"] if os.path.exists(f"{nb_path_root}/{value}.{ext}")]
+    
+#                 assert len(file), f"no files found: {value}"
+#                 assert len(file) == 1, f"multiple files found: {value}"
+#                 file_list.append(file[0])
 
-                assert len(file), f"no files found: {value}"
-                assert len(file) == 1, f"multiple files found: {value}"
-                file_list.append(file[0])
+#             elif key in ["chapters", "sections", "parts"]:
+#                 file_list_ext = []
+#                 for sub in value:
+#                     file_list_ext = _toc_files(sub, file_list_ext)
+#                 file_list.extend(file_list_ext)
 
-            elif key in ["chapters", "sections", "parts"]:
-                file_list_ext = []
-                for sub in value:
-                    file_list_ext = _toc_files(sub, file_list_ext)
-                file_list.extend(file_list_ext)
+#         return file_list
 
-        return file_list
-
-    return _toc_files(toc_dict)
+#     return _toc_files(toc_dict)
 
 
 def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None):
@@ -207,8 +204,6 @@ def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global
         pm.engines.papermill_engines._engines["md_jinja"] = md_jinja_engine
         
         task = ploomber.tasks.NotebookRunner(Path(input_path), ploomber.products.File(output_path + '.ipynb'), dag, params=parms_in, papermill_params=pm_params, kernelspec_name=info['kernel_name'], name=output_name)
-        
-        print(output_name)
         
         if dependency != None:
             raise NotImplementedError

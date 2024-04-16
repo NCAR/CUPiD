@@ -64,7 +64,7 @@ compute_notebooks:
       adf_quick_run:
         parameter_groups:
           none:
-            adf_path: ../../externals/ADF
+            adf_path: ../../../externals/ADF
             config_path: .
             config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
     ocean:
@@ -120,7 +120,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: index # root is the notebook that will be the homepage for the book
+  root: infrastructure/index # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
@@ -131,19 +131,19 @@ book_toc:
       # Each chapter is the name of one of the notebooks that you executed
       ### in compute_notebooks above, also without .ipynb
       chapters:
-        - file: adf_quick_run
+        - file: atmosphere/adf_quick_run
 
     - caption: Ocean
       chapters:
-          - file: ocean_surface
+          - file: ocean/ocean_surface
 
     - caption: Land
       chapters:
-        - file: land_comparison
+        - file: land/land_comparison
 
     - caption: SeaIce
       chapters:
-        - file: seaice
+        - file: seaice/seaice
 
 #####################################
 # Keys for Jupyter Book _config.yml #

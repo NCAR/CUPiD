@@ -44,7 +44,6 @@ def run(config_path, serial=False, time_series=False,
     cupid.util.setup_book(config_path)
 
     # Grab paths
-
     run_dir = os.path.realpath(os.path.expanduser(control['data_sources']['run_dir']))
     output_dir = run_dir + "/computed_notebooks/" + control['data_sources']['sname']
     temp_data_path = run_dir + "/temp_data" 
@@ -74,7 +73,6 @@ def run(config_path, serial=False, time_series=False,
         else:
             cat_path = full_cat_path
 
-
     #####################################################################
     # Managing global parameters
 
@@ -83,12 +81,12 @@ def run(config_path, serial=False, time_series=False,
     if 'global_params' in control:
         global_params = control['global_params']
 
+    global_params['serial'] = serial
 
     #####################################################################
     # Ploomber - making a DAG
 
     dag = ploomber.DAG(executor=ploomber.executors.Serial())
-
 
     #####################################################################
     # Organizing notebooks to run
@@ -105,16 +103,20 @@ def run(config_path, serial=False, time_series=False,
         
         for nb, info in control['compute_notebooks']['infrastructure'].items():
             all_nbs[nb] = info
+            all_nbs[nb]['nb_path_root'] = nb_path_root
+            all_nbs[nb]['output_dir'] = output_dir + '/infrastructure'
             
-        # automatically run all if not specified
+        # Automatically run all if not specified
         
         if True not in [atmosphere, ocean, land, seaice, landice]:
             all = True
         
         if all:
-            for nb_category in control["compute_notebooks"].values():
-                for nb, info in nb_category.items():
+            for comp_name, comp_nbs in control["compute_notebooks"].items():
+                for nb, info in comp_nbs.items():
                     all_nbs[nb] = info
+                    all_nbs[nb]['nb_path_root'] = nb_path_root + '/' + comp_name
+                    all_nbs[nb]['output_dir'] = output_dir + '/' + comp_name
     
         else:
             for comp_name, comp_bool in component_options.items():
@@ -122,6 +124,8 @@ def run(config_path, serial=False, time_series=False,
                     if comp_name in control['compute_notebooks']:
                         for nb, info in control['compute_notebooks'][comp_name].items():
                             all_nbs[nb] = info
+                            all_nbs[nb]['nb_path_root'] = nb_path_root + '/' + comp_name
+                            all_nbs[nb]['output_dir'] = output_dir + '/' + comp_name
                     else:
                         warnings.warn(f"No notebooks for {comp_name} component specified in config file.")
     
@@ -135,15 +139,9 @@ def run(config_path, serial=False, time_series=False,
         
         # Setting up notebook tasks
     
-        for nb, info in all_nbs.items():
-    
-            global_params['serial'] = serial
-            
-            if "dependency" in info:
-                cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency = info["dependency"])
-    
-            else:
-                cupid.util.create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag)
+        for nb, info in all_nbs.items():     
+            cupid.util.create_ploomber_nb_task(nb, info, cat_path, info["nb_path_root"], 
+                                               info["output_dir"], global_params, dag, dependency=info.get("dependency"))
 
     #####################################################################
     # Organizing scripts
@@ -152,15 +150,16 @@ def run(config_path, serial=False, time_series=False,
 
         all_scripts = dict()
 
-        # automatically run all if not specified
+        # Automatically run all if not specified
         
         if True not in [atmosphere, ocean, land, seaice, landice]:
             all = True
             
         if all:
-            for script_category in control["compute_scripts"].values():
-                for script, info in script_category.items():
+            for comp_name, comp_scripts in control["compute_scripts"].items():
+                for script, info in comp_scripts.items():
                     all_scripts[script] = info
+                    all_scripts[script]['nb_path_root'] = nb_path_root + '/' + comp_name
                     
         else:
             for comp_name, comp_bool in component_options.items():
@@ -168,6 +167,7 @@ def run(config_path, serial=False, time_series=False,
                     if comp_name in control['compute_scripts']:
                         for script, info in control['compute_scripts'][comp_name].items():
                             all_scripts[script] = info
+                            all_scripts[script]['nb_path_root'] = nb_path_root + '/' + comp_name
                     else:
                         warnings.warn(f"No scripts for {comp_name} component specified in config file.")
 
@@ -183,11 +183,8 @@ def run(config_path, serial=False, time_series=False,
 
         for script, info in all_scripts.items():
 
-            if "dependency" in info:
-                cupid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag, dependency = info["dependency"])
-
-            else:
-                cupid.util.create_ploomber_script_task(script, info, cat_path, nb_path_root, global_params, dag)
+            cupid.util.create_ploomber_script_task(script, info, cat_path, info['nb_path_root'], 
+                                                   global_params, dag, dependency=info.get("dependency"))
 
     # Run the full DAG
 
