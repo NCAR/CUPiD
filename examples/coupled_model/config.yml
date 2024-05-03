@@ -178,19 +178,19 @@ book_toc:
       # Each chapter is the name of one of the notebooks that you executed
       ### in compute_notebooks above, also without .ipynb
       chapters:
-        - file: atmosphere/adf_quick_run
+        - file: atm/adf_quick_run
 
     - caption: Ocean
       chapters:
-          - file: ocean/ocean_surface
+          - file: ocn/ocean_surface
 
     - caption: Land
       chapters:
-        - file: land/land_comparison
+        - file: lnd/land_comparison
 
-    - caption: SeaIce
+    - caption: Sea Ice
       chapters:
-        - file: seaice/seaice
+        - file: ice/seaice
 
 #####################################
 # Keys for Jupyter Book _config.yml #
