@@ -13,52 +13,7 @@ from papermill.engines import NBClientEngine
 from jinja2 import Template
 import dask
 from pathlib import Path
-
-
-class manage_conda_kernel(object):
-    """
-    Manage conda kernels so they can be seen by `papermill`
-    """
-
-    def __init__(self, kernel_name: str):
-        self.kernel_name = kernel_name
-
-    def getcwd(self):
-        """get the directory of a conda kernel by name"""
-        command = ["conda", "env", "list", "--json"]
-        output = subprocess.check_output(command).decode("ascii")
-        envs = json.loads(output)["envs"]
-
-        for env in envs:
-            env = pathlib.Path(env)
-            if self.kernel_name == env.stem:
-                return env
-        else:
-            return None
-
-    def isinstalled(self):
-        return self.kernel_name in jupyter_client.kernelspec.find_kernel_specs()
-
-    def ensure_installed(self):
-        """install a conda kernel in a location findable by `nbconvert` etc."""
-
-        if self.isinstalled():
-            return
-
-        path = self.getcwd()
-        print(path)
-        if path is None:
-            raise ValueError(f'conda kernel "{self.kernel_name}" not found')
-        path = path / pathlib.Path("share/jupyter/kernels")
-
-        kernels_in_conda_env = jupyter_client.kernelspec._list_kernels_in(path)
-        py_kernel_key = [k for k in kernels_in_conda_env.keys() if "python" in k][0]
-        kernel_path = kernels_in_conda_env[py_kernel_key]
-
-        jupyter_client.kernelspec.install_kernel_spec(
-            kernel_path, kernel_name=self.kernel_name, user=True, replace=True
-        )
-        assert self.isinstalled()
+import warnings
 
 
 class md_jinja_engine(NBClientEngine):
@@ -81,38 +36,31 @@ def get_control_dict(config_path):
     except FileNotFoundError:
         print(f"ERROR: {config_path} not found")
         sys.exit(1)
-        
-    # theoretically ploomber should manage this kernel checking by itself, but this seems to add
-    # the default kernel to info where necessary. currently a bit messy with copy pasting in 
-    # script stuff.
-    
+
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
-    if default_kernel_name is not None:
-        
-        for d in control["compute_notebooks"].values():
-            if "kernel_name" not in d:
-                d["kernel_name"] = default_kernel_name
-        
-        if "compute_scripts" in control:
-            for d in control["compute_scripts"].values():
-                if "kernel_name" not in d:
-                    d["kernel_name"] = default_kernel_name
-        
-    else:
-        for nb, d in control["compute_notebooks"].items():
-            assert "kernel_name" in d, f"kernel information missing for {nb}.ipynb"
-        
-        for script, d in control["compute_scripts"].items():
-            assert "kernel_name" in d, f"kernel information missing for {script}.py"
-
-    for nb, d in control["compute_notebooks"].items():
-        manage_conda_kernel(d["kernel_name"]).ensure_installed()
-
+    control["env_check"] = dict()
+    
+    if "compute_notebooks" in control:
+        for nb_category in control["compute_notebooks"].values():
+            for nb, info in nb_category.items():
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
+                if info["kernel_name"] is None:
+                    info["kernel_name"] = "cupid-analysis"
+                    warnings.warn(f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment.")
+                if info["kernel_name"] not in control["env_check"]:
+                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
+                    
     if "compute_scripts" in control:
-        for script, d in control["compute_scripts"].items():
-            manage_conda_kernel(d["kernel_name"]).ensure_installed()
-        
+        for script_category in control["compute_scripts"].values():
+            for script, info in script_category.items():
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
+                if info["kernel_name"] is None:
+                    info["kernel_name"] = "cupid-analysis"
+                    warnings.warn(f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment.")
+                if info["kernel_name"] not in control["env_check"]:
+                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
+    
     return control
 
 
@@ -156,55 +104,8 @@ def setup_book(config_path):
     with open(f"{output_dir}/_config.yml", "w") as fid:
         yaml.dump(config, fid, sort_keys=False)
 
-    # get list of computational notebooks
+    return None
     
-    nb_path_root = os.path.expanduser(control['data_sources']['nb_path_root'])
-    
-    compute_notebooks = [f"{nb_path_root}/{f}.ipynb" for f in control["compute_notebooks"].keys()]
-
-    # get toc files; ignore glob expressions
-    toc_files = get_toc_files(nb_path_root, toc, include_glob=False)
-    copy_files = list(set(toc_files) - set(compute_notebooks))
-    
-
-    for src in copy_files:
-        shutil.copyfile(src, f"{output_dir}/{src}")
-        
-        
-def get_toc_files(nb_path_root, toc_dict, include_glob=True):
-    """return a list of files in the _toc.yml"""
-
-    def _toc_files(toc_dict, file_list=[]):
-        for key, value in toc_dict.items():
-            
-            if key in ["root", "file", "glob"]:
-                if not include_glob and key == "glob":
-                    continue
-                file = (
-                    glob(f"{nb_path_root}/{value}")
-                    if key == "glob"
-                    else [
-                        f"{nb_path_root}/{value}.{ext}"
-                        for ext in ["ipynb", "md"]
-                        if os.path.exists(f"{nb_path_root}/{value}.{ext}")
-                    ]
-                )
-
-                assert len(file), f"no files found: {value}"
-                assert len(file) == 1, f"multiple files found: {value}"
-                file_list.append(file[0])
-
-            elif key in ["chapters", "sections", "parts"]:
-                file_list_ext = []
-                for sub in value:
-                    file_list_ext = _toc_files(sub, file_list_ext)
-                file_list.extend(file_list_ext)
-
-        return file_list
-
-    return _toc_files(toc_dict)
-
-
 def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
@@ -264,8 +165,6 @@ def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global
         pm.engines.papermill_engines._engines["md_jinja"] = md_jinja_engine
         
         task = ploomber.tasks.NotebookRunner(Path(input_path), ploomber.products.File(output_path + '.ipynb'), dag, params=parms_in, papermill_params=pm_params, kernelspec_name=info['kernel_name'], name=output_name)
-        
-        print(output_name)
         
         if dependency != None:
             raise NotImplementedError
