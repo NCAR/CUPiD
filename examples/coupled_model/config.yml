@@ -107,7 +107,7 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    atmosphere:
+    atm:
       adf_quick_run:
         parameter_groups:
           none:
@@ -115,7 +115,7 @@ compute_notebooks:
             config_path: .
             config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-    ocean:
+    ocn:
       ocean_surface:
         parameter_groups:
           none:
@@ -129,7 +129,7 @@ compute_notebooks:
                 static: 'mom6.h.static.nc'
               oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
  
-    land:
+    lnd:
       land_comparison:
         parameter_groups:
           none:
@@ -140,7 +140,7 @@ compute_notebooks:
               - 1850pAD
               - 1850pSASU
 
-    seaice:
+    ice:
       seaice:
         parameter_groups:
           none:

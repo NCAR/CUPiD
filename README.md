@@ -82,7 +82,6 @@ Usage: cupid-run [OPTIONS] CONFIG_PATH
 Options:
   -s, --serial        Do not use LocalCluster objects
   -ts, --time-series  Run time series generation scripts prior to diagnostics
-  -a, --all           Run all component diagnostics
   -atm, --atmosphere  Run atmosphere component diagnostics
   -ocn, --ocean       Run ocean component diagnostics
   -lnd, --land        Run land component diagnostics
@@ -108,7 +107,7 @@ client
 
 #### Specifying components
 
-If no component flags are provided, `--all` will be assumed and all component diagnostics listed in `config.yml` will be executed. Multiple flags can be used together to select a group of components, for example: `cupid-run -ocn -ice config.yml`.
+If no component flags are provided, all component diagnostics listed in `config.yml` will be executed by default. Multiple flags can be used together to select a group of components, for example: `cupid-run -ocn -ice config.yml`.
 
 
 ### Timeseries File Generation
