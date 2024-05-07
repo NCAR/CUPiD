@@ -82,8 +82,15 @@ Usage: cupid-run [OPTIONS] CONFIG_PATH
 Options:
   -s, --serial        Do not use LocalCluster objects
   -ts, --time-series  Run time series generation scripts prior to diagnostics
+  -atm, --atmosphere  Run atmosphere component diagnostics
+  -ocn, --ocean       Run ocean component diagnostics
+  -lnd, --land        Run land component diagnostics
+  -ice, --seaice      Run sea ice component diagnostics
+  -glc, --landice     Run land ice component diagnostics
   -h, --help          Show this message and exit.
 ```
+
+#### Running in serial
 
 By default, several of the example notebooks provided use a dask `LocalCluster` object to run in parallel.
 However, the `--serial` option will pass a logical flag to each notebook that can be used to skip starting the cluster.
@@ -98,6 +105,10 @@ if not serial:
 client
 ```
 
+#### Specifying components
+
+If no component flags are provided, all component diagnostics listed in `config.yml` will be executed by default. Multiple flags can be used together to select a group of components, for example: `cupid-run -ocn -ice config.yml`.
+
+
 ### Timeseries File Generation
 CUPiD also has the capability to generate single variable timeseries files from history files for all components. To run timeseries, edit the `config.yml` file's timeseries section to fit your preferences, and then run `cupid-run config.yml -ts`.
-

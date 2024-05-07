@@ -33,8 +33,7 @@ computation_config:
     ### notebook in NOTEBOOK CONFIG
 
     default_kernel_name: cupid-analysis
-
-
+        
 ############# NOTEBOOK CONFIG #############
 
 ############################
@@ -102,52 +101,57 @@ compute_notebooks:
 
   # The first key (here simple_no_params_nb) is the name of the
   ### notebook from nb_path_root, minus the .ipynb
-  index:
-    parameter_groups:
-      none: {}
+    
+    infrastructure:
+      index:
+        parameter_groups:
+          none: {}
 
-  adf_quick_run:
-    parameter_groups:
-      none:
-        adf_path: ../../externals/ADF
-        config_path: .
-        config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+    atm:
+      adf_quick_run:
+        parameter_groups:
+          none:
+            adf_path: ../../../externals/ADF
+            config_path: .
+            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-  ocean_surface:
-    parameter_groups:
-      none:
-        Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-        savefigs: False
-        mom6_tools_config:
-          start_date: '0091-01-01'
-          end_date: '0101-01-01'
-          Fnames:
-            native: 'mom6.h.native.????-??.nc'
-            static: 'mom6.h.static.nc'
-          oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+    ocn:
+      ocean_surface:
+        parameter_groups:
+          none:
+            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+            savefigs: False
+            mom6_tools_config:
+              start_date: '0091-01-01'
+              end_date: '0101-01-01'
+              Fnames:
+                native: 'mom6.h.native.????-??.nc'
+                static: 'mom6.h.static.nc'
+              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+ 
+    lnd:
+      land_comparison:
+        parameter_groups:
+          none:
+            cases:
+              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+            type:
+              - 1850pAD
+              - 1850pSASU
 
-  land_comparison:
-    parameter_groups:
-      none:
-        cases:
-          - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-          - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-        type:
-          - 1850pAD
-          - 1850pSASU
-
-  seaice:
-    parameter_groups:
-      none:
-        cases:
-          - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-          - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-        begyr1: 245
-        endyr1: 305
-        begyr2: 245
-        endyr2: 305
-        nyears: 25
-
+    ice:
+      seaice:
+        parameter_groups:
+          none:
+            cases:
+              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
+              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
+            begyr1: 245
+            endyr1: 305
+            begyr2: 245
+            endyr2: 305
+            nyears: 25
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -163,7 +167,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: index # root is the notebook that will be the homepage for the book
+  root: infrastructure/index # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
@@ -174,19 +178,19 @@ book_toc:
       # Each chapter is the name of one of the notebooks that you executed
       ### in compute_notebooks above, also without .ipynb
       chapters:
-        - file: adf_quick_run
+        - file: atm/adf_quick_run
 
     - caption: Ocean
       chapters:
-          - file: ocean_surface
+          - file: ocn/ocean_surface
 
     - caption: Land
       chapters:
-        - file: land_comparison
+        - file: lnd/land_comparison
 
-    - caption: SeaIce
+    - caption: Sea Ice
       chapters:
-        - file: seaice
+        - file: ice/seaice
 
 #####################################
 # Keys for Jupyter Book _config.yml #
