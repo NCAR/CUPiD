@@ -86,7 +86,7 @@ def create_time_series(
         # Check if particular case should be processed:
         if ts_done[case_idx]:
             emsg = (
-                " Configuration file indicates time series files have been pre-computed"
+                "Configuration file indicates time series files have been pre-computed"
             )
             emsg += f" for case '{case_name}'.  Will rely on those files directly."
             print(emsg)
@@ -169,7 +169,7 @@ def create_time_series(
                         # Print a warning, and assume that no vertical
                         # level information is needed.
                         wmsg = "WARNING! Unable to determine the vertical coordinate"
-                        wmsg += f" type from the {height_dim} long name, which is:\n'{lev_long_name}'."
+                        wmsg += f" type from the {height_dim} long name, \n'{lev_long_name}'."
                         wmsg += (
                             "\nNo additional vertical coordinate information will be"
                         )
@@ -239,11 +239,10 @@ def create_time_series(
                             diag_var_list.append(constit)
                     vars_to_derive.append(var)
                     continue
-                else:
-                    msg = f"WARNING: {var} is not in the file {hist_files[0]}."
-                    msg += " No time series will be generated."
-                    print(msg)
-                    continue
+                msg = f"WARNING: {var} is not in the file {hist_files[0]}."
+                msg += " No time series will be generated."
+                print(msg)
+                continue
 
             # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
             has_lev = bool(height_dim in hist_file_ds[var].dims)
@@ -374,7 +373,8 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                 Path(prect_file).unlink()
             else:
                 print(
-                    f"[{__name__}] Warning: PRECT file was found and overwrite is False. Will use existing file."
+                    f"[{__name__}] Warning: PRECT file was found and overwrite is False"
+                    + "Will use existing file."
                 )
                 continue
         # append PRECC to the file containing PRECL
@@ -407,7 +407,8 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                     Path(derived_file).unlink()
                 else:
                     print(
-                        f"[{__name__}] Warning: RESTOM file was found and overwrite is False. Will use existing file."
+                        f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
+                        + "Will use existing file."
                     )
                     continue
             # append FSNT to the file containing FLNT

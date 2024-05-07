@@ -28,8 +28,8 @@ def read_config_file(config_path):
         full_path = os.path.join(run_dir, "computed_notebooks")
         return full_path
 
-    else:  # run_dir is empty/wasn't found in config file so return error
-        raise ValueError("'run_dir' was empty/not found in the config file.")
+    # else run_dir is empty/wasn't found in config file so return error
+    raise ValueError("'run_dir' was empty/not found in the config file.")
 
 
 @click.command()

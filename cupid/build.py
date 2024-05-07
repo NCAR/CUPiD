@@ -37,7 +37,7 @@ def build():
         ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"]
     )
 
-    ### Originally used this code to copy jupyter book HTML to a location to host it online
+    # Originally used this code to copy jupyter book HTML to a location to host it online
 
     #     if 'publish_location' in control:
 

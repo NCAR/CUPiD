@@ -3,7 +3,8 @@ This module provides functions for reading YAML files and working with intake ca
 
 Functions:
     - read_yaml(path_to_yaml): Read a YAML file and return its content as a dictionary.
-    - get_collection(path_to_catalog, **kwargs): Get a collection of datasets from an intake catalog based on specified criteria.
+    - get_collection(path_to_catalog, **kwargs): Get a collection of datasets from an
+                     intake catalog based on specified criteria.
 """
 
 import intake

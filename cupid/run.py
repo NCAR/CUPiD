@@ -31,27 +31,17 @@ import cupid.timeseries
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-
+# fmt: off
+# pylint: disable=line-too-long
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
-@click.option(
-    "--time-series",
-    "-ts",
-    is_flag=True,
-    help="Run time series generation scripts prior to diagnostics",
-)
+@click.option("--time-series", "-ts", is_flag=True, help="Run time series generation scripts prior to diagnostics")
 # Options to turn components on or off
-@click.option(
-    "--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics"
-)
+@click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics")
 @click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component diagnostics")
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
-@click.option(
-    "--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics"
-)
-@click.option(
-    "--landice", "-glc", is_flag=True, help="Run land ice component diagnostics"
-)
+@click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
+@click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
 @click.argument("config_path")
 def run(
     config_path,
@@ -67,7 +57,8 @@ def run(
     """
     Main engine to set up running all the notebooks.
     """
-
+    # fmt: on
+    # pylint: enable=line-too-long
     # Get control structure
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
@@ -108,6 +99,7 @@ def run(
         for component, comp_bool in component_options.items():
             if comp_bool:
                 # fmt: off
+                # pylint: disable=line-too-long
                 cupid.timeseries.create_time_series(
                     component,
                     timeseries_params[component]["vars"],
@@ -127,6 +119,7 @@ def run(
                     serial,
                 )
                 # fmt: on
+                # pylint: enable=line-too-long
 
     # Grab paths
 
@@ -199,7 +192,9 @@ def run(
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
                 warnings.warn(
-                    f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run. See README.md for environment installation instructions."
+                    f"Environment {bad_env} specified for {nb}.ipynb could not be found;"+
+                    f" {nb}.ipynb will not be run."+
+                    f"See README.md for environment installation instructions."
                 )
                 all_nbs.pop(nb)
 
@@ -240,7 +235,8 @@ def run(
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
                 warnings.warn(
-                    f"Environment {bad_env} specified for {script}.py could not be found; {script}.py will not be run."
+                    f"Environment {bad_env} specified for {script}.py could not be found;"+
+                    f"{script}.py will not be run."
                 )
                 all_scripts.pop(script)
 

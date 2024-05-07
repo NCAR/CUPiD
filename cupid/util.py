@@ -164,7 +164,6 @@ def create_ploomber_nb_task(
         default_params = info["default_params"]
 
     for key, parms in parameter_groups.items():
-
         input_path = f"{nb_path_root}/{nb}.ipynb"
         output_name = f"{nb}-{key}" if key != "none" else f"{nb}"
 
@@ -241,7 +240,6 @@ def create_ploomber_script_task(
         default_params = info["default_params"]
 
     for key, parms in parameter_groups.items():
-
         input_path = f"{nb_path_root}/{script}.py"
         output_name = f"{script}-{key}" if key != "none" else f"{script}"
 
