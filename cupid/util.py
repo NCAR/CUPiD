@@ -57,12 +57,13 @@ def get_control_dict(config_path):
 
     if "compute_notebooks" in control:
         for nb_category in control["compute_notebooks"].values():
-            for n_b, info in nb_category.items():
+            # pylint: disable=invalid-name
+            for nb, info in nb_category.items():
                 info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
-                        f"No conda environment specified for {n_b}.ipynb and no default kernel set, will use cupid-analysis environment."
+                        f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment."
                     )
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = (
@@ -131,13 +132,13 @@ def setup_book(config_path):
 
 
 def create_ploomber_nb_task(
-    n_b, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None
+    nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None
 ):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
 
     Args:
-        n_b: key from dict of notebooks
+        nb: key from dict of notebooks
         info: various specifications for the notebook, originally from config.yml
         use_catalog: bool specified earlier, specifying if whole collection uses a catalog or not
         nb_path_root: from config.yml, path to folder containing template notebooks
@@ -164,8 +165,8 @@ def create_ploomber_nb_task(
 
     for key, parms in parameter_groups.items():
 
-        input_path = f"{nb_path_root}/{n_b}.ipynb"
-        output_name = f"{n_b}-{key}" if key != "none" else f"{n_b}"
+        input_path = f"{nb_path_root}/{nb}.ipynb"
+        output_name = f"{nb}-{key}" if key != "none" else f"{nb}"
 
         output_path = f"{output_dir}/{output_name}"
 

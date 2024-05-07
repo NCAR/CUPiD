@@ -6,23 +6,19 @@ Main script for running all notebooks and scripts specified in the configuration
 This script sets up and runs all the specified notebooks and scripts according to the configurations
 provided in the specified YAML configuration file.
 
-Usage:
-    python main_script.py [OPTIONS] CONFIG_PATH
+Usage: cupid-run [OPTIONS] CONFIG_PATH
 
-Arguments:
-    CONFIG_PATH (str): Path to the YAML configuration file containing specifications for notebooks
-                       and scripts.
+  Main engine to set up running all the notebooks.
 
 Options:
-    --serial, -s       Do not use LocalCluster objects.
-    --time-series, -ts Run time series generation scripts prior to diagnostics.
-
-    # Options to run only specified components; running all is the default
-    --atmosphere, -atm Run atmosphere component diagnostics.
-    --ocean, -ocn      Run ocean component diagnostics.
-    --land, -lnd       Run land component diagnostics.
-    --seaice, -ice     Run sea ice component diagnostics.
-    --landice, -glc    Run land ice component diagnostics.
+  -s, --serial        Do not use LocalCluster objects
+  -ts, --time-series  Run time series generation scripts prior to diagnostics
+  -atm, --atmosphere  Run atmosphere component diagnostics
+  -ocn, --ocean       Run ocean component diagnostics
+  -lnd, --land        Run land component diagnostics
+  -ice, --seaice      Run sea ice component diagnostics
+  -glc, --landice     Run land ice component diagnostics
+  -h, --help          Show this message and exit.
 """
 
 import os
@@ -194,17 +190,18 @@ def run(
 
         all_nbs = dict()
 
-        for n_b, info in control["compute_notebooks"]["infrastructure"].items():
-            all_nbs[n_b] = info
-            all_nbs[n_b]["nb_path_root"] = nb_path_root + "/infrastructure"
-            all_nbs[n_b]["output_dir"] = output_dir + "/infrastructure"
+        # pylint: disable=invalid-name
+        for nb, info in control["compute_notebooks"]["infrastructure"].items():
+            all_nbs[nb] = info
+            all_nbs[nb]["nb_path_root"] = nb_path_root + "/infrastructure"
+            all_nbs[nb]["output_dir"] = output_dir + "/infrastructure"
 
         for comp_name, comp_bool in component_options.items():
             if comp_name in control["compute_notebooks"] and comp_bool:
-                for n_b, info in control["compute_notebooks"][comp_name].items():
-                    all_nbs[n_b] = info
-                    all_nbs[n_b]["nb_path_root"] = nb_path_root + "/" + comp_name
-                    all_nbs[n_b]["output_dir"] = output_dir + "/" + comp_name
+                for nb, info in control["compute_notebooks"][comp_name].items():
+                    all_nbs[nb] = info
+                    all_nbs[nb]["nb_path_root"] = nb_path_root + "/" + comp_name
+                    all_nbs[nb]["output_dir"] = output_dir + "/" + comp_name
             elif comp_bool and not all:
                 warnings.warn(
                     f"No notebooks for {comp_name} component specified in config file."
@@ -212,19 +209,19 @@ def run(
 
         # Checking for existence of environments
 
-        for n_b, info in all_nbs.copy().items():
+        for nb, info in all_nbs.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
                 warnings.warn(
-                    f"Environment {bad_env} specified for {n_b}.ipynb could not be found; {n_b}.ipynb will not be run. See README.md for environment installation instructions."
+                    f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run. See README.md for environment installation instructions."
                 )
-                all_nbs.pop(n_b)
+                all_nbs.pop(nb)
 
         # Setting up notebook tasks
 
-        for n_b, info in all_nbs.items():
+        for nb, info in all_nbs.items():
             cupid.util.create_ploomber_nb_task(
-                n_b,
+                nb,
                 info,
                 cat_path,
                 info["nb_path_root"],

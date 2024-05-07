@@ -26,11 +26,11 @@ def get_collection(path_to_catalog, **kwargs):
     cat_subset = cat.search(**kwargs)
 
     if "variable" in kwargs.keys():
-
-        def preprocess(d_s):
+        # pylint: disable=invalid-name
+        def preprocess(ds):
             ## the double brackets return a Dataset rather than a DataArray
             ## this is fragile and could cause issues, not sure what subsetting on time_bound does
-            return d_s[[kwargs["variable"], "time_bound"]]
+            return ds[[kwargs["variable"], "time_bound"]]
 
         ## not sure what the chunking kwarg is doing here either
         dsets = cat_subset.to_dataset_dict(
