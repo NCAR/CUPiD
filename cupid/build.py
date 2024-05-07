@@ -24,7 +24,10 @@ def build():
         None
     """
 
-    config_path = str(sys.argv[1])
+    if sys.argv[1]:
+        config_path = str(sys.argv[1])
+    else:
+        config_path = "config.yml"
 
     with open(config_path, "r") as fid:
         control = yaml.safe_load(fid)
