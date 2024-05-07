@@ -15,22 +15,15 @@ Classes:
 """
 
 import os
-import shutil
-from glob import glob
-import pathlib
-import subprocess
-import json
 import sys
 from pathlib import Path
-import yaml
+import warnings
 import jupyter_client
 import papermill as pm
 import ploomber
 from papermill.engines import NBClientEngine
 from jinja2 import Template
-import dask
-from pathlib import Path
-import warnings
+import yaml
 
 
 class MdJinjaEngine(NBClientEngine):
@@ -60,14 +53,14 @@ def get_control_dict(config_path):
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
     control["env_check"] = dict()
-    
+
     if "compute_notebooks" in control:
         for nb_category in control["compute_notebooks"].values():
-            for nb, info in nb_category.items():
+            for n_b, info in nb_category.items():
                 info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
-                    warnings.warn(f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment.")
+                    warnings.warn(f"No conda environment specified for {n_b}.ipynb and no default kernel set, will use cupid-analysis environment.")
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
                     
@@ -124,13 +117,13 @@ def setup_book(config_path):
         yaml.dump(config, fid, sort_keys=False)
 
     return None
-    
+
 def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
 
     Args:
-        nb: key from dict of notebooks
+        n_b: key from dict of notebooks
         info: various specifications for the notebook, originally from config.yml
         use_catalog: bool specified earlier, specifying if whole collection uses a catalog or not
         nb_path_root: from config.yml, path to folder containing template notebooks
@@ -157,8 +150,8 @@ def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global
 
     for key, parms in parameter_groups.items():
 
-        input_path = f"{nb_path_root}/{nb}.ipynb"
-        output_name = f"{nb}-{key}" if key != "none" else f"{nb}"
+        input_path = f"{nb_path_root}/{n_b}.ipynb"
+        output_name = f"{n_b}-{key}" if key != "none" else f"{n_b}"
 
         output_path = f"{output_dir}/{output_name}"
 
@@ -175,11 +168,11 @@ def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global
         pm_params = {"engine_name": "md_jinja",
                      "jinja_data": parms,
                      "cwd": nb_path_root}
-        
-        pm.engines.papermill_engines._engines["md_jinja"] = md_jinja_engine
-        
+
+        pm.engines.papermill_engines._engines["md_jinja"] = MdJinjaEngine
+
         task = ploomber.tasks.NotebookRunner(Path(input_path), ploomber.products.File(output_path + ".ipynb"), dag, params=parms_in, papermill_params=pm_params, kernelspec_name=info['kernel_name'], name=output_name)
-        
+
         if dependency != None:
             raise NotImplementedError
             # set DAG dependency here
@@ -192,21 +185,22 @@ def create_ploomber_script_task(
     script, info, cat_path, nb_path_root, global_params, dag, dependency=None
 ):
     """
-    Creates a ploomber task for running a script, including necessary parameters.
-
-    UPDATE THIS DOCSTRING
+    Creates a Ploomber task for running a script, including necessary parameters.
 
     Args:
-        script: key from dict of scripts
-        info: various specifications for the notebook, originally from config.yml
-        use_catalog: bool specified earlier, specifying if whole collection uses a catalog or not
-        nb_path_root: from config.yml, path to folder containing template notebooks
-        global_params: global parameters from config.yml
-        dag: ploomber DAG to add the task to
-        dependency: what the upstream task is
+        script (str): The key from the dictionary of scripts.
+        info (dict): Various specifications for the notebook, originally from config.yml.
+        cat_path (str or None): Path to the catalog file if using a catalog, otherwise None.
+        nb_path_root (str): Path to the folder containing template notebooks from config.yml.
+        global_params (dict): Global parameters from config.yml.
+        dag (ploomber.DAG): Ploomber DAG to add the task to.
+        dependency (ploomber.Task, optional): The upstream task. Defaults to None.
 
     Returns:
-        task: ploomber task object
+        ploomber.Task: The Ploomber task object.
+
+    Raises:
+        NotImplementedError: Raised if dependency is not None (setting DAG dependency is not implemented yet).
     """
 
     parameter_groups = info["parameter_groups"]
