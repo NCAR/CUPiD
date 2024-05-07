@@ -107,40 +107,26 @@ def run(
 
         for component, comp_bool in component_options.items():
             if comp_bool:
+                # fmt: off
                 cupid.timeseries.create_time_series(
                     component,
                     timeseries_params[component]["vars"],
                     timeseries_params[component]["derive_vars"],
-                    [
-                        timeseries_params["case_name"]
-                    ],  # could also grab from compute_notebooks section of config file
+                    [timeseries_params["case_name"]],
                     timeseries_params[component]["hist_str"],
-                    [
-                        global_params["CESM_output_dir"]
-                        + "/"
-                        + timeseries_params["case_name"]
-                        + f"/{component}/hist/"
-                    ],  # could also grab from compute_notebooks section of config file
-                    [
-                        global_params["CESM_output_dir"]
-                        + "/"
-                        + timeseries_params["case_name"]
-                        + f"/{component}/proc/tseries/"
-                    ],
+                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
+                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/proc/tseries/"],
                     # Note that timeseries output will eventually go in
                     #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
                     timeseries_params["overwrite_ts"],
-                    timeseries_params[component][
-                        "start_years"
-                    ],
-                    timeseries_params[component][
-                        "end_years"
-                    ],
+                    timeseries_params[component]["start_years"],
+                    timeseries_params[component]["end_years"],
                     timeseries_params[component]["level"],
                     num_procs,
                     serial,
                 )
+                # fmt: on
 
     # Grab paths
 
