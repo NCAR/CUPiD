@@ -30,7 +30,6 @@ import warnings
 import click
 import intake
 import ploomber
-from dask.distributed import Client
 import cupid.util
 import cupid.timeseries
 
@@ -132,15 +131,16 @@ def run(
                         + timeseries_params["case_name"]
                         + f"/{component}/proc/tseries/"
                     ],
-                    # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
+                    # Note that timeseries output will eventually go in
+                    #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
                     timeseries_params["overwrite_ts"],
                     timeseries_params[component][
                         "start_years"
-                    ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
+                    ],
                     timeseries_params[component][
                         "end_years"
-                    ],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+                    ],
                     timeseries_params[component]["level"],
                     num_procs,
                     serial,
