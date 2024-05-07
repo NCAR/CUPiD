@@ -28,6 +28,7 @@ import yaml
 
 class MdJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
+
     @classmethod
     def execute_managed_notebook(cls, nb_man, kernel_name, **kwargs):
         """Execute notebooks with papermill execution engine"""
@@ -60,19 +61,29 @@ def get_control_dict(config_path):
                 info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
-                    warnings.warn(f"No conda environment specified for {n_b}.ipynb and no default kernel set, will use cupid-analysis environment.")
+                    warnings.warn(
+                        f"No conda environment specified for {n_b}.ipynb and no default kernel set, will use cupid-analysis environment."
+                    )
                 if info["kernel_name"] not in control["env_check"]:
-                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
-                    
+                    control["env_check"][info["kernel_name"]] = (
+                        info["kernel_name"]
+                        in jupyter_client.kernelspec.find_kernel_specs()
+                    )
+
     if "compute_scripts" in control:
         for script_category in control["compute_scripts"].values():
             for script, info in script_category.items():
                 info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
-                    warnings.warn(f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment.")
+                    warnings.warn(
+                        f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment."
+                    )
                 if info["kernel_name"] not in control["env_check"]:
-                    control["env_check"][info["kernel_name"]] = info["kernel_name"] in jupyter_client.kernelspec.find_kernel_specs()
+                    control["env_check"][info["kernel_name"]] = (
+                        info["kernel_name"]
+                        in jupyter_client.kernelspec.find_kernel_specs()
+                    )
 
     return control
 
@@ -88,7 +99,7 @@ def setup_book(config_path):
 
     os.makedirs(output_root, exist_ok=True)
 
-    output_dir = f"{output_root}/{control["data_sources"]["sname"]}"
+    output_dir = f'{output_root}/{control["data_sources"]["sname"]}'
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -118,7 +129,10 @@ def setup_book(config_path):
 
     return None
 
-def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None):
+
+def create_ploomber_nb_task(
+    n_b, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None
+):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
 
@@ -165,15 +179,25 @@ def create_ploomber_nb_task(nb, info, cat_path, nb_path_root, output_dir, global
         if cat_path is not None:
             parms_in["path_to_cat"] = cat_path
 
-        pm_params = {"engine_name": "md_jinja",
-                     "jinja_data": parms,
-                     "cwd": nb_path_root}
+        pm_params = {
+            "engine_name": "md_jinja",
+            "jinja_data": parms,
+            "cwd": nb_path_root,
+        }
 
         pm.engines.papermill_engines._engines["md_jinja"] = MdJinjaEngine
 
-        task = ploomber.tasks.NotebookRunner(Path(input_path), ploomber.products.File(output_path + ".ipynb"), dag, params=parms_in, papermill_params=pm_params, kernelspec_name=info['kernel_name'], name=output_name)
+        task = ploomber.tasks.NotebookRunner(
+            Path(input_path),
+            ploomber.products.File(output_path + ".ipynb"),
+            dag,
+            params=parms_in,
+            papermill_params=pm_params,
+            kernelspec_name=info["kernel_name"],
+            name=output_name,
+        )
 
-        if dependency != None:
+        if dependency:
             raise NotImplementedError
             # set DAG dependency here
             # something with task.set_upstream(other_task?)
