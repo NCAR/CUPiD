@@ -6,16 +6,12 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
 
-import sys
 import glob
 import multiprocessing as mp
 import os
 import subprocess
-import xarray as xr
-
-import importlib
-
 from pathlib import Path
+import xarray as xr
 
 
 def call_ncrcat(cmd):
@@ -50,7 +46,7 @@ def create_time_series(
     ----
      - component: str
          name of component, eg 'cam'
-         # This could alternatively be made into a dictionary and encorporate values such as height_dim
+         # This could also be made into a dict and encorporate values such as height_dim
      - derive_vars: dict
          information on derivable variables
          eg, {'PRECT': ['PRECL','PRECC'],
@@ -62,7 +58,7 @@ def create_time_series(
      - hist_locs: list, str
          location of CESM history files
      - ts_dir: list, str
-         location where time series files will be saved, or where pre-made time series files exist
+         location where time series files will be saved, or pre-made time series files exist
      - ts_done: list, boolean
          check if time series files already exist
      - overwrite_ts: list, boolean
@@ -90,7 +86,7 @@ def create_time_series(
         # Check if particular case should be processed:
         if ts_done[case_idx]:
             emsg = (
-                " Configuration file indicates time series files have been pre-computed"
+                "Configuration file indicates time series files have been pre-computed"
             )
             emsg += f" for case '{case_name}'.  Will rely on those files directly."
             print(emsg)
@@ -173,7 +169,7 @@ def create_time_series(
                         # Print a warning, and assume that no vertical
                         # level information is needed.
                         wmsg = "WARNING! Unable to determine the vertical coordinate"
-                        wmsg += f" type from the {height_dim} long name, which is:\n'{lev_long_name}'."
+                        wmsg += f" type from the {height_dim} long name, \n'{lev_long_name}'."
                         wmsg += (
                             "\nNo additional vertical coordinate information will be"
                         )
@@ -229,8 +225,10 @@ def create_time_series(
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
-                if component == 'ocn':
-                    print('ocean vars seem to not be present in all files and thus cause errors')
+                if component == "ocn":
+                    print(
+                        "ocean vars seem to not be present in all files and thus cause errors"
+                    )
                     continue
                 if (
                     var in derive_vars.keys()
@@ -241,11 +239,10 @@ def create_time_series(
                             diag_var_list.append(constit)
                     vars_to_derive.append(var)
                     continue
-                else:
-                    msg = f"WARNING: {var} is not in the file {hist_files[0]}."
-                    msg += " No time series will be generated."
-                    print(msg)
-                    continue
+                msg = f"WARNING: {var} is not in the file {hist_files[0]}."
+                msg += " No time series will be generated."
+                print(msg)
+                continue
 
             # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
             has_lev = bool(height_dim in hist_file_ds[var].dims)
@@ -325,7 +322,7 @@ def create_time_series(
 
         # End variable loop
 
-        if vars_to_derive != []:
+        if vars_to_derive:
             if component == "atm":
                 derive_cam_variables(
                     vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
@@ -376,7 +373,8 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                 Path(prect_file).unlink()
             else:
                 print(
-                    f"[{__name__}] Warning: PRECT file was found and overwrite is False. Will use existing file."
+                    f"[{__name__}] Warning: PRECT file was found and overwrite is False"
+                    + "Will use existing file."
                 )
                 continue
         # append PRECC to the file containing PRECL
@@ -409,7 +407,8 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                     Path(derived_file).unlink()
                 else:
                     print(
-                        f"[{__name__}] Warning: RESTOM file was found and overwrite is False. Will use existing file."
+                        f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
+                        + "Will use existing file."
                     )
                     continue
             # append FSNT to the file containing FLNT

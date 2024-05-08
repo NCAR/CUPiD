@@ -1,55 +1,91 @@
 #!/usr/bin/env python
 
-import click
+"""
+Main script for running all notebooks and scripts specified in the configuration file.
+
+This script sets up and runs all the specified notebooks and scripts according to the configurations
+provided in the specified YAML configuration file.
+
+Usage: cupid-run [OPTIONS]
+
+  Main engine to set up running all the notebooks.
+
+Options:
+  -s, --serial        Do not use LocalCluster objects
+  -ts, --time-series  Run time series generation scripts prior to diagnostics
+  -atm, --atmosphere  Run atmosphere component diagnostics
+  -ocn, --ocean       Run ocean component diagnostics
+  -lnd, --land        Run land component diagnostics
+  -ice, --seaice      Run sea ice component diagnostics
+  -glc, --landice     Run land ice component diagnostics
+  -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
+  -h, --help          Show this message and exit.
+"""
+
 import os
-from glob import glob
-import papermill as pm
+import warnings
+import click
 import intake
+import ploomber
 import cupid.util
 import cupid.timeseries
-from dask.distributed import Client
-import dask
-import time
-import ploomber
-import warnings
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
+# fmt: off
+# pylint: disable=line-too-long
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
-@click.option("--time-series", "-ts", is_flag=True,
-              help="Run time series generation scripts prior to diagnostics")
+@click.option("--time-series", "-ts", is_flag=True, help="Run time series generation scripts prior to diagnostics")
 # Options to turn components on or off
 @click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics")
 @click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component diagnostics")
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
-@click.argument("config_path")
-
-def run(config_path, serial=False, time_series=False, 
-        all=False, atmosphere=False, ocean=False, land=False, seaice=False, landice=False):
+@click.argument("config_path", default="config.yml")
+def run(
+    config_path,
+    serial=False,
+    time_series=False,
+    all=False,
+    atmosphere=False,
+    ocean=False,
+    land=False,
+    seaice=False,
+    landice=False,
+):
     """
     Main engine to set up running all the notebooks.
-    """
 
+    Args:
+        CONFIG_PATH: str, path to configuration file (default config.yml)
+
+    Returns:
+        None
+
+    """
+    # fmt: on
+    # pylint: enable=line-too-long
     # Get control structure
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
 
-    component_options = {"atm": atmosphere,
-                         "ocn": ocean,
-                         "lnd": land,
-                         "ice": seaice,
-                         "glc": landice}
+    component_options = {
+        "atm": atmosphere,
+        "ocn": ocean,
+        "lnd": land,
+        "ice": seaice,
+        "glc": landice,
+    }
 
     # Automatically run all if no components specified
-        
+
     if True not in [atmosphere, ocean, land, seaice, landice]:
         all = True
         for key in component_options.keys():
             component_options[key] = True
-    
+
     #####################################################################
     # Managing global parameters
 
@@ -57,11 +93,11 @@ def run(config_path, serial=False, time_series=False,
 
     if "global_params" in control:
         global_params = control["global_params"]
-    
-    global_params['serial'] = serial
-    
+
+    global_params["serial"] = serial
+
     ####################################################################
-    
+
     if time_series:
         timeseries_params = control["timeseries"]
 
@@ -70,23 +106,28 @@ def run(config_path, serial=False, time_series=False,
 
         for component, comp_bool in component_options.items():
             if comp_bool:
+                # fmt: off
+                # pylint: disable=line-too-long
                 cupid.timeseries.create_time_series(
                     component,
                     timeseries_params[component]["vars"],
                     timeseries_params[component]["derive_vars"],
-                    [timeseries_params["case_name"]],  # could also grab from compute_notebooks section of config file
+                    [timeseries_params["case_name"]],
                     timeseries_params[component]["hist_str"],
-                    [global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"] + f"/{component}/hist/"],  # could also grab from compute_notebooks section of config file
-                    [global_params["CESM_output_dir"]+'/'+timeseries_params['case_name']+f'/{component}/proc/tseries/'],
-                    # Note that timeseries output will eventually go in /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
+                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
+                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/proc/tseries/"],
+                    # Note that timeseries output will eventually go in
+                    #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
                     timeseries_params["overwrite_ts"],
-                    timeseries_params[component]["start_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.start_date
-                    timeseries_params[component]["end_years"],  # could get from yaml file in adf_quick_run.parameter_groups.none.config_fil_str, or for other notebooks config files, eg ocean_surface.parameter_gropus.none.mom6_tools_config.end_date
+                    timeseries_params[component]["start_years"],
+                    timeseries_params[component]["end_years"],
                     timeseries_params[component]["level"],
                     num_procs,
                     serial,
-                    )
+                )
+                # fmt: on
+                # pylint: enable=line-too-long
 
     # Grab paths
 
@@ -105,7 +146,6 @@ def run(config_path, serial=False, time_series=False,
     cat_path = None
 
     if "path_to_cat_json" in control["data_sources"]:
-        use_catalog = True
         full_cat_path = os.path.realpath(
             os.path.expanduser(control["data_sources"]["path_to_cat_json"])
         )
@@ -132,38 +172,53 @@ def run(config_path, serial=False, time_series=False,
 
     #####################################################################
     # Organizing notebooks to run
-    
-    if 'compute_notebooks' in control:
-    
+
+    if "compute_notebooks" in control:
+
         all_nbs = dict()
-        
-        for nb, info in control['compute_notebooks']['infrastructure'].items():
+
+        # pylint: disable=invalid-name
+        for nb, info in control["compute_notebooks"]["infrastructure"].items():
             all_nbs[nb] = info
-            all_nbs[nb]['nb_path_root'] = nb_path_root + '/infrastructure'
-            all_nbs[nb]['output_dir'] = output_dir + '/infrastructure'
-                    
+            all_nbs[nb]["nb_path_root"] = nb_path_root + "/infrastructure"
+            all_nbs[nb]["output_dir"] = output_dir + "/infrastructure"
+
         for comp_name, comp_bool in component_options.items():
-            if comp_name in control['compute_notebooks'] and comp_bool:
-                for nb, info in control['compute_notebooks'][comp_name].items():
+            if comp_name in control["compute_notebooks"] and comp_bool:
+                for nb, info in control["compute_notebooks"][comp_name].items():
                     all_nbs[nb] = info
-                    all_nbs[nb]['nb_path_root'] = nb_path_root + '/' + comp_name
-                    all_nbs[nb]['output_dir'] = output_dir + '/' + comp_name
+                    all_nbs[nb]["nb_path_root"] = nb_path_root + "/" + comp_name
+                    all_nbs[nb]["output_dir"] = output_dir + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(f"No notebooks for {comp_name} component specified in config file.")
-    
+                warnings.warn(
+                    f"No notebooks for {comp_name} component specified in config file."
+                )
+
         # Checking for existence of environments
-    
+
         for nb, info in all_nbs.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(f"Environment {bad_env} specified for {nb}.ipynb could not be found; {nb}.ipynb will not be run. See README.md for environment installation instructions.")
+                warnings.warn(
+                    f"Environment {bad_env} specified for {nb}.ipynb could not be found;"+
+                    f" {nb}.ipynb will not be run."+
+                    f"See README.md for environment installation instructions."
+                )
                 all_nbs.pop(nb)
-        
+
         # Setting up notebook tasks
-    
-        for nb, info in all_nbs.items():     
-            cupid.util.create_ploomber_nb_task(nb, info, cat_path, info["nb_path_root"], 
-                                               info["output_dir"], global_params, dag, dependency=info.get("dependency"))
+
+        for nb, info in all_nbs.items():
+            cupid.util.create_ploomber_nb_task(
+                nb,
+                info,
+                cat_path,
+                info["nb_path_root"],
+                info["output_dir"],
+                global_params,
+                dag,
+                dependency=info.get("dependency"),
+            )
 
     #####################################################################
     # Organizing scripts
@@ -173,26 +228,38 @@ def run(config_path, serial=False, time_series=False,
         all_scripts = dict()
 
         for comp_name, comp_bool in component_options.items():
-            if comp_name in control['compute_scripts'] and comp_bool:
-                for script, info in control['compute_scripts'][comp_name].items():
+            if comp_name in control["compute_scripts"] and comp_bool:
+                for script, info in control["compute_scripts"][comp_name].items():
                     all_scripts[script] = info
-                    all_scripts[script]['nb_path_root'] = nb_path_root + '/' + comp_name
+                    all_scripts[script]["nb_path_root"] = nb_path_root + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(f"No scripts for {comp_name} component specified in config file.")
+                warnings.warn(
+                    f"No scripts for {comp_name} component specified in config file."
+                )
 
         # Checking for existence of environments
-    
+
         for script, info in all_scripts.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(f"Environment {bad_env} specified for {script}.py could not be found; {script}.py will not be run.")
+                warnings.warn(
+                    f"Environment {bad_env} specified for {script}.py could not be found;"+
+                    f"{script}.py will not be run."
+                )
                 all_scripts.pop(script)
-                    
+
         # Setting up script tasks
 
         for script, info in all_scripts.items():
-            cupid.util.create_ploomber_script_task(script, info, cat_path, info['nb_path_root'], 
-                                                   global_params, dag, dependency=info.get("dependency"))
+            cupid.util.create_ploomber_script_task(
+                script,
+                info,
+                cat_path,
+                info["nb_path_root"],
+                global_params,
+                dag,
+                dependency=info.get("dependency"),
+            )
 
     # Run the full DAG
 
