@@ -3,31 +3,27 @@
 This script provides functionality to build a Jupyter book based on
 the configuration specified in a YAML file.
 
-The main function `build()` reads the configuration file provided as a command-line
-argument, extracts the necessary information such as the name of the book and the
+The main function `build()` reads the configuration file (default config.yml),
+extracts the necessary information such as the name of the book and the
 directory containing computed notebooks, and then proceeds to clean and build the
 Jupyter book using the `jupyter-book` command-line tool.
 """
 
+import click
 import subprocess
 import sys
 import yaml
 
-
-def build():
+@click.option("--config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks", show_default=True)
+def build(config_path):
     """
     Build a Jupyter book based on the TOC in config.yml. Called by `cupid-build`.
 
     Args:
-        none
+        config_path: str, path to yml file (default config.yml)
     Returns:
         None
     """
-
-    if sys.argv[1]:
-        config_path = str(sys.argv[1])
-    else:
-        config_path = "config.yml"
 
     with open(config_path, "r") as fid:
         control = yaml.safe_load(fid)

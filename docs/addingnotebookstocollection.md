@@ -40,4 +40,4 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 
 7. Update your parameters. Parameters that are specific to just this notebook should go under `parameter_groups` in the notebook's entry under `compute_notebooks`. Global parameters that you want passed in to every notebook in the collection should go under `global_params`.  When `CUPiD` executes your notebook, all of these parameters will get put in a new cell below the cell tagged `parameters` that you added in step 3. This means they will supercede the values of the parameters that you put in the cell above---the names, notation, etc. should match to make sure your notebook is able to find the variables it needs.
    
-8. All set! Your collection can now be run and built with `cupid-run config.yml` and `cupid-build config.yml` as usual.
+8. All set! Your collection can now be run and built with `cupid-run` and `cupid-build` as usual.

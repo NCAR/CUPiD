@@ -33,7 +33,7 @@ def read_config_file(config_path):
 
 
 @click.command()
-@click.argument("config_path")
+@click.option("--config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks", show_default=True)
 # Entry point to this script
 def clear(config_path):
     """Clears the contents of the 'computed_notebooks' folder at the location
