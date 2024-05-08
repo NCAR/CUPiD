@@ -59,7 +59,7 @@ def run(
     Main engine to set up running all the notebooks.
 
     Args:
-        config_path: str, path to configuration file (default config.yml)
+        CONFIG_PATH: str, path to configuration file (default config.yml)
 
     Returns:
         None

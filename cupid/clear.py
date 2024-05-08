@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
 This script provides functionality to clear the contents of the 'computed_notebooks' folder
-at the location specified by the 'run_dir' variable in the 'config.yml' file.
+at the location specified by the 'run_dir' variable in the CONFIG_PATH.
 
-The main function `clear()` takes the path to the config.yml file as input, reads the config file
+The main function `clear()` takes the path to the configuration file as input, reads the config file
 to obtain the 'run_dir' variable, and then deletes the contents of the 'computed_notebooks' folder
 at that location.
 
@@ -17,16 +17,16 @@ import cupid.util
 
 def read_config_file(config_path):
     """
-    Given the file path to config.yml, this function reads the config file content and
+    Given the file path to the configuration file, this function reads the config file content and
     returns the val of the run_dir string with '/computed_notebooks' appended to it
 
     Args:
-        config_path: str, path to configuration file (default config.yml)
+        CONFIG_PATH: str, path to configuration file (default config.yml)
 
     Returns:
         None
     """
-    # Obtain the contents of the config.yml file and extract the run_dir variable
+    # Obtain the contents of the configuration file and extract the run_dir variable
     control = cupid.util.get_control_dict(config_path)
     run_dir = control["data_sources"].get("run_dir", None)
 
@@ -44,9 +44,9 @@ def read_config_file(config_path):
 # Entry point to this script
 def clear(config_path):
     """Clears the contents of the 'computed_notebooks' folder at the location
-    specified by the 'run_dir' variable in the 'config.yml' file.
+    specified by the 'run_dir' variable in the CONFIG_PATH.
 
-    Args: config_path - The path to the config.yml file.
+    Args: CONFIG_PATH - The path to the configuration file.
 
     """
 

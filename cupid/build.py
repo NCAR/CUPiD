@@ -9,7 +9,7 @@ directory containing computed notebooks, and then proceeds to clean and build th
 Jupyter book using the `jupyter-book` command-line tool.
 
 Args:
-    config_path: str, path to configuration file (default config.yml)
+    CONFIG_PATH: str, path to configuration file (default config.yml)
 
 Returns:
     None
@@ -25,10 +25,10 @@ import yaml
 @click.argument("config_path", default="config.yml")
 def build(config_path):
     """
-    Build a Jupyter book based on the TOC in config.yml. Called by `cupid-build`.
+    Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-build`.
 
     Args:
-        config_path: str, path to configuration file (default config.yml)
+        CONFIG_PATH: str, path to configuration file (default config.yml)
 
     Returns:
         None
