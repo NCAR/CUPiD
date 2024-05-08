@@ -6,6 +6,7 @@ at the location specified by the 'run_dir' variable in the 'config.yml' file.
 The main function `clear()` takes the path to the config.yml file as input, reads the config file
 to obtain the 'run_dir' variable, and then deletes the contents of the 'computed_notebooks' folder
 at that location.
+
 """
 
 import os
@@ -18,6 +19,12 @@ def read_config_file(config_path):
     """
     Given the file path to config.yml, this function reads the config file content and
     returns the val of the run_dir string with '/computed_notebooks' appended to it
+
+    Args:
+        config_path: str, path to configuration file (default config.yml)
+
+    Returns:
+        None
     """
     # Obtain the contents of the config.yml file and extract the run_dir variable
     control = cupid.util.get_control_dict(config_path)
@@ -33,12 +40,7 @@ def read_config_file(config_path):
 
 
 @click.command()
-@click.option(
-    "--config_path",
-    default="config.yml",
-    help="Path to the YAML configuration file containing specifications for notebooks",
-    show_default=True,
-)
+@click.argument("config_path", default="config.yml")
 # Entry point to this script
 def clear(config_path):
     """Clears the contents of the 'computed_notebooks' folder at the location

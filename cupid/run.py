@@ -43,7 +43,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
-@click.option("--config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks", show_default=True)
+@click.argument("config_path", default="config.yml")
 def run(
     config_path,
     serial=False,
@@ -57,6 +57,13 @@ def run(
 ):
     """
     Main engine to set up running all the notebooks.
+
+    Args:
+        config_path: str, path to configuration file (default config.yml)
+
+    Returns:
+        None
+
     """
     # fmt: on
     # pylint: enable=line-too-long
