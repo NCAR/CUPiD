@@ -14,7 +14,9 @@ import subprocess
 import sys
 import yaml
 
-@click.option("--config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks", show_default=True)
+
+@click.command()
+@click.argument("config_path", default="config.yml")
 def build(config_path):
     """
     Build a Jupyter book based on the TOC in config.yml. Called by `cupid-build`.
