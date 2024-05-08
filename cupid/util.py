@@ -11,7 +11,7 @@ Functions:
 
 Classes:
     - ManageCondaKernel: Class for managing conda kernels.
-    - JinjaEngine: Class for using the Jinja Engine to run notebooks.
+    - MarkdownJinjaEngine: Class for using the Jinja Engine to run notebooks.
 """
 
 import os
@@ -26,7 +26,7 @@ from jinja2 import Template
 import yaml
 
 
-class JinjaEngine(NBClientEngine):
+class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
 
     @classmethod
@@ -185,7 +185,7 @@ def create_ploomber_nb_task(
             "cwd": nb_path_root,
         }
 
-        pm.engines.papermill_engines._engines["md_jinja"] = JinjaEngine
+        pm.engines.papermill_engines._engines["md_jinja"] = MarkdownJinjaEngine
 
         task = ploomber.tasks.NotebookRunner(
             Path(input_path),
