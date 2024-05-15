@@ -1,3 +1,19 @@
+def _run_script_in_subprocess(interpreter, path, cwd, env):
+    res = subprocess.run([interpreter, str(path)], cwd=cwd, env=env, stderr=PIPE)
+
+    if res.returncode:
+        stderr = res.stderr.decode()
+
+        if "SyntaxError" in stderr:
+            stderr += (
+                "(Note: IPython magics are not supported in "
+                "ScriptRunner, remove them or use the regular "
+                "NotebookRunner)"
+            )
+
+        raise RuntimeError("Error while executing ScriptRunner:\n" f"{stderr}")
+
+
 class ScriptRunner(NotebookMixin, Task):
     """
     Similar to NotebookRunner, except it uses python to run the code,
