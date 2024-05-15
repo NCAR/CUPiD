@@ -50,7 +50,7 @@ master_doc = "index"
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 
 extensions = [
@@ -85,7 +85,7 @@ exclude_patterns = ["**.ipynb_checkpoints"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
+# source_suffix = [".rst", ".md"]
 source_suffix = {
     ".rst": "restructuredtext",
     ".ipynb": "myst-nb",
@@ -106,7 +106,7 @@ autosummary_imported_members = True
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = dict(
-    # analytics_id=''  this is configured in rtfd.io
+    # analytics_id=""  this is configured in rtfd.io
     # canonical_url="",
     repository_url="https://github.com/NCAR/CUPiD",
     repository_branch="main",

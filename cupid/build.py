@@ -47,9 +47,9 @@ def build(config_path):
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
-    #     if 'publish_location' in control:
+    #     if "publish_location" in control:
 
-    #         user = os.environ.get('USER')
+    #         user = os.environ.get("USER")
     #         remote_mach = control["publish_location"]["remote_mach"]
     #         remote_dir = control["publish_location"]["remote_dir"]
     # this seems more complicated than expected...people have mentioned paramiko library?

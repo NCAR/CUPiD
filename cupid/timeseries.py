@@ -221,7 +221,7 @@ def create_time_series(
         # create copy of var list that can be modified for derivable variables
         if diag_var_list == ["process_all"]:
             print("generating time series for all variables")
-            # TODO: this doesn't seem to be working for ocn...
+            # TODO: this does not seem to be working for ocn...
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:

@@ -22,7 +22,7 @@ def get_collection(path_to_catalog, **kwargs):
     """Get collection of datasets from intake catalog"""
     cat = intake.open_esm_datastore(path_to_catalog)
     ### note that the json file points to the csv, so the path that the
-    ### yaml file contains doesn't actually get used. this can cause issues
+    ### yaml file contains does not actually get used. this can cause issues
 
     cat_subset = cat.search(**kwargs)
 
