@@ -25,6 +25,7 @@ from papermill.engines import NBClientEngine
 from jinja2 import Template
 import yaml
 
+from cupid.ploomber import CUPiDScriptRunner
 
 class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
@@ -255,11 +256,12 @@ def create_ploomber_script_task(
         if cat_path is not None:
             parms_in["path_to_cat"] = cat_path
 
-        task = ploomber.tasks.ScriptRunner(
+        task = CUPiDScriptRunner(
             Path(input_path),
             ploomber.products.File(info["product"]),
             dag,
             params=parms_in,
+            kernelspec_name=info["kernel_name"],
             name=output_name,
         )
 

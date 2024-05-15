@@ -1,6 +1,26 @@
-def _run_script_in_subprocess(interpreter, path, cwd, env):
-    res = subprocess.run([interpreter, str(path)], cwd=cwd, env=env, stderr=PIPE)
+import os
+import sys
+import tempfile
+import subprocess
+from subprocess import PIPE
+from pathlib import Path
+from importlib.util import find_spec
 
+from ploomber.tasks import ScriptRunner
+# from ploomber import TaskBuildError
+
+def _python_bin():
+    """
+    Get the path to the Python executable, return 'python' if unable to get it
+    """
+    executable = sys.executable
+    return executable if executable else "python"
+
+def _run_script_in_subprocess(interpreter, path, cwd, env):
+    if type(interpreter) == str:
+        res = subprocess.run([interpreter, str(path)], cwd=cwd, env=env, stderr=PIPE)
+    else:
+        res = subprocess.run(interpreter + [str(path)], cwd=cwd, env=env, stderr=PIPE)
     if res.returncode:
         stderr = res.stderr.decode()
 
@@ -14,7 +34,7 @@ def _run_script_in_subprocess(interpreter, path, cwd, env):
         raise RuntimeError("Error while executing ScriptRunner:\n" f"{stderr}")
 
 
-class ScriptRunner(NotebookMixin, Task):
+class CUPiDScriptRunner(ScriptRunner):
     """
     Similar to NotebookRunner, except it uses python to run the code,
     instead of papermill, hence, it doesn't generate an output notebook. But
@@ -85,12 +105,14 @@ class ScriptRunner(NotebookMixin, Task):
         source,
         product,
         dag,
+        kernelspec_name=None,
         name=None,
         params=None,
         ext_in=None,
         static_analysis="regular",
         local_execution=False,
     ):
+        self.kernelspec_name = kernelspec_name
         self.ext_in = ext_in
 
         kwargs = dict(hot_reload=dag._params.hot_reload)
@@ -98,27 +120,7 @@ class ScriptRunner(NotebookMixin, Task):
             source, kwargs, ext_in, static_analysis, False, False
         )
         self.local_execution = local_execution
-        super().__init__(product, dag, name, params)
-
-    @staticmethod
-    def _init_source(
-        source,
-        kwargs,
-        ext_in=None,
-        static_analysis="regular",
-        extract_up=False,
-        extract_prod=False,
-    ):
-        ns = NotebookSource(
-            source,
-            ext_in=ext_in,
-            static_analysis=static_analysis,
-            kernelspec_name=None,
-            check_if_kernel_installed=False,
-            **kwargs,
-        )
-        ns._validate_parameters_cell(extract_up, extract_prod)
-        return ns
+        super(ScriptRunner, self).__init__(product, dag, name, params)
 
     def run(self):
         # regular mode: raise but not check signature
@@ -150,6 +152,8 @@ class ScriptRunner(NotebookMixin, Task):
 
         if self.source.language == "python":
             interpreter = _python_bin()
+            if self.kernelspec_name:
+                interpreter = f"conda run -n {self.kernelspec_name} python".split()
         elif self.source.language == "r":
             interpreter = "Rscript"
         else:

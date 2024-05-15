@@ -102,25 +102,28 @@ compute_notebooks:
 
   # The first key (here simple_no_params_nb) is the name of the
   ### notebook from nb_path_root, minus the .ipynb
-  index:
-    parameter_groups:
-      none: {}
+  infrastructure:
+    index:
+      parameter_groups:
+        none: {}
 
-  adf_quick_run:
-    parameter_groups:
-      none:
-        adf_path: ../../externals/ADF
-        config_path: .
-        config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+  atm:
+    adf_quick_run:
+      parameter_groups:
+        none:
+          adf_path: ../../../externals/ADF
+          config_path: .
+          config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
 compute_scripts:
 
-  divergence:
-    kernel_name: cupid-analysis
-    parameter_groups:
-      none:
-        dummy: thpth
-    product: vector.png
+  ice:
+    divergence:
+      kernel_name: cupid-analysis
+      parameter_groups:
+        none:
+          dummy: thpth
+      product: vector.png
 
 ########### JUPYTER BOOK CONFIG ###########
 
