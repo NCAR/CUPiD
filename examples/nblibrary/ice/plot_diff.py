@@ -1,8 +1,9 @@
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 from matplotlib.gridspec import GridSpec
+import numpy as np
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 

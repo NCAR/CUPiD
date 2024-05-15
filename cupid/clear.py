@@ -11,7 +11,9 @@ at that location.
 
 import os
 import shutil
+
 import click
+
 import cupid.util
 
 

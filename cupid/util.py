@@ -16,8 +16,9 @@ Classes:
 
 import os
 import sys
-from pathlib import Path
 import warnings
+from pathlib import Path
+
 import jupyter_client
 import papermill as pm
 import ploomber

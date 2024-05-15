@@ -7,12 +7,12 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 # ++++++++++++++++++++++++++++++
 
 import glob
-import multiprocessing as mp
 import os
 import subprocess
 from pathlib import Path
-import xarray as xr
+import multiprocessing as mp
 
+import xarray as xr
 
 def call_ncrcat(cmd):
     """This is an internal function to `create_time_series`

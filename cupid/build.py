@@ -15,11 +15,11 @@ Returns:
     None
 """
 
-import click
 import subprocess
 import sys
-import yaml
 
+import click
+import yaml
 
 @click.command()
 @click.argument("config_path", default="config.yml")

@@ -1,11 +1,12 @@
 import numpy as np
+
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.path as mpath
+import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-
 
 def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON):
     uvel_rot1 = uvel1 * np.cos(angle) - vvel1 * np.sin(angle)
