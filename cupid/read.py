@@ -7,9 +7,8 @@ Functions:
                      intake catalog based on specified criteria.
 """
 
-import yaml
-
 import intake
+import yaml
 
 
 def read_yaml(path_to_yaml):

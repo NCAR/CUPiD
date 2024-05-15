@@ -1,11 +1,10 @@
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 from matplotlib.gridspec import GridSpec
 import numpy as np
-
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 
 
 def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):

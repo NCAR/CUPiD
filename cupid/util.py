@@ -22,9 +22,9 @@ from pathlib import Path
 import jupyter_client
 import papermill as pm
 import ploomber
+import yaml
 from papermill.engines import NBClientEngine
 from jinja2 import Template
-import yaml
 
 
 class MarkdownJinjaEngine(NBClientEngine):

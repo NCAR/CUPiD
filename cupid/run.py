@@ -24,12 +24,11 @@ Options:
 
 import os
 import warnings
-
 import click
 import intake
 import ploomber
-import cupid.util
 import cupid.timeseries
+import cupid.util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 

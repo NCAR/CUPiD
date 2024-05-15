@@ -17,7 +17,6 @@ Returns:
 
 import subprocess
 import sys
-
 import click
 import yaml
 

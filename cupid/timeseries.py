@@ -7,10 +7,10 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 # ++++++++++++++++++++++++++++++
 
 import glob
+import multiprocessing as mp
 import os
 import subprocess
 from pathlib import Path
-import multiprocessing as mp
 
 import xarray as xr
 
