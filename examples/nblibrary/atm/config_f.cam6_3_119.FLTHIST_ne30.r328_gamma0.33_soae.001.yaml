@@ -62,7 +62,7 @@ diag_basic_info:
     #Is this a model vs observations comparison?
     #If "false" or missing, then a model-model comparison is assumed:
     compare_obs: false
-    
+
     hist_str: cam.h0
 
     #Generate HTML website (assumed false if missing):
@@ -111,9 +111,6 @@ diag_basic_info:
     num_procs: 8
 
     redo_plot: false
-    
-    
-
 
 
 
@@ -139,7 +136,7 @@ diag_cam_climo:
 
     yrs: ${diag_cam_climo.start_year}-${diag_cam_climo.end_year}
 
-    #Location of CAM climatologies: 
+    #Location of CAM climatologies:
     cam_climo_loc: ${climo_loc}${diag_cam_climo.cam_case_name}/atm/proc/${diag_cam_climo.yrs}/
 
     #model year when time series files should start:
@@ -203,7 +200,7 @@ diag_cam_baseline_climo:
     cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/${diag_cam_baseline_climo.cam_case_name}/atm/hist/
 
     yrs: ${diag_cam_baseline_climo.start_year}-${diag_cam_baseline_climo.end_year}
-    
+
 
     #Location of baseline CAM climatologies:
     cam_climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/ADF-data/climos/${diag_cam_baseline_climo.cam_case_name}/${diag_cam_baseline_climo.yrs}/
@@ -245,7 +242,7 @@ diag_cam_baseline_climo:
 
     overwrite_tem: false
 
-    case_nickname: ${diag_cam_baseline_climo.cam_case_name} 
+    case_nickname: ${diag_cam_baseline_climo.cam_case_name}
 
 
 #This fourth set of variables provides settings for calling the Climate Variability
@@ -365,10 +362,10 @@ diag_var_list:
    - ICEFRAC
    - OCNFRAC
    - LANDFRAC
- 
+
 derived_var_list:
-   - RESTOM   
-   
+   - RESTOM
+
 
 #<Add more variables here.>
 
