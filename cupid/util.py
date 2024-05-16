@@ -53,8 +53,7 @@ def get_control_dict(config_path):
         print(f"ERROR: {config_path} not found")
         sys.exit(1)
 
-    default_kernel_name = control["computation_config"].pop(
-        "default_kernel_name", None)
+    default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
     control["env_check"] = dict()
 
@@ -62,8 +61,7 @@ def get_control_dict(config_path):
         for nb_category in control["compute_notebooks"].values():
             # pylint: disable=invalid-name
             for nb, info in nb_category.items():
-                info["kernel_name"] = info.get(
-                    `"kernel_name", default_kernel_name)
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
@@ -78,8 +76,7 @@ def get_control_dict(config_path):
     if "compute_scripts" in control:
         for script_category in control["compute_scripts"].values():
             for script, info in script_category.items():
-                info["kernel_name"] = info.get(
-                    "kernel_name", default_kernel_name)
+                info["kernel_name"] = info.get("kernel_name", default_kernel_name)
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
