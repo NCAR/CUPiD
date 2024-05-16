@@ -204,8 +204,8 @@ def run(
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
                 warnings.warn(
-                    f"Environment {bad_env} specified for {nb}.ipynb could not be found;"+
-                    f" {nb}.ipynb will not be run."+
+                    f"Environment {bad_env} specified for {nb}.ipynb could not be found;" +
+                    f" {nb}.ipynb will not be run." +
                     "See README.md for environment installation instructions.",
                 )
                 all_nbs.pop(nb)
@@ -247,7 +247,7 @@ def run(
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
                 warnings.warn(
-                    f"Environment {bad_env} specified for {script}.py could not be found;"+
+                    f"Environment {bad_env} specified for {script}.py could not be found;" +
                     f"{script}.py will not be run.",
                 )
                 all_scripts.pop(script)

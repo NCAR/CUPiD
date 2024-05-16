@@ -65,7 +65,8 @@ def get_control_dict(config_path):
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
-                        f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment.",
+                        f"No conda environment specified for {nb}.ipynb and"
+                        + " no default kernel set, will use cupid-analysis environment.",
                     )
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = (
@@ -80,7 +81,8 @@ def get_control_dict(config_path):
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
-                        f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment.",
+                        f"No environment specified for {script}.py and no default"
+                        + " kernel set, will use cupid-analysis environment.",
                     )
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = (
