@@ -105,7 +105,6 @@ autosummary_imported_members = True
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# fmt: off
 html_theme_options = dict(
     # analytics_id=""  this is configured in rtfd.io
     # canonical_url="",
@@ -117,8 +116,7 @@ html_theme_options = dict(
     use_issues_button=True,
     home_page_in_toc=True,
     extra_footer="<em>The National Center for Atmospheric Research is sponsored by the National Science Foundation. Any opinions, findings and conclusions or recommendations expressed in this material do not necessarily reflect the views of the National Science Foundation.</em>",
-)
-# fmt: on
+)   # noqa
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

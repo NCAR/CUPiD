@@ -115,7 +115,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         transform=ccrs.PlateCarree(),
     )
     units = "cm/s"
-    qk = ax.quiverkey(
+    ax.quiverkey(
         Q,
         0.85,
         0.025,

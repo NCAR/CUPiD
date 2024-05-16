@@ -36,6 +36,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 # fmt: off
 # pylint: disable=line-too-long
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
 @click.option("--time-series", "-ts", is_flag=True, help="Run time series generation scripts prior to diagnostics")
@@ -204,7 +206,7 @@ def run(
                 warnings.warn(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;"+
                     f" {nb}.ipynb will not be run."+
-                    f"See README.md for environment installation instructions.",
+                    "See README.md for environment installation instructions.",
                 )
                 all_nbs.pop(nb)
 
