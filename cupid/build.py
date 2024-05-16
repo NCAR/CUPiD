@@ -41,7 +41,7 @@ def build(config_path):
 
     subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks/{sname}"])
     subprocess.run(
-        ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"]
+        ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
     )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online

@@ -136,7 +136,7 @@ def run(
     output_dir = run_dir + "/computed_notebooks/" + control["data_sources"]["sname"]
     temp_data_path = run_dir + "/temp_data"
     nb_path_root = os.path.realpath(
-        os.path.expanduser(control["data_sources"]["nb_path_root"])
+        os.path.expanduser(control["data_sources"]["nb_path_root"]),
     )
 
     #####################################################################
@@ -148,7 +148,7 @@ def run(
 
     if "path_to_cat_json" in control["data_sources"]:
         full_cat_path = os.path.realpath(
-            os.path.expanduser(control["data_sources"]["path_to_cat_json"])
+            os.path.expanduser(control["data_sources"]["path_to_cat_json"]),
         )
         full_cat = intake.open_esm_datastore(full_cat_path)
 
@@ -160,7 +160,7 @@ def run(
             # This pulls out the name of the catalog from the path
             cat_subset_name = full_cat_path.split("/")[-1].split(".")[0] + "_subset"
             cat_subset.serialize(
-                directory=temp_data_path, name=cat_subset_name, catalog_type="file"
+                directory=temp_data_path, name=cat_subset_name, catalog_type="file",
             )
             cat_path = temp_data_path + "/" + cat_subset_name + ".json"
         else:
@@ -192,7 +192,7 @@ def run(
                     all_nbs[nb]["output_dir"] = output_dir + "/" + comp_name
             elif comp_bool and not all:
                 warnings.warn(
-                    f"No notebooks for {comp_name} component specified in config file."
+                    f"No notebooks for {comp_name} component specified in config file.",
                 )
 
         # Checking for existence of environments
@@ -203,7 +203,7 @@ def run(
                 warnings.warn(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;"+
                     f" {nb}.ipynb will not be run."+
-                    f"See README.md for environment installation instructions."
+                    f"See README.md for environment installation instructions.",
                 )
                 all_nbs.pop(nb)
 
@@ -235,7 +235,7 @@ def run(
                     all_scripts[script]["nb_path_root"] = nb_path_root + "/" + comp_name
             elif comp_bool and not all:
                 warnings.warn(
-                    f"No scripts for {comp_name} component specified in config file."
+                    f"No scripts for {comp_name} component specified in config file.",
                 )
 
         # Checking for existence of environments
@@ -245,7 +245,7 @@ def run(
                 bad_env = info["kernel_name"]
                 warnings.warn(
                     f"Environment {bad_env} specified for {script}.py could not be found;"+
-                    f"{script}.py will not be run."
+                    f"{script}.py will not be run.",
                 )
                 all_scripts.pop(script)
 
