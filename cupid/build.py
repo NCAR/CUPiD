@@ -20,6 +20,7 @@ import sys
 import click
 import yaml
 
+
 @click.command()
 @click.argument("config_path", default="config.yml")
 def build(config_path):

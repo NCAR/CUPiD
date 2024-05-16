@@ -35,7 +35,8 @@ def get_collection(path_to_catalog, **kwargs):
 
         # not sure what the chunking kwarg is doing here either
         dsets = cat_subset.to_dataset_dict(
-            xarray_open_kwargs={"chunks": {"time": -1}}, preprocess=preprocess,
+            xarray_open_kwargs={"chunks": {"time": -1}},
+            preprocess=preprocess,
         )
 
     else:

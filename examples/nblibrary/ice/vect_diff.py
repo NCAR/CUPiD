@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 
+
 def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON):
     uvel_rot1 = uvel1 * np.cos(angle) - vvel1 * np.sin(angle)
     vvel_rot1 = uvel1 * np.sin(angle) + vvel1 * np.cos(angle)

@@ -26,6 +26,7 @@ import yaml
 from jinja2 import Template
 from papermill.engines import NBClientEngine
 
+
 class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
 
@@ -132,7 +133,14 @@ def setup_book(config_path):
 
 
 def create_ploomber_nb_task(
-    nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None,
+    nb,
+    info,
+    cat_path,
+    nb_path_root,
+    output_dir,
+    global_params,
+    dag,
+    dependency=None,
 ):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
@@ -206,7 +214,13 @@ def create_ploomber_nb_task(
 
 
 def create_ploomber_script_task(
-    script, info, cat_path, nb_path_root, global_params, dag, dependency=None,
+    script,
+    info,
+    cat_path,
+    nb_path_root,
+    global_params,
+    dag,
+    dependency=None,
 ):
     """
     Creates a Ploomber task for running a script, including necessary parameters.

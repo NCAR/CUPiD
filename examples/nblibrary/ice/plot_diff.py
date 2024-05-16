@@ -38,7 +38,12 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
     field_std = field_diff.std()
 
     this = ax.pcolormesh(
-        TLON, TLAT, field1, norm=norm, cmap="tab20", transform=ccrs.PlateCarree(),
+        TLON,
+        TLAT,
+        field1,
+        norm=norm,
+        cmap="tab20",
+        transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
@@ -56,7 +61,12 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON, TLAT, field2, norm=norm, cmap="tab20", transform=ccrs.PlateCarree(),
+        TLON,
+        TLAT,
+        field2,
+        norm=norm,
+        cmap="tab20",
+        transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case2, fontsize=10)

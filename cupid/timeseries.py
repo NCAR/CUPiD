@@ -136,7 +136,9 @@ def create_time_series(
 
         # Open an xarray dataset from the first model history file:
         hist_file_ds = xr.open_dataset(
-            hist_files[0], decode_cf=False, decode_times=False,
+            hist_files[0],
+            decode_cf=False,
+            decode_times=False,
         )
 
         # Get a list of data variables in the 1st hist file:
@@ -326,7 +328,8 @@ def create_time_series(
         if vars_to_derive:
             if component == "atm":
                 derive_cam_variables(
-                    vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx],
+                    vars_to_derive=vars_to_derive,
+                    ts_dir=ts_dir[case_idx],
                 )
 
         if serial:
