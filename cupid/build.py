@@ -5,8 +5,8 @@ the configuration specified in a YAML file.
 
 The main function `build()` reads the configuration file (default config.yml),
 extracts the necessary information such as the name of the book and the
-directory containing computed notebooks, and then proceeds to clean and build the
-Jupyter book using the `jupyter-book` command-line tool.
+directory containing computed notebooks, and then proceeds to clean and build
+the Jupyter book using the `jupyter-book` command-line tool.
 
 Args:
     CONFIG_PATH: str, path to configuration file (default config.yml)
@@ -17,7 +17,6 @@ Returns:
 from __future__ import annotations
 
 import subprocess
-import sys
 
 import click
 import yaml
