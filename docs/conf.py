@@ -26,7 +26,7 @@ for file in ["README.md", "NCAR_tips.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
-    with open(file, "r") as f:
+    with open(file) as f:
         file1 = f.readline()
         file1 = re.sub("<img.*?> ", "", file1)
         file_rest = f.read()
