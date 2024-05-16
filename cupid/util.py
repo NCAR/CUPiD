@@ -13,6 +13,7 @@ Classes:
     - ManageCondaKernel: Class for managing conda kernels.
     - MarkdownJinjaEngine: Class for using the Jinja Engine to run notebooks.
 """
+from __future__ import annotations
 
 import os
 import sys

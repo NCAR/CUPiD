@@ -6,6 +6,7 @@ Functions:
     - get_collection(path_to_catalog, **kwargs): Get a collection of datasets from an
                      intake catalog based on specified criteria.
 """
+from __future__ import annotations
 
 import intake
 import yaml

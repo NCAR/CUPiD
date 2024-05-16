@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib as mpl
@@ -55,7 +57,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.title(case1, fontsize=10)
 
     intv = 5
-    ## add vectors
+    # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv].values,
         TLAT[::intv, ::intv].values,
@@ -103,7 +105,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.title(case1, fontsize=10)
 
     intv = 5
-    ## add vectors
+    # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv].values,
         TLAT[::intv, ::intv].values,
@@ -151,7 +153,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.title(case2 + "-" + case1, fontsize=10)
 
     intv = 5
-    ## add vectors
+    # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv].values,
         TLAT[::intv, ::intv].values,

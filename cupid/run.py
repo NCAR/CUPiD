@@ -20,6 +20,7 @@ Options:
   -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
   -h, --help          Show this message and exit.
 """
+from __future__ import annotations
 
 import os
 import warnings

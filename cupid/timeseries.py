@@ -5,6 +5,7 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
+from __future__ import annotations
 
 import glob
 import multiprocessing as mp

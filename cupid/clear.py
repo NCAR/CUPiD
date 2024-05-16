@@ -8,6 +8,7 @@ to obtain the "run_dir" variable, and then deletes the contents of the "computed
 at that location.
 
 """
+from __future__ import annotations
 
 import os
 import shutil

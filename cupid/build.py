@@ -14,9 +14,11 @@ Args:
 Returns:
     None
 """
+from __future__ import annotations
 
 import subprocess
 import sys
+
 import click
 import yaml
 
