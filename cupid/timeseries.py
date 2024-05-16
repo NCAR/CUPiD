@@ -1,7 +1,6 @@
 """
 Timeseries generation tool adapted from ADF for general CUPiD use.
 """
-
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
