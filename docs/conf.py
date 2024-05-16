@@ -40,7 +40,7 @@ for file in ["README.md", "NCAR_tips.md"]:
 project = "CUPiD"
 
 current_year = datetime.datetime.now().year
-copyright = "{}, University Corporation for Atmospheric Research".format(current_year)
+copyright = f"{current_year}, University Corporation for Atmospheric Research"
 
 author = "NSF NCAR"
 

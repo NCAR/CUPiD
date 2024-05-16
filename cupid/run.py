@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 Main script for running all notebooks and scripts specified in the configuration file.
 
@@ -24,9 +23,11 @@ Options:
 
 import os
 import warnings
+
 import click
 import intake
 import ploomber
+
 import cupid.timeseries
 import cupid.util
 

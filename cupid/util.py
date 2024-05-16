@@ -23,9 +23,8 @@ import jupyter_client
 import papermill as pm
 import ploomber
 import yaml
-from papermill.engines import NBClientEngine
 from jinja2 import Template
-
+from papermill.engines import NBClientEngine
 
 class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
@@ -133,7 +132,7 @@ def setup_book(config_path):
 
 
 def create_ploomber_nb_task(
-    nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None
+    nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None,
 ):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
@@ -154,7 +153,7 @@ def create_ploomber_nb_task(
 
     parameter_groups = info["parameter_groups"]
 
-    ### passing in subset kwargs if they're provided
+    # passing in subset kwargs if they're provided
     if "subset" in info:
         subset_kwargs = info["subset"]
     else:
@@ -170,7 +169,7 @@ def create_ploomber_nb_task(
 
         output_path = f"{output_dir}/{output_name}"
 
-        ### all of these things should be optional
+        # all of these things should be optional
         parms_in = dict(**default_params)
         parms_in.update(**global_params)
         parms_in.update(dict(**parms))
@@ -207,7 +206,7 @@ def create_ploomber_nb_task(
 
 
 def create_ploomber_script_task(
-    script, info, cat_path, nb_path_root, global_params, dag, dependency=None
+    script, info, cat_path, nb_path_root, global_params, dag, dependency=None,
 ):
     """
     Creates a Ploomber task for running a script, including necessary parameters.
@@ -230,7 +229,7 @@ def create_ploomber_script_task(
 
     parameter_groups = info["parameter_groups"]
 
-    ### passing in subset kwargs if they're provided
+    # passing in subset kwargs if they're provided
     if "subset" in info:
         subset_kwargs = info["subset"]
     else:
@@ -246,7 +245,7 @@ def create_ploomber_script_task(
 
         # output_path = f"{output_dir}/{output_name}"
 
-        ### all of these things should be optional
+        # all of these things should be optional
         parms_in = dict(**default_params)
         parms_in.update(**global_params)
         parms_in.update(dict(**parms))

@@ -21,21 +21,21 @@ def read_yaml(path_to_yaml):
 def get_collection(path_to_catalog, **kwargs):
     """Get collection of datasets from intake catalog"""
     cat = intake.open_esm_datastore(path_to_catalog)
-    ### note that the json file points to the csv, so the path that the
-    ### yaml file contains does not actually get used. this can cause issues
+    # note that the json file points to the csv, so the path that the
+    # yaml file contains does not actually get used. this can cause issues
 
     cat_subset = cat.search(**kwargs)
 
     if "variable" in kwargs.keys():
         # pylint: disable=invalid-name
         def preprocess(ds):
-            ## the double brackets return a Dataset rather than a DataArray
-            ## this is fragile and could cause issues, not sure what subsetting on time_bound does
+            # the double brackets return a Dataset rather than a DataArray
+            # this is fragile and could cause issues, not sure what subsetting on time_bound does
             return ds[[kwargs["variable"], "time_bound"]]
 
-        ## not sure what the chunking kwarg is doing here either
+        # not sure what the chunking kwarg is doing here either
         dsets = cat_subset.to_dataset_dict(
-            xarray_open_kwargs={"chunks": {"time": -1}}, preprocess=preprocess
+            xarray_open_kwargs={"chunks": {"time": -1}}, preprocess=preprocess,
         )
 
     else:
