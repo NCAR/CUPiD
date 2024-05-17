@@ -12,6 +12,7 @@ dependencies:
     - nco
     - pandas
     - papermill
+    - pre-commit
     - pip
     - ploomber=0.22.3
     - pyyaml
