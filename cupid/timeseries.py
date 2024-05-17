@@ -1,16 +1,17 @@
 """
 Timeseries generation tool adapted from ADF for general CUPiD use.
 """
-
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
+from __future__ import annotations
 
 import glob
 import multiprocessing as mp
 import os
 import subprocess
 from pathlib import Path
+
 import xarray as xr
 
 
@@ -124,7 +125,7 @@ def create_time_series(
         for year in range(start_year, end_year + 1):
             # Add files to main file list:
             for fname in starting_location.glob(
-                f"*{hist_str}.*{str(year).zfill(4)}*.nc"
+                f"*{hist_str}.*{str(year).zfill(4)}*.nc",
             ):
                 files_list.append(fname)
             # End for
@@ -135,7 +136,9 @@ def create_time_series(
 
         # Open an xarray dataset from the first model history file:
         hist_file_ds = xr.open_dataset(
-            hist_files[0], decode_cf=False, decode_times=False
+            hist_files[0],
+            decode_cf=False,
+            decode_times=False,
         )
 
         # Get a list of data variables in the 1st hist file:
@@ -221,13 +224,13 @@ def create_time_series(
         # create copy of var list that can be modified for derivable variables
         if diag_var_list == ["process_all"]:
             print("generating time series for all variables")
-            # TODO: this doesn't seem to be working for ocn...
+            # TODO: this does not seem to be working for ocn...
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
                 if component == "ocn":
                     print(
-                        "ocean vars seem to not be present in all files and thus cause errors"
+                        "ocean vars seem to not be present in all files and thus cause errors",
                     )
                     continue
                 if (
@@ -325,7 +328,8 @@ def create_time_series(
         if vars_to_derive:
             if component == "atm":
                 derive_cam_variables(
-                    vars_to_derive=vars_to_derive, ts_dir=ts_dir[case_idx]
+                    vars_to_derive=vars_to_derive,
+                    ts_dir=ts_dir[case_idx],
                 )
 
         if serial:
@@ -357,7 +361,7 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
             # PRECT can be found by simply adding PRECL and PRECC
             # grab file names for the PRECL and PRECC files from the case ts directory
             if glob.glob(os.path.join(ts_dir, "*PRECC*")) and glob.glob(
-                os.path.join(ts_dir, "*PRECL*")
+                os.path.join(ts_dir, "*PRECL*"),
             ):
                 constit_files = sorted(glob.glob(os.path.join(ts_dir, "*PREC*")))
             else:
@@ -374,7 +378,7 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
             else:
                 print(
                     f"[{__name__}] Warning: PRECT file was found and overwrite is False"
-                    + "Will use existing file."
+                    + "Will use existing file.",
                 )
                 continue
         # append PRECC to the file containing PRECL
@@ -385,7 +389,7 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
             # RESTOM = FSNT-FLNT
             # Have to be more precise than with PRECT because FSNTOA, FSTNC, etc are valid variables
             if glob.glob(os.path.join(ts_dir, "*.FSNT.*")) and glob.glob(
-                os.path.join(ts_dir, "*.FLNT.*")
+                os.path.join(ts_dir, "*.FLNT.*"),
             ):
                 input_files = [
                     sorted(glob.glob(os.path.join(ts_dir, f"*.{v}.*")))
@@ -408,12 +412,12 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                 else:
                     print(
                         f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
-                        + "Will use existing file."
+                        + "Will use existing file.",
                     )
                     continue
             # append FSNT to the file containing FLNT
             os.system(f"ncks -A -v FLNT {constit_files[0]} {constit_files[1]}")
             # create new file with the difference of FLNT and FSNT
             os.system(
-                f"ncap2 -s 'RESTOM=(FSNT-FLNT)' {constit_files[1]} {derived_file}"
+                f"ncap2 -s 'RESTOM=(FSNT-FLNT)' {constit_files[1]} {derived_file}",
             )

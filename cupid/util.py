@@ -13,17 +13,19 @@ Classes:
     - ManageCondaKernel: Class for managing conda kernels.
     - MarkdownJinjaEngine: Class for using the Jinja Engine to run notebooks.
 """
+from __future__ import annotations
 
 import os
 import sys
-from pathlib import Path
 import warnings
+from pathlib import Path
+
 import jupyter_client
 import papermill as pm
 import ploomber
-from papermill.engines import NBClientEngine
-from jinja2 import Template
 import yaml
+from jinja2 import Template
+from papermill.engines import NBClientEngine
 
 
 class MarkdownJinjaEngine(NBClientEngine):
@@ -45,7 +47,7 @@ class MarkdownJinjaEngine(NBClientEngine):
 def get_control_dict(config_path):
     """Get control dictionary from configuration file"""
     try:
-        with open(config_path, "r") as fid:
+        with open(config_path) as fid:
             control = yaml.safe_load(fid)
     except FileNotFoundError:
         print(f"ERROR: {config_path} not found")
@@ -63,7 +65,8 @@ def get_control_dict(config_path):
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
-                        f"No conda environment specified for {nb}.ipynb and no default kernel set, will use cupid-analysis environment."
+                        f"No conda environment specified for {nb}.ipynb and"
+                        + " no default kernel set, will use cupid-analysis environment.",
                     )
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = (
@@ -78,7 +81,8 @@ def get_control_dict(config_path):
                 if info["kernel_name"] is None:
                     info["kernel_name"] = "cupid-analysis"
                     warnings.warn(
-                        f"No environment specified for {script}.py and no default kernel set, will use cupid-analysis environment."
+                        f"No environment specified for {script}.py and no default"
+                        + " kernel set, will use cupid-analysis environment.",
                     )
                 if info["kernel_name"] not in control["env_check"]:
                     control["env_check"][info["kernel_name"]] = (
@@ -118,7 +122,7 @@ def setup_book(config_path):
 
     path_to_here = os.path.dirname(os.path.realpath(__file__))
 
-    with open(f"{path_to_here}/_jupyter-book-config-defaults.yml", "r") as fid:
+    with open(f"{path_to_here}/_jupyter-book-config-defaults.yml") as fid:
         config = yaml.safe_load(fid)
 
     # update defaults
@@ -132,7 +136,14 @@ def setup_book(config_path):
 
 
 def create_ploomber_nb_task(
-    nb, info, cat_path, nb_path_root, output_dir, global_params, dag, dependency=None
+    nb,
+    info,
+    cat_path,
+    nb_path_root,
+    output_dir,
+    global_params,
+    dag,
+    dependency=None,
 ):
     """
     Creates a ploomber task for running a notebook, including necessary parameters.
@@ -153,7 +164,7 @@ def create_ploomber_nb_task(
 
     parameter_groups = info["parameter_groups"]
 
-    ### passing in subset kwargs if they're provided
+    # passing in subset kwargs if they're provided
     if "subset" in info:
         subset_kwargs = info["subset"]
     else:
@@ -169,7 +180,7 @@ def create_ploomber_nb_task(
 
         output_path = f"{output_dir}/{output_name}"
 
-        ### all of these things should be optional
+        # all of these things should be optional
         parms_in = dict(**default_params)
         parms_in.update(**global_params)
         parms_in.update(dict(**parms))
@@ -206,7 +217,13 @@ def create_ploomber_nb_task(
 
 
 def create_ploomber_script_task(
-    script, info, cat_path, nb_path_root, global_params, dag, dependency=None
+    script,
+    info,
+    cat_path,
+    nb_path_root,
+    global_params,
+    dag,
+    dependency=None,
 ):
     """
     Creates a Ploomber task for running a script, including necessary parameters.
@@ -229,7 +246,7 @@ def create_ploomber_script_task(
 
     parameter_groups = info["parameter_groups"]
 
-    ### passing in subset kwargs if they're provided
+    # passing in subset kwargs if they're provided
     if "subset" in info:
         subset_kwargs = info["subset"]
     else:
@@ -245,7 +262,7 @@ def create_ploomber_script_task(
 
         # output_path = f"{output_dir}/{output_name}"
 
-        ### all of these things should be optional
+        # all of these things should be optional
         parms_in = dict(**default_params)
         parms_in.update(**global_params)
         parms_in.update(dict(**parms))

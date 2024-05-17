@@ -3,16 +3,16 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-
 # -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-import os
-import sys
+from __future__ import annotations
+
 import datetime
+import os
 import re
+import sys
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -26,7 +26,7 @@ for file in ["README.md", "NCAR_tips.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
-    with open(file, "r") as f:
+    with open(file) as f:
         file1 = f.readline()
         file1 = re.sub("<img.*?> ", "", file1)
         file_rest = f.read()
@@ -39,7 +39,7 @@ for file in ["README.md", "NCAR_tips.md"]:
 project = "CUPiD"
 
 current_year = datetime.datetime.now().year
-copyright = "{}, University Corporation for Atmospheric Research".format(current_year)
+copyright = f"{current_year}, University Corporation for Atmospheric Research"
 
 author = "NSF NCAR"
 
@@ -50,7 +50,7 @@ master_doc = "index"
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
+# extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 
 extensions = [
@@ -85,7 +85,7 @@ exclude_patterns = ["**.ipynb_checkpoints"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
+# source_suffix = [".rst", ".md"]
 source_suffix = {
     ".rst": "restructuredtext",
     ".ipynb": "myst-nb",
@@ -106,7 +106,7 @@ autosummary_imported_members = True
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = dict(
-    # analytics_id=''  this is configured in rtfd.io
+    # analytics_id=""  this is configured in rtfd.io
     # canonical_url="",
     repository_url="https://github.com/NCAR/CUPiD",
     repository_branch="main",
@@ -115,7 +115,7 @@ html_theme_options = dict(
     use_repository_button=True,
     use_issues_button=True,
     home_page_in_toc=True,
-    extra_footer="<em>The National Center for Atmospheric Research is sponsored by the National Science Foundation. Any opinions, findings and conclusions or recommendations expressed in this material do not necessarily reflect the views of the National Science Foundation.</em>",
+    extra_footer="<em>The National Center for Atmospheric Research is sponsored by the National Science Foundation. Any opinions, findings and conclusions or recommendations expressed in this material do not necessarily reflect the views of the National Science Foundation.</em>",  # noqa
 )
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -5,8 +5,8 @@ the configuration specified in a YAML file.
 
 The main function `build()` reads the configuration file (default config.yml),
 extracts the necessary information such as the name of the book and the
-directory containing computed notebooks, and then proceeds to clean and build the
-Jupyter book using the `jupyter-book` command-line tool.
+directory containing computed notebooks, and then proceeds to clean and build
+the Jupyter book using the `jupyter-book` command-line tool.
 
 Args:
     CONFIG_PATH: str, path to configuration file (default config.yml)
@@ -14,10 +14,11 @@ Args:
 Returns:
     None
 """
+from __future__ import annotations
+
+import subprocess
 
 import click
-import subprocess
-import sys
 import yaml
 
 
@@ -34,7 +35,7 @@ def build(config_path):
         None
     """
 
-    with open(config_path, "r") as fid:
+    with open(config_path) as fid:
         control = yaml.safe_load(fid)
 
     sname = control["data_sources"]["sname"]
@@ -42,14 +43,14 @@ def build(config_path):
 
     subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks/{sname}"])
     subprocess.run(
-        ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"]
+        ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
     )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
-    #     if 'publish_location' in control:
+    #     if "publish_location" in control:
 
-    #         user = os.environ.get('USER')
+    #         user = os.environ.get("USER")
     #         remote_mach = control["publish_location"]["remote_mach"]
     #         remote_dir = control["publish_location"]["remote_dir"]
     # this seems more complicated than expected...people have mentioned paramiko library?
