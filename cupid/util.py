@@ -29,6 +29,7 @@ from papermill.engines import NBClientEngine
 
 from cupid.ploomber import CUPiDScriptRunner
 
+
 class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
 

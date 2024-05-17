@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
-from subprocess import PIPE
 from pathlib import Path
-from importlib.util import find_spec
+from subprocess import PIPE
 
 from ploomber.tasks import ScriptRunner
-# from ploomber import TaskBuildError
+
 
 def _python_bin():
     """
@@ -16,8 +17,9 @@ def _python_bin():
     executable = sys.executable
     return executable if executable else "python"
 
+
 def _run_script_in_subprocess(interpreter, path, cwd, env):
-    if type(interpreter) == str:
+    if isinstance(interpreter, str):
         res = subprocess.run([interpreter, str(path)], cwd=cwd, env=env, stderr=PIPE)
     else:
         res = subprocess.run(interpreter + [str(path)], cwd=cwd, env=env, stderr=PIPE)
@@ -117,7 +119,12 @@ class CUPiDScriptRunner(ScriptRunner):
 
         kwargs = dict(hot_reload=dag._params.hot_reload)
         self._source = ScriptRunner._init_source(
-            source, kwargs, ext_in, static_analysis, False, False
+            source,
+            kwargs,
+            ext_in,
+            static_analysis,
+            False,
+            False,
         )
         self.local_execution = local_execution
         super(ScriptRunner, self).__init__(product, dag, name, params)
@@ -136,7 +143,7 @@ class CUPiDScriptRunner(ScriptRunner):
                 c["source"]
                 for c in self.source.nb_obj_rendered.cells
                 if c["cell_type"] == "code"
-            ]
+            ],
         )
 
         cwd = str(self.source.loc.parent.resolve())
@@ -162,6 +169,8 @@ class CUPiDScriptRunner(ScriptRunner):
         try:
             _run_script_in_subprocess(interpreter, tmp, cwd, orig_env)
         except Exception as e:
-            raise TaskBuildError("Error when executing task" f" {self.name!r}.") from e
+            raise RuntimeError(
+                "Error when executing task" f" {self.name!r}.",
+            ) from e  # should be TaskBuildError
         finally:
             tmp.unlink()
