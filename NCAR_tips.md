@@ -12,7 +12,7 @@ The recommended approach releases the cores immediately after `cupid-run` finish
 
 ```
 [login-node] $ conda activate cupid-dev
-(cupid-dev) [login-node] $ qcmd -l select=1:ncpus=12:mem=120GB -- cupid-run config.yml
+(cupid-dev) [login-node] $ qcmd -l select=1:ncpus=12:mem=120GB -- cupid-run
 ```
 
 Alternatively, you can start an interactive session and remain on the compute nodes after `cupid-run` completes:
@@ -20,7 +20,7 @@ Alternatively, you can start an interactive session and remain on the compute no
 ```
 [login-node] $ qinteractive -l select=1:ncpus=12:mem=120GB
 [compute-node] $ conda activate cupid-dev
-(cupid-dev) [compute-node] $ cupid-run config.yml
+(cupid-dev) [compute-node] $ cupid-run
 ```
 
 Notes:
