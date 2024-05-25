@@ -40,10 +40,16 @@ If you do not have `mamba` installed, you can still use `conda`... it will just 
 1. If `./manage_externals/checkout_externals` is not found, run `git submodule update --init` to clone the submodule.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
-``` bash
-$ conda activate cupid-dev
-$ pip install -e .  # installs cupid
-```
+   ``` bash
+   $ conda activate cupid-dev
+   $ pip install -e .  # installs cupid
+   ```
+
+1. If you plan on contributing code to CUPiD,
+whether developing CUPiD itself or providing notebooks for CUPiD to run,
+please see the [Contributer's Guide](https://github.com/NCAR/CUPiD/wiki/Contributor's-Guide).
+Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed,
+and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
 
 ## Running
 
