@@ -51,7 +51,7 @@ timeseries:
   num_procs: 8
   ts_done: [False]
   overwrite_ts: [False]
-  case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.092'
+  case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
 
   atm:
     vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
