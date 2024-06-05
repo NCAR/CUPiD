@@ -42,7 +42,7 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.092'
+  case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   lc_kwargs:
     threads_per_worker: 1
