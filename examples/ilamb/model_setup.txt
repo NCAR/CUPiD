@@ -1,2 +1,2 @@
 # Model Name    , Location of Files                                                                                     ,  Shift From,  Shift To
-CTSM51          , /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e23_alpha17f.BLT1850.ne30_t232.092/lnd/hist
+CTSM51          , /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e23_alpha17f.BLT1850.ne30_t232.092/lnd/hist/
