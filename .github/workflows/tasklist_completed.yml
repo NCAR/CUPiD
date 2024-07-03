@@ -15,4 +15,4 @@ jobs:
       pull-requests: write
     steps:
       - name: Check tasklist
-        uses: Awayume/github-pr-tasklist-checker@v1
+        uses: Awayume/github-pr-tasklist-checker@v1.2.0
