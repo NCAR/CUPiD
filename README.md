@@ -69,7 +69,7 @@ or you can view `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-r
 
 Notes:
 
-1. Some people seem to be getting the following error: `Environment cupid-analysis specified for <YOUR-NOTEBOOK>.ipynb could not be found`. The fix for this seems to be the following:
+1. Occasionally users report the following error the first time they run CUPiD: `Environment cupid-analysis specified for <YOUR-NOTEBOOK>.ipynb could not be found`. The fix for this is the following:
    ``` bash
    $ conda activate cupid-analysis
    (cupid-analysis) $ python -m ipykernel install --user --name=cupid-analysis
