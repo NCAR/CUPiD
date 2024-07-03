@@ -1,18 +1,12 @@
-name: PR Moderation
-
+name: 'PR Tasks Completed Check'
 on:
   pull_request:
-    types:
-      - opened
-      - edited
-      - reopened
+    types: [opened, edited]
 
 jobs:
-  verify:
-    name: Verify
+  task-check:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
-      - name: Check tasklist
-        uses: Awayume/github-pr-tasklist-checker@v1.2.0
+      - uses: kentaro-m/task-completed-checker-action@v0.1.2
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
