@@ -117,7 +117,7 @@ def run(
                     os.path.join(
                         global_params["CESM_output_dir"],
                         timeseries_params["case_name"],
-                        f"/{component}/proc/tseries/",
+                        f"{component}", "proc", "tseries",
                     ),
                 ]
 
@@ -125,7 +125,7 @@ def run(
                     ts_output_dir = [
                         os.path.join(
                             timeseries_params["ts_output_dir"],
-                            f"{component}/proc/tseries/",
+                            f"{component}", "proc", "tseries",
                         ),
                     ]
                 # -----
