@@ -113,21 +113,17 @@ def run(
 
                 # set time series output directory:
                 # -----
-                ts_output_dir = [
-                    os.path.join(
-                        global_params["CESM_output_dir"],
-                        timeseries_params["case_name"],
-                        f"{component}", "proc", "tseries",
-                    ),
-                ]
-
                 if "ts_output_dir" in timeseries_params:
-                    ts_output_dir = [
-                        os.path.join(
+                    ts_output_dir = os.path.join(
                             timeseries_params["ts_output_dir"],
                             f"{component}", "proc", "tseries",
-                        ),
-                    ]
+                    )
+                else:
+                    ts_output_dir = os.path.join(
+                            global_params["CESM_output_dir"],
+                            timeseries_params["case_name"],
+                            f"{component}", "proc", "tseries",
+                    )
                 # -----
 
                 # fmt: off
@@ -139,7 +135,7 @@ def run(
                     [timeseries_params["case_name"]],
                     timeseries_params[component]["hist_str"],
                     [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
-                    ts_output_dir,
+                    [ts_output_dir],
                     # Note that timeseries output will eventually go in
                     #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
