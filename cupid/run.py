@@ -110,6 +110,22 @@ def run(
 
         for component, comp_bool in component_options.items():
             if comp_bool:
+
+                # set time series output directory:
+                # -----
+                if "ts_output_dir" in timeseries_params:
+                    ts_output_dir = os.path.join(
+                            timeseries_params["ts_output_dir"],
+                            f"{component}", "proc", "tseries",
+                    )
+                else:
+                    ts_output_dir = os.path.join(
+                            global_params["CESM_output_dir"],
+                            timeseries_params["case_name"],
+                            f"{component}", "proc", "tseries",
+                    )
+                # -----
+
                 # fmt: off
                 # pylint: disable=line-too-long
                 cupid.timeseries.create_time_series(
@@ -119,7 +135,7 @@ def run(
                     [timeseries_params["case_name"]],
                     timeseries_params[component]["hist_str"],
                     [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
-                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/proc/tseries/"],
+                    [ts_output_dir],
                     # Note that timeseries output will eventually go in
                     #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
