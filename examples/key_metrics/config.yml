@@ -115,30 +115,16 @@ compute_notebooks:
 #            config_path: .
 #            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-#    ocn:
-#      ocean_surface:
-#        parameter_groups:
-#          none:
-#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-#            savefigs: False
-#            mom6_tools_config:
-#              start_date: '0091-01-01'
-#              end_date: '0101-01-01'
-#              Fnames:
-#                native: 'mom6.h.native.????-??.nc'
-#                static: 'mom6.h.static.nc'
-#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
-
-#    lnd:
-#      land_comparison:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-#            type:
-#              - 1850pAD
-#              - 1850pSASU
+    glc:
+      LIWG_SMB_diagnostic:
+        parameter_groups:
+          none:
+            case_name2: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
+            CESM2_output_dir: '/glade/campaign/cesm/collections/collections/CESM2-LE/timeseries/glc/proc/tseries/year_1/smb'
+            CESM2_case_name: 'b.e21.BHISTsmbb.f09_g17.LE2-1251.019.cism.h.smb.1850-2015.nc'
+            path_obs: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
+            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+            last_year: 2005
 
 #    ice:
 #      seaice:
@@ -152,6 +138,31 @@ compute_notebooks:
 #            begyr2: 245
 #            endyr2: 305
 #            nyears: 25
+
+#    lnd:
+#      land_comparison:
+#        parameter_groups:
+#          none:
+#            cases:
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+#            type:
+#              - 1850pAD
+#              - 1850pSASU
+
+#    ocn:
+#      ocean_surface:
+#        parameter_groups:
+#          none:
+#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+#            savefigs: False
+#            mom6_tools_config:
+#              start_date: '0091-01-01'
+#              end_date: '0101-01-01'
+#              Fnames:
+#                native: 'mom6.h.native.????-??.nc'
+#                static: 'mom6.h.static.nc'
+#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
 ########### JUPYTER BOOK CONFIG ###########
 
