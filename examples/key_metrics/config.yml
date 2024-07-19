@@ -119,12 +119,10 @@ compute_notebooks:
       LIWG_SMB_diagnostic:
         parameter_groups:
           none:
-            case_name2: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
-            CESM2_output_dir: '/glade/campaign/cesm/collections/collections/CESM2-LE/timeseries/glc/proc/tseries/year_1/smb'
-            CESM2_case_name: 'b.e21.BHISTsmbb.f09_g17.LE2-1251.019.cism.h.smb.1850-2015.nc'
-            path_obs: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
+            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-            last_year: 2005
+            climo_nyears: 40
+            last_year: 101
 
 #    ice:
 #      seaice:
