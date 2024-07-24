@@ -182,31 +182,35 @@ book_toc:
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
 
-    - caption: Atmosphere
+    # - caption: Atmosphere
 
-      # Each chapter is the name of one of the notebooks that you executed
-      # in compute_notebooks above, also without .ipynb
-      chapters:
-        - file: atm/adf_quick_run
+    #   # Each chapter is the name of one of the notebooks that you executed
+    #   # in compute_notebooks above, also without .ipynb
+    #   chapters:
+    #     - file: atm/adf_quick_run
 
-    - caption: Ocean
-      chapters:
-          - file: ocn/ocean_surface
+    # - caption: Ocean
+    #   chapters:
+    #       - file: ocn/ocean_surface
 
-    - caption: Land
-      chapters:
-        - file: lnd/land_comparison
+    # - caption: Land
+    #   chapters:
+    #     - file: lnd/land_comparison
 
-    - caption: Sea Ice
+    # - caption: Sea Ice
+    #   chapters:
+    #     - file: ice/seaice
+
+    - caption: Land Ice
       chapters:
-        - file: ice/seaice
+        - file: glc/LIWG_SMB_diagnostic
 
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
 book_config_keys:
 
-  title: Example project   # Title of your jupyter book
+  title: CESM Key Metrics   # Title of your jupyter book
 
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options
