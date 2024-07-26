@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 
 import numpy as np
+import xarray as xr
 from matplotlib import pyplot as plt
 from netCDF4 import Dataset
 
@@ -56,14 +57,13 @@ def read_smb(file):
     return smb_cism
 
 
-def create_climo(path, case_name, last_year, params):
-    # Initializing a field for the climatology
-    climo_out = np.zeros((params["ny_cism"], params["nx_cism"]))
+def _get_cesm_output(path, case_name, last_year, params):
+    # Set parameters
+    rhoi = 917  # ice density kg/m3
+    sec_in_yr = 60 * 60 * 24 * 365  # seconds in a year
+    smb_convert = sec_in_yr / rhoi * 1000  # converting kg m-2 s-1 ice to mm y-1 w.e.
 
-    # Counter for available year (only needed if the number of years available is smaller
-    # than the number of years requested to create the climatology.
-    count_yr = 0
-
+    filenames = []
     for k in range(params["climo_nyears"]):
 
         year_to_read = last_year - k
@@ -78,12 +78,44 @@ def create_climo(path, case_name, last_year, params):
             )
             break
 
-        climo_out = climo_out + read_smb(filename)
-        count_yr = count_yr + 1
+        filenames.append(filename)
 
-    print("number of years used in climatology = ", count_yr)
+    climo_out = (
+        xr.open_mfdataset(filenames)["glc1Exp_Flgl_qice"].compute() * smb_convert
+    )
+    # Mask out data that is 0 in initial condition
+    for k in range(len(climo_out["time"])):
+        climo_out.data[k, :, :] = np.where(
+            params["mask"],
+            0,
+            climo_out.isel(time=k).data,
+        )
+    print("number of years used in climatology = ", len(climo_out["time"]))
+    return climo_out
+
+
+def create_climo(path, case_name, last_year, params):
+
+    climo_out = _get_cesm_output(path, case_name, last_year, params)
+
     # Averaging the climo data
-    return climo_out / count_yr
+    return climo_out.mean("time").data
+
+
+def compute_annual_climo(path, case_name, last_year, params):
+    # Initializing a field for the climatology
+    avg_smb_timeseries = np.zeros(last_year)
+    climo_out = _get_cesm_output(path, case_name, last_year, params)
+    for k in range(len(climo_out["time"])):
+        # index into avg_smb_timeseries; want largest k to index (last_year-1)
+        kk = last_year - (len(climo_out["time"]) - k)
+        # note that mm_to_Gt has 1 / res**2 factor, so we want a sum rather than mean
+        avg_smb_timeseries[kk] = np.round(
+            climo_out.isel(time=k).sum() * params["mm_to_Gt"],
+            2,
+        ).data
+
+    return last_year - len(climo_out["time"]) + 1, avg_smb_timeseries
 
 
 def plot_contour(data, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
@@ -114,48 +146,6 @@ def plot_contour_diff(data_new, data_old, fig, ax, title, vmin, vmax, cmap, mm_t
 
     cbar = fig.colorbar(last_panel2, cax=cax)
     cbar.ax.tick_params(labelsize=16)
-
-
-def compute_annual_climo(path, case_name, last_year, params):
-    # Initializing a field for the climatology
-    avg_smb_timeseries = np.zeros(last_year)
-
-    # Counter for available year (only needed if the number of years available is smaller
-    # than the number of years requested to create the climatology.
-    count_yr = 0
-
-    for k in range(last_year):
-
-        year_to_read = last_year - k
-        file_name = (
-            f"{path}/{case_name}.cpl.hx.1yr2glc.{year_to_read:04d}-01-01-00000.nc"
-        )
-
-        if not os.path.isfile(file_name):
-            print("The couple file for time", year_to_read, "does not exist.")
-            print(
-                "We will only use the files that existed until now to create the time series.",
-            )
-            break
-
-        smb_temp = read_smb(file_name)
-        smb_temp = np.where(params["mask"], 0, smb_temp)
-
-        avg_smb_timeseries[year_to_read - 1] = np.round(
-            net_avrg(smb_temp) * params["mm_to_Gt"],
-            2,
-        )
-        count_yr = count_yr + 1
-
-        if count_yr == params["climo_nyears"]:
-            break
-
-        del smb_temp
-
-    first_year = year_to_read
-
-    print("number of years used in climatology = ", count_yr)
-    return first_year, avg_smb_timeseries
 
 
 def plot_line(data, time, line, color, label, linewidth):
