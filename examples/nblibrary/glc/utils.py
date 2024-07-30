@@ -66,7 +66,7 @@ def set_plot_prop_clean(ax):
     ax.set_yticks([])
 
 
-def plot_contour(da, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
+def plot_contour(da, fig, ax, left, title, vmin, vmax, cmap, mm_to_Gt):
     """
     Plot a contour map of surface mass balance (assumed to be in da.data).
     Also computes global mean, in Gt, and prints average in lower left corner.
@@ -74,6 +74,7 @@ def plot_contour(da, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
         da - xr.DataArray containing SMB in units of mm/yr
         fig - matplotlib.figure.Figure
         ax - matplotlib.axes.Axes
+        left - left dimension of rect (dimensions for colorbar)
         title - string containing title of plot
         vmin - minimum value for contours
         vmax - maximum value for contours
@@ -81,15 +82,15 @@ def plot_contour(da, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
         mm_to_Gt - conversion factor for mm/yr -> Gt/yr
     """
     avg_data = np.round(da.sum().data * mm_to_Gt, 2)
-    last_panel0 = ax.imshow(da.data[:, :], vmin=vmin, vmax=vmax, cmap=cmap)
+    last_panel = ax.imshow(da.data[:, :], vmin=vmin, vmax=vmax, cmap=cmap)
     ax.set_title(title, fontsize=16)
     set_plot_prop_clean(ax)
     ax.annotate("net avg =" + str(avg_data) + " Gt/yr", xy=(5, 5), fontsize=16)
 
     pos = ax.get_position()
-    cax = fig.add_axes([0.35, pos.y0, 0.02, pos.y1 - pos.y0])
+    cax = fig.add_axes([left, pos.y0, 0.02, pos.y1 - pos.y0])
 
-    cbar = fig.colorbar(last_panel0, cax=cax)
+    cbar = fig.colorbar(last_panel, cax=cax)
     cbar.ax.tick_params(labelsize=16)
 
 
