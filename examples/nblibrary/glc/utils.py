@@ -56,7 +56,6 @@ def read_cesm_smb(path, case_name, last_year, params):
 def set_plot_prop_clean(ax):
     """
     This function cleans up the figures from unnecessary default figure properties.
-
     """
     ax.invert_yaxis()
     ax.set_xlabel("")
@@ -68,6 +67,19 @@ def set_plot_prop_clean(ax):
 
 
 def plot_contour(da, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
+    """
+    Plot a contour map of surface mass balance (assumed to be in da.data).
+    Also computes global mean, in Gt, and prints average in lower left corner.
+    Arguments:
+        da - xr.DataArray containing SMB in units of mm/yr
+        fig - matplotlib.figure.Figure
+        ax - matplotlib.axes.Axes
+        title - string containing title of plot
+        vmin - minimum value for contours
+        vmax - maximum value for contours
+        cmap - matplotlib.colors.Colormap
+        mm_to_Gt - conversion factor for mm/yr -> Gt/yr
+    """
     avg_data = np.round(da.sum().data * mm_to_Gt, 2)
     last_panel0 = ax.imshow(da.data[:, :], vmin=vmin, vmax=vmax, cmap=cmap)
     ax.set_title(title, fontsize=16)
@@ -81,10 +93,21 @@ def plot_contour(da, fig, ax, title, vmin, vmax, cmap, mm_to_Gt):
     cbar.ax.tick_params(labelsize=16)
 
 
-def plot_line(data, time, line, color, label, linewidth):
+def plot_line(da, time, line, color, label, linewidth):
+    """
+    Plot a time series of spatially averaged surface mass balance (assumed to
+    be in da.data).
+    Arguments:
+        da - xr.DataArray containing spatially averaged SMB in units of Gt/yr
+        time - np.array containing time dimension
+        line - style of line to use in plot
+        color - color of line in plot
+        label - label of line in legend
+        linewidth - thickness of line in plot
+    """
     plt.plot(
         time,
-        data,
+        da,
         line,
         ms=3,
         mfc=color,
