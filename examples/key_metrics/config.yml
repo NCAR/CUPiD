@@ -115,30 +115,14 @@ compute_notebooks:
 #            config_path: .
 #            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-#    ocn:
-#      ocean_surface:
-#        parameter_groups:
-#          none:
-#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-#            savefigs: False
-#            mom6_tools_config:
-#              start_date: '0091-01-01'
-#              end_date: '0101-01-01'
-#              Fnames:
-#                native: 'mom6.h.native.????-??.nc'
-#                static: 'mom6.h.static.nc'
-#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
-
-#    lnd:
-#      land_comparison:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-#            type:
-#              - 1850pAD
-#              - 1850pSASU
+    glc:
+      LIWG_SMB_diagnostic:
+        parameter_groups:
+          none:
+            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
+            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+            climo_nyears: 40
+            last_year: 101
 
 #    ice:
 #      seaice:
@@ -152,6 +136,31 @@ compute_notebooks:
 #            begyr2: 245
 #            endyr2: 305
 #            nyears: 25
+
+#    lnd:
+#      land_comparison:
+#        parameter_groups:
+#          none:
+#            cases:
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+#            type:
+#              - 1850pAD
+#              - 1850pSASU
+
+#    ocn:
+#      ocean_surface:
+#        parameter_groups:
+#          none:
+#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+#            savefigs: False
+#            mom6_tools_config:
+#              start_date: '0091-01-01'
+#              end_date: '0101-01-01'
+#              Fnames:
+#                native: 'mom6.h.native.????-??.nc'
+#                static: 'mom6.h.static.nc'
+#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -173,31 +182,35 @@ book_toc:
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
 
-    - caption: Atmosphere
+    # - caption: Atmosphere
 
-      # Each chapter is the name of one of the notebooks that you executed
-      # in compute_notebooks above, also without .ipynb
-      chapters:
-        - file: atm/adf_quick_run
+    #   # Each chapter is the name of one of the notebooks that you executed
+    #   # in compute_notebooks above, also without .ipynb
+    #   chapters:
+    #     - file: atm/adf_quick_run
 
-    - caption: Ocean
-      chapters:
-          - file: ocn/ocean_surface
+    # - caption: Ocean
+    #   chapters:
+    #       - file: ocn/ocean_surface
 
-    - caption: Land
-      chapters:
-        - file: lnd/land_comparison
+    # - caption: Land
+    #   chapters:
+    #     - file: lnd/land_comparison
 
-    - caption: Sea Ice
+    # - caption: Sea Ice
+    #   chapters:
+    #     - file: ice/seaice
+
+    - caption: Land Ice
       chapters:
-        - file: ice/seaice
+        - file: glc/LIWG_SMB_diagnostic
 
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
 book_config_keys:
 
-  title: Example project   # Title of your jupyter book
+  title: CESM Key Metrics   # Title of your jupyter book
 
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options
