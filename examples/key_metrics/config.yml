@@ -111,8 +111,6 @@ compute_notebooks:
       nmse_PSL:
         parameter_groups:
           none:
-            case: b.e23_alpha17f.BLT1850.ne30_t232.092
-            component: atm
             start_date: '0001-01-01'
             end_date: '0101-01-01'
 
