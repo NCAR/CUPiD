@@ -54,9 +54,9 @@ timeseries:
   case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
 
   atm:
-    vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
-    derive_vars: [] # {'PRECT':['PRECL', 'PRECC'], 'RESTOM':['FLNT', 'FSNT']}
-    hist_str: 'h0'
+    vars: ['PSL']
+    derive_vars: []
+    hist_str: 'h0a'
     start_years: [1]
     end_years: [100]
     level: 'lev'
@@ -107,13 +107,14 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-#    atm:
-#      adf_quick_run:
-#        parameter_groups:
-#          none:
-#            adf_path: ../../../externals/ADF
-#            config_path: .
-#            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+    atm:
+      nmse_PSL:
+        parameter_groups:
+          none:
+            case: b.e23_alpha17f.BLT1850.ne30_t232.092
+            component: atm
+            start_date: '0001-01-01'
+            end_date: '0101-01-01'
 
     glc:
       LIWG_SMB_diagnostic:
@@ -181,13 +182,12 @@ book_toc:
 
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
+    # Each chapter is the name of one of the notebooks that you executed
+    # in compute_notebooks above, also without .ipynb
 
-    # - caption: Atmosphere
-
-    #   # Each chapter is the name of one of the notebooks that you executed
-    #   # in compute_notebooks above, also without .ipynb
-    #   chapters:
-    #     - file: atm/adf_quick_run
+    - caption: Atmosphere
+      chapters:
+        - file: atm/nmse_PSL
 
     # - caption: Ocean
     #   chapters:
