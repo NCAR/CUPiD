@@ -51,5 +51,4 @@ def seasonal_climatology_weighted(dat):
     dat_son = dat_son.rename("SON")
     dat_am = dat_am.rename("AM")
 
-    alldat = xr.merge([dat_djf, dat_mam, dat_jja, dat_son, dat_am])
-    return alldat
+    return xr.merge([dat_djf, dat_mam, dat_jja, dat_son, dat_am])
