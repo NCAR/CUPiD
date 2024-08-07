@@ -11,10 +11,6 @@ def nmse(obs, mod):
     from that
     """
 
-    # make sure the model and obs have the same lons and lats
-    mod["lon"] = obs.lon
-    mod["lat"] = obs.lat
-
     # get the weights and weight by zero if the model or obs is nan
     w = np.cos(np.deg2rad(obs.lat))
     w = w.expand_dims({"lon": obs.lon}, axis=1)
