@@ -82,6 +82,11 @@ def create_time_series(
 
     """
 
+    # Don't do anything if list of requested diagnostics is empty
+    if not diag_var_list:
+        print(f"\n  No time series files requested for {component}...")
+        return
+
     # Notify user that script has started:
     logger.info(f"\n  Generating {component} time series files...")
 
