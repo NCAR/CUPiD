@@ -8,6 +8,7 @@ dependencies:
   - dask
   - distributed
   - geocat-comp
+  - geopandas
   - intake
   - intake-esm
   - intake-xarray
