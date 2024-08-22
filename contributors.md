@@ -1,35 +1,35 @@
 # Alphabetical list of all contributors
-Dave Bailey - NCAR
-Ingrid Carlson - Carroll College
-Dani Coleman - NCAR
-Cameron Cummins - U Texas
-Katie Dagon - NCAR
-Anna-Lena Deppenmeier - NCAR
-Brian Dobbins - NCAR
-Orhan Eroglu - NCAR
-John Fasullo - NCAR
-Katelyn FitzGerald - NCAR
-Meg Fowler - NCAR
-Cecile Hannay - NCAR
-Teagan King - NCAR
-Shivani Kumar - U Michigan
-Hilary Lam - U Michigan
-Dave Lawrence - NCAR
-Sam Levis - NCAR
-Mike Levy - NCAR
-Gustavo Marques - NCAR
-Christina McCluskey - NCAR
-Brian Medeiros - NCAR
-Naoki Mizukami - NCAR
-Jesse Nusbaumer - NCAR
-Keith Oleson - NCAR
-Adam Phillips - NCAR
-Justin Richling - NCAR
-Lev Romashkov - NCAR
-Bill Sacks - NCAR
-Isla Simpson - NCAR
-Gary Strand - NCAR
-Kate Thayer-Calder - NCAR
-Will Wieder - NCAR
-Anissa Zacharias - NCAR
-Feng Zhu - NCAR
+ - Dave Bailey (NCAR), @dabail10
+ - Ingrid Carlson (Carroll College)
+ - Dani Coleman (NCAR), @bitterbark
+ - Cameron Cummins (U Texas), @AgentOxygen
+ - Katie Dagon (NCAR), @katiedagon
+ - Anna-Lena Deppenmeier (NCAR), @ALDepp
+ - Brian Dobbins (NCAR), @briandobbins
+ - Orhan Eroglu (NCAR), @erogluorhan
+ - John Fasullo (NCAR)
+ - Katelyn FitzGerald (NCAR), @kafitzgerald
+ - Meg Fowler (NCAR), @megandevlan
+ - Cecile Hannay (NCAR), @cecilehannay
+ - Teagan King (NCAR), @TeaganKing
+ - Shivani Kumar (U Michigan), @shivaniikum
+ - Hilary Lam (U Michigan)
+ - Dave Lawrence (NCAR), @dlawrenncar
+ - Sam Levis (NCAR), @slevis-lmwg
+ - Mike Levy (NCAR), @mnlevy1981
+ - Gustavo Marques (NCAR), @gustavo-marques
+ - Christina McCluskey (NCAR), @cmcclus
+ - Brian Medeiros (NCAR), @brianpm
+ - Naoki Mizukami (NCAR), @nmizukami
+ - Jesse Nusbaumer (NCAR), @nusbaume
+ - Keith Oleson (NCAR), @olyson
+ - Adam Phillips (NCAR), @phillips-ad
+ - Justin Richling (NCAR), @justin-richling
+ - Lev Romashkov (NCAR), @rmshkv
+ - Bill Sacks (NCAR), @billsacks
+ - Isla Simpson (NCAR), @islasimpson
+ - Gary Strand (NCAR), @strandwg
+ - Kate Thayer-Calder (NCAR), @Katetc
+ - Will Wieder (NCAR), @wwieder
+ - Anissa Zacharias (NCAR), @anissa111
+ - Feng Zhu (NCAR), @fzhu2e
