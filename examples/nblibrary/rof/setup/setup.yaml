@@ -1,0 +1,150 @@
+## Configurations used for ctsm-mizuRoute
+
+# Directories
+case_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/run_case
+archive_dir: /glade/campaign/cgd/tss/people/mizukami/ctsm-mizuRoute/archive
+geospatial_dir: /glade/campaign/cgd/tss/people/mizukami/ctsm-mizuRoute/geospatial
+ancillary_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/postprocess+analysis//ancillary_data
+ref_flow_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/obs
+
+# simulation periods
+# note assuming all the simulations have the same periods and assuming start in January 1st and end in December 31st
+syr: 1965
+eyr: 1980
+
+# rof spatial grid
+rof_grid:
+  rHDMAlk:
+    network: HDMA_lake
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:red'
+  rHDMAlk_h06:
+    network: HDMA_lake_h06
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  rHDMAlk_irrig_limited:
+    network: HDMA_lake
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  rHDMAlk_irrig_unlimited:
+    network: HDMA_lake
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:magenta'
+  rHDMAlk_irrig_groundwater:
+    network: HDMA_lake
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:magenta'
+  rHDMA:
+    network: HDMA
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:blue'
+  rMERIT:
+    network: MERIT_Hydro
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  f09_f09:
+    network: mosart
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  f09_f09_mosart:
+    network: mosart
+    model: mosart
+    network_type: grid
+    domain_nc: mosart0.5_domain.nc
+    flow_name: RIVER_DISCHARGE_OVER_LAND_LIQ
+    runoff_name: None
+    color: 'xkcd:grey'
+
+# riiver line geopackage metadata
+# sub-key is network name
+reach_gpkg:
+  HDMA:
+    file_name: hdma_global_stream.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  HDMA_lake:
+    file_name: hdma_global_stream.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  HDMA_lake_h06:
+    file_name: hdma_global_stream.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  MERIT_Hydro:
+    file_name: rivEndMERIT_simplified_0003.gpkg
+    id_name: COMID
+    down_id_name: NextDownID
+  mosart:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_flowline.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+
+# catchment geopackage metadata
+# sub-key is network name
+catch_gpkg:
+  HDMA:
+    file_name: hdma_global_catch_v2_0.01.gpkg
+    id_name: hruid
+  HDMA_lake:
+    file_name: hdma_hydrolake_global_catch_v1_0.01.gpkg
+    id_name: ID
+  HDMA_lake_h06:
+    file_name: hdma_hydrolake_global_catch_v1_0.01.gpkg
+    id_name: ID
+  MERIT_Hydro:
+    file_name: catEndoMERIT.gpkg
+    id_name: hruid
+  mosart:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_hru.gpkg
+    id_name: hruid
+
+# river network data (mizuRoute format, augumented one)
+# sub-key is network name
+river_network:
+  HDMA:
+    file_name: ntopo_HDMA.v2.aug.nc
+    reach_ID: seg_id
+  HDMA_lake:
+    file_name: Network_topology_HDMA_HydroLake_v3.aug.nc
+    reach_ID: seg_id
+  HDMA_lake_h06:
+    file_name: Network_topology_HDMA_HydroLake_v4.aug.nc
+    reach_ID: seg_id
+  MERIT_Hydro:
+    file_name: ntopo_MERIT_Hydro_v1.aug.nc
+    reach_ID: seg_id
+  mosart:
+    file_name: mizuRoute_MOSART_routing_Global_0.5x0.5_c170601.aug.nc
+    reach_ID: seg_id
