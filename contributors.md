@@ -1,35 +1,37 @@
 # Alphabetical list of all contributors
- - Dave Bailey (NCAR), @dabail10
+ - Dave Bailey (NCAR), [@dabail10](https://github.com/dabail10)
  - Ingrid Carlson (Carroll College)
- - Dani Coleman (NCAR), @bitterbark
- - Cameron Cummins (U Texas), @AgentOxygen
- - Katie Dagon (NCAR), @katiedagon
- - Anna-Lena Deppenmeier (NCAR), @ALDepp
- - Brian Dobbins (NCAR), @briandobbins
- - Orhan Eroglu (NCAR), @erogluorhan
+ - Dani Coleman (NCAR), [@bitterbark](https://github.com/bitterbark)
+ - Cameron Cummins (U Texas), [@AgentOxygen](https://github.com/AgentOxygen)
+ - Katie Dagon (NCAR), [@katiedagon](https://github.com/katiedagon)
+ - Anna-Lena Deppenmeier (NCAR), [@ALDepp](https://github.com/ALDepp)
+ - Brian Dobbins (NCAR), [@briandobbins](https://github.com/briandobbins)
+ - Orhan Eroglu (NCAR), [@erogluorhan](https://github.com/erogluorhan)
  - John Fasullo (NCAR)
- - Katelyn FitzGerald (NCAR), @kafitzgerald
- - Meg Fowler (NCAR), @megandevlan
- - Cecile Hannay (NCAR), @cecilehannay
- - Teagan King (NCAR), @TeaganKing
- - Shivani Kumar (U Michigan), @shivaniikum
+ - Katelyn FitzGerald (NCAR), [@kafitzgerald](https://github.com/kafitzgerald)
+ - Meg Fowler (NCAR), [@megandevlan](https://github.com/megandevlan)
+ - Cecile Hannay (NCAR), [@cecilehannay](https://github.com/cecilehannay)
+ - Teagan King (NCAR), [@TeaganKing](https://github.com/TeaganKing)
+ - Shivani Kumar (U Michigan), [@shivaniikum](https://github.com/shivaniikum)
  - Hilary Lam (U Michigan)
- - Dave Lawrence (NCAR), @dlawrenncar
- - Sam Levis (NCAR), @slevis-lmwg
- - Mike Levy (NCAR), @mnlevy1981
- - Gustavo Marques (NCAR), @gustavo-marques
- - Christina McCluskey (NCAR), @cmcclus
- - Brian Medeiros (NCAR), @brianpm
- - Naoki Mizukami (NCAR), @nmizukami
- - Jesse Nusbaumer (NCAR), @nusbaume
- - Keith Oleson (NCAR), @olyson
- - Adam Phillips (NCAR), @phillips-ad
- - Justin Richling (NCAR), @justin-richling
- - Lev Romashkov (NCAR), @rmshkv
- - Bill Sacks (NCAR), @billsacks
- - Isla Simpson (NCAR), @islasimpson
- - Gary Strand (NCAR), @strandwg
- - Kate Thayer-Calder (NCAR), @Katetc
- - Will Wieder (NCAR), @wwieder
- - Anissa Zacharias (NCAR), @anissa111
- - Feng Zhu (NCAR), @fzhu2e
+ - Dave Lawrence (NCAR), [@dlawrenncar](https://github.com/dlawrenncar)
+ - Sam Levis (NCAR), [@slevis-lmwg](https://github.com/slevis-lmwg)
+ - Mike Levy (NCAR), [@mnlevy1981](https://github.com/mnlevy1981)
+ - Gustavo Marques (NCAR), [@gustavo-marques](https://github.com/gustavo-marques)
+ - Christina McCluskey (NCAR), [@cmcclus](https://github.com/cmcclus)
+ - Brian Medeiros (NCAR), [@brianpm](https://github.com/brianpm)
+ - Naoki Mizukami (NCAR), [@nmizukami](https://github.com/nmizukami)
+ - Jesse Nusbaumer (NCAR), [@nusbaume](https://github.com/nusbaume)
+ - Keith Oleson (NCAR), [@olyson](https://github.com/olyson)
+ - Adam Phillips (NCAR), [@phillips-ad](https://github.com/phillips-ad)
+ - Justin Richling (NCAR), [@justin-richling](https://github.com/justin-richling)
+ - Lev Romashkov (NCAR), [@rmshkv](https://github.com/rmshkv)
+ - Bill Sacks (NCAR), [@billsacks](https://github.com/billsacks)
+ - Isla Simpson (NCAR), [@islasimpson](https://github.com/islasimpson)
+ - Gary Strand (NCAR), [@strandwg](https://github.com/strandwg)
+ - Kate Thayer-Calder (NCAR), [@Katetc](https://github.com/Katetc)
+ - Will Wieder (NCAR), [@wwieder](https://github.com/wwieder)
+ - Anissa Zacharias (NCAR), [@anissa111](https://github.com/anissa111)
+ - Feng Zhu (NCAR), [@fzhu2e](https://github.com/fzhu2e)
+
+Note: If you have contributed to the project, please feel free to add yourself to this list.
