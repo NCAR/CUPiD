@@ -1,6 +1,6 @@
 # Alphabetical list of all contributors
  - Dave Bailey (NCAR), [@dabail10](https://github.com/dabail10)
- - Ingrid Carlson (Carroll College)
+ - Ingrid Carlson (Carroll College), [@ingridc2051](https://github.com/ingridc2051)
  - Dani Coleman (NCAR), [@bitterbark](https://github.com/bitterbark)
  - Cameron Cummins (U Texas), [@AgentOxygen](https://github.com/AgentOxygen)
  - Katie Dagon (NCAR), [@katiedagon](https://github.com/katiedagon)
