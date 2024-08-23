@@ -12,8 +12,8 @@ ref_flow_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/obs
 syr: 1965
 eyr: 1980
 
-# rof spatial grid
-rof_grid:
+# case meta data
+case_meta:
   rHDMAlk:
     network: HDMA_lake
     model: mizuroute
