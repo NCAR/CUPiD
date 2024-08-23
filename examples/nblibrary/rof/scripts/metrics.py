@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import math
-
 import numpy as np
 
 # performance metrics
@@ -25,7 +23,7 @@ def corr(qsim, qobs):
 
 def alpha(qsim, qobs):
     qsim1, qobs1 = remove_nan(qsim, qobs)
-    return math.sqrt(np.sum((qsim1 - np.mean(qsim1)) ** 2) / len(qsim1)) / math.sqrt(
+    return np.sqrt(np.sum((qsim1 - np.mean(qsim1)) ** 2) / len(qsim1)) / np.sqrt(
         np.sum((qobs1 - np.mean(qobs1)) ** 2) / len(qobs1),
     )
 
@@ -37,7 +35,7 @@ def beta(qsim, qobs):
 
 def kge(qsim, qobs):
     qsim1, qobs1 = remove_nan(qsim, qobs)
-    return 1 - math.sqrt(
+    return 1 - np.sqrt(
         (1 - corr(qsim1, qobs1)) ** 2
         + (alpha(qsim1, qobs1) - 1) ** 2
         + (beta(qsim1, qobs1) - 1) ** 2,
