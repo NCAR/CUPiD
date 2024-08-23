@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import yaml
@@ -71,8 +70,8 @@ def get_index_array(a_array, b_array):
 
 def reorder_index(ID_array_orig, ID_array_target):
     x = ID_array_orig
-    # Find the indices of the reordered array
-    # From: https://stackoverflow.com/questions/8251541/numpy-for-every-element-in-one-array-find-the-index-in-another-array
+    # Find the indices of the reordered array. See link for more details:
+    # https://stackoverflow.com/questions/8251541/numpy-for-every-element-in-one-array-find-the-index-in-another-array
     index = np.argsort(x)
     sorted_x = x[index]
     sorted_index = np.searchsorted(sorted_x, ID_array_target)
