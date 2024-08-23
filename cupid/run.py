@@ -17,6 +17,7 @@ Options:
   -lnd, --land        Run land component diagnostics
   -ice, --seaice      Run sea ice component diagnostics
   -glc, --landice     Run land ice component diagnostics
+  -rof, --river-runoff Run river runoff component diagnostics
   -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
   -h, --help          Show this message and exit.
 """
@@ -47,6 +48,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
+@click.option("--river_runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
 @click.argument("config_path", default="config.yml")
 def run(
     config_path,
@@ -58,6 +60,7 @@ def run(
     land=False,
     seaice=False,
     landice=False,
+    river_runoff=False,
 ):
     """
     Main engine to set up running all the notebooks.
@@ -81,11 +84,12 @@ def run(
         "lnd": land,
         "ice": seaice,
         "glc": landice,
+        "rof": river_runoff,
     }
 
     # Automatically run all if no components specified
 
-    if True not in [atmosphere, ocean, land, seaice, landice]:
+    if True not in [atmosphere, ocean, land, seaice, landice, river_runoff]:
         all = True
         for key in component_options.keys():
             component_options[key] = True
