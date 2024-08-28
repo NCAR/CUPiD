@@ -115,19 +115,54 @@ def run(
         for component, comp_bool in component_options.items():
             if comp_bool:
 
-                # set time series output directory:
+                # set time series input and output directory:
                 # -----
-                if "ts_output_dir" in timeseries_params:
-                    ts_output_dir = os.path.join(
-                            timeseries_params["ts_output_dir"],
-                            f"{component}", "proc", "tseries",
-                    )
+                if isinstance(timeseries_params["case_name"], list):
+                    ts_input_dirs = []
+                    for cname in timeseries_params["case_name"]:
+                        ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
                 else:
-                    ts_output_dir = os.path.join(
-                            global_params["CESM_output_dir"],
-                            timeseries_params["case_name"],
-                            f"{component}", "proc", "tseries",
-                    )
+                    ts_input_dirs = [
+                        global_params["CESM_output_dir"] + "/" +
+                        timeseries_params["case_name"] + f"/{component}/hist/",
+                    ]
+
+                if "ts_output_dir" in timeseries_params:
+                    if isinstance(timeseries_params["ts_output_dir"], list):
+                        ts_output_dirs = []
+                        for ts_outdir in timeseries_params["ts_output_dir"]:
+                            ts_output_dirs.append([
+                                os.path.join(
+                                        ts_outdir,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            ])
+                    else:
+                        ts_output_dirs = [
+                            os.path.join(
+                                    timeseries_params["ts_output_dir"],
+                                    f"{component}", "proc", "tseries",
+                            ),
+                        ]
+                else:
+                    if isinstance(timeseries_params["case_name"], list):
+                        ts_output_dirs = []
+                        for cname in timeseries_params["case_name"]:
+                            ts_output_dirs.append(
+                                os.path.join(
+                                        global_params["CESM_output_dir"],
+                                        cname,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            )
+                    else:
+                        ts_output_dirs = [
+                            os.path.join(
+                                    global_params["CESM_output_dir"],
+                                    timeseries_params["case_name"],
+                                    f"{component}", "proc", "tseries",
+                            ),
+                        ]
                 # -----
 
                 # fmt: off
@@ -136,10 +171,10 @@ def run(
                     component,
                     timeseries_params[component]["vars"],
                     timeseries_params[component]["derive_vars"],
-                    [timeseries_params["case_name"]],
+                    timeseries_params["case_name"],
                     timeseries_params[component]["hist_str"],
-                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
-                    [ts_output_dir],
+                    ts_input_dirs,
+                    ts_output_dirs,
                     # Note that timeseries output will eventually go in
                     #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
