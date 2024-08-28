@@ -46,55 +46,54 @@ global_params:
   base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-  end_date: '0066-01-01'
-  base_end_date: '0101-01-01'
+  end_date: '0101-01-01'
   lc_kwargs:
     threads_per_worker: 1
 
 timeseries:
   num_procs: 8
-  ts_done: [False]
-  overwrite_ts: [False]
-  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
+  ts_done: [False, False]
+  overwrite_ts: [False, False]
+  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
 
   atm:
     vars: ['PSL']
     derive_vars: []
     hist_str: 'h0a'
-    start_years: [1]
-    end_years: [65]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   lnd:
     vars: []
     derive_vars: []
     hist_str: 'h0'
-    start_years: [1]
-    end_years: [65]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   ocn:
     vars: []
     derive_vars: []
     hist_str: 'h.z'
-    start_years: [1]
-    end_years: [65]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   ice:
     vars: []
     derive_vars: []
     hist_str: 'h'
-    start_years: [1]
-    end_years: [65]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   glc:
     vars: []
     derive_vars: []
     hist_str: 'initial_hist'
-    start_years: [1]
-    end_years: [65]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
 compute_notebooks:
@@ -125,8 +124,7 @@ compute_notebooks:
           none:
             obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-            climo_nyears: 30
-            base_climo_nyears: 40
+            climo_nyears: 40
 
 #    ice:
 #      seaice:
