@@ -17,6 +17,7 @@ import xarray as xr
 
 logger = logging.getLogger(__name__)
 
+
 def call_ncrcat(cmd):
     """This is an internal function to `create_time_series`
     It just wraps the subprocess.call() function, so it can be
@@ -344,7 +345,9 @@ def create_time_series(
     # End cases loop
 
     # Notify user that script has ended:
-    logger.info(f"  ... {component} time series file generation has finished successfully.")
+    logger.info(
+        f"  ... {component} time series file generation has finished successfully.",
+    )
 
 
 def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):

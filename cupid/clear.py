@@ -18,7 +18,7 @@ import click
 
 import cupid.util
 
-logging.basicConfig(filename='cupid.log', level=logging.DEBUG) #, force=True)
+logging.basicConfig(filename="cupid.log", level=logging.DEBUG)  # , force=True)
 logger = logging.getLogger(__name__)
 
 
