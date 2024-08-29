@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 import warnings
+from datetime import datetime
 from pathlib import Path
 
 import jupyter_client
@@ -28,6 +29,10 @@ import yaml
 from jinja2 import Template
 from papermill.engines import NBClientEngine
 
+logging.basicConfig(
+    filename="cupid.log.{}".format(datetime.now().strftime("%Y%m%d%H%M%S")),
+    level=logging.DEBUG,
+)
 logger = logging.getLogger(__name__)
 
 
