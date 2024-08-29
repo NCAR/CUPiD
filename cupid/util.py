@@ -15,6 +15,7 @@ Classes:
 """
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import warnings
@@ -26,6 +27,8 @@ import ploomber
 import yaml
 from jinja2 import Template
 from papermill.engines import NBClientEngine
+
+logger = logging.getLogger(__name__)
 
 
 class MarkdownJinjaEngine(NBClientEngine):
@@ -50,7 +53,7 @@ def get_control_dict(config_path):
         with open(config_path) as fid:
             control = yaml.safe_load(fid)
     except FileNotFoundError:
-        print(f"ERROR: {config_path} not found")
+        logger.error(f"ERROR: {config_path} not found")
         sys.exit(1)
 
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
