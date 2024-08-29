@@ -7,6 +7,7 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 from __future__ import annotations
 
 import glob
+import logging
 import multiprocessing as mp
 import os
 import subprocess
@@ -14,6 +15,7 @@ from pathlib import Path
 
 import xarray as xr
 
+logger = logging.getLogger(__name__)
 
 def call_ncrcat(cmd):
     """This is an internal function to `create_time_series`
@@ -80,7 +82,7 @@ def create_time_series(
     """
 
     # Notify user that script has started:
-    print(f"\n  Generating {component} time series files...")
+    logger.info(f"\n  Generating {component} time series files...")
 
     # Loop over cases:
     for case_idx, case_name in enumerate(case_names):
@@ -90,11 +92,11 @@ def create_time_series(
                 "Configuration file indicates time series files have been pre-computed"
             )
             emsg += f" for case '{case_name}'.  Will rely on those files directly."
-            print(emsg)
+            logger.info(emsg)
             continue
         # End if
 
-        print(f"\t Processing time series for case '{case_name}' :")
+        logger.info(f"\t Processing time series for case '{case_name}' :")
 
         # Extract start and end year values:
         start_year = start_years[case_idx]
@@ -179,7 +181,7 @@ def create_time_series(
                         wmsg += (
                             f" transferred beyond the {height_dim} dimension itself."
                         )
-                        print(wmsg)
+                        logger.warning(wmsg)
 
                         vert_coord_type = None
                     # End if
@@ -190,7 +192,7 @@ def create_time_series(
                     )
                     wmsg += " so no additional vertical coordinate information will be"
                     wmsg += f" transferred beyond the {height_dim} dimension itself."
-                    print(wmsg)
+                    logger.warning(wmsg)
 
                     vert_coord_type = None
                 # End if (long name)
@@ -223,13 +225,13 @@ def create_time_series(
         vars_to_derive = []
         # create copy of var list that can be modified for derivable variables
         if diag_var_list == ["process_all"]:
-            print("generating time series for all variables")
+            logger.info("generating time series for all variables")
             # TODO: this does not seem to be working for ocn...
             diag_var_list = hist_file_var_list
         for var in diag_var_list:
             if var not in hist_file_var_list:
                 if component == "ocn":
-                    print(
+                    logger.warning(
                         "ocean vars seem to not be present in all files and thus cause errors",
                     )
                     continue
@@ -244,7 +246,7 @@ def create_time_series(
                     continue
                 msg = f"WARNING: {var} is not in the file {hist_files[0]}."
                 msg += " No time series will be generated."
-                print(msg)
+                logger.warning(msg)
                 continue
 
             # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
@@ -269,7 +271,7 @@ def create_time_series(
                     continue
 
             # Notify user of new time series file:
-            print(f"\t - time series for {var}")
+            logger.info(f"\t - time series for {var}")
 
             # Variable list starts with just the variable
             ncrcat_var_list = f"{var}"
@@ -288,11 +290,11 @@ def create_time_series(
 
                     if "PS" in hist_file_var_list:
                         ncrcat_var_list = ncrcat_var_list + ",PS"
-                        print("Adding PS to file")
+                        logger.info("Adding PS to file")
                     else:
                         wmsg = "WARNING: PS not found in history file."
                         wmsg += " It might be needed at some point."
-                        print(wmsg)
+                        logger.warning(wmsg)
                     # End if
 
                     if vert_coord_type == "height":
@@ -304,11 +306,11 @@ def create_time_series(
                         # PMID file to each one of those targets separately. -JN
                         if "PMID" in hist_file_var_list:
                             ncrcat_var_list = ncrcat_var_list + ",PMID"
-                            print("Adding PMID to file")
+                            logger.info("Adding PMID to file")
                         else:
                             wmsg = "WARNING: PMID not found in history file."
                             wmsg += " It might be needed at some point."
-                            print(wmsg)
+                            logger.warning(wmsg)
                         # End if PMID
                     # End if height
                 # End if cam
@@ -342,7 +344,7 @@ def create_time_series(
     # End cases loop
 
     # Notify user that script has ended:
-    print(f"  ... {component} time series file generation has finished successfully.")
+    logger.info(f"  ... {component} time series file generation has finished successfully.")
 
 
 def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
@@ -376,7 +378,7 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
             if overwrite:
                 Path(prect_file).unlink()
             else:
-                print(
+                logger.warning(
                     f"[{__name__}] Warning: PRECT file was found and overwrite is False"
                     + "Will use existing file.",
                 )
@@ -410,7 +412,7 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
                 if overwrite:
                     Path(derived_file).unlink()
                 else:
-                    print(
+                    logger.warning(
                         f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
                         + "Will use existing file.",
                     )
