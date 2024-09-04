@@ -11,13 +11,11 @@ import logging
 import multiprocessing as mp
 import os
 import subprocess
-from datetime import datetime
 from pathlib import Path
 
 import xarray as xr
 
 logging.basicConfig(
-    filename="cupid.log.{}".format(datetime.now().strftime("%Y%m%d%H%M%S")),
     level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)

@@ -13,14 +13,12 @@ from __future__ import annotations
 import logging
 import os
 import shutil
-from datetime import datetime
 
 import click
 
 import cupid.util
 
 logging.basicConfig(
-    filename="cupid.log.{}".format(datetime.now().strftime("%Y%m%d%H%M%S")),
     level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
