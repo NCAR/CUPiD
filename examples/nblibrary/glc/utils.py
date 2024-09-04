@@ -7,7 +7,7 @@ import xarray as xr
 from matplotlib import pyplot as plt
 
 
-def read_cesm_smb(path, case_name, last_year, params):
+def read_cesm_smb(path, case_name, last_year, climo_nyears, params):
     """
     This function reads CESM coupler history files and returns
     an xarray DataArray containing surface mass balance in units mm/y
@@ -18,7 +18,7 @@ def read_cesm_smb(path, case_name, last_year, params):
     smb_convert = sec_in_yr / rhoi * 1000  # converting kg m-2 s-1 ice to mm y-1 w.e.
 
     filenames = []
-    for k in range(params["climo_nyears"]):
+    for k in range(climo_nyears):
 
         year_to_read = last_year - k
         filename = (
@@ -26,7 +26,9 @@ def read_cesm_smb(path, case_name, last_year, params):
         )
 
         if not os.path.isfile(filename):
-            print(f"The couple file for time {year_to_read} does not exist.")
+            print(
+                f"Looked for {filename} (for time {year_to_read}) but it does not exist.",
+            )
             print(
                 "We will only use the files that existed until now to create the SMB climatology.",
             )
