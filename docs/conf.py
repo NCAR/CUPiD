@@ -22,7 +22,7 @@ print("sys.path:", sys.path)
 # This block allows us to remove the header image from any md files
 # without affecting the original version, but still pull the source
 # into the docs build fresh each time.
-for file in ["README.md", "NCAR_tips.md"]:
+for file in ["README.md", "NCAR_tips.md", "config.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
