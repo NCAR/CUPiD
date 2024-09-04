@@ -25,7 +25,7 @@
  - Keith Oleson (NCAR), [@olyson](https://github.com/olyson)
  - Adam Phillips (NCAR), [@phillips-ad](https://github.com/phillips-ad)
  - Justin Richling (NCAR), [@justin-richling](https://github.com/justin-richling)
- - Lev Romashkov (NCAR), [@rmshkv](https://github.com/rmshkv)
+ - Lev Romashkov (NCAR; now Stanford University), [@rmshkv](https://github.com/rmshkv)
  - Bill Sacks (NCAR), [@billsacks](https://github.com/billsacks)
  - Isla Simpson (NCAR), [@islasimpson](https://github.com/islasimpson)
  - Gary Strand (NCAR), [@strandwg](https://github.com/strandwg)
