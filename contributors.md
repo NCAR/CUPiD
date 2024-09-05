@@ -34,4 +34,4 @@
  - Anissa Zacharias (NCAR), [@anissa111](https://github.com/anissa111)
  - Feng Zhu (NCAR), [@fzhu2e](https://github.com/fzhu2e)
 
-Note: If you have contributed to the project, please feel free to add yourself to this list.
+Note: If you have contributed to the project, please feel free to add yourself to this list by updating [contributors.md](https://github.com/NCAR/CUPiD/blob/main/contributors.md).
