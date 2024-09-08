@@ -1,38 +1,67 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import os
 
 import yaml
-from CIME.case import Case
-from standard_script_setup import *  # noqa: F401,F403
 
-# Create variable for the caseroot environment variable
-caseroot = os.getcwd()
-# Open the config.yml file and create a dictionary with safe_load from the yaml package
-with open("config_template.yml") as f:
-    my_dict = yaml.safe_load(f)
 
-# get environment cesm case variables
-with Case(caseroot, read_only=False, record=True) as case:
-    cime_case = case.get_value("CASE")
-    # create variable to access cesm_output_dir
-    outdir = case.get_value("DOUT_S_ROOT")
+def _parse_args():
+    """Parse command line arguments"""
 
-my_dict["global_params"]["case_name"] = cime_case
-my_dict["timeseries"]["case_name"] = cime_case
+    parser = argparse.ArgumentParser(
+        description="Generate config.yml based on an existing CUPID example",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
-# create variable user to access the user environment variable
-user = os.environ["USER"]
-# replace USER with the environment variable
-# my_dict['data_sources']['nb_path_root'] = f'/glade/u/home/{user}/CUPiD/examples/nblibrary'
+    # Command line argument for name of case (required)
+    parser.add_argument("--case", action="store", dest="case", help="Name of CESM case")
 
-# replace with environment variable
-my_dict["global_params"]["CESM_output_dir"] = outdir
+    # Command line argument for name of case (required)
+    parser.add_argument(
+        "--cesm-output-dir",
+        action="store",
+        dest="cesm_output_dir",
+        help="Location of CESM history files (short-term archive)",
+    )
 
-# create new file, make it writeable
-with open("config.yml", "w") as f:
-    # write a comment
-    f.write("# sample comment\n")
-    # enter in each element of the dictionary into the new file
-    yaml.dump(my_dict, f)
+    parser.add_argument(
+        "--cupid-root",
+        action="store",
+        dest="cupid_root",
+        help="Location of CUPiD in file system",
+    )
+
+    parser.add_argument(
+        "--cupid-example",
+        action="store",
+        dest="cupid_example",
+        default="key_metrics",
+        help="CUPiD example to use as template for config.yml",
+    )
+
+    return parser.parse_args()
+
+
+def generate_cupid_config(case, cesm_output_dir, cupid_root, cupid_example):
+    with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
+        my_dict = yaml.safe_load(f)
+
+    my_dict["global_params"]["case_name"] = case
+    my_dict["timeseries"]["case_name"] = case
+
+    # replace with environment variable
+    my_dict["global_params"]["CESM_output_dir"] = cesm_output_dir
+
+    # create new file, make it writeable
+    with open("config.yml", "w") as f:
+        # write a comment
+        f.write("# sample comment\n")
+        # enter in each element of the dictionary into the new file
+        yaml.dump(my_dict, f, sort_keys=False)
+
+
+if __name__ == "__main__":
+    args = vars(_parse_args())
+    generate_cupid_config(**args)
