@@ -35,16 +35,6 @@ for file in ["README.md", "NCAR_tips.md", "contributors.md"]:
     with open(file, "w") as f:
         f.write(file1 + file_rest)
 
-# Copy images into ${CUPID}/docs/_static/images/
-for file in [
-    "config_1.png",
-    "config_2.png",
-    "config_3.png",
-    "config_4.png",
-    "config_5.png",
-]:
-    os.system(f"cp ../images/{file} ../docs/_static/images/")
-
 # -- Project information -----------------------------------------------------
 
 project = "CUPiD"
