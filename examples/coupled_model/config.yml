@@ -154,7 +154,15 @@ compute_notebooks:
             analysis_name: 'mosart_test'
             cases:
               f09_f09_mg17_mosart: 'f09_f09_mosart'
+            figureSave: False
             error_metric: 'rmse'
+      ocean_discharge:
+        parameter_groups:
+          none:
+            analysis_name: 'mosart_test'
+            cases:
+              f09_f09_mg17_mosart: 'f09_f09_mosart'
+            figureSave: False
 
     ice:
       seaice:
