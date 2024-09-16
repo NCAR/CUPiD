@@ -12,8 +12,6 @@ cupid.egg-info
 # Text editor temp files
 **/*.swp
 
-externals/
-
 # Documentation
 /docs/_build/
 /docs/README.md
