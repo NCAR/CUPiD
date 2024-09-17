@@ -28,11 +28,6 @@ import yaml
 from jinja2 import Template
 from papermill.engines import NBClientEngine
 
-logging.basicConfig(
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
-
 
 class MarkdownJinjaEngine(NBClientEngine):
     """Class for using the Jinja Engine to run notebooks"""
@@ -52,11 +47,12 @@ class MarkdownJinjaEngine(NBClientEngine):
 
 def get_control_dict(config_path):
     """Get control dictionary from configuration file"""
+
     try:
         with open(config_path) as fid:
             control = yaml.safe_load(fid)
     except FileNotFoundError:
-        logger.error(f"ERROR: {config_path} not found")
+        print(f"ERROR: {config_path} not found")
         sys.exit(1)
 
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
@@ -97,6 +93,39 @@ def get_control_dict(config_path):
                     )
 
     return control
+
+
+def setup_logging(config_path):
+    """
+    Set up logging based on configuration file log level
+    Returns logger object
+    """
+    control = get_control_dict(config_path)
+    log_level = control["computation_config"].get("log_level", None)
+    if log_level:
+        if log_level == "debug":
+            logging.basicConfig(
+                level=logging.DEBUG,
+            )
+        if log_level == "info":
+            logging.basicConfig(
+                level=logging.INFO,
+            )
+        if log_level == "warning":
+            logging.basicConfig(
+                level=logging.WARNING,
+            )
+        if log_level == "error":
+            logging.basicConfig(
+                level=logging.ERROR,
+            )
+    else:
+        # default level is warning if log level is not set in config
+        logging.basicConfig(
+            level=logging.WARNING,
+        )
+
+    return logging.getLogger(__name__)
 
 
 def setup_book(config_path):

@@ -10,18 +10,12 @@ at that location.
 """
 from __future__ import annotations
 
-import logging
 import os
 import shutil
 
 import click
 
 import cupid.util
-
-logging.basicConfig(
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
 
 
 def read_config_file(config_path):
@@ -58,7 +52,7 @@ def clear(config_path):
     Args: CONFIG_PATH - The path to the configuration file.
 
     """
-
+    logger = cupid.util.setup_logging(config_path)
     run_dir = read_config_file(config_path)
     # Delete the "computed_notebooks" folder and all the contents inside of it
     shutil.rmtree(run_dir)
