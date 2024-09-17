@@ -7,7 +7,6 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 from __future__ import annotations
 
 import glob
-import logging
 import multiprocessing as mp
 import os
 import subprocess
@@ -15,10 +14,11 @@ from pathlib import Path
 
 import xarray as xr
 
-logging.basicConfig(
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
+import cupid.util
+
+
+# TODO: bring in actual config path in case not using config.yml
+logger = cupid.util.setup_logging("config.yml")
 
 
 def call_ncrcat(cmd):
