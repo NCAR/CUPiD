@@ -36,7 +36,7 @@ Notes:
 It still feels slower than running `mamba` directly, hence the recommendation to install with `mamba env create` rather than `conda env create`.
 If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
 (To see what version of conda you have installed, run `conda --version`.)
-1. If `externals/ADF` and `externals/mom6-tools` are empty, run `git submodule update --init` to clone the submodules.
+1. If the subdirectories in `externals/` are all empty, run `git submodule update --init` to clone the submodules.
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
    ``` bash
