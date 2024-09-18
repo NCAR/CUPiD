@@ -17,10 +17,6 @@ import xarray as xr
 import cupid.util
 
 
-# TODO: bring in actual config path in case not using config.yml
-logger = cupid.util.setup_logging("config.yml")
-
-
 def call_ncrcat(cmd):
     """This is an internal function to `create_time_series`
     It just wraps the subprocess.call() function, so it can be
@@ -45,6 +41,7 @@ def create_time_series(
     height_dim,
     num_procs,
     serial,
+    logger,
 ):
     """
     Generate time series versions of the history file data.
@@ -336,6 +333,7 @@ def create_time_series(
                 derive_cam_variables(
                     vars_to_derive=vars_to_derive,
                     ts_dir=ts_dir[case_idx],
+                    logger=logger,
                 )
 
         if serial:
@@ -353,7 +351,7 @@ def create_time_series(
     )
 
 
-def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
+def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None, logger=None):
     """
     Derive variables acccording to steps given here.  Since derivations will depend on the
     variable, each variable to derive will need its own set of steps below.
@@ -363,6 +361,9 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None):
     If the file for the derived variable exists, the kwarg `overwrite` determines
     whether to overwrite the file (true) or exit with a warning message.
     """
+
+    if logger==None:
+	logger = cupid.util.setup_logging("config.yml")
 
     for var in vars_to_derive:
         if var == "PRECT":
