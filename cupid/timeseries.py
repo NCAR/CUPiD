@@ -362,8 +362,8 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None, logge
     whether to overwrite the file (true) or exit with a warning message.
     """
 
-    if logger==None:
-	logger = cupid.util.setup_logging("config.yml")
+    if logger is None:
+        logger = cupid.util.setup_logging("config.yml")
 
     for var in vars_to_derive:
         if var == "PRECT":
