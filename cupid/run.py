@@ -24,7 +24,6 @@ Options:
 from __future__ import annotations
 
 import os
-import warnings
 
 import click
 import intake
@@ -77,6 +76,7 @@ def run(
     # Get control structure
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
+    logger = cupid.util.setup_logging(config_path)
 
     component_options = {
         "atm": atmosphere,
@@ -149,6 +149,7 @@ def run(
                     timeseries_params[component]["level"],
                     num_procs,
                     serial,
+                    logger,
                 )
                 # fmt: on
                 # pylint: enable=line-too-long
@@ -214,7 +215,7 @@ def run(
                     all_nbs[nb]["nb_path_root"] = nb_path_root + "/" + comp_name
                     all_nbs[nb]["output_dir"] = output_dir + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(
+                logger.warning(
                     f"No notebooks for {comp_name} component specified in config file.",
                 )
 
@@ -223,7 +224,7 @@ def run(
         for nb, info in all_nbs.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(
+                logger.warning(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;" +
                     f" {nb}.ipynb will not be run." +
                     "See README.md for environment installation instructions.",
@@ -257,7 +258,7 @@ def run(
                     all_scripts[script] = info
                     all_scripts[script]["nb_path_root"] = nb_path_root + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(
+                logger.warning(
                     f"No scripts for {comp_name} component specified in config file.",
                 )
 
@@ -266,7 +267,7 @@ def run(
         for script, info in all_scripts.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(
+                logger.warning(
                     f"Environment {bad_env} specified for {script}.py could not be found;" +
                     f"{script}.py will not be run.",
                 )
