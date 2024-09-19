@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from itertools import groupby
-
 import numpy as np
 import xarray as xr
 
@@ -206,7 +204,9 @@ def FHV(dr: xr.DataArray, percent=0.9):
 def FLV(dr: xr.DataArray, percent=0.1):
 
     # Calculates Flow duration curve low segment volume. default is < 0.1
-    # Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation: Applicationto the NWS distributed hydrologic model, Water Resour. Res., 44, W09417, doi:10.1029/2007WR006716
+    # Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation:
+    # Application to the NWS distributed hydrologic model, Water Resour. Res., 44, W09417,
+    # doi:10.1029/2007WR006716
 
     prob = np.arange(1, float(len(dr["time"] + 1))) / (
         1 + len(dr["time"])
@@ -273,7 +273,8 @@ def FMS(dr: xr.DataArray, percent_low=0.3, percent_high=0.7):
 def BFI(dr: xr.DataArray, alpha=0.925, npass=3, skip_time=30):
 
     # Calculate digital filter based Baseflow Index
-    # Ladson, A. R., et al. (2013). A Standard Approach to Baseflow Separation Using The Lyne and Hollick Filter. Australasian Journal of Water Resources, 17(1), 25–34.
+    # Ladson, A. R., et al. (2013). A Standard Approach to Baseflow Separation Using The Lyne and Hollick Filter.
+    # Australasian Journal of Water Resources, 17(1), 25–34.
     # https://doi.org/10.7158/13241583.2013.11465417
 
     t_axis = dr.dims.index("time")
@@ -304,18 +305,14 @@ def BFI(dr: xr.DataArray, alpha=0.925, npass=3, skip_time=30):
         np.nan,
     )
 
-    ds_BFI = xr.Dataset(
-        data_vars=dict(BFI=(["site"], BFI)),
-        coords=dict(site=dr["site"]),
-    )
-
     return BFI
 
 
 def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
 
     # freq_high_q: frequency of high-flow days (> 9 times the median daily flow) day/yr
-    # mean_high_q_dur: average duration of high-flow events over yr (number of consecutive days > 9 times the median daily flow) day
+    # mean_high_q_dur: average duration of high-flow events over yr
+    # (number of consecutive days > 9 times the median daily flow)
 
     dayofyear = "wateryear"
     if dayofyear == "wateryear":
