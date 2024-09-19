@@ -11,11 +11,26 @@ def myCount(ar):
     return [sum(val for _ in group) for val, group in groupby(ar) if val == 1]
 
 
-# time series error
-# flow metrics
-
+# ----- time series error
 
 def remove_nan(qsim, qobs):
+    """
+    Compare sim array and obs array time series,
+    Then remove both sim and obs at times if either or both sim and obs have NaN
+
+    Arguments
+    ---------
+    sim: array-like
+        Simulated time series array.
+    obs: array-like
+        Observed time series array.
+
+    Returns
+    -------
+    sim_obs: float
+        simulation and observation pair with nan removed
+    """
+
     sim_obs = np.stack((qsim, qobs), axis=1)
     sim_obs = sim_obs[~np.isnan(sim_obs).any(axis=1), :]
     return sim_obs[:, 0], sim_obs[:, 1]
@@ -37,11 +52,28 @@ def nse(qsim, qobs):
     nse: float
         nse calculated between the two arrays.
     """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return 1 - np.sum((qsim1 - qobs1) ** 2) / np.sum((qobs1 - np.mean(qobs1)) ** 2)
 
 
 def corr(qsim, qobs):
+    """
+    Calculates Pearson correlation coefficient  between two time series arrays.
+
+    Arguments
+    ---------
+    sim: array-like
+        Simulated time series array.
+    obs: array-like
+        Observed time series array.
+
+    Returns
+    -------
+    corr: float
+        correlation coefficient between the two arrays.
+    """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return np.corrcoef(qsim1, qobs1)[0, 1]
 
@@ -62,6 +94,7 @@ def alpha(qsim, qobs):
     alpha: float
         variability ratio calculated between the two arrays.
     """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return np.sqrt(np.sum((qsim1 - np.mean(qsim1)) ** 2) / len(qsim1)) / np.sqrt(
         np.sum((qobs1 - np.mean(qobs1)) ** 2) / len(qobs1),
@@ -84,6 +117,7 @@ def beta(qsim, qobs):
     beta: float
         mean ratio calculated between the two arrays.
     """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return np.mean(qsim1) / np.mean(qobs1)
 
@@ -91,6 +125,7 @@ def beta(qsim, qobs):
 def kge(qsim, qobs):
     """
     Calculates the Kling-Gupta Efficiency (KGE) between two time series arrays.
+
     Arguments
     ---------
     sim: array-like
@@ -103,6 +138,7 @@ def kge(qsim, qobs):
     kge: float
         Kling-Gupta Efficiency calculated between the two arrays.
     """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return 1 - np.sqrt(
         (1 - corr(qsim1, qobs1)) ** 2
@@ -114,6 +150,7 @@ def kge(qsim, qobs):
 def pbias(qsim, qobs):
     """
     Calculates percentage bias between two flow arrays.
+
     Arguments
     ---------
     sim: array-like
@@ -126,6 +163,7 @@ def pbias(qsim, qobs):
     pbial: float
         percentage bias calculated between the two arrays.
     """
+
     qsim1, qobs1 = remove_nan(qsim, qobs)
     return np.sum(qsim1 - qobs1) / np.sum(qobs1)
 
@@ -168,8 +206,7 @@ def rmse(qsim, qobs):
     return np.sqrt(np.mean((qsim1 - qobs1) ** 2))
 
 
-# flow metrics
-
+# ---- flow metrics
 
 def FHV(dr: xr.DataArray, percent=0.9):
     """
@@ -180,12 +217,15 @@ def FHV(dr: xr.DataArray, percent=0.9):
         2D DataArray containing daily time series with coordinates of 'site', and 'time'
     Returns
     -------
-    ds_FLV: xr.Dataset
+    ds_FHV: xr.Dataset
         Dataset containing two 2D DataArrays 'ann_max_flow' and 'ann_max_day' with coordinate of 'year', and 'site'
     Notes
     -------
-    None
+    Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation:
+    Application to the NWS distributed hydrologic model, Water Resour. Res., 44, W09417,
+    doi:10.1029/2007WR006716
     """
+
     prob = np.arange(1, float(len(dr["time"] + 1))) / (
         1 + len(dr["time"])
     )  # probability
@@ -210,11 +250,23 @@ def FHV(dr: xr.DataArray, percent=0.9):
 
 
 def FLV(dr: xr.DataArray, percent=0.1):
+    """
+    Calculates Flow duration curve low segment volume. default is < 0.1
 
-    # Calculates Flow duration curve low segment volume. default is < 0.1
-    # Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation:
-    # Application to the NWS distributed hydrologic model, Water Resour. Res., 44, W09417,
-    # doi:10.1029/2007WR006716
+    Arguments
+    ---------
+    dr: xr.DataArray
+        2D DataArray containing daily time series with coordinates of 'site', and 'time'
+    Returns
+    -------
+    ds_FLV: xr.Dataset
+        Dataset containing two 2D DataArrays 'ann_max_flow' and 'ann_max_day' with coordinate of 'year', and 'site'
+    Notes
+    -------
+    Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation:
+    Application to the NWS distributed hydrologic model, Water Resour. Res., 44, W09417,
+    doi:10.1029/2007WR006716
+    """
 
     prob = np.arange(1, float(len(dr["time"] + 1))) / (
         1 + len(dr["time"])
@@ -240,8 +292,23 @@ def FLV(dr: xr.DataArray, percent=0.1):
 
 
 def FMS(dr: xr.DataArray, percent_low=0.3, percent_high=0.7):
+    """
+    Calculate Flow duration curve midsegment slope (default between 30 and 70 percentile)
 
-    # Calculate Flow duration curve midsegment slope (default between 30 and 70 percentile)
+    Arguments
+    ---------
+    dr: xr.DataArray
+        2D DataArray containing daily time series with coordinates of 'site', and 'time'
+    Returns
+    -------
+    ds_FMS: xr.Dataset
+        Dataset containing two 2D DataArrays 'ann_max_flow' and 'ann_max_day' with coordinate of 'year', and 'site'
+    Notes
+    -------
+    Yilmaz, K. K., et al. (2008), A process-based diagnostic approach to model evaluation:
+    Application to the NWS distributed hydrologic model, Water Resour. Res., 44, W09417,
+    doi:10.1029/2007WR006716
+    """
 
     prob = np.arange(1, float(len(dr["time"] + 1))) / (
         1 + len(dr["time"])
@@ -279,11 +346,23 @@ def FMS(dr: xr.DataArray, percent_low=0.3, percent_high=0.7):
 
 
 def BFI(dr: xr.DataArray, alpha=0.925, npass=3, skip_time=30):
+    """
+    Calculate digital filter type Base flow index.
 
-    # Calculate digital filter based Baseflow Index
-    # Ladson, A. R., et al. (2013). A Standard Approach to Baseflow Separation Using The Lyne and Hollick Filter.
-    # Australasian Journal of Water Resources, 17(1), 25–34.
-    # https://doi.org/10.7158/13241583.2013.11465417
+    Arguments
+    ---------
+    dr: xr.DataArray
+        2D DataArray containing daily time series with coordinates of 'site', and 'time'
+    Returns
+    -------
+    BFI: float
+        scalar
+    Notes
+    -------
+    Ladson, A. R., et al. (2013). A Standard Approach to Baseflow Separation Using The Lyne and Hollick Filter.
+    Australasian Journal of Water Resources, 17(1), 25–34.
+    https://doi.org/10.7158/13241583.2013.11465417
+    """
 
     t_axis = dr.dims.index("time")
     tlen = len(dr["time"])
@@ -316,11 +395,29 @@ def BFI(dr: xr.DataArray, alpha=0.925, npass=3, skip_time=30):
     return BFI
 
 
-def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
+def high_q_freq_dur(dr: xr.DataArray, n=5.0, dayofyear="wateryear"):
+    """
+    Calculate high flow events frequency and duration per year
 
-    # freq_high_q: frequency of high-flow days (> 9 times the median daily flow) day/yr
-    # mean_high_q_dur: average duration of high-flow events over yr
-    # (number of consecutive days > 9 times the median daily flow)
+    Arguments
+    ---------
+    dr: xr.DataArray
+        2D DataArray containing daily time series with coordinates of 'site', and 'time'
+    qhigh_thresh
+        mulitplier applied to median flow of annual flow to define "high flow event"
+
+    Returns
+    -------
+    ds_high_q: xr.Dataset
+        Dataset containing two 2D DataArrays 'freq_high_q' and 'mean_high_q_dur' with coordinate of 'year', and 'site'
+
+    Notes
+    -------
+    freq_high_q: frequency of high-flow events [day/yr]
+    mean_high_q_dur: mean duration of high-flow events over yr
+    High flow event is defined as number of consecutive days of flows >= n times the median daily flow
+    where n is multiplier (default:5.0)
+    """
 
     dayofyear = "wateryear"
     if dayofyear == "wateryear":
@@ -358,7 +455,7 @@ def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
     )
 
     t_axis = dr.dims.index("time")
-    q_thresh = np.median(dr.values, axis=t_axis) * 5
+    q_thresh = np.median(dr.values, axis=t_axis) * n
 
     for yr in years:
         time_slice = slice(f"{yr}-{smon}-{sday}", f"{yr+yr_adj}-{emon}-{eday}")
@@ -379,9 +476,29 @@ def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
     return ds_high_q
 
 
-def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
-    # : frequency of low-flow days (< 0.2 times the mean daily flow) day/yr
-    # : average duration of low-flow events (number of consecutive days < 0.2 times the mean daily flow) day
+def low_q_freq_dur(dr: xr.DataArray, n=0.2, dayofyear="wateryear"):
+    """
+    Calculate low flow events frequency and duration per year
+
+    Arguments
+    ---------
+    dr: xr.DataArray
+        2D DataArray containing daily time series with coordinates of 'site', and 'time'
+    n: scalar
+        mulitplier applied to median flow of annual flow to define "low flow event"
+
+    Returns
+    -------
+    ds_low_q: xr.Dataset
+        Dataset containing two 2D DataArrays 'freq_low_q' and 'mean_low_q_dur' with coordinate of 'year', and 'site'
+
+    Notes
+    -------
+    freq_low_q: frequency of low-flow events [day/yr]
+    mean_low_q_dur: mean duration of low-flow events over yr
+    low flow event is defined as number of consecutive days of flows <= n times the median daily flow
+    where n is multiplier (default: 0.2)
+    """
 
     dayofyear = "wateryear"
     if dayofyear == "wateryear":
@@ -419,12 +536,12 @@ def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
     )
 
     t_axis = dr.dims.index("time")
-    q_thresh = np.median(dr.values, axis=t_axis) * 0.2
+    q_thresh = np.median(dr.values, axis=t_axis) * n
 
     for yr in years:
         time_slice = slice(f"{yr}-{smon}-{sday}", f"{yr+yr_adj}-{emon}-{eday}")
 
-        q_array = dr.sel(time=time_slice).values  # find annual max flow
+        q_array = dr.sel(time=time_slice).values
         for sidx, site in enumerate(dr["site"].values):
             binary_array = np.where(q_array[:, sidx] < q_thresh[sidx], 1, 0)
             count_dups = myCount(binary_array)
@@ -441,18 +558,22 @@ def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
 def annual_max(dr: xr.DataArray, dayofyear="wateryear"):
     """
     Calculates annual maximum value and dayofyear.
+
     Arguments
     ---------
     dr: xr.DataArray
         2D DataArray containing daily time series with coordinates of 'site', and 'time'
+
     Returns
     -------
     ds_ann_max: xr.Dataset
         Dataset containing two 2D DataArrays 'ann_max_flow' and 'ann_max_day' with coordinate of 'year', and 'site'
+
     Notes
     -------
     dayofyear start with October 1st with dayofyear="wateryear" or January 1st with dayofyear="calendar".
     """
+
     if dayofyear == "wateryear":
         smon = 10
         sday = 1
@@ -512,15 +633,18 @@ def annual_max(dr: xr.DataArray, dayofyear="wateryear"):
 def annual_min(dr: xr.DataArray, dayofyear="wateryear"):
     """
     Calculates annual minimum value and dayofyear.
+
     Arguments
     ---------
     dr: xr.DataArray
         2D DataArray containing daily time series with coordinates of 'site', and 'time'
+
     Returns
     -------
     ds_ann_max: xr.Dataset
         Dataset containing two 2D DataArrays 'ann_min_flow' and 'ann_min_day' with coordinate of 'year', and 'site'
     """
+
     if dayofyear == "wateryear":
         smon = 10
         sday = 1
@@ -576,15 +700,18 @@ def annual_min(dr: xr.DataArray, dayofyear="wateryear"):
 def annual_centroid(dr: xr.DataArray, dayofyear="wateryear"):
     """
     Calculates annual time series centroid (in dayofyear).
+
     Arguments
     ---------
     dr: xr.DataArray
         2D DataArray containing daily time series with coordinates of 'site', and 'time'
+
     Returns
     -------
     ds_ann_max: xr.Dataset
         Dataset containing one 2D DataArrays 'ann_centroid_day' with coordinate of 'year', and 'site'
     """
+
     if dayofyear == "wateryear":
         smon = 10
         sday = 1
@@ -627,7 +754,21 @@ def annual_centroid(dr: xr.DataArray, dayofyear="wateryear"):
     return ds_ann_centroid
 
 
-def season_mean(ds: xr.Dataset, calendar="standard"):
+def season_mean(ds: xr.Dataset):
+    """
+    Calculates seasonal mean
+
+    Arguments
+    ---------
+    ds: xr.Dataset
+        Dataset containing daily time series with coordinates of 'time'
+
+    Returns
+    -------
+    dr: xr.Dataset
+        Dataset containing seasonal mean (season: DJF, MAM, JJA, SON)
+    """
+
     # Make a DataArray with the number of days in each month, size = len(time)
     month_length = ds.time.dt.days_in_month
 
