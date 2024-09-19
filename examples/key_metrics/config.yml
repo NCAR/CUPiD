@@ -34,7 +34,7 @@ computation_config:
 
     # log level sets the level of how verbose logging will be.
     # options include: debug, info, warning, error
-    log_level: info
+    log_level: 'info'
 
 ############# NOTEBOOK CONFIG #############
 
