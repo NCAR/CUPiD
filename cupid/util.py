@@ -4,7 +4,8 @@ executing notebooks with custom engines, and creating tasks for Ploomber DAGs.
 
 Functions:
     - get_control_dict(): Get the control dictionary from a configuration file.
-    - setup_book(): Setup run dir and output Jupyter book based on config.yaml
+    - setup_logging(): Set up logging based on configuration file log level.
+    - setup_book(): Setup run dir and output Jupyter book based on config.yaml.
     - get_toc_files(): Return a list of files in the '_toc.yml'.
     - create_ploomber_nb_task(): Create a Ploomber task for running a notebook.
     - create_ploomber_script_task(): Create a Ploomber task for running a script.
@@ -101,28 +102,23 @@ def setup_logging(config_path):
     Returns logger object
     """
     control = get_control_dict(config_path)
-    log_level = control["computation_config"].get("log_level", None)
-    if log_level:
-        if log_level == "debug":
-            logging.basicConfig(
-                level=logging.DEBUG,
-            )
-        if log_level == "info":
-            logging.basicConfig(
-                level=logging.INFO,
-            )
-        if log_level == "warning":
-            logging.basicConfig(
-                level=logging.WARNING,
-            )
-        if log_level == "error":
-            logging.basicConfig(
-                level=logging.ERROR,
-            )
-    else:
-        # default level is info if log level is not set in config
+    # default level is info if log level is not set in config
+    log_level = control["computation_config"].get("log_level", "info")
+    if log_level == "debug":
+        logging.basicConfig(
+            level=logging.DEBUG,
+        )
+    if log_level == "info":
         logging.basicConfig(
             level=logging.INFO,
+        )
+    if log_level == "warning":
+        logging.basicConfig(
+            level=logging.WARNING,
+        )
+    if log_level == "error":
+        logging.basicConfig(
+            level=logging.ERROR,
         )
 
     return logging.getLogger(__name__)
