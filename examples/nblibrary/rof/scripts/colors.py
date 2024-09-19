@@ -31,11 +31,6 @@ cmap12.set_under("red")
 
 
 # kge
-# vals0=[0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-# cmap0 = cm.get_cmap('plasma_r', (8))
-# cmap0.set_under('cyan')
-# cmap = mpl.colors.ListedColormap(mpl.cm.Spectral_r(np.arange(9)))
-# norm0 = mpl.colors.BoundaryNorm(vals0, cmap0.N)
 cmap0 = mpl.cm.plasma_r
 cmap0.set_under("cyan")
 vals0 = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -56,7 +51,6 @@ norm1 = mpl.colors.BoundaryNorm(vals1, cmap1.N)
 
 # ratio
 vals2 = [0.75, 0.8, 0.85, 0.9, 0.95, 1.05, 1.1, 1.15, 1.2, 1.25]
-# cmap = cm.get_cmap('RdYlBu', (7))
 cmap2 = LinearSegmentedColormap.from_list(
     "custom1",
     [(0.0, "xkcd:red"), (0.5, "xkcd:light grey"), (1.0, "xkcd:blue")],
