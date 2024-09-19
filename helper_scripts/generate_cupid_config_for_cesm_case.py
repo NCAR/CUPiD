@@ -50,10 +50,22 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     sys.path.append(os.path.join(cesm_root, "cime"))
     from CIME.case import Case
 
+    # Is cupid_example a valid value?
+    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    cupid_examples = os.path.join(cupid_root, "examples")
+    valid_examples = [
+        example
+        for example in next(os.walk(cupid_examples))[1]
+        if example not in ["ilamb", "nblibrary"]
+    ]
+    if cupid_example not in valid_examples:
+        raise KeyError(
+            f"--cupid-example must be a subdirectory of {cupid_examples} ({valid_examples})",
+        )
+
     with Case(case_root, read_only=False, record=True) as cesm_case:
         case = cesm_case.get_value("CASE")
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
 
     # Additional options we need to get from env_cupid.xml
     nyears = 1
