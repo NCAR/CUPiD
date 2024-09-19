@@ -120,9 +120,9 @@ def setup_logging(config_path):
                 level=logging.ERROR,
             )
     else:
-        # default level is warning if log level is not set in config
+        # default level is info if log level is not set in config
         logging.basicConfig(
-            level=logging.WARNING,
+            level=logging.INFO,
         )
 
     return logging.getLogger(__name__)
