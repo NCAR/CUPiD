@@ -14,8 +14,6 @@ from pathlib import Path
 
 import xarray as xr
 
-import cupid.util
-
 
 def call_ncrcat(cmd):
     """This is an internal function to `create_time_series`
@@ -84,7 +82,7 @@ def create_time_series(
 
     # Don't do anything if list of requested diagnostics is empty
     if not diag_var_list:
-        print(f"\n  No time series files requested for {component}...")
+        logger.info(f"\n  No time series files requested for {component}...")
         return
 
     # Notify user that script has started:
@@ -336,9 +334,9 @@ def create_time_series(
         if vars_to_derive:
             if component == "atm":
                 derive_cam_variables(
+                    logger,
                     vars_to_derive=vars_to_derive,
                     ts_dir=ts_dir[case_idx],
-                    logger=logger,
                 )
 
         if serial:
@@ -356,7 +354,7 @@ def create_time_series(
     )
 
 
-def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None, logger=None):
+def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=None):
     """
     Derive variables acccording to steps given here.  Since derivations will depend on the
     variable, each variable to derive will need its own set of steps below.
@@ -366,9 +364,6 @@ def derive_cam_variables(vars_to_derive=None, ts_dir=None, overwrite=None, logge
     If the file for the derived variable exists, the kwarg `overwrite` determines
     whether to overwrite the file (true) or exit with a warning message.
     """
-
-    if logger is None:
-        logger = cupid.util.setup_logging("config.yml")
 
     for var in vars_to_derive:
         if var == "PRECT":
