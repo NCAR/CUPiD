@@ -99,26 +99,32 @@ def get_control_dict(config_path):
 def setup_logging(config_path):
     """
     Set up logging based on configuration file log level
+    Options for log levels include debug, info, warning, and error.
     Returns logger object
     """
     control = get_control_dict(config_path)
     # default level is info if log level is not set in config
     log_level = control["computation_config"].get("log_level", "info")
-    if log_level == "debug":
+    if log_level == "debug" or log_level == "DEBUG":
         logging.basicConfig(
             level=logging.DEBUG,
         )
-    if log_level == "info":
+    elif log_level == "info" or log_level == "INFO":
         logging.basicConfig(
             level=logging.INFO,
         )
-    if log_level == "warning":
+    elif log_level == "warning" or log_level == "WARNING":
         logging.basicConfig(
             level=logging.WARNING,
         )
-    if log_level == "error":
+    elif log_level == "error" or log_level == "ERROR":
         logging.basicConfig(
             level=logging.ERROR,
+        )
+    else:
+        print('setting log_level to "info" because invalid log level')
+        logging.basicConfig(
+            level=logging.INFO,
         )
 
     return logging.getLogger(__name__)
