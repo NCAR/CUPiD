@@ -3,9 +3,11 @@ from __future__ import annotations
 import numpy as np
 import xarray as xr
 
+# count consecutive 1 elements in a 1D array
+myCount = lambda ar: [sum(val for _ in group) for val, group in groupby(ar) if val==1]
+
 # time series error
 # flow metrics
-
 
 def remove_nan(qsim, qobs):
     sim_obs = np.stack((qsim, qobs), axis=1)
@@ -249,6 +251,16 @@ def FMS(dr: xr.DataArray, percent_low=0.3, percent_high=0.7):
 
     t_axis = dr.dims.index("time")
     flow_array_sort = np.sort(dr.values, axis=t_axis)
+<<<<<<< HEAD
+=======
+
+    if t_axis==0:
+        high = flow_array_sort[idx_h,:]
+        low  = flow_array_sort[idx_l,:]
+    elif t_axis==1:
+        high = flow_array_sort[:,idx_h]
+        low  = flow_array_sort[:,idx_l]
+>>>>>>> 576aea4 (added myCount function in metrics.py. it was missing)
 
     if t_axis == 0:
         high = flow_array_sort[idx_h, :]
@@ -308,6 +320,7 @@ def BFI(dr: xr.DataArray, alpha=0.925, npass=3, skip_time=30):
     return BFI
 
 
+<<<<<<< HEAD
 def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
 
     # freq_high_q: frequency of high-flow days (> 9 times the median daily flow) day/yr
@@ -327,6 +340,18 @@ def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
         emon = 12
         eday = 31
         yr_adj = 0
+=======
+def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear='wateryear'):
+
+    # freq_high_q: frequency of high-flow days (> 9 times the median daily flow) day/yr
+    # mean_high_q_dur: average duration of high-flow events over yr (number of consecutive days > 9 times the median daily flow) day
+
+    dayofyear='wateryear'
+    if dayofyear=='wateryear':
+        smon=10; sday=1; emon=9; eday=30; yr_adj=1
+    elif dayofyear=='calendar':
+        smon=1; sday=1; emon=12; eday=31; yr_adj=0
+>>>>>>> 576aea4 (added myCount function in metrics.py. it was missing)
     else:
         raise ValueError('Invalid argument for "dayofyear"')
 
@@ -363,10 +388,15 @@ def high_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
                 ds_high_q["mean_high_q_dur"].loc[yr, site] = 0
                 ds_high_q["freq_high_q"].loc[yr, site] = 0
             else:
+<<<<<<< HEAD
                 ds_high_q["mean_high_q_dur"].loc[yr, site] = np.mean(count_dups)
                 ds_high_q["freq_high_q"].loc[yr, site] = len(
                     count_dups,
                 )  # used to np.sum
+=======
+                ds_high_q['mean_high_q_dur'].loc[yr, site] = np.mean(count_dups)
+                ds_high_q['freq_high_q'].loc[yr, site]     = len(count_dups) # used to np.sum
+>>>>>>> 576aea4 (added myCount function in metrics.py. it was missing)
 
     return ds_high_q
 
@@ -375,6 +405,7 @@ def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
     # : frequency of low-flow days (< 0.2 times the mean daily flow) day/yr
     # : average duration of low-flow events (number of consecutive days < 0.2 times the mean daily flow) day
 
+<<<<<<< HEAD
     dayofyear = "wateryear"
     if dayofyear == "wateryear":
         smon = 10
@@ -388,6 +419,13 @@ def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
         emon = 12
         eday = 31
         yr_adj = 0
+=======
+    dayofyear='wateryear'
+    if dayofyear=='wateryear':
+        smon=10; sday=1; emon=9; eday=30; yr_adj=1
+    elif dayofyear=='calendar':
+        smon=1; sday=1; emon=12; eday=31; yr_adj=0
+>>>>>>> 576aea4 (added myCount function in metrics.py. it was missing)
     else:
         raise ValueError('Invalid argument for "dayofyear"')
 
@@ -424,8 +462,13 @@ def low_q_freq_dur(dr: xr.DataArray, percent=0.7, dayofyear="wateryear"):
                 ds_low_q["mean_low_q_dur"].loc[yr, site] = 0
                 ds_low_q["freq_low_q"].loc[yr, site] = 0
             else:
+<<<<<<< HEAD
                 ds_low_q["mean_low_q_dur"].loc[yr, site] = np.mean(count_dups)
                 ds_low_q["freq_low_q"].loc[yr, site] = len(count_dups)  # used to np.sum
+=======
+                ds_low_q['mean_low_q_dur'].loc[yr, site] = np.mean(count_dups)
+                ds_low_q['freq_low_q'].loc[yr, site]     = len(count_dups) # used to np.sum
+>>>>>>> 576aea4 (added myCount function in metrics.py. it was missing)
 
     return ds_low_q
 
