@@ -106,7 +106,7 @@ compute_notebooks:
   # parameters are specified. Several examples of different
   # types of notebooks are provided.
 
-  # The first key (here simple_no_params_nb) is the name of the
+  # The second key (here adf_quick_run) is the name of the
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
