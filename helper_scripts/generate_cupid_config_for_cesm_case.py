@@ -21,6 +21,7 @@ def _parse_args():
         "--cesm-root",
         action="store",
         dest="cesm_root",
+        required=True,
         help="Location of CESM source code",
     )
 
