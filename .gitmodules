@@ -1,3 +1,6 @@
-[submodule "manage_externals"]
-	path = manage_externals
-	url = https://github.com/ESMCI/manage_externals.git
+[submodule "externals/ADF"]
+	path = externals/ADF
+	url = https://github.com/NCAR/ADF.git
+[submodule "externals/mom6-tools"]
+	path = externals/mom6-tools
+	url = https://github.com/NCAR/mom6-tools.git
