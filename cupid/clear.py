@@ -52,8 +52,8 @@ def clear(config_path):
     Args: CONFIG_PATH - The path to the configuration file.
 
     """
-
+    logger = cupid.util.setup_logging(config_path)
     run_dir = read_config_file(config_path)
     # Delete the "computed_notebooks" folder and all the contents inside of it
     shutil.rmtree(run_dir)
-    print(f"All contents in {run_dir} have been cleared.")
+    logger.info(f"All contents in {run_dir} have been cleared.")

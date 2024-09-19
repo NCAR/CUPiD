@@ -30,8 +30,11 @@ computation_config:
     ### It must already be installed on your machine. You can also
     ### specify a different environment than the default for any
     ### notebook in NOTEBOOK CONFIG
-
     default_kernel_name: cupid-analysis
+
+    # log level sets the level of how verbose logging will be.
+    # options include: debug, info, warning, error
+    log_level: 'info'
 
 ############# NOTEBOOK CONFIG #############
 
