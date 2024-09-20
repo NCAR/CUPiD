@@ -13,6 +13,7 @@ def myCount(ar):
 
 # ----- time series error
 
+
 def remove_nan(qsim, qobs):
     """
     Compare sim array and obs array time series,
@@ -207,6 +208,7 @@ def rmse(qsim, qobs):
 
 
 # ---- flow metrics
+
 
 def FHV(dr: xr.DataArray, percent=0.9):
     """
