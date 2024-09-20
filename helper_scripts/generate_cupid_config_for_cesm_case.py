@@ -59,8 +59,9 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         if example not in ["ilamb", "nblibrary"]
     ]
     if cupid_example not in valid_examples:
+        error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
         raise KeyError(
-            f"--cupid-example must be a subdirectory of {cupid_examples} ({valid_examples})",
+            f"{error_msg} (choose from subdirectories of {cupid_examples}: {valid_examples})",
         )
 
     with Case(case_root, read_only=False, record=True) as cesm_case:
