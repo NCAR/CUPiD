@@ -42,7 +42,7 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+  CESM_output_dir: /glade/derecho/scratch/dbailey/ADF/
   lc_kwargs:
     threads_per_worker: 1
 
@@ -50,47 +50,47 @@ timeseries:
   num_procs: 8
   ts_done: [False]
   overwrite_ts: [False]
-  case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
+  case_name: 'g.e23_b15.GJRAv4.TL319_t232_zstar_N65.cgrid.001'
 
-  atm:
-    vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
-    derive_vars: [] # {'PRECT':['PRECL', 'PRECC'], 'RESTOM':['FLNT', 'FSNT']}
-    hist_str: 'h0'
-    start_years: [2]
-    end_years: [102]
-    level: 'lev'
+# atm:
+#   vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
+#   derive_vars: [] # {'PRECT':['PRECL', 'PRECC'], 'RESTOM':['FLNT', 'FSNT']}
+#   hist_str: 'h0i'
+#   start_years: [2]
+#   end_years: [42]
+#   level: 'lev'
 
-  lnd:
-    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
-    derive_vars: []
-    hist_str: 'h0'
-    start_years: [2]
-    end_years: [102]
-    level: 'lev'
+# lnd:
+#   vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
+#   derive_vars: []
+#   hist_str: 'h0'
+#   start_years: [2]
+#   end_years: [42]
+#   level: 'lev'
 
-  ocn:
-    vars: ['taux', 'tauy'] # ['process_all']
-    derive_vars: []
-    hist_str: 'h.frc'
-    start_years: [2]
-    end_years: [102]
-    level: 'lev'
+# ocn:
+#   vars: ['taux', 'tauy'] # ['process_all']
+#   derive_vars: []
+#   hist_str: 'h.frc'
+#   start_years: [2]
+#   end_years: [42]
+#   level: 'lev'
 
   ice:
-    vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
+    vars: ['process_all'] #['process_all']
     derive_vars: []
     hist_str: 'h'
-    start_years: [2]
-    end_years: [102]
+    start_years: [1]
+    end_years: [126]
     level: 'lev'
 
-  glc:
-    vars: ['usurf', 'topg'] #['process_all']
-    derive_vars: []
-    hist_str: 'initial_hist'
-    start_years: [2]
-    end_years: [102]
-    level: 'lev'
+# glc:
+#   vars: ['usurf', 'topg'] #['process_all']
+#   derive_vars: []
+#   hist_str: 'initial_hist'
+#   start_years: [2]
+#   end_years: [102]
+#   level: 'lev'
 
 compute_notebooks:
 
@@ -106,51 +106,51 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    atm:
-      adf_quick_run:
-        parameter_groups:
-          none:
-            adf_path: ../../../externals/ADF
-            config_path: .
-            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
+#   atm:
+#     adf_quick_run:
+#       parameter_groups:
+#         none:
+#           adf_path: ../../../externals/ADF
+#           config_path: .
+#           config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
-    ocn:
-      ocean_surface:
-        parameter_groups:
-          none:
-            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-            savefigs: False
-            mom6_tools_config:
-              start_date: '0091-01-01'
-              end_date: '0101-01-01'
-              Fnames:
-                native: 'mom6.h.native.????-??.nc'
-                static: 'mom6.h.static.nc'
-              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+#   ocn:
+#     ocean_surface:
+#       parameter_groups:
+#         none:
+#           Case: b.e23_alpha16b.BLT1850.ne30_t232.054
+#           savefigs: False
+#           mom6_tools_config:
+#             start_date: '0091-01-01'
+#             end_date: '0101-01-01'
+#             Fnames:
+#               native: 'mom6.h.native.????-??.nc'
+#               static: 'mom6.h.static.nc'
+#             oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
-    lnd:
-      land_comparison:
-        parameter_groups:
-          none:
-            cases:
-              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-            type:
-              - 1850pAD
-              - 1850pSASU
+#   lnd:
+#     land_comparison:
+#       parameter_groups:
+#         none:
+#           cases:
+#             - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+#             - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+#           type:
+#             - 1850pAD
+#             - 1850pSASU
 
     ice:
       seaice:
         parameter_groups:
           none:
             cases:
-              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-            begyr1: 245
-            endyr1: 305
-            begyr2: 245
-            endyr2: 305
-            nyears: 25
+              - g.e23_b15.GJRAv4.TL319_t232_zstar_N65.cgrid.001
+              - g.e23_b15.GJRAv4.TL319_t232_zstar_N65.snow.001b
+            begyr1: 57
+            endyr1: 126
+            begyr2: 57
+            endyr2: 162
+            nyears: 35
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -172,20 +172,20 @@ book_toc:
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
 
-    - caption: Atmosphere
+#   - caption: Atmosphere
 
-      # Each chapter is the name of one of the notebooks that you executed
-      # in compute_notebooks above, also without .ipynb
-      chapters:
-        - file: atm/adf_quick_run
+#     # Each chapter is the name of one of the notebooks that you executed
+#     # in compute_notebooks above, also without .ipynb
+#     chapters:
+#       - file: atm/adf_quick_run
 
-    - caption: Ocean
-      chapters:
-          - file: ocn/ocean_surface
+#   - caption: Ocean
+#     chapters:
+#         - file: ocn/ocean_surface
 
-    - caption: Land
-      chapters:
-        - file: lnd/land_comparison
+#   - caption: Land
+#     chapters:
+#       - file: lnd/land_comparison
 
     - caption: Sea Ice
       chapters:
