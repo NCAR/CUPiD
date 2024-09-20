@@ -96,9 +96,14 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
 
     # create new file, make it writeable
     with open("config.yml", "w") as f:
-        # write a comment
+        # Header of file is a comment logging provenance
         f.write(f"# This file has been auto-generated for use with {case}\n")
         f.write(f"# It is based off of examples/{cupid_example}/config.yml\n")
+        f.write("# Arguments used:\n")
+        f.write(f"# cesm_root = {cesm_root}\n")
+        f.write(f"# case_root = {case_root}\n")
+        f.write(f"# cupid_example= {cupid_example}\n")
+
         # enter in each element of the dictionary into the new file
         yaml.dump(my_dict, f, sort_keys=False)
 
