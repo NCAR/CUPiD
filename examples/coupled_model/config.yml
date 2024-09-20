@@ -96,7 +96,7 @@ timeseries:
     level: 'lev'
 
   rof:
-    vars: []
+    vars: ['process_all']
     derive_vars: []
     hist_str: 'initial_hist'
     start_years: [2]
