@@ -48,7 +48,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
-@click.option("--river_runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
+@click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
 @click.argument("config_path", default="config.yml")
 def run(
     config_path,
