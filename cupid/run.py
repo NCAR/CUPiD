@@ -23,7 +23,6 @@ Options:
 from __future__ import annotations
 
 import os
-import warnings
 
 import click
 import intake
@@ -74,6 +73,7 @@ def run(
     # Get control structure
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
+    logger = cupid.util.setup_logging(config_path)
 
     component_options = {
         "atm": atmosphere,
@@ -110,16 +110,67 @@ def run(
 
         for component, comp_bool in component_options.items():
             if comp_bool:
+
+                # set time series input and output directory:
+                # -----
+                if isinstance(timeseries_params["case_name"], list):
+                    ts_input_dirs = []
+                    for cname in timeseries_params["case_name"]:
+                        ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
+                else:
+                    ts_input_dirs = [
+                        global_params["CESM_output_dir"] + "/" +
+                        timeseries_params["case_name"] + f"/{component}/hist/",
+                    ]
+
+                if "ts_output_dir" in timeseries_params:
+                    if isinstance(timeseries_params["ts_output_dir"], list):
+                        ts_output_dirs = []
+                        for ts_outdir in timeseries_params["ts_output_dir"]:
+                            ts_output_dirs.append([
+                                os.path.join(
+                                        ts_outdir,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            ])
+                    else:
+                        ts_output_dirs = [
+                            os.path.join(
+                                    timeseries_params["ts_output_dir"],
+                                    f"{component}", "proc", "tseries",
+                            ),
+                        ]
+                else:
+                    if isinstance(timeseries_params["case_name"], list):
+                        ts_output_dirs = []
+                        for cname in timeseries_params["case_name"]:
+                            ts_output_dirs.append(
+                                os.path.join(
+                                        global_params["CESM_output_dir"],
+                                        cname,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            )
+                    else:
+                        ts_output_dirs = [
+                            os.path.join(
+                                    global_params["CESM_output_dir"],
+                                    timeseries_params["case_name"],
+                                    f"{component}", "proc", "tseries",
+                            ),
+                        ]
+                # -----
+
                 # fmt: off
                 # pylint: disable=line-too-long
                 cupid.timeseries.create_time_series(
                     component,
                     timeseries_params[component]["vars"],
                     timeseries_params[component]["derive_vars"],
-                    [timeseries_params["case_name"]],
+                    timeseries_params["case_name"],
                     timeseries_params[component]["hist_str"],
-                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/hist/"],
-                    [global_params["CESM_output_dir"]+"/"+timeseries_params["case_name"]+f"/{component}/proc/tseries/"],
+                    ts_input_dirs,
+                    ts_output_dirs,
                     # Note that timeseries output will eventually go in
                     #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
                     timeseries_params["ts_done"],
@@ -129,6 +180,7 @@ def run(
                     timeseries_params[component]["level"],
                     num_procs,
                     serial,
+                    logger,
                 )
                 # fmt: on
                 # pylint: enable=line-too-long
@@ -194,7 +246,7 @@ def run(
                     all_nbs[nb]["nb_path_root"] = nb_path_root + "/" + comp_name
                     all_nbs[nb]["output_dir"] = output_dir + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(
+                logger.warning(
                     f"No notebooks for {comp_name} component specified in config file.",
                 )
 
@@ -203,7 +255,7 @@ def run(
         for nb, info in all_nbs.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(
+                logger.warning(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;" +
                     f" {nb}.ipynb will not be run." +
                     "See README.md for environment installation instructions.",
@@ -237,7 +289,7 @@ def run(
                     all_scripts[script] = info
                     all_scripts[script]["nb_path_root"] = nb_path_root + "/" + comp_name
             elif comp_bool and not all:
-                warnings.warn(
+                logger.warning(
                     f"No scripts for {comp_name} component specified in config file.",
                 )
 
@@ -246,7 +298,7 @@ def run(
         for script, info in all_scripts.copy().items():
             if not control["env_check"][info["kernel_name"]]:
                 bad_env = info["kernel_name"]
-                warnings.warn(
+                logger.warning(
                     f"Environment {bad_env} specified for {script}.py could not be found;" +
                     f"{script}.py will not be run.",
                 )

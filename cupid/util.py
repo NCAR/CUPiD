@@ -4,7 +4,8 @@ executing notebooks with custom engines, and creating tasks for Ploomber DAGs.
 
 Functions:
     - get_control_dict(): Get the control dictionary from a configuration file.
-    - setup_book(): Setup run dir and output Jupyter book based on config.yaml
+    - setup_logging(): Set up logging based on configuration file log level.
+    - setup_book(): Setup run dir and output Jupyter book based on config.yaml.
     - get_toc_files(): Return a list of files in the '_toc.yml'.
     - create_ploomber_nb_task(): Create a Ploomber task for running a notebook.
     - create_ploomber_script_task(): Create a Ploomber task for running a script.
@@ -15,6 +16,7 @@ Classes:
 """
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import warnings
@@ -46,6 +48,7 @@ class MarkdownJinjaEngine(NBClientEngine):
 
 def get_control_dict(config_path):
     """Get control dictionary from configuration file"""
+
     try:
         with open(config_path) as fid:
             control = yaml.safe_load(fid)
@@ -91,6 +94,40 @@ def get_control_dict(config_path):
                     )
 
     return control
+
+
+def setup_logging(config_path):
+    """
+    Set up logging based on configuration file log level
+    Options for log levels include debug, info, warning, and error.
+    Returns logger object
+    """
+    control = get_control_dict(config_path)
+    # default level is info if log level is not set in config
+    log_level = control["computation_config"].get("log_level", "info")
+    if log_level == "debug" or log_level == "DEBUG":
+        logging.basicConfig(
+            level=logging.DEBUG,
+        )
+    elif log_level == "info" or log_level == "INFO":
+        logging.basicConfig(
+            level=logging.INFO,
+        )
+    elif log_level == "warning" or log_level == "WARNING":
+        logging.basicConfig(
+            level=logging.WARNING,
+        )
+    elif log_level == "error" or log_level == "ERROR":
+        logging.basicConfig(
+            level=logging.ERROR,
+        )
+    else:
+        print('setting log_level to "info" because invalid log level')
+        logging.basicConfig(
+            level=logging.INFO,
+        )
+
+    return logging.getLogger(__name__)
 
 
 def setup_book(config_path):
