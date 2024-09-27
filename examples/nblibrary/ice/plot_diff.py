@@ -17,7 +17,7 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
     circle = mpath.Path(verts * radius + center)
 
     if np.size(levels) > 2:
-        cmap = mpl.colormaps["cmocean"]
+        cmap = mpl.colormaps["ocean"]
         norm = mpl.colors.BoundaryNorm(levels, ncolors=cmap.N)
 
     # set up the figure with a North Polar Stereographic projection
@@ -44,7 +44,7 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
         TLAT,
         field1,
         norm=norm,
-        cmap="cmocean",
+        cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
@@ -67,7 +67,7 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
         TLAT,
         field2,
         norm=norm,
-        cmap="cmocean",
+        cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)

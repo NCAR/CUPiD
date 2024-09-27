@@ -49,7 +49,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         speed1,
         vmin=0.0,
         vmax=0.5,
-        cmap="cmocean",
+        cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
@@ -97,7 +97,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         speed2,
         vmin=0.0,
         vmax=0.5,
-        cmap="cmocean",
+        cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
