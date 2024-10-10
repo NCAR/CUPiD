@@ -114,12 +114,11 @@ compute_notebooks:
           none: {}
 
     atm:
-      nmse_PSL:
+      link_to_ADF:
+        kernel_name: cupid-dev
         parameter_groups:
           none:
-            regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
-            validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
+            html_link: computed_notebooks/ADF_webpage
 
 #    glc:
 #      LIWG_SMB_diagnostic:
@@ -191,7 +190,7 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-        - file: atm/nmse_PSL
+        - file: atm/link_to_ADF
 
     # - caption: Ocean
     #   chapters:
