@@ -6,7 +6,7 @@
 data_sources:
     # sname is any string used as a nickname for this configuration. It will be
     ### used as the name of the folder your computed notebooks are put in
-    sname: key_metrics
+    sname: external_diag_packages
 
     # run_dir is the path to the folder you want
     ### all the files associated with this configuration
@@ -121,13 +121,13 @@ compute_notebooks:
             base_regridded_output: True
             validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
 
-    glc:
-      LIWG_SMB_diagnostic:
-        parameter_groups:
-          none:
-            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
-            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-            climo_nyears: 40
+#    glc:
+#      LIWG_SMB_diagnostic:
+#        parameter_groups:
+#          none:
+#            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
+#            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+#            climo_nyears: 40
 
 #    ice:
 #      seaice:
@@ -205,16 +205,16 @@ book_toc:
     #   chapters:
     #     - file: ice/seaice
 
-    - caption: Land Ice
-      chapters:
-        - file: glc/LIWG_SMB_diagnostic
+    # - caption: Land Ice
+    #   chapters:
+    #     - file: glc/LIWG_SMB_diagnostic
 
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
 book_config_keys:
 
-  title: CESM Key Metrics   # Title of your jupyter book
+  title: External Diagnostic Packages  # Title of your jupyter book
 
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options
