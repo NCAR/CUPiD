@@ -129,6 +129,20 @@ compute_notebooks:
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
             climo_nyears: 40
 
+    rof:
+      month_annual_flow:
+        parameter_groups:
+          none:
+            analysis_name: 'mosart_test'
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            figureSave: False
+      ocean_discharge:
+        parameter_groups:
+          none:
+            analysis_name: 'mosart_test'
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            figureSave: False
+
 #    ice:
 #      seaice:
 #        parameter_groups:
