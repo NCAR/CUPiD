@@ -158,13 +158,13 @@ compute_notebooks:
             case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
             grid_name: 'f09_f09_mosart' # ROF grid name
             figureSave: False
-#      ocean_discharge:
-#        parameter_groups:
-#          none:
-#            analysis_name: 'mosart_test'
-#            case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
-#            grid_name: 'f09_f09_mosart' # ROF grid name
-#            figureSave: False
+      ocean_discharge:
+        parameter_groups:
+          none:
+            analysis_name: 'mosart_test'
+            case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            figureSave: False
 
     ice:
       seaice:
