@@ -66,3 +66,4 @@ if __name__ == "__main__":
     args = vars(_parse_args())
     print(args)
     generate_adf_config(args['cupid_file'], args['adf_template'], args['out_file'])
+    
