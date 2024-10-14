@@ -48,13 +48,13 @@ def _parse_args():
 
 def generate_cupid_config(case_root, cesm_root, cupid_example):
     """
-    Generate a CUPiD `config.yml` file based on information from a CESM case and 
+    Generate a CUPiD `config.yml` file based on information from a CESM case and
     a specific CUPiD example configuration (such as 'key metrics').
 
-    This function takes the root directory of the CESM case and the CESM installation, 
-    along with the name of a CUPiD example. It validates the example, loads information 
-    from the CESM case (such as the case name and output directory), modifies the 
-    configuration based on the case-specific data, and generates a new `config.yml` file 
+    This function takes the root directory of the CESM case and the CESM installation,
+    along with the name of a CUPiD example. It validates the example, loads information
+    from the CESM case (such as the case name and output directory), modifies the
+    configuration based on the case-specific data, and generates a new `config.yml` file
     in the current working directory.
 
     The generated `config.yml` file contains:
@@ -66,23 +66,23 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     ----------
     case_root : str
         The root directory of the CESM case from which case-specific data will be retrieved.
-    
+
     cesm_root : str
         The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
-    
+
     cupid_example : str
-        The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on. 
+        The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
         Must be a valid subdirectory within the CUPiD examples directory.
-    
+
     Raises:
     -------
     KeyError:
         If the provided CUPiD example is not found in the valid CUPiD examples directory.
-    
+
     Outputs:
     --------
     config.yml : file
-        A YAML file containing the generated configuration based on the provided CESM case 
+        A YAML file containing the generated configuration based on the provided CESM case
         and CUPiD example.
     """
 
