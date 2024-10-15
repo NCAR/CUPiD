@@ -25,10 +25,11 @@ from __future__ import annotations
 import os
 
 import click
+import gents
 import intake
 import ploomber
-import gents
-from dask.distributed import Client, LocalCluster
+from dask.distributed import Client
+from dask.distributed import LocalCluster
 
 import cupid.timeseries
 import cupid.util
@@ -76,7 +77,7 @@ def run(
     control = cupid.util.get_control_dict(config_path)
     cupid.util.setup_book(config_path)
     logger = cupid.util.setup_logging(config_path)
-    
+
     component_options = {
         "atm": atmosphere,
         "ocn": ocean,
@@ -84,26 +85,17 @@ def run(
         "ice": seaice,
         "glc": landice,
     }
-    
-    # Automatically run all if no components specified
-    
+
     if True not in [atmosphere, ocean, land, seaice, landice]:
         all = True
         for key in component_options.keys():
             component_options[key] = True
-    
-    #####################################################################
-    # Managing global parameters
-    
+
     global_params = dict()
-    
     if "global_params" in control:
         global_params = control["global_params"]
-    
     global_params["serial"] = serial
-    
-    ####################################################################
-    
+
     if time_series:
         timeseries_params = control["timeseries"]
         client = None
@@ -112,15 +104,15 @@ def run(
                 n_workers=1,
                 processes=1,
                 threads_per_worker=1,
-                memory_limit="2GB"
+                memory_limit="2GB",
             )
-    
+
             cluster.scale(timeseries_params["num_procs"])
             client = Client(cluster)
-    
+
         if "ts_output_dir" not in timeseries_params:
             timeseries_params["ts_output_dir"] = "./"
-    
+
         for component in component_options:
             if component not in timeseries_params:
                 continue
@@ -129,7 +121,7 @@ def run(
                 include_vars = timeseries_params[component]["vars"]
                 if include_vars == [] or include_vars == ["process_all"]:
                     include_vars = None
-    
+
             year_start = None
             if "start_years" in timeseries_params[component]:
                 year_start = timeseries_params[component]["start_years"]
@@ -137,7 +129,7 @@ def run(
                     year_start = None
                 else:
                     year_start = int(year_start[0])
-    
+
             year_end = None
             if "end_years" in timeseries_params[component]:
                 year_end = timeseries_params[component]["end_years"]
@@ -145,7 +137,7 @@ def run(
                     year_end = None
                 else:
                     year_end = int(year_end[0])
-            
+
             modb = gents.ModelOutputDatabase(
                 hf_head_dir=global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"],
                 ts_head_dir=timeseries_params["ts_output_dir"],
@@ -157,7 +149,7 @@ def run(
                 compression_level=0,
                 year_start=year_start,
                 year_end=year_end,
-                verbosity_level=1
+                verbosity_level=1,
             )
             modb.run(client=client, serial=global_params["serial"])
         client.shutdown()
