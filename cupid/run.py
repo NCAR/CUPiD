@@ -119,7 +119,7 @@ def run(
             client = Client(cluster)
     
         if "ts_output_dir" not in timeseries_params:
-            timeseries_params["ts_output_dir"] = global_params["CESM_output_dir"] + timeseries_params["case_name"]
+            timeseries_params["ts_output_dir"] = "./"
     
         for component in component_options:
             if component not in timeseries_params:
@@ -147,7 +147,7 @@ def run(
                     year_end = int(year_end[0])
             
             modb = gents.ModelOutputDatabase(
-                hf_head_dir = global_params["CESM_output_dir"] + timeseries_params["case_name"],
+                hf_head_dir = global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"],
                 ts_head_dir = timeseries_params["ts_output_dir"],
                 dir_name_swaps = {"hist": "proc/tseries"},
                 dir_exclusions = [comp for comp in component_options if comp != component],
@@ -157,7 +157,7 @@ def run(
                 compression_level = 0,
                 year_start = year_start,
                 year_end = year_end,
-                verbosity_level = 0
+                verbosity_level = 1
             )
             modb.run(client=client, serial=global_params["serial"])
         client.shutdown()
