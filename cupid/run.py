@@ -147,24 +147,22 @@ def run(
                     year_end = int(year_end[0])
             
             modb = gents.ModelOutputDatabase(
-                hf_head_dir = global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"],
-                ts_head_dir = timeseries_params["ts_output_dir"],
-                dir_name_swaps = {"hist": "proc/tseries"},
-                dir_exclusions = [comp for comp in component_options if comp != component],
-                timeseries_year_length = 10,
-                overwrite = timeseries_params["overwrite_ts"][0],
-                include_variables = include_vars,
-                compression_level = 0,
-                year_start = year_start,
-                year_end = year_end,
-                verbosity_level = 1
+                hf_head_dir=global_params["CESM_output_dir"] + "/" + timeseries_params["case_name"],
+                ts_head_dir=timeseries_params["ts_output_dir"],
+                dir_name_swaps={"hist": "proc/tseries"},
+                dir_exclusions=[comp for comp in component_options if comp != component],
+                timeseries_year_length=10,
+                overwrite=timeseries_params["overwrite_ts"][0],
+                include_variables=include_vars,
+                compression_level=0,
+                year_start=year_start,
+                year_end=year_end,
+                verbosity_level=1
             )
             modb.run(client=client, serial=global_params["serial"])
         client.shutdown()
 
-
     # Grab paths
-
     run_dir = os.path.realpath(os.path.expanduser(control["data_sources"]["run_dir"]))
     output_dir = run_dir + "/computed_notebooks/" + control["data_sources"]["sname"]
     temp_data_path = run_dir + "/temp_data"
