@@ -20,6 +20,7 @@ dependencies:
   - numpy
   - pip
   - python==3.11.4
+  - uxarray
   - xarray
   - yaml
   - zarr
