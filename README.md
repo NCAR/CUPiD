@@ -37,7 +37,7 @@ It still feels slower than running `mamba` directly, hence the recommendation to
 If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
 (To see what version of conda you have installed, run `conda --version`.)
 1. If the subdirectories in `externals/` are all empty, run `git submodule update --init` to clone the submodules.
-1. For existing users who cloned `CUPiD` prior to the switch from manage externals to git submodule, we recommend removing `externals/` before checking out main, running `git submodule update`, and removing `manage_externals` (if it is still present after `git submodule update --init`).
+1. For existing users who cloned `CUPiD` prior to the switch from manage externals to git submodule, we recommend removing `externals/` before checking out main, running `git submodule update --init`, and removing `manage_externals` (if it is still present after `git submodule update --init`).
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
    ``` bash
