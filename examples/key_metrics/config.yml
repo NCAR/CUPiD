@@ -135,12 +135,16 @@ compute_notebooks:
           none:
             analysis_name: 'mosart_test'
             grid_name: 'f09_f09_mosart' # ROF grid name
+            rof_start_date: '0091-01-01'
+            rof_end_date: '0101-01-01'
             figureSave: False
       ocean_discharge:
         parameter_groups:
           none:
             analysis_name: 'mosart_test'
             grid_name: 'f09_f09_mosart' # ROF grid name
+            rof_start_date: '0091-01-01'
+            rof_end_date: '0101-01-01'
             figureSave: False
 
 #    ice:
