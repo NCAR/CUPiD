@@ -1,2 +1,2 @@
-.. include:: Contributors_Guide.md
+.. include:: ContributorsGuide.md
    :parser: myst
