@@ -1,2 +1,2 @@
-.. include:: contributors.md
+.. include:: Contributors.md
    :parser: myst
