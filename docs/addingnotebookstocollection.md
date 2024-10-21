@@ -2,6 +2,7 @@
 
 Generally, a good fit for a diagnostic notebook is one that reads in CESM output, does some processing, and outputs plots, values, and/or new files (images, data, etc.) that are useful for evaluating the run.
 
+0. Check out our [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_guide.html) to make ensure appropriate setup of your git repository for contributions.
 1. Install the `environments/cupid-analysis.yml` environment (see [installation instructions](https://ncar.github.io/CUPiD/index.html#installing)). Make sure that your notebook runs properly in this environment. If there are conflicts or missing dependencies, open an issue or talk to CUPiD developers so we can find a solution.
 2. In your notebook, move all variables you might want to change (paths to data, dates to select, etc.) to a cell near the top. For example:
 
@@ -40,4 +41,9 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 
 7. Update your parameters. Parameters that are specific to just this notebook should go under `parameter_groups` in the notebook's entry under `compute_notebooks`. Global parameters that you want passed in to every notebook in the collection should go under `global_params`.  When `CUPiD` executes your notebook, all of these parameters will get put in a new cell below the cell tagged `parameters` that you added in step 3. This means they will supercede the values of the parameters that you put in the cell above---the names, notation, etc. should match to make sure your notebook is able to find the variables it needs.
 
-8. All set! Your collection can now be run and built with `cupid-run` and `cupid-build` as usual.
+8. Your collection can now be run with `cupid-run`, and then the website can be built with `cupid-build`.
+
+9. If you're happy with your notebook and want to add it to the CUPiD repository, there are a few formatting items that we would like contributors to follow:
+    * Title your notebook something descriptive. A recommended format is `<region>_<variable>_<metric>_<comparisons>.ipynb`; for instance, this might look like `Global_PSL_NMSE_compare_obs_lens.ipynb` or `Greenland_SMB_visual_compare_obs.ipynb`.
+    * Add a [cell tag](https://jupyterbook.org/en/stable/content/metadata.html#jupyter-cell-tags) `hide-input` for cells which output plots, and add the tag `hide-cell` for cells that do not contain plots (this will hide both the input and output). Do this through JupyterHub when editing your notebook: click `View --> Cell Toolbar --> Tags` and add either `hide-input` or `hide-cell`. This makes it easier to glance at the plots once the webpage is built and not need to scroll through code cells.
+    * Set up `pre-commit` in the `cupid-dev` environment to ensure that your code is properly formatted and linted. Running `pre-commit install` will configure `git` to automatically run the `pre-commit` checks when you try to commit changes; the commit will only proceed if all the checks pass.
