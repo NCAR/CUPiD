@@ -100,6 +100,7 @@ Options:
   -lnd, --land        Run land component diagnostics
   -ice, --seaice      Run sea ice component diagnostics
   -glc, --landice     Run land ice component diagnostics
+  -rof, --river-runoff Run river runoff component diagnostics
   --config_path       Path to the YAML configuration file containing specifications for notebooks (default config.yml)
   -h, --help          Show this message and exit.
 ```
