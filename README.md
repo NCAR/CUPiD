@@ -37,6 +37,7 @@ It still feels slower than running `mamba` directly, hence the recommendation to
 If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
 (To see what version of conda you have installed, run `conda --version`.)
 1. If the subdirectories in `externals/` are all empty, run `git submodule update --init` to clone the submodules.
+1. For existing users who cloned `CUPiD` prior to the switch from manage externals to git submodule, we recommend removing `externals/` before checking out main, running `git submodule update --init`, and removing `manage_externals` (if it is still present after `git submodule update --init`).
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
    ``` bash
@@ -44,11 +45,10 @@ If you do not have `mamba` installed, you can still use `conda`... it will just 
    $ pip install -e .  # installs cupid
    ```
 
+1. In the `cupid-dev` environment, run `pre-commit install` to configure `git` to automatically run `pre-commit` checks when you try to commit changes from the `cupid-dev` environment; the commit will only proceed if all checks pass. Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed, and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
 1. If you plan on contributing code to CUPiD,
 whether developing CUPiD itself or providing notebooks for CUPiD to run,
-please see the [Contributer's Guide](https://github.com/NCAR/CUPiD/wiki/Contributor's-Guide).
-Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed,
-and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
+please see the [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_guide.html).
 
 ## Running
 

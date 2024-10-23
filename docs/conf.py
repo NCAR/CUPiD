@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 print("sys.path:", sys.path)
 
-# Copy README, NCAR_tips, and contributors into docs
+# Copy README, NCAR_tips, and Contributors into docs
 # This block allows us to remove the header image from any md files
 # without affecting the original version, but still pull the source
 # into the docs build fresh each time.
 
-for file in ["README.md", "NCAR_tips.md", "contributors.md"]:
+for file in ["README.md", "NCARtips.md", "Contributors.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
