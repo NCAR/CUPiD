@@ -82,7 +82,7 @@ def generate_adf_config(cupid_file, adf_file, out_file):
 
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join([DOUT, "proc", "regrid"])  # This is where ADF will make "regrid" files
-    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join([c_dict["sname"], "ADF"]) # this is where ADF will put plots, and "website" directory
+    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join([c_dict['data_sources']["sname"], "ADF"]) # this is where ADF will put plots, and "website" directory
     a_dict["user"] = os.getenv("USER")
 
     with open(out_file, "w") as f:
