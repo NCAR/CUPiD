@@ -130,7 +130,7 @@ compute_notebooks:
             climo_nyears: 40
 
     rof:
-      month_annual_flow:
+      global_discharge_gauge_compare_obs:
         parameter_groups:
           none:
             analysis_name: ""
@@ -138,7 +138,7 @@ compute_notebooks:
             rof_start_date: '0091-01-01'
             rof_end_date: '0101-01-01'
             figureSave: False
-      ocean_discharge:
+      global_discharge_ocean_compare_obs:
         parameter_groups:
           none:
             analysis_name: ""
