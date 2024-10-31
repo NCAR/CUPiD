@@ -202,11 +202,6 @@ book_toc:
       chapters:
         - file: ice/seaice
 
-    - caption: River Runoff
-      chapters:
-        - file: rof/month_annual_flow
-        - file: rof/ocean_discharge
-
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
