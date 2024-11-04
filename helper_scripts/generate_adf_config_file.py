@@ -111,7 +111,12 @@ def generate_adf_config(cupid_file, adf_file, out_file):
         [DOUT, "proc", "regrid"],
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
-        [c_dict["data_sources"]["sname"], "ADF"],  # TODO: update this
+        [
+            c_dict["data_sources"]["sname"],
+            "computed_notebooks",
+            c_dict["data_sources"]["sname"],
+            "ADF",
+        ],
     )  # this is where ADF will put plots, and "website" directory
     a_dict["user"] = os.getenv("USER")
 
