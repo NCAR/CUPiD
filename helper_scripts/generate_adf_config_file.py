@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import argparse
-import yaml
 import os
+
+import yaml
 
 
 def _parse_args():
@@ -12,7 +15,10 @@ def _parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "--cupid_file", action="store", required=True, help="CUPID YAML file"
+        "--cupid_file",
+        action="store",
+        required=True,
+        help="CUPID YAML file",
     )
     parser.add_argument(
         "--adf_template",
@@ -21,7 +27,10 @@ def _parse_args():
         help="an adf config file to use as a base",
     )
     parser.add_argument(
-        "--out_file", action="store", required=True, help="the output file to save"
+        "--out_file",
+        action="store",
+        required=True,
+        help="the output file to save",
     )
     return parser.parse_args()
 
@@ -49,7 +58,6 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
 
-    
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = "/".join([DOUT, "atm", "hist"])
     # TEST CASE TIME SERIES FILE PATH
@@ -57,38 +65,60 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = "/".join([DOUT, "proc", "climo"])
     # TEST CASE START / END YEARS
-    test_case_cupid_ts_index =  ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
+    test_case_cupid_ts_index = (
+        ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
+    )
     start_date = get_date_from_ts(c_ts["atm"], "start_years", test_case_cupid_ts_index)
     end_date = get_date_from_ts(c_ts["atm"], "end_years", test_case_cupid_ts_index)
     a_dict["diag_cam_climo"]["start_year"] = start_date
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
-    # Set values for BASELINE 
-    base_case_cupid_ts_index = ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
+    # Set values for BASELINE
+    base_case_cupid_ts_index = (
+        ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
+    )
     if base_case_name is not None:
         base_case_output_dir = c_dict["global_params"].get("base_case_output_dir", DOUT)
-        base_start_date = get_date_from_ts(c_ts["atm"], "start_years", base_case_cupid_ts_index)
-        base_end_date = get_date_from_ts(c_ts["atm"], "end_years", base_case_cupid_ts_index)
+        base_start_date = get_date_from_ts(
+            c_ts["atm"],
+            "start_years",
+            base_case_cupid_ts_index,
+        )
+        base_end_date = get_date_from_ts(
+            c_ts["atm"],
+            "end_years",
+            base_case_cupid_ts_index,
+        )
         if base_start_date is None:
             base_start_date = start_date
         if base_end_date is None:
             base_end_date = end_date
 
-    a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = "/".join([base_case_output_dir, "atm", "hist"])
-    a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = "/".join([base_case_output_dir, "proc", "tseries"])
-    a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = "/".join([base_case_output_dir, "proc", "climo"])
+    a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = "/".join(
+        [base_case_output_dir, "atm", "hist"],
+    )
+    a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = "/".join(
+        [base_case_output_dir, "proc", "tseries"],
+    )
+    a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = "/".join(
+        [base_case_output_dir, "proc", "climo"],
+    )
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
-    a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join([DOUT, "proc", "regrid"])  # This is where ADF will make "regrid" files
-    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join([c_dict['data_sources']["sname"], "ADF"]) # this is where ADF will put plots, and "website" directory
+    a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join(
+        [DOUT, "proc", "regrid"],
+    )  # This is where ADF will make "regrid" files
+    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
+        [c_dict["data_sources"]["sname"], "ADF"],
+    )  # this is where ADF will put plots, and "website" directory
     a_dict["user"] = os.getenv("USER")
 
     with open(out_file, "w") as f:
         # Header of file is a comment logging provenance
         f.write(
-            f"# This file has been auto-generated using generate_adf_config_file.py\n"
+            "# This file has been auto-generated using generate_adf_config_file.py\n",
         )
         f.write("# Arguments:\n")
         f.write(f"# {cupid_file = }\n")
