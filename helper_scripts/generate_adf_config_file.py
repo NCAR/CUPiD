@@ -59,11 +59,17 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
 
     # TEST CASE HISTORY FILE PATH
-    a_dict["diag_cam_climo"]["cam_hist_loc"] = "/".join([DOUT, "atm", "hist"])
+    a_dict["diag_cam_climo"]["cam_hist_loc"] = "/".join(
+        [DOUT, test_case_name, "atm", "hist"],
+    )
     # TEST CASE TIME SERIES FILE PATH
-    a_dict["diag_cam_climo"]["cam_ts_loc"] = "/".join([DOUT, "proc", "tseries"])
+    a_dict["diag_cam_climo"]["cam_ts_loc"] = "/".join(
+        [DOUT, test_case_name, "proc", "tseries"],
+    )
     # TEST CASE CLIMO FILE PATH
-    a_dict["diag_cam_climo"]["cam_climo_loc"] = "/".join([DOUT, "proc", "climo"])
+    a_dict["diag_cam_climo"]["cam_climo_loc"] = "/".join(
+        [DOUT, test_case_name, "proc", "climo"],
+    )
     # TEST CASE START / END YEARS
     test_case_cupid_ts_index = (
         ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
@@ -78,7 +84,10 @@ def generate_adf_config(cupid_file, adf_file, out_file):
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
     if base_case_name is not None:
-        base_case_output_dir = c_dict["global_params"].get("base_case_output_dir", DOUT)
+        base_case_output_dir = c_dict["global_params"].get(
+            "base_case_output_dir",
+            DOUT + "/" + base_case_name,
+        )
         base_start_date = get_date_from_ts(
             c_ts["atm"],
             "start_years",
@@ -108,7 +117,7 @@ def generate_adf_config(cupid_file, adf_file, out_file):
 
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join(
-        [DOUT, "proc", "regrid"],
+        [DOUT, base_case_name, "proc", "regrid"],
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
         [
