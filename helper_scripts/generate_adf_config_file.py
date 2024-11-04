@@ -111,7 +111,7 @@ def generate_adf_config(cupid_file, adf_file, out_file):
         [DOUT, "proc", "regrid"],
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
-        [c_dict["data_sources"]["sname"], "ADF"],
+        [c_dict["data_sources"]["sname"], "ADF"],  # TODO: update this
     )  # this is where ADF will put plots, and "website" directory
     a_dict["user"] = os.getenv("USER")
 
@@ -121,9 +121,9 @@ def generate_adf_config(cupid_file, adf_file, out_file):
             "# This file has been auto-generated using generate_adf_config_file.py\n",
         )
         f.write("# Arguments:\n")
-        f.write(f"# {cupid_file = }\n")
-        f.write(f"# {adf_file = }\n")
-        f.write(f"# Output: {out_file = }\n")
+        f.write(f"# {cupid_file =}\n")
+        f.write(f"# {adf_file =}\n")
+        f.write(f"# Output: {out_file =}\n")
         # enter in each element of the dictionary into the new file
         yaml.dump(a_dict, f, sort_keys=False)
 
