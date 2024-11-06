@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import argparse
-import os
 
 import yaml
+
+# import os
 
 
 def _parse_args():
@@ -64,11 +65,11 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = "/".join(
-        [DOUT, test_case_name, "proc", "tseries"],
+        [DOUT, test_case_name, "atm", "proc", "tseries"],
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = "/".join(
-        [DOUT, test_case_name, "proc", "climo"],
+        [DOUT, test_case_name, "atm", "proc", "climo"],
     )
     # TEST CASE START / END YEARS
     test_case_cupid_ts_index = (
@@ -107,10 +108,10 @@ def generate_adf_config(cupid_file, adf_file, out_file):
         [base_case_output_dir, "atm", "hist"],
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = "/".join(
-        [base_case_output_dir, "proc", "tseries"],
+        [base_case_output_dir, "atm", "proc", "tseries"],
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = "/".join(
-        [base_case_output_dir, "proc", "climo"],
+        [base_case_output_dir, "atm", "proc", "climo"],
     )
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
@@ -118,17 +119,25 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"].get("hist_str")
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join(
-        [DOUT, base_case_name, "proc", "regrid"],
+        [DOUT, base_case_name, "atm", "proc", "regrid"],
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
         [
-            c_dict["data_sources"]["sname"],
+            "/".join(cupid_file.split("/")[:-1]),
             "computed_notebooks",
             c_dict["data_sources"]["sname"],
             "ADF",
         ],
     )  # this is where ADF will put plots, and "website" directory
-    a_dict["user"] = os.getenv("USER")
+    a_dict["user"] = "/".join(
+        [
+            "/".join(cupid_file.split("/")[:-1]),
+            "computed_notebooks",
+            c_dict["data_sources"]["sname"],
+            "ADF",
+        ],
+    )
+    # os.getenv("USER")
 
     with open(out_file, "w") as f:
         # Header of file is a comment logging provenance
