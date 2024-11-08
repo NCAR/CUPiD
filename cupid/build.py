@@ -48,7 +48,8 @@ def build(config_path):
         ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
     )
     shutil.copytree(
-        f"{run_dir}/ADF", f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
+        f"{run_dir}/ADF",
+        f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
     )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
