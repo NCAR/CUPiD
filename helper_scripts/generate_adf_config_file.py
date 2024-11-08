@@ -126,6 +126,8 @@ def generate_adf_config(cupid_file, adf_file, out_file):
             "/".join(cupid_file.split("/")[:-1]),
             "computed_notebooks",
             c_dict["data_sources"]["sname"],
+            "_build",
+            "html",
             "ADF",
         ],
     )  # this is where ADF will put plots, and "website" directory
@@ -134,6 +136,8 @@ def generate_adf_config(cupid_file, adf_file, out_file):
             "/".join(cupid_file.split("/")[:-1]),
             "computed_notebooks",
             c_dict["data_sources"]["sname"],
+            "_build",
+            "html",
             "ADF",
         ],
     )
