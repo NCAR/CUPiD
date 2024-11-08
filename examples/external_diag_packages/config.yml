@@ -46,7 +46,7 @@ computation_config:
 
 global_params:
   case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
+  base_case_name: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0101-01-01'
@@ -118,7 +118,9 @@ compute_notebooks:
         kernel_name: cupid-dev
         parameter_groups:
           none:
-            adf_root: ../../external_diag_packages/computed_notebooks/external_diag_packages/_build/html/ADF
+            adf_root: ../../external_diag_packages/computed_notebooks/external_diag_packages/_build/html/ADF/
+            case_year_range: "1_100"
+            base_case_year_range: "1995_2006"
 
 #    glc:
 #      LIWG_SMB_diagnostic:
