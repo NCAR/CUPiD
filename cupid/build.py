@@ -16,6 +16,7 @@ Returns:
 """
 from __future__ import annotations
 
+import shutil
 import subprocess
 
 import click
@@ -42,8 +43,12 @@ def build(config_path):
     run_dir = control["data_sources"]["run_dir"]
 
     subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks/{sname}"])
+    # TODO : add flag if ADF exists
     subprocess.run(
         ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
+    )
+    shutil.copytree(
+        f"{run_dir}/ADF", f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
     )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
@@ -59,3 +64,7 @@ def build(config_path):
     #                 f"{user}@{remote_mach}:{remote_dir}"])
 
     return None
+
+
+if __name__ == "__main__":
+    build()
