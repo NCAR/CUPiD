@@ -118,7 +118,7 @@ compute_notebooks:
         kernel_name: cupid-dev
         parameter_groups:
           none:
-            html_link: computed_notebooks/ADF_webpage
+            adf_root: ../../external_diag_packages/computed_notebooks/external_diag_packages/_build/html/ADF
 
 #    glc:
 #      LIWG_SMB_diagnostic:
