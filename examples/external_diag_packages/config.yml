@@ -57,7 +57,7 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
+  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099']
 
   atm:
     vars: ['PSL']
@@ -122,6 +122,7 @@ compute_notebooks:
             case_year_range: "1_100"
             base_case_year_range: "1995_2006"
             adf_run: True
+            adf_vars: ['PRECT', 'SST']
 
 #    glc:
 #      LIWG_SMB_diagnostic:
