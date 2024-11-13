@@ -141,6 +141,17 @@ def generate_adf_config(cupid_file, adf_file, out_file):
             "ADF",
         ],
     )
+
+    try:
+        cupid_config_vars = c_dict["compute_notebooks"]["atm"]["link_to_ADF"][
+            "parameter_groups"
+        ]["none"]["adf_vars"]
+        # if added in cupid config file, overwrite adf default diag_var_list
+        a_dict["diag_var_list"] = cupid_config_vars
+    except KeyError:
+        # use default adf diag_var_list
+        pass
+
     # os.getenv("USER")
 
     with open(out_file, "w") as f:
