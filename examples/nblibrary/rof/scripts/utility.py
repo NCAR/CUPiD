@@ -37,7 +37,7 @@ class AutoVivification(dict):
 
 
 def read_shps(shp_list, usecols, **kwargs):
-    """Load shapefiles with selected attributes in dataframe"""
+    """Faster load shapefiles with selected attributes in dataframe"""
     gdf_frame = []
     for shp in shp_list:
         gdf_frame.append(read_dataframe(shp, columns=usecols))
