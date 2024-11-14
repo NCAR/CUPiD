@@ -31,27 +31,6 @@ def remove_nan(qsim, qobs):
     return sim_obs[:, 0], sim_obs[:, 1]
 
 
-def corr(qsim, qobs):
-    """
-    Calculates Pearson correlation coefficient  between two time series arrays.
-
-    Arguments
-    ---------
-    sim: array-like
-        Simulated time series array.
-    obs: array-like
-        Observed time series array.
-
-    Returns
-    -------
-    corr: float
-        correlation coefficient between the two arrays.
-    """
-
-    qsim1, qobs1 = remove_nan(qsim, qobs)
-    return np.corrcoef(qsim1, qobs1)[0, 1]
-
-
 def pbias(qsim, qobs):
     """
     Calculates percentage bias between two flow arrays.
