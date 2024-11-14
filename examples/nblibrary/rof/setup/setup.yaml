@@ -5,12 +5,15 @@ geospatial_dir: /glade/campaign/cgd/tss/people/mizukami/ctsm-mizuRoute/geospatia
 ancillary_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/postprocess+analysis//ancillary_data
 ref_flow_dir: /glade/u/home/mizukami/proj/ctsm-mizuRoute/obs
 
-# simulation periods (TODO: Consider removing this)
-# note assuming all the simulations have the same periods and assuming start in January 1st and end in December 31st
-syr: 1965
-eyr: 1980
-
-# case meta data (TODO: Consider rename case_meta, consider removing color)
+# case meta dictionary data (TODO: consider removing color)
+# grid_name -> name of grid
+#   network_name -> name of river network
+#   model -> MOSART or mizuroute
+#   network_type -> grid or vector
+#   vars_read -> history variables read in
+#   flow_name -> routed runoff
+#   runoff_name -> instantaneous runoff from land model
+#   color -> color used for plotting
 case_meta:
   rHDMAlk:
     network: HDMA_lake
