@@ -15,9 +15,9 @@ def remove_nan(qsim, qobs):
 
     Arguments
     ---------
-    sim: array-like
+    qsim: array-like
         Simulated time series array.
-    obs: array-like
+    qobs: array-like
         Observed time series array.
 
     Returns
