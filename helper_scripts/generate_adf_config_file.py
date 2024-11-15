@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import os
+import sys
 
 import yaml
-
-# import os
 
 
 def _parse_args():
@@ -15,20 +15,30 @@ def _parse_args():
         description="Generate cupid_adf_config.yml based on an existing CUPID YAML file",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    # Command line argument for location of CESM source code (required)
     parser.add_argument(
-        "--cupid_file",
+        "--cesm-root",
         action="store",
+        dest="cesm_root",
         required=True,
-        help="CUPID YAML file",
+        help="Location of CESM source code",
+    )
+    # Command line argument for CUPiD example from which to get config.yml
+    parser.add_argument(
+        "--cupid-example",
+        action="store",
+        dest="cupid_example",
+        default="external_diag_packages",
+        help="CUPiD example to use as template for config.yml",
     )
     parser.add_argument(
-        "--adf_template",
+        "--adf-template",
         action="store",
         required=True,
         help="an adf config file to use as a base",
     )
     parser.add_argument(
-        "--out_file",
+        "--out-file",
         action="store",
         required=True,
         help="the output file to save",
@@ -36,14 +46,30 @@ def _parse_args():
     return parser.parse_args()
 
 
-def generate_adf_config(cupid_file, adf_file, out_file):
-    """Use cupid_file (YAML) and adf_file (YAML) to produce out_file
-    by modifying adf_file with data from cupid_file.
+def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
+    """Use cupid config file (YAML) from cupid_example and adf_file (YAML)
+    to produce out_file by modifying adf_file with data from cupid config file.
     """
-    with open(cupid_file, encoding="UTF-8") as c:
-        c_dict = yaml.load(c, Loader=yaml.SafeLoader)
+    sys.path.append(os.path.join(cesm_root, "cime"))
+
+    # Is cupid_example a valid value?
+    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    cupid_examples = os.path.join(cupid_root, "examples")
+    valid_examples = [
+        example
+        for example in next(os.walk(cupid_examples))[1]
+        if example not in ["ilamb", "nblibrary"]
+    ]
+    if cupid_example not in valid_examples:
+        error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
+        raise KeyError(
+            f"{error_msg} (choose from subdirectories of {cupid_examples}: {valid_examples})",
+        )
+
+    with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as c:
+        c_dict = yaml.safe_load(c)
     with open(adf_file, encoding="UTF-8") as a:
-        a_dict = yaml.load(a, Loader=yaml.SafeLoader)
+        a_dict = yaml.safe_load(a)
 
     # read parameters from CUPID
     # use `get` to default to None
@@ -123,7 +149,9 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
         [
-            "/".join(cupid_file.split("/")[:-1]),
+            cupid_root,
+            "examples",
+            cupid_example,
             "computed_notebooks",
             c_dict["data_sources"]["sname"],
             "_build",
@@ -133,7 +161,9 @@ def generate_adf_config(cupid_file, adf_file, out_file):
     )  # this is where ADF will put plots, and "website" directory
     a_dict["user"] = "/".join(
         [
-            "/".join(cupid_file.split("/")[:-1]),
+            cupid_root,
+            "examples",
+            cupid_example,
             "computed_notebooks",
             c_dict["data_sources"]["sname"],
             "_build",
@@ -160,7 +190,8 @@ def generate_adf_config(cupid_file, adf_file, out_file):
             "# This file has been auto-generated using generate_adf_config_file.py\n",
         )
         f.write("# Arguments:\n")
-        f.write(f"# {cupid_file=}\n")
+        f.write(f"# {cesm_root=}\n")
+        f.write(f"# {cupid_example=}\n")
         f.write(f"# {adf_file=}\n")
         f.write(f"# Output: {out_file=}\n")
         # enter in each element of the dictionary into the new file
@@ -184,4 +215,9 @@ def get_date_from_ts(data: dict, keyname: str, listindex: int, default=None):
 if __name__ == "__main__":
     args = vars(_parse_args())
     print(args)
-    generate_adf_config(args["cupid_file"], args["adf_template"], args["out_file"])
+    generate_adf_config(
+        args["cesm_root"],
+        args["cupid_example"],
+        args["adf_template"],
+        args["out_file"],
+    )
