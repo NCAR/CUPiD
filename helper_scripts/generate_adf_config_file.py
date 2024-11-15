@@ -83,19 +83,34 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
 
     # Set case names for ADF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
-    a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
+    if base_case_name:
+        a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
+
+    elif "cam_case_name" in "cam_case_name":
+        del a_dict["diag_cam_baseline_climo"]["cam_case_name"]
 
     # TEST CASE HISTORY FILE PATH
-    a_dict["diag_cam_climo"]["cam_hist_loc"] = "/".join(
-        [DOUT, test_case_name, "atm", "hist"],
+    a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
+        DOUT,
+        test_case_name,
+        "atm",
+        "hist",
     )
     # TEST CASE TIME SERIES FILE PATH
-    a_dict["diag_cam_climo"]["cam_ts_loc"] = "/".join(
-        [DOUT, test_case_name, "atm", "proc", "tseries"],
+    a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
+        DOUT,
+        test_case_name,
+        "atm",
+        "proc",
+        "tseries",
     )
     # TEST CASE CLIMO FILE PATH
-    a_dict["diag_cam_climo"]["cam_climo_loc"] = "/".join(
-        [DOUT, test_case_name, "atm", "proc", "climo"],
+    a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
+        DOUT,
+        test_case_name,
+        "atm",
+        "proc",
+        "climo",
     )
     # TEST CASE START / END YEARS
     test_case_cupid_ts_index = (
@@ -107,10 +122,13 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
     # Set values for BASELINE
-    base_case_cupid_ts_index = (
-        ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
-    )
     if base_case_name is not None:
+        base_case_cupid_ts_index = (
+            ts_case_names.index(base_case_name)
+            if base_case_name in ts_case_names
+            else None
+        )
+
         base_case_output_dir = c_dict["global_params"].get(
             "base_case_output_dir",
             DOUT + "/" + base_case_name,
@@ -130,46 +148,54 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         if base_end_date is None:
             base_end_date = end_date
 
-    a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = "/".join(
-        [base_case_output_dir, "atm", "hist"],
+    a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
+        base_case_output_dir,
+        "atm",
+        "hist",
     )
-    a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = "/".join(
-        [base_case_output_dir, "atm", "proc", "tseries"],
+    a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
+        base_case_output_dir,
+        "atm",
+        "proc",
+        "tseries",
     )
-    a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = "/".join(
-        [base_case_output_dir, "atm", "proc", "climo"],
+    a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
+        base_case_output_dir,
+        "atm",
+        "proc",
+        "climo",
     )
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"].get("hist_str")
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
-    a_dict["diag_basic_info"]["cam_regrid_loc"] = "/".join(
-        [DOUT, base_case_name, "atm", "proc", "regrid"],
+    a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
+        DOUT,
+        base_case_name,
+        "atm",
+        "proc",
+        "regrid",
     )  # This is where ADF will make "regrid" files
-    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = "/".join(
-        [
-            cupid_root,
-            "examples",
-            cupid_example,
-            "computed_notebooks",
-            c_dict["data_sources"]["sname"],
-            "_build",
-            "html",
-            "ADF",
-        ],
+    a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
+        cupid_root,
+        "examples",
+        cupid_example,
+        "computed_notebooks",
+        c_dict["data_sources"]["sname"],
+        "_build",
+        "html",
+        "ADF",
     )  # this is where ADF will put plots, and "website" directory
-    a_dict["user"] = "/".join(
-        [
-            cupid_root,
-            "examples",
-            cupid_example,
-            "computed_notebooks",
-            c_dict["data_sources"]["sname"],
-            "_build",
-            "html",
-            "ADF",
-        ],
+    a_dict["user"] = os.path.join(
+        cupid_root,
+        "examples",
+        cupid_example,
+        "computed_notebooks",
+        c_dict["data_sources"]["sname"],
+        "_build",
+        "html",
+        "ADF",
     )
 
     try:
@@ -189,6 +215,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         f.write(
             "# This file has been auto-generated using generate_adf_config_file.py\n",
         )
+        f.write(f"# It is based off of examples/{cupid_example}/config.yml\n")
         f.write("# Arguments:\n")
         f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_example=}\n")
