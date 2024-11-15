@@ -198,15 +198,21 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "ADF",
     )
 
-    try:
-        cupid_config_vars = c_dict["compute_notebooks"]["atm"]["link_to_ADF"][
-            "parameter_groups"
-        ]["none"]["adf_vars"]
-        # if added in cupid config file, overwrite adf default diag_var_list
-        a_dict["diag_var_list"] = cupid_config_vars
-    except KeyError:
-        # use default adf diag_var_list
-        pass
+    diag_var_list = []
+    plotting_scripts = []
+    for component in c_dict["compute_notebooks"]:
+        for nb in c_dict["compute_notebooks"][component]:
+            if c_dict["compute_notebooks"][component][nb].get("external_tool",{}).get("tool_name") == "ADF":
+                for var in c_dict["compute_notebooks"][component][nb]["external_tool"].get("vars", []):
+                    if var not in diag_var_list:
+                        diag_var_list.append(var)
+                for script in c_dict["compute_notebooks"][component][nb]["external_tool"].get("plotting_scripts", []):
+                    if script not in plotting_scripts:
+                        plotting_scripts.append(script)
+    if diag_var_list:
+        a_dict["diag_var_list"] = diag_var_list
+    if plotting_scripts:
+        a_dict["plotting_scripts"] = plotting_scripts
 
     # os.getenv("USER")
 
