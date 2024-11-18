@@ -74,7 +74,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     # read parameters from CUPID
     # use `get` to default to None
     DOUT = c_dict["global_params"]["CESM_output_dir"]
-    base_case_name = c_dict["global_params"].get("base_case_name")
+    base_case_name = c_dict["global_params"]["base_case_name"]
     test_case_name = c_dict["global_params"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
