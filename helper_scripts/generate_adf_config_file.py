@@ -85,9 +85,6 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
 
-    if "cam_case_name" in "cam_case_name":
-        del a_dict["diag_cam_baseline_climo"]["cam_case_name"]
-
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
         DOUT,
