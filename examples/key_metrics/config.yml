@@ -68,7 +68,7 @@ timeseries:
     level: 'lev'
 
   lnd:
-    vars: []
+    vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
@@ -142,16 +142,13 @@ compute_notebooks:
 #            endyr2: 305
 #            nyears: 25
 
-#    lnd:
-#      land_comparison:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-#            type:
-#              - 1850pAD
-#              - 1850pSASU
+    lnd:
+      Global_TerrestrialCouplingIndex_VisualCompareObs:
+        parameter_groups:
+          none:
+            clmFile_h: '.h0.'
+            fluxnet_comparison: True
+            obsDir: '/glade/campaign/cgd/tss/people/mdfowler/FLUXNET2015/'
 
 #    ocn:
 #      ocean_surface:
@@ -197,9 +194,9 @@ book_toc:
     #   chapters:
     #       - file: ocn/ocean_surface
 
-    # - caption: Land
-    #   chapters:
-    #     - file: lnd/land_comparison
+    - caption: Land
+      chapters:
+        - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
 
     # - caption: Sea Ice
     #   chapters:
