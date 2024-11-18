@@ -83,10 +83,9 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
 
     # Set case names for ADF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
-    if base_case_name:
-        a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
+    a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
 
-    elif "cam_case_name" in "cam_case_name":
+    if "cam_case_name" in "cam_case_name":
         del a_dict["diag_cam_baseline_climo"]["cam_case_name"]
 
     # TEST CASE HISTORY FILE PATH
@@ -122,31 +121,28 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
     # Set values for BASELINE
-    if base_case_name is not None:
-        base_case_cupid_ts_index = (
-            ts_case_names.index(base_case_name)
-            if base_case_name in ts_case_names
-            else None
-        )
+    base_case_cupid_ts_index = (
+        ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
+    )
 
-        base_case_output_dir = c_dict["global_params"].get(
-            "base_case_output_dir",
-            DOUT + "/" + base_case_name,
-        )
-        base_start_date = get_date_from_ts(
-            c_ts["atm"],
-            "start_years",
-            base_case_cupid_ts_index,
-        )
-        base_end_date = get_date_from_ts(
-            c_ts["atm"],
-            "end_years",
-            base_case_cupid_ts_index,
-        )
-        if base_start_date is None:
-            base_start_date = start_date
-        if base_end_date is None:
-            base_end_date = end_date
+    base_case_output_dir = c_dict["global_params"].get(
+        "base_case_output_dir",
+        DOUT + "/" + base_case_name,
+    )
+    base_start_date = get_date_from_ts(
+        c_ts["atm"],
+        "start_years",
+        base_case_cupid_ts_index,
+    )
+    base_end_date = get_date_from_ts(
+        c_ts["atm"],
+        "end_years",
+        base_case_cupid_ts_index,
+    )
+    if base_start_date is None:
+        base_start_date = start_date
+    if base_end_date is None:
+        base_end_date = end_date
 
     a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
         base_case_output_dir,
