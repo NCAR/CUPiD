@@ -46,14 +46,14 @@ def build(config_path):
     subprocess.run(
         ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
     )
-    adf_run = control["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"][
-        "none"
-    ]["adf_run"]
-    if adf_run:
-        shutil.copytree(
-            f"{run_dir}/ADF",
-            f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
-        )
+    for component in control["compute_notebooks"]:
+        for notebook in control["compute_notebooks"][component]:
+            if "external_tool" in control["compute_notebooks"][component][notebook]:
+                if control["compute_notebooks"][component][notebook]["external_tool"].get("tool_name") == "ADF":
+                    shutil.copytree(
+                        f"{run_dir}/ADF_output",
+                        f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
+                    )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
