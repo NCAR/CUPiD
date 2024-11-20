@@ -174,22 +174,9 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         cupid_root,
         "examples",
         cupid_example,
-        "computed_notebooks",
-        c_dict["data_sources"]["sname"],
-        "_build",
-        "html",
-        "ADF",
+        "ADF_output",
     )  # this is where ADF will put plots, and "website" directory
-    a_dict["user"] = os.path.join(
-        cupid_root,
-        "examples",
-        cupid_example,
-        "computed_notebooks",
-        c_dict["data_sources"]["sname"],
-        "_build",
-        "html",
-        "ADF",
-    )
+    a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
     plotting_scripts = []
