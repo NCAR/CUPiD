@@ -120,6 +120,17 @@ compute_notebooks:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
             base_regridded_output: True
             validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
+      link_to_ADF:
+        kernel_name: cupid-dev
+        parameter_groups:
+          none:
+            adf_root: ../../external_diag_packages/ADF/
+            case_year_range: "1_100"
+            base_case_year_range: "1_100"
+        external_tool:
+          tool_name: 'ADF'
+          vars: ['PRECT', 'SST']
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -189,6 +200,7 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
+        - file: atm/link_to_ADF
 
     # - caption: Ocean
     #   chapters:
