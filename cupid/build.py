@@ -49,7 +49,12 @@ def build(config_path):
     for component in control["compute_notebooks"]:
         for notebook in control["compute_notebooks"][component]:
             if "external_tool" in control["compute_notebooks"][component][notebook]:
-                if control["compute_notebooks"][component][notebook]["external_tool"].get("tool_name") == "ADF":
+                if (
+                    control["compute_notebooks"][component][notebook][
+                        "external_tool"
+                    ].get("tool_name")
+                    == "ADF"
+                ):
                     shutil.copytree(
                         f"{run_dir}/ADF_output",
                         f"{run_dir}/computed_notebooks/{sname}/_build/html/ADF",
