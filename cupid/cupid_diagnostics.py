@@ -105,7 +105,7 @@ def run(
     # Grab paths
 
     run_dir = os.path.realpath(os.path.expanduser(control["data_sources"]["run_dir"]))
-    output_dir = run_dir + "/computed_notebooks/" + control["data_sources"]["sname"]
+    output_dir = run_dir + "/computed_notebooks/"
     temp_data_path = run_dir + "/temp_data"
     nb_path_root = os.path.realpath(
         os.path.expanduser(control["data_sources"]["nb_path_root"]),
