@@ -15,7 +15,7 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 ---
 **If you want to run your notebook through the `CUPiD` workflow yourself, follow the rest of the instructions:**
 
-4. Move your new diagnostic notebook to the folder called `examples/nblibrary`.
+4. Move your new diagnostic notebook to the folder called `nblibrary`.
 
 5. Open `config.yml`. First, add your new notebook (as its name, minus the `.ipynb`) to the list of notebooks that will be computed (`compute_notebooks`). The notebooks will be executed in the order they are listed here. For example:
 
