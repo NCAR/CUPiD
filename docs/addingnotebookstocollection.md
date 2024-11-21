@@ -40,7 +40,7 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 
 7. Update your parameters. Parameters that are specific to just this notebook should go under `parameter_groups` in the notebook's entry under `compute_notebooks`. Global parameters that you want passed in to every notebook in the collection should go under `global_params`.  When `CUPiD` executes your notebook, all of these parameters will get put in a new cell below the cell tagged `parameters` that you added in step 3. This means they will supercede the values of the parameters that you put in the cell above---the names, notation, etc. should match to make sure your notebook is able to find the variables it needs.
 
-8. Your collection can now be run with `cupid-run`, and then the website can be built with `cupid-build`.
+8. Your collection can now be run with `cupid-diagnostics`, and then the website can be built with `cupid-webpage`.
 
 9. If you're happy with your notebook and want to add it to the CUPiD repository, there are a few formatting items that we would like contributors to follow:
     * Title your notebook something descriptive. A recommended format is `<region>_<variable>_<metric>_<comparisons>.ipynb`; for instance, this might look like `Global_PSL_NMSE_compare_obs_lens.ipynb` or `Greenland_SMB_visual_compare_obs.ipynb`.
