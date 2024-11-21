@@ -4,10 +4,6 @@
 # Data Sources #
 ################
 data_sources:
-    # sname is any string used as a nickname for this configuration. It will be
-    ### used as the name of the folder your computed notebooks are put in
-    sname: external_diag_packages
-
     # run_dir is the path to the folder you want
     ### all the files associated with this configuration
     ### to be created in
@@ -17,7 +13,7 @@ data_sources:
     ### look for your template notebooks in. It doesn't have to
     ### be inside run_dir, or be specific to this project, as
     ### long as the notebooks are there
-    nb_path_root: ../nblibrary
+    nb_path_root: ../../nblibrary
 
 ######################
 # Computation Config #
@@ -118,7 +114,7 @@ compute_notebooks:
         kernel_name: cupid-dev
         parameter_groups:
           none:
-            adf_root: ../../external_diag_packages/ADF/
+            adf_root: ../../examples/external_diag_packages/ADF_output/
             case_year_range: "1_100"
             base_case_year_range: "1995_2006"
         external_tool:
