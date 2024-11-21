@@ -108,6 +108,25 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "proc",
         "climo",
     )
+    # UPDATE PATHS FOR REGRIDDED DATA
+    try:
+        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+            "regridded_output"
+        ]:
+            a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_hist_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_ts_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_climo_loc"],
+                "regrid",
+            )
+    except:  # noqa: E722
+        pass
     # TEST CASE START / END YEARS
     test_case_cupid_ts_index = (
         ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
@@ -158,6 +177,24 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "proc",
         "climo",
     )
+    try:
+        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+            "base_regridded_output"
+        ]:
+            a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_hist_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_ts_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_climo_loc"],
+                "regrid",
+            )
+    except:  # noqa: E722
+        pass
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 

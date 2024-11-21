@@ -118,7 +118,7 @@ compute_notebooks:
         kernel_name: cupid-dev
         parameter_groups:
           none:
-            adf_root: ../../external_diag_packages/ADF/
+            adf_root: ../../external_diag_packages/ADF_output/
             case_year_range: "1_100"
             base_case_year_range: "1995_2006"
         external_tool:
