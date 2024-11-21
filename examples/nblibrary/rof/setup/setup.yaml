@@ -1,0 +1,145 @@
+## Configurations used for ctsm-mizuRoute
+
+# Directories
+geospatial_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/rof_data/geospatial
+ancillary_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/rof_data/ancillary_data
+ref_flow_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/rof_data/obs
+
+# case meta dictionary data (TODO: consider removing color)
+# grid_name -> name of grid
+#   network_name -> name of river network
+#   model -> MOSART or mizuroute
+#   network_type -> grid or vector
+#   vars_read -> history variables read in
+#   flow_name -> routed runoff
+#   runoff_name -> instantaneous runoff from land model
+#   color -> color used for plotting
+case_meta:
+  rHDMAlk:
+    network: HDMA_lake
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    vars_read:
+     - DWroutedRunoff
+     - basRunoff
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:red'
+  rHDMAlk_h06:
+    network: HDMA_lake_h06
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    vars_read:
+     - DWroutedRunoff
+     - basRunoff
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  rHDMA:
+    network: HDMA
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    vars_read:
+     - DWroutedRunoff
+     - basRunoff
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:blue'
+  rMERIT:
+    network: MERIT_Hydro
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    vars_read:
+     - DWroutedRunoff
+     - basRunoff
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  f09_f09:
+    network: mosart
+    model: mizuroute
+    network_type: vector
+    domain_nc: None
+    vars_read:
+     - DWroutedRunoff
+     - basRunoff
+    flow_name: DWroutedRunoff
+    runoff_name: basRunoff
+    color: 'xkcd:green'
+  f09_f09_mosart:
+    network: mosart
+    model: mosart
+    network_type: grid
+    domain_nc: mosart0.5_domain.nc
+    vars_read:
+     - RIVER_DISCHARGE_OVER_LAND_LIQ
+     - RIVER_DISCHARGE_OVER_LAND_ICE
+    flow_name: RIVER_DISCHARGE_OVER_LAND_LIQ
+    runoff_name: None
+    color: 'xkcd:grey'
+
+# riiver line geopackage metadata
+# sub-key is network name
+reach_gpkg:
+  rHDMA:
+    file_name: hdma_global_stream.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  rHDMAlk:
+    file_name: hdma_global_stream.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  rMERIT:
+    file_name: rivEndMERIT_simplified_0003.gpkg
+    id_name: COMID
+    down_id_name: NextDownID
+  f09_f09_mosart:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_flowline.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+  f09_f09:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_flowline.gpkg
+    id_name: seg_id
+    down_id_name: Tosegment
+
+# catchment geopackage metadata
+# sub-key is network name
+catch_gpkg:
+  rHDMA:
+    file_name: hdma_global_catch_v2_0.01.gpkg
+    id_name: hruid
+  rHDMAlk:
+    file_name: hdma_hydrolake_global_catch_v1_0.01.gpkg
+    id_name: ID
+  rMERIT:
+    file_name: catEndoMERIT.gpkg
+    id_name: hruid
+  f09_f09_mosart:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_hru.gpkg
+    id_name: hruid
+  f09_f09:
+    file_name: MOSART_routing_Global_0.5x0.5_c170601_hru.gpkg
+    id_name: hruid
+
+# river network data (mizuRoute format, augumented one)
+# sub-key is network name
+river_network:
+  rHDMA:
+    file_name: ntopo_HDMA.v2.aug.nc
+    reach_ID: seg_id
+  rHDMAlk:
+    file_name: Network_topology_HDMA_HydroLake_v3.aug.nc
+    reach_ID: seg_id
+  rMERIT:
+    file_name: ntopo_MERIT_Hydro_v1.aug.nc
+    reach_ID: seg_id
+  f09_f09_mosart:
+    file_name: mizuRoute_MOSART_routing_Global_0.5x0.5_c170601.aug.nc
+    reach_ID: seg_id
+  f09_f09:
+    file_name: mizuRoute_MOSART_routing_Global_0.5x0.5_c170601.aug.nc
+    reach_ID: seg_id
