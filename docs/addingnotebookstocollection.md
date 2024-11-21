@@ -6,7 +6,6 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 1. Install the `environments/cupid-analysis.yml` environment (see [installation instructions](https://ncar.github.io/CUPiD/index.html#installing)). Make sure that your notebook runs properly in this environment. If there are conflicts or missing dependencies, open an issue or talk to CUPiD developers so we can find a solution.
 2. In your notebook, move all variables you might want to change (paths to data, dates to select, etc.) to a cell near the top. For example:
 
-            sname = "run_name"
             data_path = "path/to/data"
             dates = {"start_date" = "01/01/01",
                                     "end_date" = "01/01/02"}

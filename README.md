@@ -53,18 +53,18 @@ please see the [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_g
 ## Running
 
 CUPiD currently provides an example for generating diagnostics.
-To test the package out, try to run `examples/coupled-model`:
+To test the package out, try to run `examples/key-metrics`:
 
 ``` bash
 $ conda activate cupid-dev
-$ cd examples/coupled_model
+$ cd examples/key_metrics
 $ # machine-dependent: request multiple compute cores
 $ cupid-run
 $ cupid-build  # Will build HTML from Jupyter Book
 ```
 
-After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
-or you can view `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html/index.html` in a web browser.
+After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/key-metrics/computed_notebooks`
+or you can view `${CUPID_ROOT}/examples/key-metrics/computed_notebooks/_build/html/index.html` in a web browser.
 
 Notes:
 
