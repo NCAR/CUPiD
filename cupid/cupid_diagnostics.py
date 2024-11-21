@@ -11,7 +11,6 @@ Usage: cupid-run [OPTIONS]
 
 Options:
   -s, --serial        Do not use LocalCluster objects
-  -ts, --time-series  Run time series generation scripts prior to diagnostics
   -atm, --atmosphere  Run atmosphere component diagnostics
   -ocn, --ocean       Run ocean component diagnostics
   -lnd, --land        Run land component diagnostics
@@ -29,7 +28,6 @@ import click
 import intake
 import ploomber
 
-import cupid.timeseries
 import cupid.util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -40,7 +38,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
-@click.option("--time-series", "-ts", is_flag=True, help="Run time series generation scripts prior to diagnostics")
 # Options to turn components on or off
 @click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics")
 @click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component diagnostics")
@@ -52,7 +49,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def run(
     config_path,
     serial=False,
-    time_series=False,
     all=False,
     atmosphere=False,
     ocean=False,
@@ -105,89 +101,6 @@ def run(
     global_params["serial"] = serial
 
     ####################################################################
-
-    if time_series:
-        timeseries_params = control["timeseries"]
-
-        # general timeseries arguments for all components
-        num_procs = timeseries_params["num_procs"]
-
-        for component, comp_bool in component_options.items():
-            if comp_bool:
-
-                # set time series input and output directory:
-                # -----
-                if isinstance(timeseries_params["case_name"], list):
-                    ts_input_dirs = []
-                    for cname in timeseries_params["case_name"]:
-                        ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
-                else:
-                    ts_input_dirs = [
-                        global_params["CESM_output_dir"] + "/" +
-                        timeseries_params["case_name"] + f"/{component}/hist/",
-                    ]
-
-                if "ts_output_dir" in timeseries_params:
-                    if isinstance(timeseries_params["ts_output_dir"], list):
-                        ts_output_dirs = []
-                        for ts_outdir in timeseries_params["ts_output_dir"]:
-                            ts_output_dirs.append([
-                                os.path.join(
-                                        ts_outdir,
-                                        f"{component}", "proc", "tseries",
-                                ),
-                            ])
-                    else:
-                        ts_output_dirs = [
-                            os.path.join(
-                                    timeseries_params["ts_output_dir"],
-                                    f"{component}", "proc", "tseries",
-                            ),
-                        ]
-                else:
-                    if isinstance(timeseries_params["case_name"], list):
-                        ts_output_dirs = []
-                        for cname in timeseries_params["case_name"]:
-                            ts_output_dirs.append(
-                                os.path.join(
-                                        global_params["CESM_output_dir"],
-                                        cname,
-                                        f"{component}", "proc", "tseries",
-                                ),
-                            )
-                    else:
-                        ts_output_dirs = [
-                            os.path.join(
-                                    global_params["CESM_output_dir"],
-                                    timeseries_params["case_name"],
-                                    f"{component}", "proc", "tseries",
-                            ),
-                        ]
-                # -----
-
-                # fmt: off
-                # pylint: disable=line-too-long
-                cupid.timeseries.create_time_series(
-                    component,
-                    timeseries_params[component]["vars"],
-                    timeseries_params[component]["derive_vars"],
-                    timeseries_params["case_name"],
-                    timeseries_params[component]["hist_str"],
-                    ts_input_dirs,
-                    ts_output_dirs,
-                    # Note that timeseries output will eventually go in
-                    #   /glade/derecho/scratch/${USER}/archive/${CASE}/${component}/proc/tseries/
-                    timeseries_params["ts_done"],
-                    timeseries_params["overwrite_ts"],
-                    timeseries_params[component]["start_years"],
-                    timeseries_params[component]["end_years"],
-                    timeseries_params[component]["level"],
-                    num_procs,
-                    serial,
-                    logger,
-                )
-                # fmt: on
-                # pylint: enable=line-too-long
 
     # Grab paths
 
