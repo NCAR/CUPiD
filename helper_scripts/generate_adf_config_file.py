@@ -58,7 +58,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     valid_examples = [
         example
         for example in next(os.walk(cupid_examples))[1]
-        if example not in ["ilamb", "nblibrary"]
+        if example not in ["ilamb"]
     ]
     if cupid_example not in valid_examples:
         error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"

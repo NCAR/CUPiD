@@ -141,7 +141,7 @@ def setup_book(config_path):
 
     os.makedirs(output_root, exist_ok=True)
 
-    output_dir = f'{output_root}/{control["data_sources"]["sname"]}'
+    output_dir = f"{output_root}"
 
     os.makedirs(output_dir, exist_ok=True)
 

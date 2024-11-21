@@ -38,5 +38,5 @@ and can be accessed via the following steps:
 1. Open a default desktop icon.
 1. Select the browser client.
 1. Type `xterm` and hit enter to open a terminal.
-1. In the terminal, run `cd ${CUPID_ROOT}/examples/coupled_model/computed_notebooks/quick-run/_build/html` to enter the `html` directory.
+1. In the terminal, run `cd ${CUPID_ROOT}/examples/key_metrics/computed_notebooks/_build/html` to enter the `html` directory.
 1. From the updated directory, run `firefox index.html &` to open a web browser pointed at the generated web page.

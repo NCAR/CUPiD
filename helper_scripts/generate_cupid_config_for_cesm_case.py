@@ -95,7 +95,7 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     valid_examples = [
         example
         for example in next(os.walk(cupid_examples))[1]
-        if example not in ["ilamb", "nblibrary"]
+        if example not in ["ilamb"]
     ]
     if cupid_example not in valid_examples:
         error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
