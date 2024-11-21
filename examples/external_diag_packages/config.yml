@@ -111,7 +111,7 @@ compute_notebooks:
 
     atm:
       link_to_ADF:
-        kernel_name: cupid-dev
+        kernel_name: cupid-analysis
         parameter_groups:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/

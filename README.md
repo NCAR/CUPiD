@@ -24,8 +24,8 @@ Then `cd` into the `CUPiD` directory and build the necessary conda environments 
 
 ``` bash
 $ cd CUPiD
-$ mamba env create -f environments/dev-environment.yml
-$ conda activate cupid-dev
+$ mamba env create -f environments/cupid-infrastructure.yml
+$ conda activate cupid-infrastructure
 $ which cupid-diagnostics
 $ mamba env create -f environments/cupid-analysis.yml
 ```
@@ -41,11 +41,11 @@ If you do not have `mamba` installed, you can still use `conda`... it will just 
 1. If `which cupid-diagnostics` returned the error `which: no cupid-diagnostics in ($PATH)`, then please run the following:
 
    ``` bash
-   $ conda activate cupid-dev
+   $ conda activate cupid-infrastructure
    $ pip install -e .  # installs cupid
    ```
 
-1. In the `cupid-dev` environment, run `pre-commit install` to configure `git` to automatically run `pre-commit` checks when you try to commit changes from the `cupid-dev` environment; the commit will only proceed if all checks pass. Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed, and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
+1. In the `cupid-infrastructure` environment, run `pre-commit install` to configure `git` to automatically run `pre-commit` checks when you try to commit changes from the `cupid-infrastructure` environment; the commit will only proceed if all checks pass. Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed, and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
 1. If you plan on contributing code to CUPiD,
 whether developing CUPiD itself or providing notebooks for CUPiD to run,
 please see the [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_guide.html).
@@ -56,7 +56,7 @@ CUPiD currently provides an example for generating diagnostics.
 To test the package out, try to run `examples/key-metrics`:
 
 ``` bash
-$ conda activate cupid-dev
+$ conda activate cupid-infrastructure
 $ cd examples/key_metrics
 $ # machine-dependent: request multiple compute cores
 $ cupid-diagnostics
@@ -87,7 +87,7 @@ This will clear the `computed_notebooks` folder which is at the location pointed
 Most of CUPiD's configuration is done via the `config.yml` file, but there are a few command line options as well:
 
 ```bash
-(cupid-dev) $ cupid-diagnostics -h
+(cupid-infrastructure) $ cupid-diagnostics -h
 Usage: cupid-diagnostics [OPTIONS] CONFIG_PATH
 
   Main engine to set up running all the notebooks.

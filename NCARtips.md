@@ -11,16 +11,16 @@ Both cases are requesting 12 cores and 120 GB of memory.
 The recommended approach releases the cores immediately after `cupid-diagnostics` finishes:
 
 ```
-[login-node] $ conda activate cupid-dev
-(cupid-dev) [login-node] $ qcmd -l select=1:ncpus=12:mem=120GB -- cupid-diagnostics
+[login-node] $ conda activate cupid-infrastructure
+(cupid-infrastructure) [login-node] $ qcmd -l select=1:ncpus=12:mem=120GB -- cupid-diagnostics
 ```
 
 Alternatively, you can start an interactive session and remain on the compute nodes after `cupid-diagnostics` completes:
 
 ```
 [login-node] $ qinteractive -l select=1:ncpus=12:mem=120GB
-[compute-node] $ conda activate cupid-dev
-(cupid-dev) [compute-node] $ cupid-diagnostics
+[compute-node] $ conda activate cupid-infrastructure
+(cupid-infrastructure) [compute-node] $ cupid-diagnostics
 ```
 
 Notes:
