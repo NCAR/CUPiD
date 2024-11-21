@@ -17,7 +17,7 @@ Options:
   -lnd, --land        Run land component diagnostics
   -ice, --seaice      Run sea ice component diagnostics
   -glc, --landice     Run land ice component diagnostics
-  -rof, --river-runoff Run river runoff component diagnostics
+  #-rof, --river-runoff Run river runoff component diagnostics
   -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
   -h, --help          Show this message and exit.
 """
@@ -44,7 +44,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
-@click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
+# @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
 @click.argument("config_path", default="config.yml")
 def run_timeseries(
     config_path,
@@ -79,7 +79,7 @@ def run_timeseries(
         "lnd": land,
         "ice": seaice,
         "glc": landice,
-        "rof": river_runoff,
+        # "rof": river_runoff,
     }
 
     # Automatically run all if no components specified

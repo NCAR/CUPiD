@@ -46,5 +46,5 @@ documentation = "https://nbscuid.readthedocs.io"
 [project.scripts]
 cupid-timeseries = "cupid.run_timeseries:run_timeseries"
 cupid-diagnostics = "cupid.run_diagnostics:run_diagnostics"
-cupid-webpage = "cupid.cupid_webpage:cupid_webpage"
+cupid-webpage = "cupid.cupid_webpage:build"
 cupid-clear = "cupid.clear:clear"
