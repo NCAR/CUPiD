@@ -184,3 +184,7 @@ def run_timeseries(
             # pylint: enable=line-too-long
 
     return None
+
+
+if __name__ == "__main__":
+    run_timeseries()

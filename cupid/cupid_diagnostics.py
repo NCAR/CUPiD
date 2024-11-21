@@ -5,7 +5,7 @@ Main script for running all notebooks and scripts specified in the configuration
 This script sets up and runs all the specified notebooks and scripts according to the configurations
 provided in the specified YAML configuration file.
 
-Usage: cupid-run [OPTIONS]
+Usage: cupid-diagnostics [OPTIONS]
 
   Main engine to set up running all the notebooks.
 
@@ -46,7 +46,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
 @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
 @click.argument("config_path", default="config.yml")
-def run(
+def run_diagnostics(
     config_path,
     serial=False,
     all=False,
@@ -239,3 +239,7 @@ def run(
     dag.build()
 
     return None
+
+
+if __name__ == "__main__":
+    run_diagnostics()
