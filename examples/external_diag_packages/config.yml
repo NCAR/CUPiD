@@ -42,7 +42,7 @@ computation_config:
 
 global_params:
   case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
+  base_case_name: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0101-01-01'
@@ -53,7 +53,7 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
+  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099']
 
   atm:
     vars: ['PSL']
@@ -64,7 +64,7 @@ timeseries:
     level: 'lev'
 
   lnd:
-    vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
+    vars: []
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
@@ -110,38 +110,25 @@ compute_notebooks:
           none: {}
 
     atm:
-      Global_PSL_NMSE_compare_obs_lens:
+      link_to_ADF:
+        kernel_name: cupid-dev
         parameter_groups:
           none:
-            regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
-            validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
+            adf_root: ../../examples/external_diag_packages/ADF_output/
+            case_year_range: "1_100"
+            base_case_year_range: "1995_2006"
+        external_tool:
+          tool_name: 'ADF'
+          vars: ['PRECT', 'SST']
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
 
-    glc:
-      Greenland_SMB_visual_compare_obs:
-        parameter_groups:
-          none:
-            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
-            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-            climo_nyears: 40
-
-#    rof:
-#      global_discharge_gauge_compare_obs:
+#    glc:
+#      LIWG_SMB_diagnostic:
 #        parameter_groups:
 #          none:
-#            analysis_name: ""
-#            grid_name: 'f09_f09_mosart' # ROF grid name
-#            rof_start_date: '0091-01-01'
-#            rof_end_date: '0101-01-01'
-#            figureSave: False
-#      global_discharge_ocean_compare_obs:
-#        parameter_groups:
-#          none:
-#            analysis_name: ""
-#            grid_name: 'f09_f09_mosart' # ROF grid name
-#            rof_start_date: '0091-01-01'
-#            rof_end_date: '0101-01-01'
-#            figureSave: False
+#            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
+#            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+#            climo_nyears: 40
 
 #    ice:
 #      seaice:
@@ -156,13 +143,16 @@ compute_notebooks:
 #            endyr2: 305
 #            nyears: 25
 
-    lnd:
-      Global_TerrestrialCouplingIndex_VisualCompareObs:
-        parameter_groups:
-          none:
-            clmFile_h: '.h0.'
-            fluxnet_comparison: True
-            obsDir: '/glade/campaign/cgd/tss/people/mdfowler/FLUXNET2015/'
+#    lnd:
+#      land_comparison:
+#        parameter_groups:
+#          none:
+#            cases:
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
+#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
+#            type:
+#              - 1850pAD
+#              - 1850pSASU
 
 #    ocn:
 #      ocean_surface:
@@ -202,30 +192,30 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-        - file: atm/Global_PSL_NMSE_compare_obs_lens
+        - file: atm/link_to_ADF
 
     # - caption: Ocean
     #   chapters:
     #       - file: ocn/ocean_surface
 
-    - caption: Land
-      chapters:
-        - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
+    # - caption: Land
+    #   chapters:
+    #     - file: lnd/land_comparison
 
     # - caption: Sea Ice
     #   chapters:
     #     - file: ice/seaice
 
-    - caption: Land Ice
-      chapters:
-        - file: glc/Greenland_SMB_visual_compare_obs
+    # - caption: Land Ice
+    #   chapters:
+    #     - file: glc/LIWG_SMB_diagnostic
 
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
 book_config_keys:
 
-  title: CESM Key Metrics   # Title of your jupyter book
+  title: External Diagnostic Packages  # Title of your jupyter book
 
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options

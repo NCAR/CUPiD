@@ -37,6 +37,7 @@ It still feels slower than running `mamba` directly, hence the recommendation to
 If you do not have `mamba` installed, you can still use `conda`... it will just be significantly slower.
 (To see what version of conda you have installed, run `conda --version`.)
 1. If the subdirectories in `externals/` are all empty, run `git submodule update --init` to clone the submodules.
+1. For existing users who cloned `CUPiD` prior to the switch from manage externals to git submodule, we recommend removing `externals/` before checking out main, running `git submodule update --init`, and removing `manage_externals` (if it is still present after `git submodule update --init`).
 1. If `which cupid-run` returned the error `which: no cupid-run in ($PATH)`, then please run the following:
 
    ``` bash
@@ -44,27 +45,26 @@ If you do not have `mamba` installed, you can still use `conda`... it will just 
    $ pip install -e .  # installs cupid
    ```
 
+1. In the `cupid-dev` environment, run `pre-commit install` to configure `git` to automatically run `pre-commit` checks when you try to commit changes from the `cupid-dev` environment; the commit will only proceed if all checks pass. Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed, and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
 1. If you plan on contributing code to CUPiD,
 whether developing CUPiD itself or providing notebooks for CUPiD to run,
-please see the [Contributer's Guide](https://github.com/NCAR/CUPiD/wiki/Contributor's-Guide).
-Note that CUPiD uses `pre-commit` to ensure code formatting guidelines are followed,
-and pull requests will not be accepted if they fail the `pre-commit`-based Github Action.
+please see the [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_guide.html).
 
 ## Running
 
 CUPiD currently provides an example for generating diagnostics.
-To test the package out, try to run `examples/coupled-model`:
+To test the package out, try to run `examples/key-metrics`:
 
 ``` bash
 $ conda activate cupid-dev
-$ cd examples/coupled_model
+$ cd examples/key_metrics
 $ # machine-dependent: request multiple compute cores
 $ cupid-run
 $ cupid-build  # Will build HTML from Jupyter Book
 ```
 
-After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run`
-or you can view `${CUPID_ROOT}/examples/coupled-model/computed_notebooks/quick-run/_build/html/index.html` in a web browser.
+After the last step is finished, you can use Jupyter to view generated notebooks in `${CUPID_ROOT}/examples/key-metrics/computed_notebooks`
+or you can view `${CUPID_ROOT}/examples/key-metrics/computed_notebooks/_build/html/index.html` in a web browser.
 
 Notes:
 
@@ -100,6 +100,7 @@ Options:
   -lnd, --land        Run land component diagnostics
   -ice, --seaice      Run sea ice component diagnostics
   -glc, --landice     Run land ice component diagnostics
+  -rof, --river-runoff Run river runoff component diagnostics
   --config_path       Path to the YAML configuration file containing specifications for notebooks (default config.yml)
   -h, --help          Show this message and exit.
 ```

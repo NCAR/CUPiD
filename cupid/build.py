@@ -16,6 +16,7 @@ Returns:
 """
 from __future__ import annotations
 
+import shutil
 import subprocess
 
 import click
@@ -38,13 +39,25 @@ def build(config_path):
     with open(config_path) as fid:
         control = yaml.safe_load(fid)
 
-    sname = control["data_sources"]["sname"]
     run_dir = control["data_sources"]["run_dir"]
 
-    subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks/{sname}"])
+    subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks"])
     subprocess.run(
-        ["jupyter-book", "build", f"{run_dir}/computed_notebooks/{sname}", "--all"],
+        ["jupyter-book", "build", f"{run_dir}/computed_notebooks", "--all"],
     )
+    for component in control["compute_notebooks"]:
+        for notebook in control["compute_notebooks"][component]:
+            if "external_tool" in control["compute_notebooks"][component][notebook]:
+                if (
+                    control["compute_notebooks"][component][notebook][
+                        "external_tool"
+                    ].get("tool_name")
+                    == "ADF"
+                ):
+                    shutil.copytree(
+                        f"{run_dir}/ADF_output",
+                        f"{run_dir}/computed_notebooks/_build/html/ADF",
+                    )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
@@ -55,7 +68,11 @@ def build(config_path):
     #         remote_dir = control["publish_location"]["remote_dir"]
     # this seems more complicated than expected...people have mentioned paramiko library?
     # subprocess.run(["mkdir", "-p", remote_dir])
-    # subprocess.run(["scp", "-r", f"{run_dir}/computed_notebooks/{sname}/_build/html/*",
+    # subprocess.run(["scp", "-r", f"{run_dir}/computed_notebooks/_build/html/*",
     #                 f"{user}@{remote_mach}:{remote_dir}"])
 
     return None
+
+
+if __name__ == "__main__":
+    build()

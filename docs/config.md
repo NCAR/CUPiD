@@ -5,8 +5,6 @@ This page describes the fields in the configuration file that might commonly be 
 <img src="_static/images/config/config_1.png" alt="CUPiD Config 1" width=1000 />
 The data sources section of the configuration file describes general data sources and expected directory structure for running CUPiD.
 
-`sname`: nickname for this configuration as a string. This will be used as the name of the folder your computed notebooks are put in
-
 <img src="_static/images/config/config_2.png" alt="CUPiD Config 2" width=1000 />
 The computation config section of the configuration file supplies the default kernel for running CUPiD. This should usually be `cupid-analysis`. If a contributor wants to include additional packages, please create an issue describing the packages you'd like to add to this conda environment.
 

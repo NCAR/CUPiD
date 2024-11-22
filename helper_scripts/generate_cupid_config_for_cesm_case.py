@@ -47,6 +47,45 @@ def _parse_args():
 
 
 def generate_cupid_config(case_root, cesm_root, cupid_example):
+    """
+    Generate a CUPiD `config.yml` file based on information from a CESM case and
+    a specific CUPiD example configuration (such as 'key metrics').
+
+    This function takes the root directory of the CESM case and the CESM installation,
+    along with the name of a CUPiD example. It validates the example, loads information
+    from the CESM case (such as the case name and output directory), modifies the
+    configuration based on the case-specific data, and generates a new `config.yml` file
+    in the current working directory.
+
+    The generated `config.yml` file contains:
+    - Global parameters such as case name, start and end dates.
+    - Time series information for atmospheric end years.
+    - Base output directory paths for CESM results.
+
+    Arguments:
+    ----------
+    case_root : str
+        The root directory of the CESM case from which case-specific data will be retrieved.
+
+    cesm_root : str
+        The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
+
+    cupid_example : str
+        The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
+        Must be a valid subdirectory within the CUPiD examples directory.
+
+    Raises:
+    -------
+    KeyError:
+        If the provided CUPiD example is not found in the valid CUPiD examples directory.
+
+    Outputs:
+    --------
+    config.yml : file
+        A YAML file containing the generated configuration based on the provided CESM case
+        and CUPiD example.
+    """
+
     sys.path.append(os.path.join(cesm_root, "cime"))
     from CIME.case import Case
 
@@ -56,7 +95,7 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     valid_examples = [
         example
         for example in next(os.walk(cupid_examples))[1]
-        if example not in ["ilamb", "nblibrary"]
+        if example not in ["ilamb"]
     ]
     if cupid_example not in valid_examples:
         error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
