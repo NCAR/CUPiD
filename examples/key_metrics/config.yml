@@ -98,7 +98,7 @@ timeseries:
   rof:
     vars: []
     derive_vars: []
-    hist_str: 'h'
+    hist_str: 'h0'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
