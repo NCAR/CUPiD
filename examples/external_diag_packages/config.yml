@@ -26,7 +26,7 @@ computation_config:
     ### It must already be installed on your machine. You can also
     ### specify a different environment than the default for any
     ### notebook in NOTEBOOK CONFIG
-    default_kernel_name: cupid-infrastructure
+    default_kernel_name: cupid-analysis
 
     # log level sets the level of how verbose logging will be.
     # options include: debug, info, warning, error
@@ -111,7 +111,7 @@ compute_notebooks:
 
     atm:
       link_to_ADF:
-        kernel_name: cupid-analysis
+        kernel_name: cupid-infrastructure
         parameter_groups:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/
