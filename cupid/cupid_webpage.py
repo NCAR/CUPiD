@@ -27,7 +27,7 @@ import yaml
 @click.argument("config_path", default="config.yml")
 def build(config_path):
     """
-    Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-build`.
+    Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-webpage`.
 
     Args:
         CONFIG_PATH: str, path to configuration file (default config.yml)

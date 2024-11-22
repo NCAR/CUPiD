@@ -1,4 +1,4 @@
-name: cupid-dev
+name: cupid-infrastructure
 dependencies:
     - python=3.11.4
     - black

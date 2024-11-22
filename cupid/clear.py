@@ -57,3 +57,7 @@ def clear(config_path):
     # Delete the "computed_notebooks" folder and all the contents inside of it
     shutil.rmtree(run_dir)
     logger.info(f"All contents in {run_dir} have been cleared.")
+
+
+if __name__ == "__main__":
+    clear()

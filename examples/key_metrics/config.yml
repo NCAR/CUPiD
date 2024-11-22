@@ -95,6 +95,14 @@ timeseries:
     end_years: [100,100]
     level: 'lev'
 
+  rof:
+    vars: []
+    derive_vars: []
+    hist_str: 'h0'
+    start_years: [1,1]
+    end_years: [100,100]
+    level: 'lev'
+
 compute_notebooks:
 
   # This is where all the notebooks you want run and their
@@ -117,7 +125,7 @@ compute_notebooks:
             base_regridded_output: True
             validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
       link_to_ADF:
-        kernel_name: cupid-dev
+        kernel_name: cupid-infrastructure
         parameter_groups:
           none:
             adf_root: ../../examples/key_metrics/ADF_output/
