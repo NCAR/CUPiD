@@ -95,6 +95,14 @@ timeseries:
     end_years: [100,100]
     level: 'lev'
 
+  rof:
+    vars: []
+    derive_vars: []
+    hist_str: 'h'
+    start_years: [1,1]
+    end_years: [100,100]
+    level: 'lev'
+
 compute_notebooks:
 
   # This is where all the notebooks you want run and their

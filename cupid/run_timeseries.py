@@ -11,13 +11,12 @@ Usage: cupid-timeseries [OPTIONS]
 
 Options:
   -s, --serial        Do not use LocalCluster objects
-  -ts, --time-series  Run time series generation scripts prior to diagnostics
-  -atm, --atmosphere  Run atmosphere component diagnostics  #TODO: should we set this up to run timeseries for just atm?
-  -ocn, --ocean       Run ocean component diagnostics
-  -lnd, --land        Run land component diagnostics
-  -ice, --seaice      Run sea ice component diagnostics
-  -glc, --landice     Run land ice component diagnostics
-  #-rof, --river-runoff Run river runoff component diagnostics
+  -atm, --atmosphere  Run atmosphere component timeseries
+  -ocn, --ocean       Run ocean component timeseries
+  -lnd, --land        Run land component timeseries
+  -ice, --seaice      Run sea ice component timeseries
+  -glc, --landice     Run land ice component timeseries
+  -rof, --river-runoff Run river runoff component timeseries
   -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
   -h, --help          Show this message and exit.
 """
@@ -39,12 +38,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
 # Options to turn components on or off
-@click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component diagnostics")
-@click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component diagnostics")
-@click.option("--land", "-lnd", is_flag=True, help="Run land component diagnostics")
-@click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
-@click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
-# @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
+@click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component timeseries")
+@click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component timeseries")
+@click.option("--land", "-lnd", is_flag=True, help="Run land component timeseries")
+@click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component timeseries")
+@click.option("--landice", "-glc", is_flag=True, help="Run land ice component timeseries")
+@click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component timeseries")
 @click.argument("config_path", default="config.yml")
 def run_timeseries(
     config_path,
@@ -79,13 +78,12 @@ def run_timeseries(
         "lnd": land,
         "ice": seaice,
         "glc": landice,
-        # "rof": river_runoff,
+        "rof": river_runoff,
     }
 
     # Automatically run all if no components specified
 
     if True not in [atmosphere, ocean, land, seaice, landice, river_runoff]:
-        # all = True
         for key in component_options.keys():
             component_options[key] = True
 
