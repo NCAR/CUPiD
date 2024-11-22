@@ -11,7 +11,7 @@ In order to contribute code to this repository, we recommend that you get starte
 4. [Install CUPiD](https://ncar.github.io/CUPiD/index.html#installing), relevant environments, and setup `pre-commit`.
 5. Make your edits and add your name to our `contributors.md` file to make sure we recognize your contributions
 6. Merge in recent changes from master
-7. Ensure that `pre-commit` checks all pass from the `cupid-dev` environment
+7. Ensure that `pre-commit` checks all pass from the `cupid-infrastructure` environment
 8. IF updating `github.io` pages, test with the steps listed below, otherwise proceed to #9:
     - Create the environment necessary for building documentation with `$ conda env create -f environments/docs.yml`
     - Activate the docs environment: `$ conda activate cupid-docs`
