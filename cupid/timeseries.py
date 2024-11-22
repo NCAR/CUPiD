@@ -340,7 +340,16 @@ def create_time_series(
                 )
 
         if serial:
-            call_ncrcat(list_of_commands)
+            try:
+                call_ncrcat(list_of_commands[0])
+                # TODO: list_of_commands fails with "cupid-timeseries -s", but works if list is indexed
+            except IndexError:
+                print(
+                    "If no commands in the following list, then no timeseries were requested.",
+                )
+                print(list_of_commands)
+                print("No timeseries are being created")
+                continue
         else:  # if not serial
             # Now run the "ncrcat" subprocesses in parallel:
             with mp.Pool(processes=num_procs) as mpool:
