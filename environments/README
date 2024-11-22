@@ -1,6 +1,6 @@
 This directory contains three conda environment files:
 
-1. dev-environment.yml: this creates (cupid-dev), which provides cupid-run and cupid-build,
+1. dev-environment.yml: this creates (cupid-dev), which provides cupid-timeseries, cupid-diagnostics and cupid-webpage,
                         and lets users update the main CUPiD code in cupid/
 
 2. cupid-analysis.yml: this creates (cupid-analysis), the environment all scripts and notebooks
