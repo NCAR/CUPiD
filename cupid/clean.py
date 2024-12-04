@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-This script provides functionality to clear the contents of the "computed_notebooks" folder
+This script provides functionality to clean the contents of the "computed_notebooks" folder
 at the location specified by the "run_dir" variable in the CONFIG_PATH.
 
-The main function `clear()` takes the path to the configuration file as input, reads the config file
+The main function `clean()` takes the path to the configuration file as input, reads the config file
 to obtain the "run_dir" variable, and then deletes the contents of the "computed_notebooks" folder
 at that location.
 
@@ -45,8 +45,8 @@ def read_config_file(config_path):
 @click.command()
 @click.argument("config_path", default="config.yml")
 # Entry point to this script
-def clear(config_path):
-    """Clears the contents of the "computed_notebooks" folder at the location
+def clean(config_path):
+    """Cleans the contents of the "computed_notebooks" folder at the location
     specified by the "run_dir" variable in the CONFIG_PATH.
 
     Args: CONFIG_PATH - The path to the configuration file.
@@ -56,8 +56,8 @@ def clear(config_path):
     run_dir = read_config_file(config_path)
     # Delete the "computed_notebooks" folder and all the contents inside of it
     shutil.rmtree(run_dir)
-    logger.info(f"All contents in {run_dir} have been cleared.")
+    logger.info(f"All contents in {run_dir} have been cleaned.")
 
 
 if __name__ == "__main__":
-    clear()
+    clean()
