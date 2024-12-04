@@ -131,8 +131,8 @@ compute_notebooks:
             adf_root: ../../examples/key_metrics/ADF_output/
         external_tool:
           tool_name: 'ADF'
-          vars: ['PRECT', 'SST']
-          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TGCLDLWP']
+          plotting_scripts: ["amwg_table", "global_latlon_map", "global_latlon_vect_map"]
           base_regridded_output: True
 
     glc:
