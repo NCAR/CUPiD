@@ -46,6 +46,8 @@ global_params:
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0101-01-01'
+  base_start_date: '0001-01-01'
+  base_end_date: '0001-01-01'
   lc_kwargs:
     threads_per_worker: 1
 
@@ -151,18 +153,11 @@ compute_notebooks:
 #            rof_end_date: '0101-01-01'
 #            figureSave: False
 
-#    ice:
-#      seaice:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-#              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-#            begyr1: 245
-#            endyr1: 305
-#            begyr2: 245
-#            endyr2: 305
-#            nyears: 25
+    ice:
+      seaice:
+        parameter_groups:
+          none:
+            climo_nyears: 35
 
     lnd:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
@@ -220,9 +215,9 @@ book_toc:
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
 
-    # - caption: Sea Ice
-    #   chapters:
-    #     - file: ice/seaice
+    - caption: Sea Ice
+      chapters:
+        - file: ice/Hemis_seaice_visual_compare_obs_lens
 
     - caption: Land Ice
       chapters:
