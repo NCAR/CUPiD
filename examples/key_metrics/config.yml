@@ -132,7 +132,8 @@ compute_notebooks:
         external_tool:
           tool_name: 'ADF'
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TGCLDLWP']
-          plotting_scripts: ["amwg_table", "global_latlon_map", "global_latlon_vect_map"]
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+          analysis_scripts: ["amwg_table"]
           base_regridded_output: True
 
     glc:

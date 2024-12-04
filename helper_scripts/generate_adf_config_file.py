@@ -216,6 +216,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
+    analysis_scripts = []
     plotting_scripts = []
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
@@ -232,11 +233,18 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
                         diag_var_list.append(var)
                 for script in c_dict["compute_notebooks"][component][nb][
                     "external_tool"
+                ].get("analysis_scripts", []):
+                    if script not in analysis_scripts:
+                        analysis_scripts.append(script)
+                for script in c_dict["compute_notebooks"][component][nb][
+                    "external_tool"
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
+    if analysis_scripts:
+        a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
 
