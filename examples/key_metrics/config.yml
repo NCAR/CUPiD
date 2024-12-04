@@ -129,8 +129,6 @@ compute_notebooks:
         parameter_groups:
           none:
             adf_root: ../../examples/key_metrics/ADF_output/
-            case_year_range: "1_100"
-            base_case_year_range: "1_100"
         external_tool:
           tool_name: 'ADF'
           vars: ['PRECT', 'SST']
