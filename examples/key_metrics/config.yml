@@ -58,7 +58,7 @@ timeseries:
   atm:
     vars: ['PSL']
     derive_vars: []
-    hist_str: 'h0a'
+    hist_str: 'cam.h0a'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'

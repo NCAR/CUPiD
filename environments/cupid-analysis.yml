@@ -22,6 +22,7 @@ dependencies:
   - python==3.11.4
   - uxarray
   - xarray
+  - xesmf
   - yaml
   - zarr
   - pip:
