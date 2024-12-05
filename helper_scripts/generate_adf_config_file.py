@@ -108,6 +108,25 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "proc",
         "climo",
     )
+    # UPDATE PATHS FOR REGRIDDED DATA
+    try:
+        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+            "regridded_output"
+        ]:
+            a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_hist_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_ts_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
+                a_dict["diag_cam_climo"]["cam_climo_loc"],
+                "regrid",
+            )
+    except:  # noqa: E722
+        pass
     # TEST CASE START / END YEARS
     test_case_cupid_ts_index = (
         ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
@@ -158,6 +177,24 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "proc",
         "climo",
     )
+    try:
+        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+            "base_regridded_output"
+        ]:
+            a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_hist_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_ts_loc"],
+                "regrid",
+            )
+            a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
+                a_dict["diag_cam_baseline_climo"]["cam_climo_loc"],
+                "regrid",
+            )
+    except:  # noqa: E722
+        pass
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
@@ -179,6 +216,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
+    analysis_scripts = []
     plotting_scripts = []
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
@@ -195,11 +233,18 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
                         diag_var_list.append(var)
                 for script in c_dict["compute_notebooks"][component][nb][
                     "external_tool"
+                ].get("analysis_scripts", []):
+                    if script not in analysis_scripts:
+                        analysis_scripts.append(script)
+                for script in c_dict["compute_notebooks"][component][nb][
+                    "external_tool"
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
+    if analysis_scripts:
+        a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
 
