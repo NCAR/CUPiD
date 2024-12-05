@@ -47,7 +47,7 @@ global_params:
   start_date: '0001-01-01'
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
-  base_end_date: '0001-01-01'
+  base_end_date: '0101-01-01'
   lc_kwargs:
     threads_per_worker: 1
 
@@ -82,9 +82,9 @@ timeseries:
     level: 'lev'
 
   ice:
-    vars: []
+    vars: ['aice','hi','hs']
     derive_vars: []
-    hist_str: 'h'
+    hist_str: 'cice.h'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -154,7 +154,7 @@ compute_notebooks:
 #            figureSave: False
 
     ice:
-      seaice:
+      Hemis_seaice_visual_compare_obs_lens:
         parameter_groups:
           none:
             climo_nyears: 35
