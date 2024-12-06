@@ -58,7 +58,7 @@ timeseries:
   atm:
     vars: ['PSL']
     derive_vars: []
-    hist_str: 'h0a'
+    hist_str: 'cam.h0a'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -115,12 +115,12 @@ compute_notebooks:
         parameter_groups:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/
-            case_year_range: "1_100"
-            base_case_year_range: "1995_2006"
         external_tool:
           tool_name: 'ADF'
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+          analysis_scripts: ["amwg_table"]
+          base_regridded_output: True
 
 #    glc:
 #      LIWG_SMB_diagnostic:

@@ -60,7 +60,7 @@ timeseries:
   atm:
     vars: ['PSL']
     derive_vars: []
-    hist_str: 'h0a'
+    hist_str: 'cam.h0a'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -126,6 +126,17 @@ compute_notebooks:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
             base_regridded_output: True
             validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/nmse_validation/fv0.9x1.25'
+      link_to_ADF:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            adf_root: ../../examples/key_metrics/ADF_output/
+        external_tool:
+          tool_name: 'ADF'
+          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+          analysis_scripts: ["amwg_table"]
+          base_regridded_output: True
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -206,6 +217,7 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
+        - file: atm/link_to_ADF
 
     # - caption: Ocean
     #   chapters:
