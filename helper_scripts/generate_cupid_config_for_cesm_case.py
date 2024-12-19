@@ -120,6 +120,12 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
         my_dict = yaml.safe_load(f)
 
+    my_dict["data_sources"]["nb_path_root"] = os.path.join(
+        cesm_root,
+        "tools",
+        "CUPiD",
+        "nblibrary",
+    )
     my_dict["global_params"]["case_name"] = case
     my_dict["global_params"]["start_date"] = start_date
     my_dict["global_params"]["end_date"] = end_date
@@ -127,11 +133,11 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     my_dict["global_params"]["base_case_output_dir"] = base_case_output_dir
     my_dict["global_params"]["base_end_date"] = base_end_date
     my_dict["global_params"]["base_climo_nyears"] = base_climo_nyears
-    my_dict["timeseries"]["case_name"] = case
+    my_dict["timeseries"]["case_name"] = [case]
     my_dict["timeseries"]["atm"]["end_years"] = [nyears, base_nyears]
 
     # replace with environment variable
-    my_dict["global_params"]["CESM_output_dir"] = dout_s_root
+    my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
 
     # create new file, make it writeable
     with open("config.yml", "w") as f:
