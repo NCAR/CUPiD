@@ -108,10 +108,11 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
 
     # Additional options we need to get from env_cupid.xml
+    base_case = "b.e23_alpha17f.BLT1850.ne30_t232.092"
     nyears = 1
     start_date = "0001-01-01"
     end_date = f"{nyears+1:04d}-01-01"
-    climo_nyears = 1
+    climo_nyears = nyears
     base_case_output_dir = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing"
     base_nyears = 100
     base_end_date = f"{base_nyears+1:04d}-01-01"
@@ -129,12 +130,18 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     my_dict["global_params"]["case_name"] = case
     my_dict["global_params"]["start_date"] = start_date
     my_dict["global_params"]["end_date"] = end_date
-    my_dict["global_params"]["climo_nyears"] = climo_nyears
+    my_dict["global_params"]["base_case_name"] = base_case
     my_dict["global_params"]["base_case_output_dir"] = base_case_output_dir
     my_dict["global_params"]["base_end_date"] = base_end_date
-    my_dict["global_params"]["base_climo_nyears"] = base_climo_nyears
-    my_dict["timeseries"]["case_name"] = [case]
+    my_dict["timeseries"]["case_name"] = [case, base_case]
+
     my_dict["timeseries"]["atm"]["end_years"] = [nyears, base_nyears]
+    my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
+        "parameter_groups"
+    ]["none"]["climo_nyears"] = climo_nyears
+    my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
+        "parameter_groups"
+    ]["none"]["base_climo_nyears"] = base_climo_nyears
 
     # replace with environment variable
     my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
