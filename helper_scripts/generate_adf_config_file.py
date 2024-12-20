@@ -141,9 +141,9 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
 
-    base_case_output_dir = c_dict["global_params"].get(
-        "base_case_output_dir",
-        DOUT + "/" + base_case_name,
+    base_case_output_dir = os.path.join(
+        c_dict["global_params"].get("base_case_output_dir", DOUT),
+        base_case_name,
     )
     base_start_date = get_date_from_ts(
         c_ts["atm"],
