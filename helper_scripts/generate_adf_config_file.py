@@ -25,10 +25,10 @@ def _parse_args():
     )
     # Command line argument for CUPiD example from which to get config.yml
     parser.add_argument(
-        "--cupid-example",
+        "--cupid-config-loc",
         action="store",
-        dest="cupid_example",
-        default="external_diag_packages",
+        dest="cupid_config_loc",
+        default=None,
         help="CUPiD example to use as template for config.yml",
     )
     parser.add_argument(
@@ -46,27 +46,20 @@ def _parse_args():
     return parser.parse_args()
 
 
-def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
-    """Use cupid config file (YAML) from cupid_example and adf_file (YAML)
+def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
+    """Use cupid config file (YAML) from cupid_config_loc and adf_file (YAML)
     to produce out_file by modifying adf_file with data from cupid config file.
     """
     sys.path.append(os.path.join(cesm_root, "cime"))
 
-    # Is cupid_example a valid value?
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
-    cupid_examples = os.path.join(cupid_root, "examples")
-    valid_examples = [
-        example
-        for example in next(os.walk(cupid_examples))[1]
-        if example not in ["ilamb"]
-    ]
-    if cupid_example not in valid_examples:
-        error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
-        raise KeyError(
-            f"{error_msg} (choose from subdirectories of {cupid_examples}: {valid_examples})",
-        )
+    # Is cupid_config_loc a valid value?
+    if cupid_config_loc is None:
+        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
+    if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
+        raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
-    with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as c:
+    with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
     with open(adf_file, encoding="UTF-8") as a:
         a_dict = yaml.safe_load(a)
@@ -208,9 +201,7 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         "regrid",
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
-        cupid_root,
-        "examples",
-        cupid_example,
+        cupid_config_loc,
         "ADF_output",
     )  # this is where ADF will put plots, and "website" directory
     a_dict["user"] = os.environ["USER"]
@@ -255,10 +246,10 @@ def generate_adf_config(cesm_root, cupid_example, adf_file, out_file):
         f.write(
             "# This file has been auto-generated using generate_adf_config_file.py\n",
         )
-        f.write(f"# It is based off of examples/{cupid_example}/config.yml\n")
+        f.write(f"# It is based off of {cupid_config_loc}/config.yml\n")
         f.write("# Arguments:\n")
         f.write(f"# {cesm_root=}\n")
-        f.write(f"# {cupid_example=}\n")
+        f.write(f"# {cupid_config_loc=}\n")
         f.write(f"# {adf_file=}\n")
         f.write(f"# Output: {out_file=}\n")
         # enter in each element of the dictionary into the new file
@@ -284,7 +275,7 @@ if __name__ == "__main__":
     print(args)
     generate_adf_config(
         args["cesm_root"],
-        args["cupid_example"],
+        args["cupid_config_loc"],
         args["adf_template"],
         args["out_file"],
     )
