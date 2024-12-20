@@ -36,7 +36,10 @@ def seasonal_climatology_weighted(dat):
     datw_am = dat * wgts_am
 
     ds_season = (
-        datw.rolling(min_periods=3, center=True, time=3).sum().dropna("time", how="all")
+        datw.load()
+        .rolling(min_periods=3, center=True, time=3)
+        .sum()
+        .dropna("time", how="all")
     )
     dat_djf = ds_season.where(ds_season.time.dt.month == 1, drop=True).mean("time")
     dat_mam = ds_season.where(ds_season.time.dt.month == 4, drop=True).mean("time")
