@@ -151,13 +151,13 @@ compute_notebooks:
         parameter_groups:
           none:
             cases:
-              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-            begyr1: 245
-            endyr1: 305
-            begyr2: 245
-            endyr2: 305
-            nyears: 25
+              - b.e23_alpha17f.BLTHIST.ne30_t232.092
+              - b.e30_beta02.BLTHIST.ne30_t232.104
+            begyr1: 1850
+            endyr1: 2013
+            begyr2: 1850
+            endyr2: 2013
+            nyears: 35
 
 ########### JUPYTER BOOK CONFIG ###########
 
