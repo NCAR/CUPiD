@@ -111,7 +111,7 @@ def create_time_series(
 
         # Check that path actually exists:
         if not starting_location.is_dir():
-            emsg = "Provided 'cam_hist_loc' directory '{starting_location}' not found."
+            emsg = f"Provided 'cam_hist_loc' directory '{starting_location}' not found."
             emsg += " Script is ending here."
 
             raise FileNotFoundError(emsg)
