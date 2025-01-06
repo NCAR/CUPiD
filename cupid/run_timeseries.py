@@ -112,7 +112,10 @@ def run_timeseries(
             if isinstance(timeseries_params["case_name"], list):
                 ts_input_dirs = []
                 for cname in timeseries_params["case_name"]:
-                    ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
+                    if cname == global_params["base_case_name"]:
+                        ts_input_dirs.append(global_params["base_case_output_dir"]+"/"+cname+f"/{component}/hist/")
+                    else:
+                        ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
             else:
                 ts_input_dirs = [
                     global_params["CESM_output_dir"] + "/" +
