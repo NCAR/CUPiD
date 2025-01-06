@@ -135,13 +135,23 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     my_dict["global_params"]["base_end_date"] = base_end_date
     my_dict["timeseries"]["case_name"] = [case, base_case]
 
-    my_dict["timeseries"]["atm"]["end_years"] = [nyears, base_nyears]
-    my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
-        "parameter_groups"
-    ]["none"]["climo_nyears"] = climo_nyears
-    my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
-        "parameter_groups"
-    ]["none"]["base_climo_nyears"] = base_climo_nyears
+    for component in my_dict["timeseries"]:
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
+            and "end_years" in my_dict["timeseries"][component]
+        ):
+            my_dict["timeseries"][component]["end_years"] = [nyears, base_nyears]
+    if "link_to_ADF" in my_dict["compute_notebooks"]["atm"]:
+        my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
+            "adf_root"
+        ] = os.path.join(case_root, "ADF_output")
+    if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"]["glc"]:
+        my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
+            "parameter_groups"
+        ]["none"]["climo_nyears"] = climo_nyears
+        my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
+            "parameter_groups"
+        ]["none"]["base_climo_nyears"] = base_climo_nyears
 
     # replace with environment variable
     my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
