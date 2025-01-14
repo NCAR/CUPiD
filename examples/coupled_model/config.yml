@@ -76,11 +76,11 @@ timeseries:
     level: 'lev'
 
   ice:
-    vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
+    vars: ['aice','hi', 'hs'] #['process_all']
     derive_vars: []
     hist_str: 'h'
-    start_years: [2]
-    end_years: [102]
+    start_years: [1]
+    end_years: [100]
     level: 'lev'
 
   glc:
@@ -196,7 +196,7 @@ book_toc:
 
     - caption: Sea Ice
       chapters:
-        - file: ice/seaice
+        - file: ice/Hemis_seaice_visual_compare_full
 
 #####################################
 # Keys for Jupyter Book _config.yml #
