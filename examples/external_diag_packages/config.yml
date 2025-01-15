@@ -122,51 +122,13 @@ compute_notebooks:
           analysis_scripts: ["amwg_table"]
           base_regridded_output: True
 
-#    glc:
-#      LIWG_SMB_diagnostic:
-#        parameter_groups:
-#          none:
-#            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
-#            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-#            climo_nyears: 40
-
-#    ice:
-#      seaice:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-#              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-#            begyr1: 245
-#            endyr1: 305
-#            begyr2: 245
-#            endyr2: 305
-#            nyears: 25
-
-#    lnd:
-#      land_comparison:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-#            type:
-#              - 1850pAD
-#              - 1850pSASU
-
-#    ocn:
-#      ocean_surface:
-#        parameter_groups:
-#          none:
-#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-#            savefigs: False
-#            mom6_tools_config:
-#              start_date: '0091-01-01'
-#              end_date: '0101-01-01'
-#              Fnames:
-#                native: 'mom6.h.native.????-??.nc'
-#                static: 'mom6.h.static.nc'
-#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+    lnd:
+      link_to_ILAMB:
+        parameter_groups:
+          none:
+            ilamb_root: ../../examples/external_diag_packages/ILAMB_output
+        external_tool:
+          tool_name: 'ILAMB'
 
 ########### JUPYTER BOOK CONFIG ###########
 
