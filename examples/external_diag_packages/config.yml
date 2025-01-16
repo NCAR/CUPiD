@@ -129,6 +129,7 @@ compute_notebooks:
             ilamb_root: ../../examples/external_diag_packages/ILAMB_output
         external_tool:
           tool_name: 'ILAMB'
+          key_plots: ["PLOT_1", "PLOT_2"]
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -154,7 +155,7 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-        - file: atm/link_to_ADF
+       - file: atm/link_to_ADF
 
     - caption: Land
       chapters:
