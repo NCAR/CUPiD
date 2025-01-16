@@ -25,7 +25,6 @@ from __future__ import annotations
 import os
 
 import click
-
 import timeseries
 import util
 
