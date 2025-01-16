@@ -26,8 +26,8 @@ import os
 
 import click
 
-import cupid.timeseries
-import cupid.util
+import timeseries
+import util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -68,9 +68,9 @@ def run_timeseries(
     # fmt: on
     # pylint: enable=line-too-long
     # Get control structure
-    control = cupid.util.get_control_dict(config_path)
-    cupid.util.setup_book(config_path)
-    logger = cupid.util.setup_logging(config_path)
+    control = util.get_control_dict(config_path)
+    util.setup_book(config_path)
+    logger = util.setup_logging(config_path)
 
     component_options = {
         "atm": atmosphere,
@@ -112,7 +112,7 @@ def run_timeseries(
             if isinstance(timeseries_params["case_name"], list):
                 ts_input_dirs = []
                 for cname in timeseries_params["case_name"]:
-                    if cname == global_params["base_case_name"]:
+                    if cname == global_params["base_case_name"] and "base_case_output_dir" in global_params:
                         ts_input_dirs.append(global_params["base_case_output_dir"]+"/"+cname+f"/{component}/hist/")
                     else:
                         ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
@@ -162,7 +162,7 @@ def run_timeseries(
 
             # fmt: off
             # pylint: disable=line-too-long
-            cupid.timeseries.create_time_series(
+            timeseries.create_time_series(
                 component,
                 timeseries_params[component]["vars"],
                 timeseries_params[component]["derive_vars"],
