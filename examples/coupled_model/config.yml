@@ -41,12 +41,12 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121wave'
+  case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121min'
   base_case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   base_case_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-  end_date: '0018-01-01'
+  end_date: '0100-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0100-01-01'
   lc_kwargs:
@@ -54,9 +54,9 @@ global_params:
 
 timeseries:
   num_procs: 8
-  ts_done: [False]
-  overwrite_ts: [False]
-  case_name: ['b.e30_beta04.BLT1850.ne30_t232_wgx3.121wave', 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121']
+  ts_done: [False,False]
+  overwrite_ts: [False,False]
+  case_name: ['b.e30_beta04.BLT1850.ne30_t232_wgx3.121min', 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121']
 
   atm:
     vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
@@ -85,7 +85,7 @@ timeseries:
   ice:
     vars: ['aice','hi', 'hs','uvel','vvel'] #['process_all']
     derive_vars: []
-    hist_str: 'h'
+    hist_str: 'cice.h'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -157,11 +157,11 @@ compute_notebooks:
       Hemis_seaice_visual_compare_obs_lens:
         parameter_groups:
           none:
-            climo_nyears: 17
+            climo_nyears: 35
       Hemis_seaice_visual_compare_contour:
         parameter_groups:
           none:
-            climo_nyears: 17
+            climo_nyears: 35
 
 
 ########### JUPYTER BOOK CONFIG ###########
