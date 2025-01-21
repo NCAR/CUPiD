@@ -156,21 +156,9 @@ book_toc:
       chapters:
         - file: atm/link_to_ADF
 
-    # - caption: Ocean
-    #   chapters:
-    #       - file: ocn/ocean_surface
-
-    # - caption: Land
-    #   chapters:
-    #     - file: lnd/land_comparison
-
-    # - caption: Sea Ice
-    #   chapters:
-    #     - file: ice/seaice
-
-    # - caption: Land Ice
-    #   chapters:
-    #     - file: glc/LIWG_SMB_diagnostic
+    - caption: Land
+      chapters:
+        - file: lnd/link_to_ILAMB
 
 #####################################
 # Keys for Jupyter Book _config.yml #

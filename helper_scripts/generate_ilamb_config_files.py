@@ -37,16 +37,10 @@ def _parse_args():
         required=True,
         help="either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)",
     )
-    parser.add_argument(
-        "--out-dir",
-        action="store",
-        required=True,
-        help="the output directory where model_setup.txt file is saved",
-    )
     return parser.parse_args()
 
 
-def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type, out_dir):
+def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     """Create model_setup.txt file for use in ILAMB"""
     sys.path.append(os.path.join(cesm_root, "cime"))
 
@@ -63,29 +57,26 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type, out_dir):
         c_dict["global_params"]["CESM_output_dir"],
         c_dict["global_params"]["base_case_name"],
     )
-    with open(out_dir + "/model_setup.txt", "w") as ms:
+    with open(cupid_config_loc + "/model_setup.txt", "w") as ms:
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
             f"CTSM51          , {base_case_output_dir}/lnd/hist/",
         )  # TODO: aslo update model name? Add to cupid config file?
-    print(f"wrote {out_dir}/model_setup.txt")
+    print(f"wrote {cupid_config_loc}/model_setup.txt")
     print("You can now run ILAMB with the following commands:")
     print("---")
     print("qinteractive -l select=1:ncpus=16:mpiprocs=16:mem=100G -l walltime=06:00:00")
     print("conda activate cupid-analysis")
-    print("export ILAMB_ROOT=../../ilamb_aux")
+    print("export ILAMB_ROOT=../ilamb_aux")
     if run_type == "BGC":
-        print(
-            "mpiexec ilamb-run --config ilamb_nohoff_final_CLM.cfg --build_dir bld/ --df_errs ../../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../../ilamb_aux/DATA/regions/LandRegions.nc ../../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
-        )
+        config_file_name = "ilamb_nohoff_final_CLM.cfg"
     if run_type == "SP":
-        print(
-            "mpiexec ilamb-run --config ilamb_nohoff_final_CLM_SP.cfg --build_dir bld/ --df_errs ../../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../../ilamb_aux/DATA/regions/LandRegions.nc ../../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
-        )
-    print("---")
-
+        config_file_name = "ilamb_nohoff_final_CLM_SP.cfg"
+    print(f"mpiexec ilamb-run --config {config_file_name} --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
+          )
+    print("---------")
 
 if __name__ == "__main__":
     args = vars(_parse_args())
@@ -94,5 +85,4 @@ if __name__ == "__main__":
         args["cesm_root"],
         args["cupid_config_loc"],
         args["run_type"],
-        args["out_dir"],
     )
