@@ -62,7 +62,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"CTSM51          , {base_case_output_dir}/lnd/hist/",
+            f"CTSM51          , {base_case_output_dir}/lnd/hist/regrid/",
         )  # TODO: aslo update model name? Add to cupid config file?
     print(f"wrote {cupid_config_loc}/model_setup.txt")
     print("You can now run ILAMB with the following commands:")
@@ -71,7 +71,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     print("conda activate cupid-analysis")
     print("export ILAMB_ROOT=../ilamb_aux")
     print(
-        f"mpiexec ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_{run_type}.cfg --build_dir {cupid_config_loc}ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
+        f"mpiexec ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_{run_type}.cfg --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
     )
     print("---------")
 
