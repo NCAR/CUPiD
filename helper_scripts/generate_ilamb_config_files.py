@@ -74,9 +74,11 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
         config_file_name = "ilamb_nohoff_final_CLM.cfg"
     if run_type == "SP":
         config_file_name = "ilamb_nohoff_final_CLM_SP.cfg"
-    print(f"mpiexec ilamb-run --config {config_file_name} --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
-          )
+    print(
+        f"mpiexec ilamb-run --config {config_file_name} --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
+    )
     print("---------")
+
 
 if __name__ == "__main__":
     args = vars(_parse_args())
