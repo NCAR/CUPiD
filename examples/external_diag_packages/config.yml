@@ -129,7 +129,7 @@ compute_notebooks:
             ilamb_root: ../../examples/external_diag_packages/ILAMB_output
         external_tool:
           tool_name: 'ILAMB'
-          key_plots: ["PLOT_1", "PLOT_2"]
+          key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png"]
 
 ########### JUPYTER BOOK CONFIG ###########
 
