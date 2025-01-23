@@ -176,7 +176,7 @@ compute_notebooks:
           none:
             clmFile_h: '.h0.'
             fluxnet_comparison: True
-            obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
+            obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
 
 #    ocn:
 #      ocean_surface:
