@@ -125,7 +125,7 @@ compute_notebooks:
           none:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
             base_regridded_output: True
-            validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/atm/analysis_datasets/fv0.9x1.25/PROCESSED_FIELD_TYPE/nmse_validation/'
+            validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
       link_to_ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
@@ -142,7 +142,7 @@ compute_notebooks:
       Greenland_SMB_visual_compare_obs:
         parameter_groups:
           none:
-            obs_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/RESOLUTION/PROCESSED_FIELD_TYPE/SMB_data/'
+            obs_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/multi_grid/annual_avg/SMB_data/'
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
             climo_nyears: 40
 
@@ -176,7 +176,7 @@ compute_notebooks:
           none:
             clmFile_h: '.h0.'
             fluxnet_comparison: True
-            obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/RESOLUTION/PROCESSED_FIELD_TYPE/FLUXNET2015/'
+            obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
 
 #    ocn:
 #      ocean_surface:
