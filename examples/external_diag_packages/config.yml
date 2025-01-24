@@ -131,7 +131,7 @@ compute_notebooks:
             key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
         external_tool:
           tool_name: 'ILAMB'
-          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB'
+          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
 
 ########### JUPYTER BOOK CONFIG ###########
 

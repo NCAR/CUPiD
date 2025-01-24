@@ -61,14 +61,16 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
     print(run_type)
     with open(
         os.path.join(
-            ilamb_config_loc, f"ilamb_nohoff_final_CLM_{run_type}_template.cfg",
+            ilamb_config_loc,
+            f"ilamb_nohoff_final_CLM_{run_type}_template.cfg",
         ),
     ) as cfg:
         cfg_content = cfg.read()
         cfg_content = cfg_content.replace("PATH/", ilamb_config_data_loc)
     print(f"writing ilamb_nohoff_final_CLM_{run_type}.cfg")
     with open(
-        os.path.join(ilamb_config_loc, f"ilamb_nohoff_final_CLM_{run_type}.cfg"), "w",
+        os.path.join(ilamb_config_loc, f"ilamb_nohoff_final_CLM_{run_type}.cfg"),
+        "w",
     ) as cfg:
         cfg.write(cfg_content)
     print(f"wrote {ilamb_config_loc}/ilamb_nohoff_final_CLM_{run_type}.cfg")
@@ -120,5 +122,7 @@ if __name__ == "__main__":
     print(args)
     generate_ilamb_cfg(args["cesm_root"], args["cupid_config_loc"], args["run_type"])
     generate_ilamb_model_setup(
-        args["cesm_root"], args["cupid_config_loc"], args["run_type"],
+        args["cesm_root"],
+        args["cupid_config_loc"],
+        args["run_type"],
     )
