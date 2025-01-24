@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 
 import yaml
@@ -40,6 +41,32 @@ def _parse_args():
     return parser.parse_args()
 
 
+def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
+    """Create config file for use in ILAMB"""
+    sys.path.append(os.path.join(cesm_root, "cime"))
+
+    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    # Is cupid_config_loc a valid value?
+    if cupid_config_loc is None:
+        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
+    if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
+        raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
+
+    with open(os.path.join(cupid_config_loc, "config.yml")) as c:
+        c_dict = yaml.safe_load(c)
+    ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["link_to_ILAMB"]["external_tool"]["ilamb_config_data_loc"]
+
+    ilamb_config_loc=os.path.join(cesm_root,"tools","CUPiD","ilamb_aux")
+    print(run_type)
+    with open(os.path.join(ilamb_config_loc,f"ilamb_nohoff_final_CLM_{run_type}_template.cfg"),"r") as cfg:
+        cfg_content = cfg.read()
+        cfg_content = cfg_content.replace("PATH/",ilamb_config_data_loc)
+    print(f"writing ilamb_nohoff_final_CLM_{run_type}.cfg")
+    with open(os.path.join(ilamb_config_loc,f"ilamb_nohoff_final_CLM_{run_type}.cfg"),"w") as cfg:
+        cfg.write(cfg_content)
+    print(f"wrote {ilamb_config_loc}/ilamb_nohoff_final_CLM_{run_type}.cfg")
+
+
 def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     """Create model_setup.txt file for use in ILAMB"""
     sys.path.append(os.path.join(cesm_root, "cime"))
@@ -70,17 +97,27 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     print("qinteractive -l select=1:ncpus=16:mpiprocs=16:mem=100G -l walltime=06:00:00")
     print("conda activate cupid-analysis")
     print("export ILAMB_ROOT=../ilamb_aux")
-    print(
-        f"mpiexec ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_{run_type}.cfg --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
-    )
+    if run_type=="SP":
+        print(
+            f"mpiexec ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_SP.cfg --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
+        )
+    elif run_type=="BGC":
+        print(
+            f"mpiexec ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_BGC.cfg --build_dir {cupid_config_loc}/ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.",  # noqa: E501
+        )
     print("---------")
 
 
 if __name__ == "__main__":
     args = vars(_parse_args())
     print(args)
+    generate_ilamb_cfg(
+        args["cesm_root"],
+        args["cupid_config_loc"],
+        args["run_type"]
+    )
     generate_ilamb_model_setup(
         args["cesm_root"],
         args["cupid_config_loc"],
-        args["run_type"],
+        args["run_type"]
     )
