@@ -93,14 +93,14 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
         c_dict["global_params"]["CESM_output_dir"],
         c_dict["global_params"]["base_case_name"],
     )
-    with open(cupid_config_loc + "/model_setup.txt", "w") as ms:
+    with open(cupid_config_loc + "model_setup.txt", "w") as ms:
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
             f"CTSM51          , {base_case_output_dir}/lnd/hist/regrid/",
         )  # TODO: aslo update model name? Add to cupid config file?
-    print(f"wrote {cupid_config_loc}/model_setup.txt")
+    print(f"wrote {cupid_config_loc}model_setup.txt")
     print("You can now run ILAMB with the following commands:")
     print("---")
     print("qinteractive -l select=1:ncpus=16:mpiprocs=16:mem=100G -l walltime=06:00:00")
