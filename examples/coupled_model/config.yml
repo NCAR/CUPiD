@@ -41,15 +41,22 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
+  case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121min'
+  base_case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+  base_case_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+  start_date: '0001-01-01'
+  end_date: '0100-01-01'
+  base_start_date: '0001-01-01'
+  base_end_date: '0100-01-01'
   lc_kwargs:
     threads_per_worker: 1
 
 timeseries:
   num_procs: 8
-  ts_done: [False]
-  overwrite_ts: [False]
-  case_name: 'b.e23_alpha16b.BLT1850.ne30_t232.054'
+  ts_done: [False,False]
+  overwrite_ts: [False,False]
+  case_name: ['b.e30_beta04.BLT1850.ne30_t232_wgx3.121min', 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121']
 
   atm:
     vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
@@ -76,11 +83,11 @@ timeseries:
     level: 'lev'
 
   ice:
-    vars: ['hi', 'hs', 'snowfrac', 'Tsfc'] #['process_all']
+    vars: ['aice','hi', 'hs','uvel','vvel'] #['process_all']
     derive_vars: []
-    hist_str: 'h'
-    start_years: [2]
-    end_years: [102]
+    hist_str: 'cice.h'
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   glc:
@@ -147,17 +154,15 @@ compute_notebooks:
               - 1850pSASU
 
     ice:
-      seaice:
+      Hemis_seaice_visual_compare_obs_lens:
         parameter_groups:
           none:
-            cases:
-              - b.e23_alpha17f.BLTHIST.ne30_t232.092
-              - b.e30_beta02.BLTHIST.ne30_t232.104
-            begyr1: 1850
-            endyr1: 2013
-            begyr2: 1850
-            endyr2: 2013
-            nyears: 35
+            climo_nyears: 35
+      Hemis_seaice_visual_compare_contour:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -196,7 +201,8 @@ book_toc:
 
     - caption: Sea Ice
       chapters:
-        - file: ice/seaice
+        - file: ice/Hemis_seaice_visual_compare_obs_lens
+        - file: ice/Hemis_seaice_visual_compare_contour
 
 #####################################
 # Keys for Jupyter Book _config.yml #
