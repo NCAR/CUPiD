@@ -142,7 +142,7 @@ compute_notebooks:
       Greenland_SMB_visual_compare_obs:
         parameter_groups:
           none:
-            obs_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/multi_grid/annual_avg/SMB_data'
+            obs_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/glc/analysis_datasets/multi_grid/annual_avg/SMB_data'
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
             climo_nyears: 40
 
