@@ -6,3 +6,4 @@
 * [ ] Have you [hidden the code cells (#8 in Adding Notebooks Guide)](https://ncar.github.io/CUPiD/addingnotebookstocollection.html) in your notebook?
 * [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 * [ ] Have you successfully tested your changes locally?
+* [ ] Have you moved any observational data that you are using to `/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data` and ensured that it follows this format within that directory: `COMPONENT/analysis_datasets/RESOLUTION/PROCESSED_FIELD_TYPE`?
