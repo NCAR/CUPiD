@@ -178,15 +178,6 @@ compute_notebooks:
             clmFile_h: '.h0.'
             fluxnet_comparison: True
             obsDir: '/glade/campaign/cgd/tss/people/mdfowler/FLUXNET2015/'
-      link_to_ILAMB:
-        parameter_groups:
-          none:
-            ilamb_root: ../../examples/external_diag_packages/ILAMB_output
-            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
-            print_table: False
-        external_tool:
-          tool_name: 'ILAMB'
-          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
 
 #    ocn:
 #      ocean_surface:
@@ -236,7 +227,6 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
-        - file: lnd/link_to_ILAMB
 
     - caption: Sea Ice
       chapters:
