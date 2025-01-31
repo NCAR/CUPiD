@@ -15,7 +15,10 @@ import shutil
 
 import click
 
-import cupid.util
+try:
+    import util
+except ModuleNotFoundError:
+    import cupid.util as util
 
 
 def read_config_file(config_path):
@@ -30,7 +33,7 @@ def read_config_file(config_path):
         None
     """
     # Obtain the contents of the configuration file and extract the run_dir variable
-    control = cupid.util.get_control_dict(config_path)
+    control = util.get_control_dict(config_path)
     run_dir = control["data_sources"].get("run_dir", None)
 
     if run_dir:
@@ -52,7 +55,7 @@ def clean(config_path):
     Args: CONFIG_PATH - The path to the configuration file.
 
     """
-    logger = cupid.util.setup_logging(config_path)
+    logger = util.setup_logging(config_path)
     run_dir = read_config_file(config_path)
     # Delete the "computed_notebooks" folder and all the contents inside of it
     shutil.rmtree(run_dir)
