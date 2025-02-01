@@ -46,7 +46,7 @@ def _parse_args():
     return parser.parse_args()
 
 
-def generate_cupid_config(case_root, cesm_root, cupid_example):
+def generate_cupid_config(case_root, cesm_root, cupid_example, cupid_baseline_case=None, cupid_baseline_root=None, cupid_start_year=None, cupid_end_year=None, cupid_base_start_year=None, cupid_base_end_year=None):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
     a specific CUPiD example configuration (such as 'key metrics').
@@ -108,16 +108,38 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
 
     # Additional options we need to get from env_cupid.xml
-    base_case = "b.e23_alpha17f.BLT1850.ne30_t232.092"
-    nyears = 1
-    start_date = "0001-01-01"
-    end_date = f"{nyears+1:04d}-01-01"
+    if cupid_baseline_case:
+        base_case = cupid_baseline_case
+    else:
+        base_case = "b.e23_alpha17f.BLT1850.ne30_t232.092"
+    if cupid_baseline_root:
+        base_case_output_dir = cupid_baseline_root
+    else:
+        base_case_output_dir = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing"
+    if cupid_start_year:
+        start_date = cupid_start_year
+    else:
+        start_date = "0001-01-01"
+    if cupid_end_year:
+        end_date = cupid_end_year
+    else:
+        end_date = f"{nyears+1:04d}-01-01"
+    if cupid_base_start_year:
+        base_case_start_date = cupid_base_start_year
+    else:
+        continue # default for this one?
+    if cupid_base_end_year:
+        base_end_date = cupid_base_end_year
+    else:
+        base_end_date = f"{base_nyears+1:04d}-01-01"
+
+    # TODO: these should also perhaps be added as environment vars?
+    nyears = 1    
     climo_nyears = nyears
-    base_case_output_dir = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing"
     base_nyears = 100
-    base_end_date = f"{base_nyears+1:04d}-01-01"
     base_climo_nyears = 40
 
+    # --------------------------------------------------------------------------------
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
         my_dict = yaml.safe_load(f)
 
