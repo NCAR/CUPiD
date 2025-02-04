@@ -88,8 +88,6 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
 
     ds_pop = add_cyclic(ds_obs)
 
-    ifrac_obs = ds_pop.monthly_ifrac.mean(dim="month")
-
     aice = title.find("Concentration")
 
     if np.size(levels) > 2:
@@ -101,14 +99,15 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
     gs = GridSpec(2, 4)
 
     if proj == "N":
-
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.NorthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+        ifrac_obs = ds_pop["monthly_ifrac"].isel(month=2)
     if proj == "S":
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+        ifrac_obs = ds_pop["monthly_ifrac"].isel(month=8)
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
