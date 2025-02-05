@@ -98,9 +98,12 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"CTSM51          , {base_case_output_dir}/lnd/hist/regrid/",
-        )  # TODO: aslo update model name? Add to cupid config file?
+            f"CTSM51          , {base_case_output_dir}/lnd/hist/regrid/\n",
+        )
     print(f"wrote {cupid_config_loc}model_setup.txt")
+    print(
+        f"WARNING: ILAMB requires regridded output to be in {base_case_output_dir}/lnd/hist/regrid/ directory.",
+    )
     print("You can now run ILAMB with the following commands:")
     print("---")
     print("qinteractive -l select=1:ncpus=16:mpiprocs=16:mem=100G -l walltime=06:00:00")
@@ -108,7 +111,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     print("export ILAMB_ROOT=../ilamb_aux")
     if run_type == "SP":
         print(
-            f"ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_SP.cfg --build_dir {cupid_config_loc}ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup {cupid_config_loc}odel_setup.txt --filter .clm2.h0.",  # noqa: E501
+            f"ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_SP.cfg --build_dir {cupid_config_loc}ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup {cupid_config_loc}model_setup.txt --filter .clm2.h0.",  # noqa: E501
         )
     elif run_type == "BGC":
         print(
