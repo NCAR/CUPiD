@@ -10,7 +10,18 @@ import xarray as xr
 from matplotlib.gridspec import GridSpec
 
 
-def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
+def plot_diff(
+    field1,
+    field2,
+    levels,
+    case1,
+    case2,
+    title,
+    proj,
+    TLAT,
+    TLON,
+    path_HadleyOI,
+):
     # make circular boundary for polar stereographic circular plots
     theta = np.linspace(0, 2 * np.pi, 100)
     center, radius = [0.5, 0.5], 0.5
@@ -19,9 +30,7 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
 
     # Read in observed sea ice concentration
 
-    path_nsidc = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/"
-
-    ds_obs = xr.open_dataset(path_nsidc + "sst_HadOIBl_bc_1x1_climo_1980_2019.nc")
+    ds_obs = xr.open_dataset(path_HadleyOI + "sst_HadOIBl_bc_1x1_climo_1980_2019.nc")
 
     aice = title.find("Concentration")
 

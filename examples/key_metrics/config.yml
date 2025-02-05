@@ -170,7 +170,8 @@ compute_notebooks:
           none:
             climo_nyears: 35
             grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-            path_nsidc: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/hemispheric_data/NSIDC_SeaIce_extent'
+            path_obs: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
 
     lnd:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
