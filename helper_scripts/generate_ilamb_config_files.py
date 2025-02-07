@@ -83,6 +83,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     sys.path.append(os.path.join(cesm_root, "cime"))
 
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    ilamb_config_loc = os.path.join(cesm_root, "tools", "CUPiD", "ilamb_aux")
     # Is cupid_config_loc a valid value?
     if cupid_config_loc is None:
         cupid_config_loc = os.path.join(
@@ -132,11 +133,11 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     print("export ILAMB_ROOT=../ilamb_aux")
     if run_type == "SP":
         print(
-            f"ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_SP.cfg --build_dir {cupid_config_loc}ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup {cupid_config_loc}model_setup.txt --filter .clm2.h0.",  # noqa: E501
+            f"ilamb-run --config {os.path.join(ilamb_config_loc, 'ilamb_nohoff_final_CLM_SP.cfg'} --build_dir {os.path.join(cupid_config_loc, 'ILAMB_output/')} --df_errs {os.path.join(ilamb_config_loc, 'quantiles_Whittaker_cmip5v6.parquet'} --define_regions {os.path.join(ilamb_config_loc, 'DATA/regions/LandRegions.nc'} {os.path.join(ilamb_config_loc, 'DATA/regions/Whittaker.nc'} --regions global --model_setup {os.path.join(cupid_config_loc, 'model_setup.txt')} --filter .clm2.h0.",  # noqa: E501
         )
     elif run_type == "BGC":
         print(
-            f"ilamb-run --config ../ilamb_aux/ilamb_nohoff_final_CLM_BGC.cfg --build_dir {cupid_config_loc}ILAMB_output/ --df_errs ../ilamb_aux/quantiles_Whittaker_cmip5v6.parquet --define_regions ../ilamb_aux/DATA/regions/LandRegions.nc ../ilamb_aux/DATA/regions/Whittaker.nc --regions global --model_setup {cupid_config_loc}model_setup.txt --filter .clm2.h0.",  # noqa: E501
+            f"ilamb-run --config {os.path.join(ilamb_config_loc, 'ilamb_nohoff_final_CLM_BGC.cfg'} --build_dir {os.path.join(cupid_config_loc, 'ILAMB_output/')} --df_errs {os.path.join(ilamb_config_loc, 'quantiles_Whittaker_cmip5v6.parquet'} --define_regions {os.path.join(ilamb_config_loc, 'DATA/regions/LandRegions.nc'} {os.path.join(ilamb_config_loc, 'DATA/regions/Whittaker.nc'} --regions global --model_setup {os.path.join(cupid_config_loc, 'model_setup.txt')} --filter .clm2.h0.",  # noqa: E501
         )
     print("---------")
 
