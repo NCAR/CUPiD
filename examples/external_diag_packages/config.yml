@@ -158,7 +158,7 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-       - file: atm/link_to_ADF
+        - file: atm/link_to_ADF
 
     - caption: Land
       chapters:

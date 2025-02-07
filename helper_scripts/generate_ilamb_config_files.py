@@ -47,7 +47,11 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     # Is cupid_config_loc a valid value?
     if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
+        cupid_config_loc = os.path.join(
+            cupid_root,
+            "examples",
+            "external_diag_packages",
+        )
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
@@ -83,30 +87,49 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     # Is cupid_config_loc a valid value?
     if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
+        cupid_config_loc = os.path.join(
+            cupid_root,
+            "examples",
+            "external_diag_packages",
+        )
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    base_case_output_dir = os.path.join(
+    case_output_dir = os.path.join(
         c_dict["global_params"]["CESM_output_dir"],
-        c_dict["global_params"]["base_case_name"],
+        c_dict["global_params"]["case_name"],
     )
-    with open(cupid_config_loc + "model_setup.txt", "w") as ms:
+    if "base_case_output_dir" in c_dict["global_params"]:
+        base_case_output_dir = os.path.join(
+            c_dict["global_params"]["CESM_output_dir"],
+            c_dict["global_params"]["base_case_name"],
+        )
+    else:
+        base_case_output_dir = os.path.join(
+            c_dict["global_params"]["CESM_output_dir"],
+            c_dict["global_params"]["base_case_name"],
+        )
+    with open(os.path.join(cupid_config_loc, "model_setup.txt"), "w") as ms:
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"CTSM51          , {base_case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['lobal_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
         )
-    print(f"wrote {cupid_config_loc}model_setup.txt")
+        ms.write(
+            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/\n",
+        )
+    print(f"wrote {os.path.join(cupid_config_loc, 'model_setup.txt')}")
     print(
         f"WARNING: ILAMB requires regridded output to be in {base_case_output_dir}/lnd/hist/regrid/ directory.",
     )
     print("You can now run ILAMB with the following commands:")
+    print(
+        "(Users on a super computer should make sure they are on a compute node rather than a login node)",
+    )
     print("---")
-    print("qinteractive -l select=1:ncpus=16:mpiprocs=16:mem=100G -l walltime=06:00:00")
     print("conda activate cupid-analysis")
     print("export ILAMB_ROOT=../ilamb_aux")
     if run_type == "SP":
