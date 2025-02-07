@@ -16,6 +16,7 @@ Returns:
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 
@@ -54,10 +55,11 @@ def build(config_path):
                     ].get("tool_name")
                     == "ADF"
                 ):
-                    shutil.copytree(
-                        f"{run_dir}/ADF_output",
-                        f"{run_dir}/computed_notebooks/_build/html/ADF",
-                    )
+                    if os.path.exists(f"{run_dir}/ADF_output"):
+                        shutil.copytree(
+                            f"{run_dir}/ADF_output",
+                            f"{run_dir}/computed_notebooks/_build/html/ADF",
+                        )
             if "external_tool" in control["compute_notebooks"][component][notebook]:
                 if (
                     control["compute_notebooks"][component][notebook][
@@ -65,10 +67,11 @@ def build(config_path):
                     ].get("tool_name")
                     == "ILAMB"
                 ):
-                    shutil.copytree(
-                        f"{run_dir}/ILAMB_output",
-                        f"{run_dir}/computed_notebooks/_build/html/ILAMB",
-                    )
+                    if os.path.exists(f"{run_dir}/ILAMB_output"):
+                        shutil.copytree(
+                            f"{run_dir}/ILAMB_output",
+                            f"{run_dir}/computed_notebooks/_build/html/ILAMB",
+                        )
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
