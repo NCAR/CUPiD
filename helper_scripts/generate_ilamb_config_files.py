@@ -62,7 +62,6 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
     ]["ilamb_config_data_loc"]
 
     ilamb_config_loc = os.path.join(cesm_root, "tools", "CUPiD", "ilamb_aux")
-    print(run_type)
     with open(
         os.path.join(
             ilamb_config_loc,
@@ -71,7 +70,6 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
     ) as cfg:
         cfg_content = cfg.read()
         cfg_content = cfg_content.replace("PATH/", ilamb_config_data_loc)
-    print(f"writing ilamb_nohoff_final_CLM_{run_type}.cfg")
     with open(
         os.path.join(ilamb_config_loc, f"ilamb_nohoff_final_CLM_{run_type}.cfg"),
         "w",
@@ -116,7 +114,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"{c_dict['lobal_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
         )
         ms.write(
             f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/\n",
@@ -129,7 +127,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     print(
         "(Users on a super computer should make sure they are on a compute node rather than a login node)",
     )
-    print("---")
+    print("---------")
     print("conda activate cupid-analysis")
     print("export ILAMB_ROOT=../ilamb_aux")
     if run_type == "SP":
