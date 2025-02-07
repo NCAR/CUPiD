@@ -46,7 +46,17 @@ def _parse_args():
     return parser.parse_args()
 
 
-def generate_cupid_config(case_root, cesm_root, cupid_example, cupid_baseline_case=None, cupid_baseline_root=None, cupid_start_year=None, cupid_end_year=None, cupid_base_start_year=None, cupid_base_end_year=None):
+def generate_cupid_config(
+    case_root,
+    cesm_root,
+    cupid_example,
+    cupid_baseline_case=None,
+    cupid_baseline_root=None,
+    cupid_start_year=None,
+    cupid_end_year=None,
+    cupid_base_start_year=None,
+    cupid_base_end_year=None,
+):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
     a specific CUPiD example configuration (such as 'key metrics').
@@ -107,6 +117,12 @@ def generate_cupid_config(case_root, cesm_root, cupid_example, cupid_baseline_ca
         case = cesm_case.get_value("CASE")
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
 
+    # TODO: these should also perhaps be added as environment vars?
+    nyears = 1
+    climo_nyears = nyears
+    base_nyears = 100
+    base_climo_nyears = 40
+
     # Additional options we need to get from env_cupid.xml
     if cupid_baseline_case:
         base_case = cupid_baseline_case
@@ -125,19 +141,13 @@ def generate_cupid_config(case_root, cesm_root, cupid_example, cupid_baseline_ca
     else:
         end_date = f"{nyears+1:04d}-01-01"
     if cupid_base_start_year:
-        base_case_start_date = cupid_base_start_year
+        base_start_date = cupid_base_start_year
     else:
-        continue # default for this one?
+        base_start_date = start_date
     if cupid_base_end_year:
         base_end_date = cupid_base_end_year
     else:
         base_end_date = f"{base_nyears+1:04d}-01-01"
-
-    # TODO: these should also perhaps be added as environment vars?
-    nyears = 1    
-    climo_nyears = nyears
-    base_nyears = 100
-    base_climo_nyears = 40
 
     # --------------------------------------------------------------------------------
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
@@ -154,6 +164,7 @@ def generate_cupid_config(case_root, cesm_root, cupid_example, cupid_baseline_ca
     my_dict["global_params"]["end_date"] = end_date
     my_dict["global_params"]["base_case_name"] = base_case
     my_dict["global_params"]["base_case_output_dir"] = base_case_output_dir
+    my_dict["global_params"]["base_start_date"] = base_start_date
     my_dict["global_params"]["base_end_date"] = base_end_date
     my_dict["timeseries"]["case_name"] = [case, base_case]
 
