@@ -84,6 +84,26 @@ def generate_cupid_config(
         The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
         Must be a valid subdirectory within the CUPiD examples directory.
 
+    Optional Arguments:
+    -------------------
+    cupid_baseline_case : str
+        The name of the base case.
+
+    cupid_baseline_root : str
+        The root directory of the base case.
+
+    cupid_start_year : int
+        The start year of the case being analyzed.
+
+    cupid_end_year : int
+        The end year of the case being analyzed.
+    
+    cupid_base_start_year : int
+        The start year of the base case.
+
+    cupid_base_end_year : int
+        The end year of the base case.
+
     Raises:
     -------
     KeyError:
