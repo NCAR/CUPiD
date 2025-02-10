@@ -6,6 +6,7 @@
  - Katie Dagon (NCAR), [@katiedagon](https://github.com/katiedagon)
  - Anna-Lena Deppenmeier (NCAR; now University of Liverpool), [@ALDepp](https://github.com/ALDepp)
  - Brian Dobbins (NCAR), [@briandobbins](https://github.com/briandobbins)
+ - Alice DuVivier (NCAR), [@duvivier](https://github.com/duvivier)
  - Orhan Eroglu (NCAR), [@erogluorhan](https://github.com/erogluorhan)
  - John Fasullo (NCAR)
  - Katelyn FitzGerald (NCAR), [@kafitzgerald](https://github.com/kafitzgerald)
@@ -33,6 +34,5 @@
  - Will Wieder (NCAR), [@wwieder](https://github.com/wwieder)
  - Anissa Zacharias (NCAR), [@anissa111](https://github.com/anissa111)
  - Feng Zhu (NCAR), [@fzhu2e](https://github.com/fzhu2e)
- - Alice DuVivier (NCAR), [@duvivier](https://github.com/duvivier)
 
 Note: If you have contributed to the project, please feel free to add yourself to this list by updating [contributors.md](https://github.com/NCAR/CUPiD/blob/main/contributors.md).
