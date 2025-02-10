@@ -97,7 +97,7 @@ def generate_cupid_config(
 
     cupid_end_year : int
         The end year of the case being analyzed.
-    
+
     cupid_base_start_year : int
         The start year of the base case.
 
