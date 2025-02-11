@@ -43,6 +43,54 @@ def _parse_args():
         help="CESM case directory",
     )
 
+    parser.add_argument(
+        "--cupid-baseline-case",
+        action="store",
+        default="b.e23_alpha17f.BLT1850.ne30_t232.092",
+        dest="cupid_baseline_case",
+        help="Base case name",
+    )
+
+    parser.add_argument(
+        "--cupid-baseline-root",
+        action="store",
+        default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+        dest="cupid_baseline_root",
+        help="Base case root directory",
+    )
+
+    parser.add_argument(
+        "--cupid-start-year",
+        action="store",
+        default="0001-01-01",
+        dest="cupid_start_year",
+        help="CUPiD case start year",
+    )
+
+    parser.add_argument(
+        "--cupid-end-year",
+        action="store",
+        default="0101-01-01",
+        dest="cupid_end_year",
+        help="CUPiD case end year",
+    )
+
+    parser.add_argument(
+        "--cupid-base-start-year",
+        action="store",
+        default="0001-01-01",
+        dest="cupid_base_start_year",
+        help="CUPiD base case start year",
+    )
+
+    parser.add_argument(
+        "--cupid-base-end-year",
+        action="store",
+        default="0101-01-01",
+        dest="cupid_base_end_year",
+        help="CUPiD base case end year",
+    )
+
     return parser.parse_args()
 
 
@@ -50,12 +98,12 @@ def generate_cupid_config(
     case_root,
     cesm_root,
     cupid_example,
-    cupid_baseline_case=None,
-    cupid_baseline_root=None,
-    cupid_start_year=None,
-    cupid_end_year=None,
-    cupid_base_start_year=None,
-    cupid_base_end_year=None,
+    cupid_baseline_case,
+    cupid_baseline_root,
+    cupid_start_year,
+    cupid_end_year,
+    cupid_base_start_year,
+    cupid_base_end_year,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -84,8 +132,6 @@ def generate_cupid_config(
         The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
         Must be a valid subdirectory within the CUPiD examples directory.
 
-    Optional Arguments:
-    -------------------
     cupid_baseline_case : str
         The name of the base case.
 
@@ -137,37 +183,10 @@ def generate_cupid_config(
         case = cesm_case.get_value("CASE")
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
 
-    # TODO: these should also perhaps be added as environment vars?
-    nyears = 1
-    climo_nyears = nyears
-    base_nyears = 100
+    # TODO: these sea-ice specific vars (and some glc vars) should also be added as environment vars
+    # See https://github.com/NCAR/CUPiD/issues/189
+    climo_nyears = 35
     base_climo_nyears = 40
-
-    # Additional options we need to get from env_cupid.xml
-    if cupid_baseline_case:
-        base_case = cupid_baseline_case
-    else:
-        base_case = "b.e23_alpha17f.BLT1850.ne30_t232.092"
-    if cupid_baseline_root:
-        base_case_output_dir = cupid_baseline_root
-    else:
-        base_case_output_dir = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing"
-    if cupid_start_year:
-        start_date = cupid_start_year
-    else:
-        start_date = "0001-01-01"
-    if cupid_end_year:
-        end_date = cupid_end_year
-    else:
-        end_date = f"{nyears+1:04d}-01-01"
-    if cupid_base_start_year:
-        base_start_date = cupid_base_start_year
-    else:
-        base_start_date = start_date
-    if cupid_base_end_year:
-        base_end_date = cupid_base_end_year
-    else:
-        base_end_date = f"{base_nyears+1:04d}-01-01"
 
     # --------------------------------------------------------------------------------
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
@@ -180,20 +199,20 @@ def generate_cupid_config(
         "nblibrary",
     )
     my_dict["global_params"]["case_name"] = case
-    my_dict["global_params"]["start_date"] = start_date
-    my_dict["global_params"]["end_date"] = end_date
-    my_dict["global_params"]["base_case_name"] = base_case
-    my_dict["global_params"]["base_case_output_dir"] = base_case_output_dir
-    my_dict["global_params"]["base_start_date"] = base_start_date
-    my_dict["global_params"]["base_end_date"] = base_end_date
-    my_dict["timeseries"]["case_name"] = [case, base_case]
+    my_dict["global_params"]["start_date"] = cupid_start_year
+    my_dict["global_params"]["end_date"] = cupid_end_year
+    my_dict["global_params"]["base_case_name"] = cupid_baseline_case
+    my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["base_start_date"] = cupid_base_start_year
+    my_dict["global_params"]["base_end_date"] = cupid_base_end_year
+    my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
         if (
             isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
         ):
-            my_dict["timeseries"][component]["end_years"] = [nyears, base_nyears]
+            my_dict["timeseries"][component]["end_years"] = [cupid_end_year, cupid_base_end_year]
     if "link_to_ADF" in my_dict["compute_notebooks"]["atm"]:
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
