@@ -25,8 +25,13 @@ from __future__ import annotations
 import os
 
 import click
-import timeseries
-import util
+
+try:
+    import timeseries
+    import util
+except ModuleNotFoundError:
+    import cupid.timeseries as timeseries
+    import cupid.util as util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
