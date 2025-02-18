@@ -79,8 +79,12 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
 
     # copy ilamb_aux to local directory
     if os.path.exists(os.path.join(cupid_config_loc, "ilamb_aux")):
-        shutil.rmtree(os.path.join(cupid_config_loc, "ilamb_aux"))  # Remove the existing directory
-    shutil.copytree(os.path.join(ilamb_config_loc), os.path.join(cupid_config_loc, "ilamb_aux"))
+        shutil.rmtree(
+            os.path.join(cupid_config_loc, "ilamb_aux"),
+        )  # Remove the existing directory
+    shutil.copytree(
+        os.path.join(ilamb_config_loc), os.path.join(cupid_config_loc, "ilamb_aux"),
+    )
 
 
 def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
