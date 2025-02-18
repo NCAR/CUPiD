@@ -77,6 +77,11 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
         cfg.write(cfg_content)
     print(f"wrote {cupid_config_loc}/ilamb_nohoff_final_CLM_{run_type}.cfg")
 
+    # copy ilamb_aux to local directory
+    if os.path.exists(os.path.join(cupid_config_loc, "ilamb_aux")):
+        shutil.rmtree(os.path.join(cupid_config_loc, "ilamb_aux"))  # Remove the existing directory
+    shutil.copytree(os.path.join(ilamb_config_loc), os.path.join(cupid_config_loc, "ilamb_aux"))
+
 
 def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     """Create model_setup.txt file for use in ILAMB"""
@@ -130,7 +135,7 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     )
     print("---------")
     print("conda activate cupid-analysis")
-    print("export ILAMB_ROOT=../ilamb_aux")
+    print(f"export ILAMB_ROOT={os.getcwd()}")
     if os.path.exists(os.path.join(cupid_config_loc, "ILAMB_output/")):
         print(
             "WARNING: directory {os.path.join(cupid_config_loc, 'ILAMB_output/'} exists; this may cause issues with runnign ILAMB. It is recommended to remove this directory prior to running the following command.",  # noqa: E501
