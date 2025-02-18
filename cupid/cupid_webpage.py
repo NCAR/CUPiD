@@ -60,8 +60,7 @@ def build(config_path):
                             f"{run_dir}/ADF_output",
                             f"{run_dir}/computed_notebooks/_build/html/ADF",
                         )
-            if "external_tool" in control["compute_notebooks"][component][notebook]:
-                if (
+                elif (
                     control["compute_notebooks"][component][notebook][
                         "external_tool"
                     ].get("tool_name")
