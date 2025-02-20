@@ -36,7 +36,11 @@ def convert_pft1d_to_sparse(
     vegtype_var="pft",
     vars_to_grid=None,
     drop_others=False,
+    pfts_to_keep=None,
 ):
+
+    if not isinstance(pfts_to_keep, list):
+        pfts_to_keep = [pfts_to_keep]
 
     # extract PFT variables
     pfts = xr.Dataset({k: v for k, v in dataset.items() if vegtype_var in v.dims})
@@ -68,7 +72,7 @@ def convert_pft1d_to_sparse(
             if vegtype_var in dataset[var].dims:
                 print(f"Gridding {var}")
                 print(pfts[var])
-                result[var] = xr.apply_ufunc(
+                da = xr.apply_ufunc(
                     to_sparse,
                     pfts[var],
                     vegtype,
@@ -84,6 +88,9 @@ def convert_pft1d_to_sparse(
                         output_sizes=output_sizes,
                     ),  # lets dask know that we are changing from numpy to sparse
                 )
+                if pfts_to_keep is not None:
+                    da = da.sel(pft=pfts_to_keep)
+                result[var] = da
             elif all([x in dataset[var].dims for x in ["lat", "lon"]]):
                 result[var] = dataset[var]
             else:
@@ -98,6 +105,9 @@ def convert_pft1d_to_sparse(
     print(result)
     result = result.update(dataset[["lat", "lon"]])
     print(result)
-    result["pft"] = np.arange(result.sizes[vegtype_var])
+    if pfts_to_keep is not None:
+        result["pft"] = np.array(pfts_to_keep)
+    else:
+        result["pft"] = np.arange(result.sizes[vegtype_var])
     print(result)
     return result
