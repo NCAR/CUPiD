@@ -48,7 +48,7 @@ global_params:
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0101-01-01'
-  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/'
+  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   lc_kwargs:
     threads_per_worker: 1
 
