@@ -185,6 +185,9 @@ compute_notebooks:
             clmFile_h: '.h5.'
             fluxnet_comparison: True
             obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
+            # The following are default True, but that's only really useful during development (running the notebook manually)
+            dev_mode: False
+            verbose: False
 
 #    ocn:
 #      ocean_surface:
