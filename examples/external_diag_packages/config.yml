@@ -41,8 +41,8 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
+  case_name: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
+  base_case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0101-01-01'
@@ -54,7 +54,7 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099']
+  case_name: ['f.e23_alpha17f.FLTHIST_ne30.roughtopo.099','b.e30_beta02.BLT1850.ne30_t232.104']
 
   atm:
     vars: ['PSL']
@@ -116,6 +116,7 @@ compute_notebooks:
         parameter_groups:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/
+            key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
         external_tool:
           tool_name: 'ADF'
           vars: ['PRECT', 'SST']
@@ -123,51 +124,16 @@ compute_notebooks:
           analysis_scripts: ["amwg_table"]
           base_regridded_output: True
 
-#    glc:
-#      LIWG_SMB_diagnostic:
-#        parameter_groups:
-#          none:
-#            obs_path: '/glade/u/home/gunterl/obs_diagnostic_cesm/'
-#            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-#            climo_nyears: 40
-
-#    ice:
-#      seaice:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - g.e23_a16g.GJRAv4.TL319_t232_hycom1_N75.2024.005
-#              - g.e23_a16g.GJRAv4.TL319_t232_zstar_N65.2024.004
-#            begyr1: 245
-#            endyr1: 305
-#            begyr2: 245
-#            endyr2: 305
-#            nyears: 25
-
-#    lnd:
-#      land_comparison:
-#        parameter_groups:
-#          none:
-#            cases:
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-#              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
-#            type:
-#              - 1850pAD
-#              - 1850pSASU
-
-#    ocn:
-#      ocean_surface:
-#        parameter_groups:
-#          none:
-#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-#            savefigs: False
-#            mom6_tools_config:
-#              start_date: '0091-01-01'
-#              end_date: '0101-01-01'
-#              Fnames:
-#                native: 'mom6.h.native.????-??.nc'
-#                static: 'mom6.h.static.nc'
-#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
+    lnd:
+      link_to_ILAMB:
+        parameter_groups:
+          none:
+            ilamb_root: ../../examples/external_diag_packages/ILAMB_output
+            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
+            print_table: False
+        external_tool:
+          tool_name: 'ILAMB'
+          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -195,21 +161,9 @@ book_toc:
       chapters:
         - file: atm/link_to_ADF
 
-    # - caption: Ocean
-    #   chapters:
-    #       - file: ocn/ocean_surface
-
-    # - caption: Land
-    #   chapters:
-    #     - file: lnd/land_comparison
-
-    # - caption: Sea Ice
-    #   chapters:
-    #     - file: ice/seaice
-
-    # - caption: Land Ice
-    #   chapters:
-    #     - file: glc/LIWG_SMB_diagnostic
+    - caption: Land
+      chapters:
+        - file: lnd/link_to_ILAMB
 
 #####################################
 # Keys for Jupyter Book _config.yml #

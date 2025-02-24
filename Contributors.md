@@ -6,6 +6,7 @@
  - Katie Dagon (NCAR), [@katiedagon](https://github.com/katiedagon)
  - Anna-Lena Deppenmeier (NCAR; now University of Liverpool), [@ALDepp](https://github.com/ALDepp)
  - Brian Dobbins (NCAR), [@briandobbins](https://github.com/briandobbins)
+ - Alice DuVivier (NCAR), [@duvivier](https://github.com/duvivier)
  - Orhan Eroglu (NCAR), [@erogluorhan](https://github.com/erogluorhan)
  - John Fasullo (NCAR)
  - Katelyn FitzGerald (NCAR), [@kafitzgerald](https://github.com/kafitzgerald)
