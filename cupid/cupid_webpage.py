@@ -142,15 +142,13 @@ def build(config_path, github_pages_dir, name, overwrite):
                 continue
 
             if "external_tool" in control["compute_notebooks"][component][notebook]:
-                if (
-                    control["compute_notebooks"][component][notebook][
-                        "external_tool"
-                    ].get("tool_name")
-                    == "ADF"
-                ):
+                tool_name = control["compute_notebooks"][component][notebook][
+                    "external_tool"
+                ].get("tool_name")
+                if tool_name in ["ADF", "ILAMB"]:
                     shutil.copytree(
-                        f"{run_dir}/ADF_output",
-                        os.path.join(html_output_path, "ADF"),
+                        f"{run_dir}/{tool_name}_output",
+                        os.path.join(html_output_path, tool_name),
                     )
 
     if github_pages_dir:

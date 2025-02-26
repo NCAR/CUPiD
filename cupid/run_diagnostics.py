@@ -28,7 +28,10 @@ import click
 import intake
 import ploomber
 
-import cupid.util
+try:
+    import util
+except ModuleNotFoundError:
+    import cupid.util as util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -70,9 +73,9 @@ def run_diagnostics(
     # fmt: on
     # pylint: enable=line-too-long
     # Get control structure
-    control = cupid.util.get_control_dict(config_path)
-    cupid.util.setup_book(config_path)
-    logger = cupid.util.setup_logging(config_path)
+    control = util.get_control_dict(config_path)
+    util.setup_book(config_path)
+    logger = util.setup_logging(config_path)
 
     component_options = {
         "atm": atmosphere,
@@ -170,7 +173,7 @@ def run_diagnostics(
         # Checking for existence of environments
 
         for nb, info in all_nbs.copy().items():
-            if cupid.util.is_bad_env(control, info):
+            if util.is_bad_env(control, info):
                 bad_env = info["kernel_name"]
                 logger.warning(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;" +
@@ -182,7 +185,7 @@ def run_diagnostics(
         # Setting up notebook tasks
 
         for nb, info in all_nbs.items():
-            cupid.util.create_ploomber_nb_task(
+            util.create_ploomber_nb_task(
                 nb,
                 info,
                 cat_path,
@@ -224,7 +227,7 @@ def run_diagnostics(
         # Setting up script tasks
 
         for script, info in all_scripts.items():
-            cupid.util.create_ploomber_script_task(
+            util.create_ploomber_script_task(
                 script,
                 info,
                 cat_path,

@@ -6,15 +6,33 @@ import matplotlib as mpl
 import matplotlib.path as mpath
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 from matplotlib.gridspec import GridSpec
 
 
-def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
+def plot_diff(
+    field1,
+    field2,
+    levels,
+    case1,
+    case2,
+    title,
+    proj,
+    TLAT,
+    TLON,
+    path_HadleyOI,
+):
     # make circular boundary for polar stereographic circular plots
     theta = np.linspace(0, 2 * np.pi, 100)
     center, radius = [0.5, 0.5], 0.5
     verts = np.vstack([np.sin(theta), np.cos(theta)]).T
     circle = mpath.Path(verts * radius + center)
+
+    # Read in observed sea ice concentration
+
+    ds_obs = xr.open_dataset(path_HadleyOI + "sst_HadOIBl_bc_1x1_climo_1980_2019.nc")
+
+    aice = title.find("Concentration")
 
     if np.size(levels) > 2:
         cmap = mpl.colormaps["ocean"]
@@ -28,25 +46,40 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.NorthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+        ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=3)
+        field1_tmp = field1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
+        field2_tmp = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
     if proj == "S":
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+        ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=9)
+        field1_tmp = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
+        field2_tmp = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
-    field_diff = field2.values - field1.values
+    field_diff = field2_tmp.values - field1_tmp.values
     field_std = field_diff.std()
 
     this = ax.pcolormesh(
         TLON,
         TLAT,
-        field1,
+        field1_tmp,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
+    if aice > 0:
+        plt.contour(
+            ds_obs.lon,
+            ds_obs.lat,
+            ifrac_obs,
+            levels=[0.15],
+            colors="magenta",
+            transform=ccrs.PlateCarree(),
+        )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
 
@@ -65,11 +98,20 @@ def plot_diff(field1, field2, levels, case1, case2, title, proj, TLAT, TLON):
     this = ax.pcolormesh(
         TLON,
         TLAT,
-        field2,
+        field2_tmp,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
+    if aice > 0:
+        plt.contour(
+            ds_obs.lon,
+            ds_obs.lat,
+            ifrac_obs,
+            levels=[0.15],
+            colors="magenta",
+            transform=ccrs.PlateCarree(),
+        )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case2, fontsize=10)
 
