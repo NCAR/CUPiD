@@ -216,11 +216,15 @@ def generate_cupid_config(
                 cupid_end_year,
                 cupid_base_end_year,
             ]
-    if "link_to_ADF" in my_dict["compute_notebooks"]["atm"]:
+    if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(case_root, "ADF_output")
-    if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"]["glc"]:
+
+    if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
+        "glc",
+        {},
+    ):
         my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
             "parameter_groups"
         ]["none"]["climo_nyears"] = climo_nyears
