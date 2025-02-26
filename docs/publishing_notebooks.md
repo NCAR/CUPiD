@@ -16,7 +16,21 @@ Start by [creating a fresh GitHub repository](https://github.com/new).
 Once that's done, go to your repo's Settings > Pages screen.
 1. For Source, choose "GitHub Actions".
 2. If you see the "Static HTML" workflow, press Configure. Otherwise, press "browse all workflows", find it there, and press Configure.
-3. Press Commit Changes and handle the dialog box that pops up.
+3. Add git lfs support. You should see something like the following:
+```yml
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+```
+Add two lines so it looks like this (be careful to include the spaces at the beginning of each line):
+```yml
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+```
+4. Press Commit Changes and handle the dialog box that pops up.
 
 ### Cloning and preparing your GitHub repo
 
