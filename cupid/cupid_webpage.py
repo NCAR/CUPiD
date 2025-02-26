@@ -19,6 +19,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+from urllib.parse import quote
 
 import click
 import yaml
@@ -42,9 +43,12 @@ def github_pages_publish(
         dirs_exist_ok=overwrite,
     )
 
+    # Handle special characters, converting e.g. ^ to %5E
+    name_url = quote(name)
+
     # Write to index.html, if needed
     index_html_file = os.path.join(github_pages_dir, "index.html")
-    new_line = f'<a href="versions/{name}/index.html"/>{name}</a><p>\n'
+    new_line = f'<a href="versions/{name_url}/index.html"/>{name}</a><p>\n'
     do_write = True
     if os.path.exists(index_html_file):
         with open(index_html_file) as f:

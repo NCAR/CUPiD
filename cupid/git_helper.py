@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from urllib.parse import quote
 
 
 def run_git_cmd(git_cmd, cwd=os.getcwd()):
@@ -37,9 +38,13 @@ class GitHelper:
         if publish_url is None:
             publish_url = self.get_publish_url()
         self.publish_url = publish_url
+
+        # Get URL to print, handling spaces and special characters
         self.published_to_url = "/".join(
             [self.publish_url, "versions", self.version_name],
         )
+        self.published_to_url = quote(self.published_to_url)
+        self.published_to_url = re.sub("http(s?)%3A", r"http\1:", self.published_to_url)
 
     def check_pub_dir_clean(self):
         status = run_git_cmd(f"git -C {self.publish_dir} status")
