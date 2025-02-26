@@ -323,3 +323,7 @@ def create_ploomber_script_task(
             # something with task.set_upstream(other_task?)
 
     return task
+
+
+def is_bad_env(control, nb_info):
+    return not control["env_check"][nb_info["kernel_name"]]

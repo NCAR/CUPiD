@@ -22,8 +22,9 @@ import subprocess
 from urllib.parse import quote
 
 import click
-import yaml
 from git_helper import GitHelper
+from util import get_control_dict
+from util import is_bad_env
 
 
 def github_pages_publish(
@@ -115,8 +116,7 @@ def build(config_path, github_pages_dir, name, overwrite):
         None
     """
 
-    with open(config_path) as fid:
-        control = yaml.safe_load(fid)
+    control = get_control_dict(config_path)
 
     # Check and process arguments
     if github_pages_dir:
@@ -135,6 +135,12 @@ def build(config_path, github_pages_dir, name, overwrite):
     html_output_path = os.path.join(run_dir, "computed_notebooks", "_build", "html")
     for component in control["compute_notebooks"]:
         for notebook in control["compute_notebooks"][component]:
+            # Skip this notebook if it wasn't run due to bad environment
+            info = control["compute_notebooks"][component][notebook]
+            if is_bad_env(control, info):
+                print(f"Skipping {notebook}: Not run due to bad environment")
+                continue
+
             if "external_tool" in control["compute_notebooks"][component][notebook]:
                 if (
                     control["compute_notebooks"][component][notebook][
