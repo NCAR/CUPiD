@@ -28,17 +28,17 @@ from git_helper import GitHelper
 @click.command()
 @click.argument("config_path", default="config.yml")
 @click.option(
-    "--github-pages",
+    "--github-pages-dir",
     "-g",
-    is_flag=True,
-    help="Publish to GitHub pages\n"
-    "If given, then -d/--publish-dir must be provided and it must be a git repo.",
+    default="",
+    help="For publishing to GitHub pages:\n"
+    "Directory where the HTML outputs should be copied (into a new sub-directory in versions/ given by -n/--name)",
 )
 @click.option(
     "--name",
     "-n",
     default="",
-    help="Name of sub-directory in -d/--publish-dir that HTML outputs should be copied to",
+    help="Name of version to publish",
 )
 @click.option(
     "--overwrite",
@@ -46,13 +46,7 @@ from git_helper import GitHelper
     is_flag=True,
     help="Overwrite existing publish directory",
 )
-@click.option(
-    "--publish-dir",
-    "-d",
-    default="",
-    help="Directory where the HTML outputs should be copied (into a new sub-directory given by -n/--name)",
-)
-def build(config_path, github_pages, name, overwrite, publish_dir):
+def build(config_path, github_pages_dir, name, overwrite):
     """
     Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-webpage`.
 
@@ -67,32 +61,31 @@ def build(config_path, github_pages, name, overwrite, publish_dir):
         control = yaml.safe_load(fid)
 
     # Check and process arguments
-    if github_pages:
+    if github_pages_dir:
         # Check that you gave --publish-dir
-        if not publish_dir:
+        if not github_pages_dir:
             raise RuntimeError(
                 "When specifying -g/--github-pages, you must specify -d/--publish-dir",
             )
 
         # Check that git repo is ready
-        if os.path.split(publish_dir)[-1] != "versions":
-            publish_dir = os.path.join(publish_dir, "versions")
-        git_dir = os.path.join(publish_dir, os.pardir, ".git")
+        if os.path.split(github_pages_dir)[-1] != "versions":
+            github_pages_dir = os.path.join(github_pages_dir, "versions")
+        git_dir = os.path.join(github_pages_dir, os.pardir, ".git")
         if not os.path.isdir(git_dir):
             raise RuntimeError(f"Not an existing git repo: '{os.path.pardir(git_dir)}'")
         git_repo = GitHelper(os.path.split(git_dir)[0], name)
-    if publish_dir:
         if not name:
             raise RuntimeError(
                 "When specifying -d/--publish-dir, you must also provide -n/--name",
             )
-        publish_dir = os.path.join(publish_dir, name)
-        if os.path.exists(publish_dir):
+        github_pages_dir = os.path.join(github_pages_dir, name)
+        if os.path.exists(github_pages_dir):
             if not overwrite:
                 raise FileExistsError(
-                    f"Add -o to overwrite existing directory '{publish_dir}'",
+                    f"Add -o to overwrite existing directory '{github_pages_dir}'",
                 )
-        print(f"Publishing to '{publish_dir}'")
+        print(f"Publishing to '{github_pages_dir}'")
 
     run_dir = control["data_sources"]["run_dir"]
 
@@ -115,33 +108,32 @@ def build(config_path, github_pages, name, overwrite, publish_dir):
                         os.path.join(html_output_path, "ADF"),
                     )
 
-    if publish_dir:
-        publish_parent_dir = os.path.split(publish_dir)[0]
+    if github_pages_dir:
+        publish_parent_dir = os.path.split(github_pages_dir)[0]
         if not os.path.exists(publish_parent_dir):
             os.makedirs(publish_parent_dir)
         shutil.copytree(
             html_output_path,
-            publish_dir,
+            github_pages_dir,
             dirs_exist_ok=overwrite,
         )
 
-        if github_pages:
-            # Write to index.html, if needed
-            index_html_file = os.path.join(publish_parent_dir, os.pardir, "index.html")
-            new_line = f'<a href="versions/{name}/index.html"/>{name}</a><p>\n'
-            do_write = True
-            if os.path.exists(index_html_file):
-                with open(index_html_file) as f:
-                    for line in f:
-                        if line.strip() == new_line.strip():
-                            do_write = False
-                            break
-            if do_write:
-                with open(index_html_file, "a") as f:
-                    f.write(new_line)
+        # Write to index.html, if needed
+        index_html_file = os.path.join(publish_parent_dir, os.pardir, "index.html")
+        new_line = f'<a href="versions/{name}/index.html"/>{name}</a><p>\n'
+        do_write = True
+        if os.path.exists(index_html_file):
+            with open(index_html_file) as f:
+                for line in f:
+                    if line.strip() == new_line.strip():
+                        do_write = False
+                        break
+        if do_write:
+            with open(index_html_file, "a") as f:
+                f.write(new_line)
 
-            # Publish to GitHub.io
-            git_repo.publish()
+        # Publish to GitHub.io
+        git_repo.publish()
 
     # Originally used this code to copy jupyter book HTML to a location to host it online
 
