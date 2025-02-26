@@ -43,6 +43,15 @@ def _parse_args():
         help="CESM case directory",
     )
 
+    # Command line argument location of CESM case directory
+    parser.add_argument(
+        "--adf-output-root",
+        action="store",
+        dest="adf_output_root",
+        default=None,
+        help="Directory where ADF will be run (None => case root)",
+    )
+
     parser.add_argument(
         "--cupid-baseline-case",
         action="store",
@@ -104,6 +113,7 @@ def generate_cupid_config(
     cupid_end_year,
     cupid_base_start_year,
     cupid_base_end_year,
+    adf_output_root=None,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -165,6 +175,10 @@ def generate_cupid_config(
     sys.path.append(os.path.join(cesm_root, "cime"))
     from CIME.case import Case
 
+    # Is adf_output_root provided?
+    if adf_output_root is None:
+        adf_output_root = case_root
+
     # Is cupid_example a valid value?
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     cupid_examples = os.path.join(cupid_root, "examples")
@@ -198,6 +212,14 @@ def generate_cupid_config(
         "CUPiD",
         "nblibrary",
     )
+    if type(cupid_start_year) == str:
+        cupid_start_year = int(cupid_start_year)
+    if type(cupid_end_year) == str:
+        cupid_end_year = int(cupid_end_year)
+    if type(cupid_base_start_year) == str:
+        cupid_base_start_year = int(cupid_base_start_year)
+    if type(cupid_base_end_year) == str:
+        cupid_base_end_year = int(cupid_base_end_year)
     my_dict["global_params"]["case_name"] = case
     my_dict["global_params"]["start_date"] = cupid_start_year
     my_dict["global_params"]["end_date"] = cupid_end_year
@@ -219,7 +241,7 @@ def generate_cupid_config(
     if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
-        ] = os.path.join(case_root, "ADF_output")
+        ] = os.path.join(adf_output_root, "ADF_output")
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
