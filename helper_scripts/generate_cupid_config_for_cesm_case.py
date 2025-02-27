@@ -212,13 +212,13 @@ def generate_cupid_config(
         "CUPiD",
         "nblibrary",
     )
-    if type(cupid_start_year) == str:
+    if isinstance(cupid_start_year, str):
         cupid_start_year = int(cupid_start_year)
-    if type(cupid_end_year) == str:
+    if isinstance(cupid_end_year, str):
         cupid_end_year = int(cupid_end_year)
-    if type(cupid_base_start_year) == str:
+    if isinstance(cupid_base_start_year, str):
         cupid_base_start_year = int(cupid_base_start_year)
-    if type(cupid_base_end_year) == str:
+    if isinstance(cupid_base_end_year, str):
         cupid_base_end_year = int(cupid_base_end_year)
     my_dict["global_params"]["case_name"] = case
     my_dict["global_params"]["start_date"] = cupid_start_year
