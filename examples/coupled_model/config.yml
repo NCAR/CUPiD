@@ -49,6 +49,7 @@ global_params:
   end_date: '0100-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0100-01-01'
+  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   lc_kwargs:
     threads_per_worker: 1
 
@@ -159,7 +160,7 @@ compute_notebooks:
           none:
             climo_nyears: 35
             grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-            path_nsidc: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/hemispheric_data/NSIDC_SeaIce_extent'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
       Hemis_seaice_visual_compare_contour:
         parameter_groups:
           none:
