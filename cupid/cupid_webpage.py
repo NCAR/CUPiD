@@ -149,6 +149,7 @@ def build(config_path, github_pages_dir, name, overwrite):
     control = get_control_dict(config_path)
 
     # Check and process arguments
+    github_pages_dir = os.path.realpath(github_pages_dir)
     if github_pages_dir:
         github_pages_dir_thisversion, git_repo = github_pages_args(
             github_pages_dir,
