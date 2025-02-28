@@ -175,8 +175,9 @@ class GitHelper:
         elif "https://github.com/" in publish_repo_url:
             gh_user = re.compile(r"https://github.com/(\w+)").findall(publish_repo_url)
             gh_user = gh_user[0]
-            re.compile(r"https://github.com/\w+/(\w+)").findall(publish_repo_url)[0]
-            repo_name = re.compile(r"/(.+).git").findall(publish_repo_url)[0]
+            repo_name = re.compile(r"https://github.com/\w+/(\w+)").findall(
+                publish_repo_url,
+            )[0]
             publish_url = f"https://{gh_user}.github.io/{repo_name}" + subdirs
         else:
             raise NotImplementedError(
