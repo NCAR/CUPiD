@@ -70,7 +70,7 @@ class GitHelper:
             RuntimeError: If the publish directory is not clean.
         """
         self.version_name = version_name
-        self.publish_dir = publish_dir
+        self.publish_dir = os.path.realpath(publish_dir)
         self.check_pub_dir_clean()
 
         if publish_url is None:
