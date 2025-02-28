@@ -35,6 +35,20 @@ def github_pages_publish(
     git_repo,
     html_output_path,
 ):
+    """
+    Publishes a version of the site to GitHub Pages.
+
+    Copies the HTML output to the GitHub Pages directory, add prefix to `index.html`
+    with a link to the new version, and pushes changes to the repository.
+
+    Args:
+        github_pages_dir (str): Root directory for GitHub Pages.
+        github_pages_dir_thisversion (str): Directory for the specific version.
+        name (str): Version name.
+        overwrite (bool): Whether to overwrite existing files.
+        git_repo (GitHelper): Git repository helper instance.
+        html_output_path (str): Path to the generated HTML files.
+    """
     parent_dir = os.path.split(github_pages_dir_thisversion)[-1]
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
@@ -66,7 +80,23 @@ def github_pages_publish(
 
 
 def github_pages_args(github_pages_dir, name, overwrite):
+    """
+    Prepares the GitHub Pages directory for publishing.
+    Ensures a name is provided, initializes a `GitHelper` object,
+    and checks if the version directory exists, handling overwrite conditions.
 
+    Args:
+        github_pages_dir (str): Root directory for GitHub Pages.
+        name (str): Version name.
+        overwrite (bool): Whether to overwrite an existing version directory.
+
+    Returns:
+        tuple: (str, GitHelper) - The version directory path and `GitHelper` instance.
+
+    Raises:
+        RuntimeError: If no name is provided.
+        FileExistsError: If the directory exists and overwrite is not allowed.
+    """
     # Check that you gave a name
     if not name:
         raise RuntimeError(
