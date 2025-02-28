@@ -174,12 +174,7 @@ class GitHelper:
             publish_url = f"https://{gh_user}.github.io/{repo_name}" + subdirs
         else:
             raise NotImplementedError(
-                " ".join(
-                    [
-                        f"Not sure how to handle publish_repo_url {publish_repo_url}.",
-                        "Provide PUBLISH_URL in options.py.",
-                    ],
-                ),
+                f"Not sure how to handle publish_repo_url {publish_repo_url}.",
             )
 
         return publish_url
