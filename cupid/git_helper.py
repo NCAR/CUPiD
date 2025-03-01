@@ -54,7 +54,7 @@ class GitHelper:
         Checks if the Git working directory in the publish directory is clean.
         If the working tree is not clean, it raises a `RuntimeError`.
         """
-        status = self.run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         if status[-1] != "nothing to commit, working tree clean":
             raise RuntimeError(f"self.publish_dir not clean: {self.publish_dir}")
 
@@ -78,21 +78,16 @@ class GitHelper:
             - Staging, committing, and pushing progress updates.
             - The publish URL if changes are successfully pushed.
         """
-        status = self.run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         if status[-1] != "nothing to commit, working tree clean":
             # Stage
             print("Staging...")
-            git_cmd = (
-                f"git -C {self.publish_dir} add {os.path.join(self.publish_dir, '*')}"
-            )
+            git_cmd = ["add", os.path.join(self.publish_dir, "*")]
             status = self.run_git_cmd(git_cmd)
 
             # Commit
             print("Committing...")
             git_cmd = [
-                "git",
-                "-C",
-                self.publish_dir,
                 "commit",
                 "-m",
                 f"Add version '{self.version_name}'",
@@ -101,8 +96,7 @@ class GitHelper:
 
             # Push
             print("Pushing...")
-            git_cmd = f"git -C {self.publish_dir} push"
-            status = self.run_git_cmd(git_cmd)
+            status = self.run_git_cmd("push")
 
             print("Done! Published to " + self.published_to_url)
             print("It might take a bit for GitHub.io to generate that URL")
@@ -123,10 +117,10 @@ class GitHelper:
         Raises:
             NotImplementedError: If the remote URL format is not recognized.
         """
-        cmd = "git config --get remote.origin.url"
+        cmd = "config --get remote.origin.url"
         publish_repo_url = self.run_git_cmd(cmd, cwd=self.publish_dir)[0]
 
-        cmd = "git rev-parse --show-toplevel"
+        cmd = "rev-parse --show-toplevel"
         publish_dir_repo_top = self.run_git_cmd(cmd, cwd=self.publish_dir)[0]
         subdirs = str(os.path.realpath(self.publish_dir)).replace(
             publish_dir_repo_top,
@@ -163,7 +157,7 @@ class GitHelper:
             Exception: If any error occurs while executing the Git command.
 
         """
-        status = self.run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         modified_files = []
         new_files = []
         in_untracked_files = False
@@ -206,6 +200,7 @@ class GitHelper:
         """
         if not isinstance(git_cmd, list):
             git_cmd = git_cmd.split(" ")
+        git_cmd = ["git", "-C", self.publish_dir] + git_cmd
         try:
             git_result = subprocess.check_output(
                 git_cmd,
