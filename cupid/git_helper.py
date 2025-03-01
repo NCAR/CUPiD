@@ -35,7 +35,7 @@ class GitHelper:
             RuntimeError: If the publish directory is not clean.
         """
         self.version_name = version_name
-        self.publish_dir = os.path.realpath(publish_dir)
+        self.publish_dir = os.path.abspath(os.path.realpath(publish_dir))
         self.check_pub_dir_clean()
 
         if publish_url is None:
@@ -122,7 +122,7 @@ class GitHelper:
 
         cmd = "rev-parse --show-toplevel"
         publish_dir_repo_top = self.run_git_cmd(cmd, cwd=self.publish_dir)[0]
-        subdirs = str(os.path.realpath(self.publish_dir)).replace(
+        subdirs = self.publish_dir.replace(
             publish_dir_repo_top,
             "",
         )
