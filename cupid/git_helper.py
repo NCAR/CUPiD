@@ -9,41 +9,6 @@ import subprocess
 from urllib.parse import quote
 
 
-def run_git_cmd(git_cmd, cwd=os.getcwd()):
-    """
-    Executes a Git command in the specified working directory and returns the output as a list of lines.
-
-    Args:
-        git_cmd (str or list): The Git command to execute. Can be a string or a list of command components.
-        cwd (str, optional): The directory where command should be executed. Defaults to current working directory.
-
-    Returns:
-        list: A list of strings representing the output lines of the command.
-
-    Raises:
-        subprocess.CalledProcessError: If the Git command fails, prints the command, working directory, and
-            error message before raising the exception.
-        Exception: If any other error occurs during execution.
-    """
-    if not isinstance(git_cmd, list):
-        git_cmd = git_cmd.split(" ")
-    try:
-        git_result = subprocess.check_output(
-            git_cmd,
-            stderr=subprocess.STDOUT,
-            text=True,
-            cwd=cwd,
-        ).splitlines()
-    except subprocess.CalledProcessError as e:
-        print("Command: " + " ".join(e.cmd))
-        print("Working directory: " + cwd)
-        print("Message: ", e.stdout)
-        raise e
-    except Exception as e:
-        raise e
-    return git_result
-
-
 class GitHelper:
     def __init__(self, publish_dir, version_name, publish_url=None):
         """
@@ -70,7 +35,7 @@ class GitHelper:
             RuntimeError: If the publish directory is not clean.
         """
         self.version_name = version_name
-        self.publish_dir = os.path.realpath(publish_dir)
+        self.publish_dir = os.path.abspath(os.path.realpath(publish_dir))
         self.check_pub_dir_clean()
 
         if publish_url is None:
@@ -89,7 +54,7 @@ class GitHelper:
         Checks if the Git working directory in the publish directory is clean.
         If the working tree is not clean, it raises a `RuntimeError`.
         """
-        status = run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         if status[-1] != "nothing to commit, working tree clean":
             raise RuntimeError(f"self.publish_dir not clean: {self.publish_dir}")
 
@@ -113,31 +78,25 @@ class GitHelper:
             - Staging, committing, and pushing progress updates.
             - The publish URL if changes are successfully pushed.
         """
-        status = run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         if status[-1] != "nothing to commit, working tree clean":
             # Stage
             print("Staging...")
-            git_cmd = (
-                f"git -C {self.publish_dir} add {os.path.join(self.publish_dir, '*')}"
-            )
-            status = run_git_cmd(git_cmd)
+            git_cmd = ["add", os.path.join(self.publish_dir, "*")]
+            status = self.run_git_cmd(git_cmd)
 
             # Commit
             print("Committing...")
             git_cmd = [
-                "git",
-                "-C",
-                self.publish_dir,
                 "commit",
                 "-m",
                 f"Add version '{self.version_name}'",
             ]
-            status = run_git_cmd(git_cmd)
+            status = self.run_git_cmd(git_cmd)
 
             # Push
             print("Pushing...")
-            git_cmd = f"git -C {self.publish_dir} push"
-            status = run_git_cmd(git_cmd)
+            status = self.run_git_cmd("push")
 
             print("Done! Published to " + self.published_to_url)
             print("It might take a bit for GitHub.io to generate that URL")
@@ -158,12 +117,12 @@ class GitHelper:
         Raises:
             NotImplementedError: If the remote URL format is not recognized.
         """
-        cmd = "git config --get remote.origin.url"
-        publish_repo_url = run_git_cmd(cmd, cwd=self.publish_dir)[0]
+        cmd = "config --get remote.origin.url"
+        publish_repo_url = self.run_git_cmd(cmd, cwd=self.publish_dir)[0]
 
-        cmd = "git rev-parse --show-toplevel"
-        publish_dir_repo_top = run_git_cmd(cmd, cwd=self.publish_dir)[0]
-        subdirs = str(os.path.realpath(self.publish_dir)).replace(
+        cmd = "rev-parse --show-toplevel"
+        publish_dir_repo_top = self.run_git_cmd(cmd, cwd=self.publish_dir)[0]
+        subdirs = self.publish_dir.replace(
             publish_dir_repo_top,
             "",
         )
@@ -198,7 +157,7 @@ class GitHelper:
             Exception: If any error occurs while executing the Git command.
 
         """
-        status = run_git_cmd(f"git -C {self.publish_dir} status")
+        status = self.run_git_cmd("status")
         modified_files = []
         new_files = []
         in_untracked_files = False
@@ -222,3 +181,38 @@ class GitHelper:
             print("Adding files:\n   " + "\n   ".join(new_files))
 
         self.commit(modified_files, new_files)
+
+    def run_git_cmd(self, git_cmd, cwd=os.getcwd()):
+        """
+        Executes a Git command in the specified working directory and returns the output as a list of lines.
+
+        Args:
+            git_cmd (str or list): The Git command to execute. Can be a string or a list of command components.
+            cwd (str, optional): The directory where command should be executed. Defaults to current working directory.
+
+        Returns:
+            list: A list of strings representing the output lines of the command.
+
+        Raises:
+            subprocess.CalledProcessError: If the Git command fails, prints the command, working directory, and
+                error message before raising the exception.
+            Exception: If any other error occurs during execution.
+        """
+        if not isinstance(git_cmd, list):
+            git_cmd = git_cmd.split(" ")
+        git_cmd = ["git", "-C", self.publish_dir] + git_cmd
+        try:
+            git_result = subprocess.check_output(
+                git_cmd,
+                stderr=subprocess.STDOUT,
+                text=True,
+                cwd=cwd,
+            ).splitlines()
+        except subprocess.CalledProcessError as e:
+            print("Command: " + " ".join(e.cmd))
+            print("Working directory: " + cwd)
+            print("Message: ", e.stdout)
+            raise e
+        except Exception as e:
+            raise e
+        return git_result
