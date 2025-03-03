@@ -173,7 +173,7 @@ def run_diagnostics(
         # Checking for existence of environments
 
         for nb, info in all_nbs.copy().items():
-            if not control["env_check"][info["kernel_name"]]:
+            if util.is_bad_env(control, info):
                 bad_env = info["kernel_name"]
                 logger.warning(
                     f"Environment {bad_env} specified for {nb}.ipynb could not be found;" +

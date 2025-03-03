@@ -15,5 +15,5 @@ cupid.egg-info
 # Documentation
 /docs/_build/
 /docs/README.md
-/docs/NCAR_tips.md
-/docs/contributors.md
+/docs/NCARtips.md
+/docs/Contributors.md
