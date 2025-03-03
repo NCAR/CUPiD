@@ -69,35 +69,35 @@ def _parse_args():
     )
 
     parser.add_argument(
-        "--cupid-start-year",
+        "--cupid-startdate",
         action="store",
         default="0001-01-01",
-        dest="cupid_start_year",
-        help="CUPiD case start year",
+        dest="cupid_startdate",
+        help="CUPiD case start date",
     )
 
     parser.add_argument(
-        "--cupid-end-year",
+        "--cupid-enddate",
         action="store",
         default="0101-01-01",
-        dest="cupid_end_year",
-        help="CUPiD case end year",
+        dest="cupid_enddate",
+        help="CUPiD case end date",
     )
 
     parser.add_argument(
-        "--cupid-base-start-year",
+        "--cupid-base-startdate",
         action="store",
         default="0001-01-01",
-        dest="cupid_base_start_year",
-        help="CUPiD base case start year",
+        dest="cupid_base_startdate",
+        help="CUPiD base case start date",
     )
 
     parser.add_argument(
-        "--cupid-base-end-year",
+        "--cupid-base-enddate",
         action="store",
         default="0101-01-01",
-        dest="cupid_base_end_year",
-        help="CUPiD base case end year",
+        dest="cupid_base_enddate",
+        help="CUPiD base case end date",
     )
 
     return parser.parse_args()
@@ -109,10 +109,10 @@ def generate_cupid_config(
     cupid_example,
     cupid_baseline_case,
     cupid_baseline_root,
-    cupid_start_year,
-    cupid_end_year,
-    cupid_base_start_year,
-    cupid_base_end_year,
+    cupid_startdate,
+    cupid_enddate,
+    cupid_base_startdate,
+    cupid_base_enddate,
     adf_output_root=None,
 ):
     """
@@ -148,17 +148,17 @@ def generate_cupid_config(
     cupid_baseline_root : str
         The root directory of the base case.
 
-    cupid_start_year : int
-        The start year of the case being analyzed.
+    cupid_startdate : str
+        The start date of the case being analyzed ("YYYY-MM-DD").
 
-    cupid_end_year : int
-        The end year of the case being analyzed.
+    cupid_enddate : int
+        The end date of the case being analyzed ("YYYY-MM-DD").
 
-    cupid_base_start_year : int
-        The start year of the base case.
+    cupid_base_startdate : str
+        The start date of the base case ("YYYY-MM-DD").
 
-    cupid_base_end_year : int
-        The end year of the base case.
+    cupid_base_enddate : str
+        The end date of the base case ("YYYY-MM-DD").
 
     Raises:
     -------
@@ -212,21 +212,13 @@ def generate_cupid_config(
         "CUPiD",
         "nblibrary",
     )
-    if isinstance(cupid_start_year, str):
-        cupid_start_year = int(cupid_start_year)
-    if isinstance(cupid_end_year, str):
-        cupid_end_year = int(cupid_end_year)
-    if isinstance(cupid_base_start_year, str):
-        cupid_base_start_year = int(cupid_base_start_year)
-    if isinstance(cupid_base_end_year, str):
-        cupid_base_end_year = int(cupid_base_end_year)
     my_dict["global_params"]["case_name"] = case
-    my_dict["global_params"]["start_date"] = cupid_start_year
-    my_dict["global_params"]["end_date"] = cupid_end_year
+    my_dict["global_params"]["start_date"] = cupid_startdate
+    my_dict["global_params"]["end_date"] = cupid_enddate
     my_dict["global_params"]["base_case_name"] = cupid_baseline_case
     my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
-    my_dict["global_params"]["base_start_date"] = cupid_base_start_year
-    my_dict["global_params"]["base_end_date"] = cupid_base_end_year
+    my_dict["global_params"]["base_start_date"] = cupid_base_startdate
+    my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
@@ -234,6 +226,9 @@ def generate_cupid_config(
             isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
         ):
+            # Assumption that end_year is YYYY-01-01, so we want end_year to be YYYY-1
+            cupid_end_year = int(cupid_enddate.split("-")[0]) - 1
+            cupid_base_end_year = int(cupid_base_enddate.split("-")[0]) - 1
             my_dict["timeseries"][component]["end_years"] = [
                 cupid_end_year,
                 cupid_base_end_year,
