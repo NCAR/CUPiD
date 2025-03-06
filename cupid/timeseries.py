@@ -65,9 +65,9 @@ def create_time_series(
          check if time series files already exist
      - overwrite_ts: list, boolean
          check if existing time series files will bew overwritten
-     - start_years: list, str or int
+     - start_years: list of ints
          first year for desired range of years
-     - end_years: list, str or int
+     - end_years: list of ints
          last year for desired range of years
      - height_dim: str
          name of height dimension for given component, eg 'lev'
