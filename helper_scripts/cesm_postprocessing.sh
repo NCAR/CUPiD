@@ -17,13 +17,7 @@ add_years() {
   echo ${NEW_YEAR}
 }
 
-# Use cupid-infrastructure environment for running these scripts
-# Note: on derecho, the cesmdev module creates a python conflict
-#       by setting $PYTHONPATH; since this is conda-based we
-#       want an empty PYTHONPATH environment variable
-MACH=`./xmlquery --value MACH`
-
-# Set variables that come from environment file
+# Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
@@ -84,6 +78,10 @@ if [ "${CUPID_RUN_ALL}" == "TRUE" ]; then
   echo "CUPID_RUN_ALL is True, running diagnostics for all components"
 fi
 
+# Use cupid-infrastructure environment for running these scripts
+# Note: on derecho, the cesmdev module creates a python conflict
+#       by setting $PYTHONPATH; since this is conda-based we
+#       want an empty PYTHONPATH environment variable
 unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 

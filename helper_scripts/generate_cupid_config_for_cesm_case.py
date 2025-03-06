@@ -151,7 +151,7 @@ def generate_cupid_config(
     cupid_startdate : str
         The start date of the case being analyzed ("YYYY-MM-DD").
 
-    cupid_enddate : int
+    cupid_enddate : str
         The end date of the case being analyzed ("YYYY-MM-DD").
 
     cupid_base_startdate : str
