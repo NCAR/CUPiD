@@ -4,7 +4,7 @@
 
 <entry_id version="3.0">
 
-  <!-- Variables that configure what part(s) of CUPiD are run -->
+  <!-- Variables that configure which part(s) of CUPiD are run -->
 
   <entry id="CUPID_GEN_TIMESERIES">
     <type>char</type>
@@ -33,7 +33,7 @@
     <desc>When TRUE, CUPiD will generate web pages from the diagnostic plots</desc>
   </entry>
 
-  <!-- Variables that configure what conda environments are used my CUPiD -->
+  <!-- Variables that configure conda environments used by CUPiD -->
 
   <entry id="CUPID_ANALYSIS_ENV">
     <type>char</type>
@@ -109,7 +109,7 @@
     <desc>Example to use in CUPiD analysis</desc>
   </entry>
 
-  <!-- Variables that define what components are analyzed -->
+  <!-- Variables that define which components are analyzed -->
 
   <entry id="CUPID_RUN_ALL">
     <type>char</type>
