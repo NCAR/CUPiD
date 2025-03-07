@@ -113,21 +113,13 @@ compute_notebooks:
   # parameters are specified. Several examples of different
   # types of notebooks are provided.
 
-  # The second key (here adf_quick_run) is the name of the
+  # The second key (here ocean_surface) is the name of the
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
       index:
         parameter_groups:
           none: {}
-
-    atm:
-      adf_quick_run:
-        parameter_groups:
-          none:
-            adf_path: ../../../externals/ADF
-            config_path: .
-            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
 
     ocn:
       ocean_surface:
@@ -187,13 +179,8 @@ book_toc:
 
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
-
-    - caption: Atmosphere
-
-      # Each chapter is the name of one of the notebooks that you executed
-      # in compute_notebooks above, also without .ipynb
-      chapters:
-        - file: atm/adf_quick_run
+    # Each chapter is the name of one of the notebooks that you executed
+    # in compute_notebooks above, also without .ipynb
 
     - caption: Ocean
       chapters:
