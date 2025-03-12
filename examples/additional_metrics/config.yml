@@ -67,7 +67,7 @@ timeseries:
     level: 'lev'
 
   lnd:
-    vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
+    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
@@ -75,7 +75,7 @@ timeseries:
     level: 'lev'
 
   ocn:
-    vars: []
+    vars: ['taux', 'tauy']
     derive_vars: []
     hist_str: 'h.z'
     start_years: [1,1]
@@ -83,7 +83,7 @@ timeseries:
     level: 'lev'
 
   ice:
-    vars: ['aice','hi','hs']
+    vars: ['aice', 'hi', 'hs', 'uvel', 'vvel']
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
@@ -99,9 +99,9 @@ timeseries:
     level: 'lev'
 
   rof:
-    vars: []
+    vars: ['usurf', 'topg']
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: 'initial_hist'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -112,7 +112,7 @@ compute_notebooks:
   # parameters are specified. Several examples of different
   # types of notebooks are provided.
 
-  # The second key (here ocean_surface) is the name of the
+  # The second key (here Global_Ocean_Surface) is the name of the
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
