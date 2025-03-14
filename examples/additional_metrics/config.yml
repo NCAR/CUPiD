@@ -41,10 +41,9 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121min'
-  base_case_name: 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121'
+  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
+  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  base_case_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0100-01-01'
   base_start_date: '0001-01-01'
@@ -57,34 +56,34 @@ timeseries:
   num_procs: 8
   ts_done: [False,False]
   overwrite_ts: [False,False]
-  case_name: ['b.e30_beta04.BLT1850.ne30_t232_wgx3.121min', 'b.e30_beta04.BLT1850.ne30_t232_wgx3.121']
+  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
 
   atm:
     vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
-    derive_vars: [] # {'PRECT':['PRECL', 'PRECC'], 'RESTOM':['FLNT', 'FSNT']}
-    hist_str: 'h0'
-    start_years: [2]
-    end_years: [102]
+    derive_vars: []
+    hist_str: 'h0a'
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   lnd:
-    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']  #['process_all']
+    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']
     derive_vars: []
     hist_str: 'h0'
-    start_years: [2]
-    end_years: [102]
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   ocn:
-    vars: ['taux', 'tauy'] # ['process_all']
+    vars: ['taux', 'tauy']
     derive_vars: []
-    hist_str: 'h.frc'
-    start_years: [2]
-    end_years: [102]
+    hist_str: 'h.z'
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
   ice:
-    vars: ['aice','hi', 'hs','uvel','vvel'] #['process_all']
+    vars: ['aice', 'hi', 'hs', 'uvel', 'vvel']
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
@@ -92,19 +91,19 @@ timeseries:
     level: 'lev'
 
   glc:
-    vars: ['usurf', 'topg'] #['process_all']
-    derive_vars: []
-    hist_str: 'initial_hist'
-    start_years: [2]
-    end_years: [102]
-    level: 'lev'
-
-  rof:
     vars: []
     derive_vars: []
     hist_str: 'initial_hist'
-    start_years: [2]
-    end_years: [102]
+    start_years: [1,1]
+    end_years: [100,100]
+    level: 'lev'
+
+  rof:
+    vars: ['usurf', 'topg']
+    derive_vars: []
+    hist_str: 'initial_hist'
+    start_years: [1,1]
+    end_years: [100,100]
     level: 'lev'
 
 compute_notebooks:
@@ -113,7 +112,7 @@ compute_notebooks:
   # parameters are specified. Several examples of different
   # types of notebooks are provided.
 
-  # The second key (here adf_quick_run) is the name of the
+  # The second key (here Global_Ocean_Surface) is the name of the
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
@@ -121,35 +120,21 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    atm:
-      adf_quick_run:
-        parameter_groups:
-          none:
-            adf_path: ../../../externals/ADF
-            config_path: .
-            config_fil_str: "config_f.cam6_3_119.FLTHIST_ne30.r328_gamma0.33_soae.001.yaml"
-
     ocn:
-      ocean_surface:
+      Global_Ocean_Surface:
         parameter_groups:
           none:
-            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
             savefigs: False
             mom6_tools_config:
-              start_date: '0091-01-01'
-              end_date: '0101-01-01'
               Fnames:
                 native: 'mom6.h.native.????-??.nc'
                 static: 'mom6.h.static.nc'
               oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
     lnd:
-      land_comparison:
+      Global_Land_Compare_Two_Cases:
         parameter_groups:
           none:
-            cases:
-              - ctsm51d159_f45_GSWP3_bgccrop_1850pAD
-              - ctsm51d159_f45_GSWP3_bgccrop_1850pSASU
             type:
               - 1850pAD
               - 1850pSASU
@@ -187,21 +172,16 @@ book_toc:
 
     # Parts group notebooks into different sections in the Jupyter book
     # table of contents, so you can organize different parts of your project.
-
-    - caption: Atmosphere
-
-      # Each chapter is the name of one of the notebooks that you executed
-      # in compute_notebooks above, also without .ipynb
-      chapters:
-        - file: atm/adf_quick_run
+    # Each chapter is the name of one of the notebooks that you executed
+    # in compute_notebooks above, also without .ipynb
 
     - caption: Ocean
       chapters:
-          - file: ocn/ocean_surface
+          - file: ocn/Global_Ocean_Surface
 
     - caption: Land
       chapters:
-        - file: lnd/land_comparison
+        - file: lnd/Global_Land_Compare_Two_Cases
 
     - caption: Sea Ice
       chapters:
@@ -213,7 +193,7 @@ book_toc:
 #####################################
 book_config_keys:
 
-  title: Example project   # Title of your jupyter book
+  title: Additional Metrics   # Title of your jupyter book
 
   # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
   ### for many more options
