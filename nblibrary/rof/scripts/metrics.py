@@ -31,6 +31,34 @@ def remove_nan(qsim, qobs):
     return sim_obs[:, 0], sim_obs[:, 1]
 
 
+def corr(qsim, qobs):
+    """
+    Calculates pearson correlation between two flow arrays.
+
+    Arguments
+    ---------
+    sim: array-like
+        Simulated time series array.
+    obs: array-like
+        Observed time series array.
+
+    Returns
+    -------
+    corr: float
+        Pearson correlation between the two arrays.
+    """
+    qsim1, qobs1 = remove_nan(qsim, qobs)
+    if qobs1.size <= 1:  # correlation cannot be computed with size 1 array
+        error_metric = np.nan
+    elif (
+        len(np.unique(qsim1)) == 1 or len(np.unique(qobs1)) == 1
+    ):  # if array has the same values, standard deviation become zero, causing "divide by zero" issue
+        error_metric = np.nan
+    else:
+        error_metric = np.corrcoef(qsim1, qobs1)[0, 1]
+    return error_metric
+
+
 def pbias(qsim, qobs):
     """
     Calculates percentage bias between two flow arrays.
@@ -47,9 +75,12 @@ def pbias(qsim, qobs):
     pbial: float
         percentage bias calculated between the two arrays.
     """
-
     qsim1, qobs1 = remove_nan(qsim, qobs)
-    return np.sum(qsim1 - qobs1) / np.sum(qobs1) * 100
+    if qobs1.size == 0:
+        error_metric = np.nan
+    else:
+        error_metric = np.sum(qsim1 - qobs1) / np.sum(qobs1) * 100
+    return error_metric
 
 
 def rmse(qsim, qobs):
@@ -68,4 +99,8 @@ def rmse(qsim, qobs):
         rmse calculated between the two arrays.
     """
     qsim1, qobs1 = remove_nan(qsim, qobs)
-    return np.sqrt(np.mean((qsim1 - qobs1) ** 2))
+    if qobs1.size == 0:
+        error_metric = np.nan
+    else:
+        error_metric = np.sqrt(np.mean((qsim1 - qobs1) ** 2))
+    return error_metric
