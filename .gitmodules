@@ -4,6 +4,6 @@
 [submodule "externals/mom6-tools"]
 	path = externals/mom6-tools
 	url = https://github.com/NCAR/mom6-tools.git
-[submodule "externals/ctsm_python_gallery"]
-	path = externals/ctsm_python_gallery
-	url = git@github.com:samsrabin/ctsm_python_gallery.git
+[submodule "externals/ctsm_postprocessing"]
+	path = externals/ctsm_postprocessing
+	url = git@github.com:samsrabin/ctsm_postprocessing.git
