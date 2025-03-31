@@ -52,22 +52,22 @@ cd cupid-postprocessing
 CUPID_FLAG_STRING=""
 if [ "${CUPID_RUN_ALL}" == "FALSE" ]; then
   if [ "${CUPID_RUN_ATM}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --atm"
+    CUPID_FLAG_STRING+=" -atm"
   fi
   if [ "${CUPID_RUN_OCN}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --ocn"
+    CUPID_FLAG_STRING+=" -ocn"
   fi
   if [ "${CUPID_RUN_LND}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --lnd"
+    CUPID_FLAG_STRING+=" -lnd"
   fi
   if [ "${CUPID_RUN_ICE}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --ice"
+    CUPID_FLAG_STRING+=" -ice"
   fi
   if [ "${CUPID_RUN_ROF}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --rof"
+    CUPID_FLAG_STRING+=" -rof"
   fi
   if [ "${CUPID_RUN_GLC}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --glc"
+    CUPID_FLAG_STRING+=" -glc"
   fi
   if [ "${CUPID_FLAG_STRING}" == "" ]; then
     echo "If CUPID_RUN_ALL is False, user must set at least one component"
