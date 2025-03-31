@@ -5,20 +5,23 @@ Main script for running timeseries specified in the configuration file.
 This script sets up and runs timeseries according to the configurations
 provided in the specified YAML configuration file.
 
-Usage: cupid-timeseries [OPTIONS]
+Usage: run_timeseries.py [OPTIONS] [CONFIG_PATH]
 
-  Main engine to set up running timeseries.
+  Main engine to set up running all the notebooks.
+
+  Args:     CONFIG_PATH: str, path to configuration file (default config.yml)
+
+  Returns:     None
 
 Options:
-  -s, --serial        Do not use LocalCluster objects
-  -atm, --atmosphere  Run atmosphere component timeseries
-  -ocn, --ocean       Run ocean component timeseries
-  -lnd, --land        Run land component timeseries
-  -ice, --seaice      Run sea ice component timeseries
-  -glc, --landice     Run land ice component timeseries
-  -rof, --river-runoff Run river runoff component timeseries
-  -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
-  -h, --help          Show this message and exit.
+  -s, --serial          Do not use multiprocessing to run ncrcat in parallel
+  -atm, --atmosphere    Run atmosphere component timeseries
+  -ocn, --ocean         Run ocean component timeseries
+  -lnd, --land          Run land component timeseries
+  -ice, --seaice        Run sea ice component timeseries
+  -glc, --landice       Run land ice component timeseries
+  -rof, --river-runoff  Run river runoff component timeseries
+  -h, --help            Show this message and exit.
 """
 from __future__ import annotations
 
@@ -40,7 +43,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("--serial", "-s", is_flag=True, help="Do not use LocalCluster objects")
+@click.option("--serial", "-s", is_flag=True, help="Do not use multiprocessing to run ncrcat in parallel")
 # Options to turn components on or off
 @click.option("--atmosphere", "-atm", is_flag=True, help="Run atmosphere component timeseries")
 @click.option("--ocean", "-ocn", is_flag=True, help="Run ocean component timeseries")
