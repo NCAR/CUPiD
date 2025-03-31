@@ -40,6 +40,8 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
+CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`  # Is this already an xml variable somewhere else?
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
@@ -107,19 +109,35 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
      --out-file adf_config.yml
 fi
 
-# 3. Generate timeseries files
+# 3. Generate ILAMB config file
+if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
+     --cesm-root ${SRCROOT} \
+     --cupid-config-loc . \
+     --run-type ${CUPID_RUN_TYPE}
+fi
+
+# 4. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${SRCROOT}/tools/CUPiD/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
-#4. Run ADF
+# 5. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${SRCROOT}/tools/CUPiD/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 5. Run CUPiD and build webpage
+# 6. Run ILAMB
+if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  export ILAMB_ROOT=ilamb_aux
+  ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir bld/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
+fi
+
+# 7. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
