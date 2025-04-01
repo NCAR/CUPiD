@@ -1,108 +1,50 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import os
 import sys
 
+import click
 import yaml
 
-
-def _parse_args():
-    """Parse command line arguments"""
-
-    parser = argparse.ArgumentParser(
-        description="Generate config.yml based on an existing CUPID example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    # Command line argument for location of CESM source code (required)
-    parser.add_argument(
-        "--cesm-root",
-        action="store",
-        dest="cesm_root",
-        required=True,
-        help="Location of CESM source code",
-    )
-
-    # Command line argument for CUPiD example from which to get config.yml
-    parser.add_argument(
-        "--cupid-example",
-        action="store",
-        dest="cupid_example",
-        default="key_metrics",
-        help="CUPiD example to use as template for config.yml",
-    )
-
-    # Command line argument location of CESM case directory
-    parser.add_argument(
-        "--case-root",
-        action="store",
-        dest="case_root",
-        default=os.getcwd(),
-        help="CESM case directory",
-    )
-
-    # Command line argument location of CESM case directory
-    parser.add_argument(
-        "--adf-output-root",
-        action="store",
-        dest="adf_output_root",
-        default=None,
-        help="Directory where ADF will be run (None => case root)",
-    )
-
-    parser.add_argument(
-        "--cupid-baseline-case",
-        action="store",
-        default="b.e23_alpha17f.BLT1850.ne30_t232.092",
-        dest="cupid_baseline_case",
-        help="Base case name",
-    )
-
-    parser.add_argument(
-        "--cupid-baseline-root",
-        action="store",
-        default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
-        dest="cupid_baseline_root",
-        help="Base case root directory",
-    )
-
-    parser.add_argument(
-        "--cupid-startdate",
-        action="store",
-        default="0001-01-01",
-        dest="cupid_startdate",
-        help="CUPiD case start date",
-    )
-
-    parser.add_argument(
-        "--cupid-enddate",
-        action="store",
-        default="0101-01-01",
-        dest="cupid_enddate",
-        help="CUPiD case end date",
-    )
-
-    parser.add_argument(
-        "--cupid-base-startdate",
-        action="store",
-        default="0001-01-01",
-        dest="cupid_base_startdate",
-        help="CUPiD base case start date",
-    )
-
-    parser.add_argument(
-        "--cupid-base-enddate",
-        action="store",
-        default="0101-01-01",
-        dest="cupid_base_enddate",
-        help="CUPiD base case end date",
-    )
-
-    return parser.parse_args()
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option("--cesm-root", required=True, help="Location of CESM source code")
+@click.option("--case-root", default=os.getcwd(), help="CESM case directory")
+@click.option(
+    "--cupid-example",
+    default="key_metrics",
+    help="CUPiD example to use as template for config.yml",
+)
+@click.option(
+    "--cupid-baseline-case",
+    default="b.e23_alpha17f.BLT1850.ne30_t232.092",
+    help="Base case name",
+)
+@click.option(
+    "--cupid-baseline-root",
+    default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+    help="Base case root directory",
+)
+@click.option("--cupid-startdate", default="0001-01-01", help="CUPiD case start date")
+@click.option("--cupid-enddate", default="0101-01-01", help="CUPiD case end date")
+@click.option(
+    "--cupid-base-startdate",
+    default="0001-01-01",
+    help="CUPiD base case start date",
+)
+@click.option(
+    "--cupid-base-enddate",
+    default="0101-01-01",
+    help="CUPiD base case end date",
+)
+@click.option(
+    "--adf-output-root",
+    default=None,
+    help="Directory where ADF will be run (None => case root)",
+)
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -113,7 +55,7 @@ def generate_cupid_config(
     cupid_enddate,
     cupid_base_startdate,
     cupid_base_enddate,
-    adf_output_root=None,
+    adf_output_root,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -267,5 +209,4 @@ def generate_cupid_config(
 
 
 if __name__ == "__main__":
-    args = vars(_parse_args())
-    generate_cupid_config(**args)
+    generate_cupid_config()
