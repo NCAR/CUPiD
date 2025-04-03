@@ -22,9 +22,18 @@ import subprocess
 from urllib.parse import quote
 
 import click
-from git_helper import GitHelper
-from util import get_control_dict
-from util import is_bad_env
+
+try:
+    from git_helper import GitHelper
+except ModuleNotFoundError:
+    from cupid.git_helper import GitHelper
+
+try:
+    from util import get_control_dict
+    from util import is_bad_env
+except ModuleNotFoundError:
+    from cupid.util import get_control_dict
+    from cupid.util import is_bad_env
 
 
 def github_pages_publish(
@@ -149,8 +158,8 @@ def build(config_path, github_pages_dir, name, overwrite):
     control = get_control_dict(config_path)
 
     # Check and process arguments
-    github_pages_dir = os.path.realpath(github_pages_dir)
     if github_pages_dir:
+        github_pages_dir = os.path.realpath(github_pages_dir)
         github_pages_dir_thisversion, git_repo = github_pages_args(
             github_pages_dir,
             name,
