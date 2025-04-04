@@ -23,9 +23,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="an adf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
-    """Use cupid config file (YAML) from cupid_config_loc and adf_file (YAML)
-    to produce out_file by modifying adf_file with data from cupid config file.
+def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
+    """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
+    to produce out_file by modifying adf_template with data from cupid config file.
     """
     sys.path.append(os.path.join(cesm_root, "cime"))
 
@@ -38,7 +38,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    with open(adf_file, encoding="UTF-8") as a:
+    with open(adf_template, encoding="UTF-8") as a:
         a_dict = yaml.safe_load(a)
 
     # read parameters from CUPID
@@ -227,7 +227,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
         f.write("# Arguments:\n")
         f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_config_loc=}\n")
-        f.write(f"# {adf_file=}\n")
+        f.write(f"# {adf_template=}\n")
         f.write(f"# Output: {out_file=}\n")
         # enter in each element of the dictionary into the new file
         yaml.dump(a_dict, f, sort_keys=False)
