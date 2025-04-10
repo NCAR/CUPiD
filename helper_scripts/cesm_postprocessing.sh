@@ -32,6 +32,7 @@ CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_NYEARS=`./xmlquery --value CUPID_BASE_NYEARS`
 CUPID_BASE_ENDDATE=`add_years ${CUPID_BASE_STARTDATE} ${CUPID_BASE_NYEARS}`
+CUPID_RUN_SERIAL=`./xmlquery --value CUPID_RUN_SERIAL`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
 CUPID_RUN_OCN=`./xmlquery --value CUPID_RUN_OCN`
@@ -52,28 +53,34 @@ cd cupid-postprocessing
 CUPID_FLAG_STRING=""
 if [ "${CUPID_RUN_ALL}" == "FALSE" ]; then
   if [ "${CUPID_RUN_ATM}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --atm"
+    CUPID_FLAG_STRING+=" -atm"
   fi
   if [ "${CUPID_RUN_OCN}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --ocn"
+    CUPID_FLAG_STRING+=" -ocn"
   fi
   if [ "${CUPID_RUN_LND}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --lnd"
+    CUPID_FLAG_STRING+=" -lnd"
   fi
   if [ "${CUPID_RUN_ICE}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --ice"
+    CUPID_FLAG_STRING+=" -ice"
   fi
   if [ "${CUPID_RUN_ROF}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --rof"
+    CUPID_FLAG_STRING+=" -rof"
   fi
   if [ "${CUPID_RUN_GLC}" == "TRUE" ]; then
-    CUPID_FLAG_STRING+=" --glc"
+    CUPID_FLAG_STRING+=" -glc"
   fi
   if [ "${CUPID_FLAG_STRING}" == "" ]; then
     echo "If CUPID_RUN_ALL is False, user must set at least one component"
     exit 1
   fi
 fi
+
+if [ "${CUPID_RUN_SERIAL}" == "TRUE" ]; then
+  echo "CUPiD will not use dask in any notebooks"
+  CUPID_FLAG_STRING+=" --serial"
+fi
+
 if [ "${CUPID_RUN_ALL}" == "TRUE" ]; then
   echo "CUPID_RUN_ALL is True, running diagnostics for all components"
 fi
