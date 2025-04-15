@@ -1,54 +1,31 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import os
 import sys
 
+import click
 import yaml
 
-
-def _parse_args():
-    """Parse command line arguments"""
-
-    parser = argparse.ArgumentParser(
-        description="Generate cupid_adf_config.yml based on an existing CUPID YAML file",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    # Command line argument for location of CESM source code (required)
-    parser.add_argument(
-        "--cesm-root",
-        action="store",
-        dest="cesm_root",
-        required=True,
-        help="Location of CESM source code",
-    )
-    # Command line argument for CUPiD example from which to get config.yml
-    parser.add_argument(
-        "--cupid-config-loc",
-        action="store",
-        dest="cupid_config_loc",
-        default=None,
-        help="CUPiD example to use as template for config.yml",
-    )
-    parser.add_argument(
-        "--adf-template",
-        action="store",
-        required=True,
-        help="an adf config file to use as a base",
-    )
-    parser.add_argument(
-        "--out-file",
-        action="store",
-        required=True,
-        help="the output file to save",
-    )
-    return parser.parse_args()
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
-def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
-    """Use cupid config file (YAML) from cupid_config_loc and adf_file (YAML)
-    to produce out_file by modifying adf_file with data from cupid config file.
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option("--cesm-root", required=True, help="Location of CESM source code")
+@click.option(
+    "--cupid-config-loc",
+    default=None,
+    help="CUPiD example to use as template for config.yml",
+)
+@click.option(
+    "--adf-template",
+    required=True,
+    help="an adf config file to use as a base",
+)
+@click.option("--out-file", required=True, help="the output file to save")
+def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
+    """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
+    to produce out_file by modifying adf_template with data from cupid config file.
     """
     sys.path.append(os.path.join(cesm_root, "cime"))
 
@@ -61,7 +38,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    with open(adf_file, encoding="UTF-8") as a:
+    with open(adf_template, encoding="UTF-8") as a:
         a_dict = yaml.safe_load(a)
 
     # read parameters from CUPID
@@ -250,7 +227,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_file, out_file):
         f.write("# Arguments:\n")
         f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_config_loc=}\n")
-        f.write(f"# {adf_file=}\n")
+        f.write(f"# {adf_template=}\n")
         f.write(f"# Output: {out_file=}\n")
         # enter in each element of the dictionary into the new file
         yaml.dump(a_dict, f, sort_keys=False)
@@ -271,11 +248,4 @@ def get_date_from_ts(data: dict, keyname: str, listindex: int, default=None):
 
 
 if __name__ == "__main__":
-    args = vars(_parse_args())
-    print(args)
-    generate_adf_config(
-        args["cesm_root"],
-        args["cupid_config_loc"],
-        args["adf_template"],
-        args["out_file"],
-    )
+    generate_adf_config()

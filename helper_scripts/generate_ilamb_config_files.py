@@ -1,48 +1,46 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import os
 import shutil
 import sys
 
+import click
 import yaml
 
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-def _parse_args():
-    """Parse command line arguments"""
 
-    parser = argparse.ArgumentParser(
-        description="Generate an ILAMB model_setup.txt file based on an existing CUPID YAML file",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    # Command line argument for location of CESM source code (required)
-    parser.add_argument(
-        "--cesm-root",
-        action="store",
-        dest="cesm_root",
-        required=True,
-        help="Location of CESM source code",
-    )
-    # Command line argument for CUPiD example from which to get config.yml
-    parser.add_argument(
-        "--cupid-config-loc",
-        action="store",
-        dest="cupid_config_loc",
-        default=None,
-        help="CUPiD config file to use information from for model_setup.txt",
-    )
-    parser.add_argument(
-        "--run-type",
-        action="store",
-        required=True,
-        help="either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)",
-    )
-    return parser.parse_args()
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option("--cesm-root", required=True, help="Location of CESM source code")
+@click.option(
+    "--cupid-config-loc",
+    default=None,
+    help="CUPiD config file to use information from for model_setup.txt",
+)
+@click.option(
+    "--run-type",
+    required=True,
+    help="either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)",
+)
+def generate_all_cfg(cesm_root, cupid_config_loc, run_type):
+    """Generate all files necessary to run ILAMB based on
+    the CUPiD configuration file and the run type (BGC or SP)
+    by running both generate_ilamb_cfg() and generate_ilamb_model_setup().
+
+    Arguments:
+    ---------
+    cesm_root: str, Location of CESM source code
+    cupid_config_loc: str, CUPiD config file location
+    run_type: str, either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)
+    """
+    generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type)
+    generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type)
 
 
 def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
-    """Create config file for use in ILAMB"""
+    """Create ILAMB config file with correct paths to ILAMB auxiliary files
+    given information from CUPiD configuration file"""
     sys.path.append(os.path.join(cesm_root, "cime"))
 
     cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
@@ -58,9 +56,15 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["link_to_ILAMB"][
-        "external_tool"
-    ]["ilamb_config_data_loc"]
+    if "link_to_ILAMB" in c_dict["compute_notebooks"]["lnd"].keys():
+        ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["link_to_ILAMB"][
+            "external_tool"
+        ]["ilamb_config_data_loc"]
+    else:
+        print(
+            "Warning: ILAMB information not in configuration file. Please add link_to_ILAMB",
+        )
+        raise KeyError
 
     ilamb_config_loc = os.path.join(cesm_root, "tools", "CUPiD", "ilamb_aux")
     with open(
@@ -152,11 +156,4 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
 
 
 if __name__ == "__main__":
-    args = vars(_parse_args())
-    print(args)
-    generate_ilamb_cfg(args["cesm_root"], args["cupid_config_loc"], args["run_type"])
-    generate_ilamb_model_setup(
-        args["cesm_root"],
-        args["cupid_config_loc"],
-        args["run_type"],
-    )
+    generate_all_cfg()
