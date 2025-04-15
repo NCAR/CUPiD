@@ -134,7 +134,10 @@ if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   export ILAMB_ROOT=ilamb_aux
-  ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir bld/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
+  if [ -d "ILAMB_output" ]; then
+    echo "WARNING: ILAMB_output directory already exists. You may need to clear it before running ILAMB."
+  fi
+  ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir ILAMB_output/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
 fi
 
 # 7. Run CUPiD and build webpage
