@@ -185,8 +185,8 @@ compute_notebooks:
       link_to_ILAMB:
         parameter_groups:
           none:
-            ilamb_root: ../../examples/external_diag_packages/ILAMB_output
-            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
+            ilamb_root: ../../examples/key_metrics/ILAMB_output
+            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/*_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/*1_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/*_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/*_global_bias.png"]
             print_table: False
         external_tool:
           tool_name: 'ILAMB'
