@@ -175,6 +175,16 @@ def generate_cupid_config(
                 cupid_end_year,
                 cupid_base_end_year,
             ]
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
     if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
