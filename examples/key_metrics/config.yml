@@ -65,6 +65,8 @@ timeseries:
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
+    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
 
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
