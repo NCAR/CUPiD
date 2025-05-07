@@ -3,7 +3,7 @@
 CUPiD can be run either independently or via the CESM workflow. If you want to install CUPiD and run directly, we recommend looking at the main Documentation pages. If you already have CESM installed and want to run CUPiD after the short term archiver is run as part of the CESM workflow, you have come to the right place!
 
 ## Setup
-Install cupid analysis and infrastructure environments per the [usual setup instructions](https://ncar.github.io/CUPiD/index.html). It is necessary 
+Install cupid analysis and infrastructure environments per the [usual setup instructions](https://ncar.github.io/CUPiD/index.html). It is necessary
 
 ## Information on what is being run when running via CESM workflow
 - Look at `helper_scripts/cesm_postprocessing.sh` for information on how CUPiD is run as part of the CESM workflow
