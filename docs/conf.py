@@ -23,7 +23,7 @@ print("sys.path:", sys.path)
 # without affecting the original version, but still pull the source
 # into the docs build fresh each time.
 
-for file in ["README.md", "NCARtips.md", "Contributors.md"]:
+for file in ["README.md", "NCARtips.md", "Contributors.md", "RunCESM.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
