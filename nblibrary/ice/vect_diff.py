@@ -8,18 +8,11 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 
 
-def symlog(x):
-    """Returns the symmetric log10 value"""
-    return np.sign(x) * np.log10(np.abs(x) + 1.0)
-
-
 def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON):
-    uvel_rot1 = symlog(uvel1) * np.cos(angle) - symlog(vvel1) * np.sin(angle)
-    vvel_rot1 = symlog(uvel1) * np.sin(angle) + symlog(vvel1) * np.cos(angle)
-    uvel_rot2 = symlog(uvel2) * np.cos(angle) - symlog(vvel2) * np.sin(angle)
-    vvel_rot2 = symlog(uvel2) * np.sin(angle) + symlog(vvel2) * np.cos(angle)
-
-    print(uvel_rot1)
+    uvel_rot1 = uvel1 * np.cos(angle) - vvel1 * np.sin(angle)
+    vvel_rot1 = uvel1 * np.sin(angle) + vvel1 * np.cos(angle)
+    uvel_rot2 = uvel2 * np.cos(angle) - vvel2 * np.sin(angle)
+    vvel_rot2 = uvel2 * np.sin(angle) + vvel2 * np.cos(angle)
 
     speed1 = np.sqrt(uvel1 * uvel1 + vvel1 * vvel1)
     speed2 = np.sqrt(uvel2 * uvel2 + vvel2 * vvel2)
@@ -51,9 +44,9 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        speed1.values,
+        TLON,
+        TLAT,
+        speed1,
         vmin=0.0,
         vmax=0.5,
         cmap="ocean",
@@ -63,11 +56,6 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.title(case1, fontsize=10)
 
     intv = 5
-    scalev = 0.6
-    scalev2 = 0.18
-    scale_diff = 0.30
-    scale_diff2 = 0.04
-
     # add vectors
     Q = ax.quiver(
         TLON.values[::intv, ::intv],
@@ -75,16 +63,16 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         uvel_rot1.values[::intv, ::intv],
         vvel_rot1.values[::intv, ::intv],
         color="black",
-        scale=scalev,
+        scale=1.0,
         transform=ccrs.PlateCarree(),
     )
-    units = "m/s"
+    units = "cm/s"
     ax.quiverkey(
         Q,
-        0.1,
+        0.85,
         0.025,
-        scalev2,
-        r"0.5 " + units,
+        0.10,
+        r"10 " + units,
         labelpos="S",
         coordinates="axes",
         color="black",
@@ -104,9 +92,9 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        speed2.values,
+        TLON,
+        TLAT,
+        speed2,
         vmin=0.0,
         vmax=0.5,
         cmap="ocean",
@@ -115,6 +103,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
 
+    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON.values[::intv, ::intv],
@@ -122,16 +111,16 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         uvel_rot2.values[::intv, ::intv],
         vvel_rot2.values[::intv, ::intv],
         color="black",
-        scale=scalev,
+        scale=1.0,
         transform=ccrs.PlateCarree(),
     )
-    units = "m/s"
+    units = "cm/s"
     ax.quiverkey(
         Q,
-        0.10,
+        0.85,
         0.025,
-        scalev2,
-        r"0.5 " + units,
+        0.10,
+        r"10 " + units,
         labelpos="S",
         coordinates="axes",
         color="black",
@@ -151,9 +140,9 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        speed_diff.values,
+        TLON,
+        TLAT,
+        speed_diff,
         vmin=-0.2,
         vmax=0.2,
         cmap="seismic",
@@ -162,6 +151,7 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case2 + "-" + case1, fontsize=10)
 
+    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON.values[::intv, ::intv],
@@ -169,16 +159,16 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         uvel_diff.values[::intv, ::intv],
         vvel_diff.values[::intv, ::intv],
         color="black",
-        scale=scale_diff,
+        scale=1.0,
         transform=ccrs.PlateCarree(),
     )
-    units = "m/s"
+    units = "cm/s"
     ax.quiverkey(
         Q,
-        0.10,
+        0.85,
         0.025,
-        scale_diff2,
-        r"0.1 " + units,
+        0.10,
+        r"10 " + units,
         labelpos="S",
         coordinates="axes",
         color="black",
