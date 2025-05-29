@@ -146,6 +146,23 @@ def run_timeseries(
                                 f"{component}", "proc", "tseries",
                         ),
                     ]
+            elif "ts_dir" in global_params:
+                if isinstance(global_params["ts_dir"], list):
+                    ts_output_dirs = []
+                    for ts_outdir in global_params["ts_dir"]:
+                        ts_output_dirs.append([
+                            os.path.join(
+                                    ts_outdir,
+                                    f"{component}", "proc", "tseries",
+                            ),
+                        ])
+                else:
+                    ts_output_dirs = [
+                        os.path.join(
+                                global_params["ts_dir"],
+                                f"{component}", "proc", "tseries",
+                        ),
+                    ]
             else:
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []

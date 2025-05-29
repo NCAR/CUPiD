@@ -101,6 +101,14 @@
     <desc>Baseline case root to use in CUPiD analysis</desc>
   </entry>
 
+  <entry id="CUPID_BASELINE_TS_ROOT">
+    <type>char</type>
+    <default_value>$DOUT_S_ROOT</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Timeseries directory for baseline case to use in generating ts. Change this in the case of directory permission issues to eg, your scratch directory</desc>
+  </entry>
+
   <entry id="CUPID_EXAMPLE">
     <type>char</type>
     <default_value>key_metrics</default_value>
