@@ -38,7 +38,7 @@ Generally, a good fit for a diagnostic notebook is one that reads in CESM output
 
 6. If you'd like your new notebook included in the final Jupyter Book, add it to the Jupyter Book table of contents (`book_toc`). See [Jupyter Book's documentation](https://jupyterbook.org/en/stable/structure/toc.html) for different things you can do with this.
 
-7. Update your parameters. Parameters that are specific to just this notebook should go under `parameter_groups` in the notebook's entry under `compute_notebooks`. Global parameters that you want passed in to every notebook in the collection should go under `global_params`.  When `CUPiD` executes your notebook, all of these parameters will get put in a new cell below the cell tagged `parameters` that you added in step 3. This means they will supercede the values of the parameters that you put in the cell above---the names, notation, etc. should match to make sure your notebook is able to find the variables it needs.
+7. Update your parameters. Parameters that are specific to just this notebook should go under `parameter_groups` in the notebook's entry under `compute_notebooks`. Global parameters that you want passed in to every notebook in the collection should go under `global_params/CUPiD_config`.  When `CUPiD` executes your notebook, all of these parameters will get put in a new cell below the cell tagged `parameters` that you added in step 3. This means they will supercede the values of the parameters that you put in the cell above---the names, notation, etc. should match to make sure your notebook is able to find the variables it needs.
 
 8. Your collection can now be run with `cupid-diagnostics`, and then the website can be built with `cupid-webpage`.
 

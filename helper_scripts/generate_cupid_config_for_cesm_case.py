@@ -158,7 +158,9 @@ def generate_cupid_config(
     my_dict["global_params"]["CUPiD_config"]["start_date"] = cupid_startdate
     my_dict["global_params"]["CUPiD_config"]["end_date"] = cupid_enddate
     my_dict["global_params"]["CUPiD_config"]["base_case_name"] = cupid_baseline_case
-    my_dict["global_params"]["CUPiD_config"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["CUPiD_config"][
+        "base_case_output_dir"
+    ] = cupid_baseline_root
     my_dict["global_params"]["CUPiD_config"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["CUPiD_config"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
@@ -202,7 +204,9 @@ def generate_cupid_config(
         ]["none"]["base_climo_nyears"] = base_climo_nyears
 
     # replace with environment variable
-    my_dict["global_params"]["CUPiD_config"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
+    my_dict["global_params"]["CUPiD_config"]["CESM_output_dir"] = os.path.dirname(
+        dout_s_root,
+    )
 
     # create new file, make it writeable
     with open("config.yml", "w") as f:

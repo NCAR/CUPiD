@@ -100,7 +100,7 @@ def run_timeseries(
     global_params = dict()
 
     if "global_params" in control:
-        global_params = control["global_params"]
+        global_params = control["global_params"]["CUPiD_config"]
 
     global_params["serial"] = serial
 
