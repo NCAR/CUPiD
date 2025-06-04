@@ -12,6 +12,7 @@ CUPiD Documentation
     Tips and Tricks for NCAR Machines <ncar_tips.rst>
     Running CUPiD via CESM Workflow <run_cesm.rst>
     Contributors <contributors_to_cupid.rst>
+    API <api.md>
 
 .. include:: README.md
    :parser: myst
