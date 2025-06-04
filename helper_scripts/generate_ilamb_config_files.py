@@ -111,28 +111,28 @@ def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
     case_output_dir = os.path.join(
-        c_dict["global_params"]["CESM_output_dir"],
-        c_dict["global_params"]["case_name"],
+        c_dict["global_params"]["CUPiD_config"]["CESM_output_dir"],
+        c_dict["global_params"]["CUPiD_config"]["case_name"],
     )
-    if "base_case_output_dir" in c_dict["global_params"]:
+    if "base_case_output_dir" in c_dict["global_params"]["CUPiD_config"]:
         base_case_output_dir = os.path.join(
-            c_dict["global_params"]["base_case_output_dir"],
-            c_dict["global_params"]["base_case_name"],
+            c_dict["global_params"]["CUPiD_config"]["base_case_output_dir"],
+            c_dict["global_params"]["CUPiD_config"]["base_case_name"],
         )
     else:
         base_case_output_dir = os.path.join(
-            c_dict["global_params"]["CESM_output_dir"],
-            c_dict["global_params"]["base_case_name"],
+            c_dict["global_params"]["CUPiD_config"]["CESM_output_dir"],
+            c_dict["global_params"]["CUPiD_config"]["base_case_name"],
         )
     with open(os.path.join(cupid_config_loc, "model_setup.txt"), "w") as ms:
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['global_params']["CUPiD_config"]['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
         )
         ms.write(
-            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['global_params']["CUPiD_config"]['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/\n",
         )
     print(f"wrote {os.path.join(cupid_config_loc, 'model_setup.txt')}")
     print(
