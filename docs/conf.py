@@ -19,7 +19,7 @@ import cupid
 sys.path.insert(0, os.path.abspath("../.."))
 
 print("sys.path:", sys.path)
-print(f"cupid: {cupid.__version__}, {cupid.__file__}")
+print(f"cupid: {cupid.__file__}")
 
 # Copy README, NCAR_tips, and Contributors into docs
 # This block allows us to remove the header image from any md files
