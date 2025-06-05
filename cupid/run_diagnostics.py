@@ -10,15 +10,16 @@ Usage: cupid-diagnostics [OPTIONS]
   Main engine to set up running all the notebooks.
 
 Options:
-  -s, --serial        Do not use LocalCluster objects
-  -atm, --atmosphere  Run atmosphere component diagnostics
-  -ocn, --ocean       Run ocean component diagnostics
-  -lnd, --land        Run land component diagnostics
-  -ice, --seaice      Run sea ice component diagnostics
-  -glc, --landice     Run land ice component diagnostics
-  -rof, --river-runoff Run river runoff component diagnostics
-  -config_path        Path to the YAML configuration file containing specifications for notebooks (default: config.yml)
-  -h, --help          Show this message and exit.
+  -s, --serial          Do not use LocalCluster objects
+  -atm, --atmosphere    Run atmosphere component diagnostics
+  -ocn, --ocean         Run ocean component diagnostics
+  -lnd, --land          Run land component diagnostics
+  -ice, --seaice        Run sea ice component diagnostics
+  -glc, --landice       Run land ice component diagnostics
+  -rof, --river-runoff  Run river runoff component diagnostics
+  -config_path          Path to the YAML configuration file containing
+                        specifications for notebooks (default: config.yml)
+  -h, --help            Show this message and exit.
 """
 from __future__ import annotations
 
