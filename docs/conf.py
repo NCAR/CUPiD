@@ -14,9 +14,12 @@ import os
 import re
 import sys
 
+import cupid
+
 sys.path.insert(0, os.path.abspath("../.."))
 
 print("sys.path:", sys.path)
+print(f"cupid: {cupid.__file__}")
 
 # Copy README, NCAR_tips, and Contributors into docs
 # This block allows us to remove the header image from any md files
@@ -61,6 +64,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "myst_nb",
     "sphinx_design",
+    "sphinx_click",
     "nbsphinx",
 ]
 

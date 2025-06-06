@@ -1,10 +1,5 @@
 """
 This module provides functions for reading YAML files and working with intake catalogs.
-
-Functions:
-    - read_yaml(path_to_yaml): Read a YAML file and return its content as a dictionary.
-    - get_collection(path_to_catalog, **kwargs): Get a collection of datasets from an
-                     intake catalog based on specified criteria.
 """
 from __future__ import annotations
 
@@ -13,7 +8,7 @@ import yaml
 
 
 def read_yaml(path_to_yaml):
-    """Read yaml file and return data from loaded yaml file"""
+    """Read yaml file and return data from loaded yaml file as a dictionary"""
     with open(path_to_yaml) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
     return data
