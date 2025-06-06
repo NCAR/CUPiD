@@ -64,6 +64,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "myst_nb",
     "sphinx_design",
+    "sphinx_click",
     "nbsphinx",
 ]
 
