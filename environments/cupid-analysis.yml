@@ -10,7 +10,6 @@ dependencies:
   - geocat-comp
   - geopandas
   - intake
-  - intake-esm
   - intake-xarray
   - ipykernel
   - matplotlib
@@ -28,3 +27,4 @@ dependencies:
   - pip:
     - -e ../externals/mom6-tools
     - git+https://github.com/rubisco-sfa/ILAMB.git
+    - intake-esm
