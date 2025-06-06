@@ -9,7 +9,7 @@ Installing `cupid` provides several command line tools:
    :caption: CLI Commands
    :glob:
 
-   cli_timeseries
-   cli_diagnostics
-   cli_webpage
-   cli_clean
+   cli/cli_timeseries
+   cli/cli_diagnostics
+   cli/cli_webpage
+   cli/cli_clean
