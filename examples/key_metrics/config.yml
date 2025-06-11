@@ -211,7 +211,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: infrastructure/index # root is the notebook that will be the homepage for the book
+  root: examples/key_metrics/index # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
