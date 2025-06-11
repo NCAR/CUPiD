@@ -116,7 +116,7 @@ compute_notebooks:
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
-      index:
+      indexNew:
         parameter_groups:
           none: {}
 
@@ -211,7 +211,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: examples/key_metrics/index # root is the notebook that will be the homepage for the book
+  root: infrastructure/indexNew # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
