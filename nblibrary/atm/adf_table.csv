@@ -1,0 +1,4 @@
+variable,unit,mean,sample size,standard dev.,standard error,95% CI,trend,trend p-value
+OCNFRAC,fraction,0.662,100, 0.00162, 1.62e-05, 3.18e-05, 0.662 + -1.46e-06 t, 0.797
+PRECT,m/s,3.56e-08,100, 1.37e-10, 1.37e-12, 2.69e-12, 3.56e-08 + -1.31e-12 t, 0.00552
+SST,K,292.333,100, 0.096, 0.001, 0.002, 292.401 + -0.001 t, 0.000
