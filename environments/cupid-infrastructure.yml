@@ -1,5 +1,5 @@
 name: cupid-infrastructure
-channels: 
+channels:
     - conda-forge
     - defaults
 dependencies:
