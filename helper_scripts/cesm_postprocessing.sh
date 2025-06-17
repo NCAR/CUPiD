@@ -45,12 +45,6 @@ CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
-# Make sure environments are installed
-FOUND=TRUE; conda activate cupid-infrastructure 2>/dev/null || FOUND=FALSE
-mamba env create -f environments/cupid-infrastructure.yml
-conda activate cupid-infrastructure
-mamba env create -f environments/cupid-analysis.yml
-
 # Create directory for running CUPiD
 mkdir -p cupid-postprocessing
 cd cupid-postprocessing
