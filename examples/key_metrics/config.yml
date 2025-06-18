@@ -116,7 +116,7 @@ compute_notebooks:
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
-      indexNew:
+      summary_tables:
         parameter_groups:
           none: {}
 
