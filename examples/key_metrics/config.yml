@@ -211,7 +211,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: infrastructure/indexNew # root is the notebook that will be the homepage for the book
+  root: infrastructure/summary_tables  # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
