@@ -8,7 +8,7 @@ extracts the necessary information such as the name of the book and the
 directory containing computed notebooks, and then proceeds to clean and build
 the Jupyter book using the `jupyter-book` command-line tool.
 
-Usage: cupid_webpage.py [OPTIONS] [CONFIG_PATH]
+Usage: generate_webpage.py [OPTIONS] [CONFIG_PATH]
 
   Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-
   webpage`.
