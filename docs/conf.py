@@ -14,16 +14,19 @@ import os
 import re
 import sys
 
+import cupid
+
 sys.path.insert(0, os.path.abspath("../.."))
 
 print("sys.path:", sys.path)
+print(f"cupid: {cupid.__file__}")
 
 # Copy README, NCAR_tips, and Contributors into docs
 # This block allows us to remove the header image from any md files
 # without affecting the original version, but still pull the source
 # into the docs build fresh each time.
 
-for file in ["README.md", "NCARtips.md", "Contributors.md", "runCESM.md"]:
+for file in ["README.md", "NCARtips.md", "Contributors.md", "RunCESM.md"]:
     os.system(f"cp ../{file} ./")
 
     # Remove any images from the first line of the file
@@ -61,6 +64,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "myst_nb",
     "sphinx_design",
+    "sphinx_click",
     "nbsphinx",
 ]
 

@@ -42,7 +42,7 @@ def create_time_series(
     logger,
 ):
     """
-    Generate time series versions of the history file data.
+    Generate time series versions of the history file data. Called by ``cupid-timeseries``.
 
     Args
     ----
