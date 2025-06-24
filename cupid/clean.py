@@ -54,6 +54,7 @@ def clean(config_path):
 
     Args: CONFIG_PATH - The path to the configuration file.
 
+    Called by ``cupid-clean``.
     """
     logger = util.setup_logging(config_path)
     run_dir = read_config_file(config_path)

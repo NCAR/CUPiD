@@ -70,6 +70,7 @@ def run_diagnostics(
     Returns:
         None
 
+    Called by ``cupid-diagnostics``.
     """
     # fmt: on
     # pylint: enable=line-too-long

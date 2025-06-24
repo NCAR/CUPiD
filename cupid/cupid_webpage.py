@@ -140,7 +140,7 @@ def github_pages_args(github_pages_dir, name, overwrite):
 )
 def build(config_path, github_pages_dir, name, overwrite):
     """
-    Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-webpage`.
+    Build a Jupyter book based on the TOC in CONFIG_PATH. Called by ``cupid-webpage``.
 
     Args:
         CONFIG_PATH: str, path to configuration file (default config.yml)
