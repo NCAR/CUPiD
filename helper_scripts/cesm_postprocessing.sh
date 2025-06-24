@@ -102,7 +102,7 @@ ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
-   --cupid-baseline-ts-root ${CUPID_TS_DIR} \
+   --cupid-ts-dir ${CUPID_TS_DIR} \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
