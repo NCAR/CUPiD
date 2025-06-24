@@ -49,8 +49,6 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
     ts_dir = os.path.join(c_dict["global_params"].get("ts_dir", DOUT))
-    if ts_dir == "None":
-        ts_dir = DOUT
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
