@@ -101,7 +101,7 @@
     <desc>Baseline case root to use in CUPiD analysis</desc>
   </entry>
 
-  <entry id="CUPID_BASELINE_TS_ROOT">
+  <entry id="CUPID_TS_DIR">
     <type>char</type>
     <default_value>$DOUT_S_ROOT</default_value>
     <group>cupid_analysis</group>

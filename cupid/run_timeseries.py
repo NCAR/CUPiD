@@ -115,6 +115,9 @@ def run_timeseries(
         if comp_bool:
 
             # set time series input and output directory:
+            # if timeseries params contain a list make a list of input directories, or make  one input directory
+            # if ts_dir is specified and contains a list make a list of output dirs; or make just one output dir
+            # if ts_dir is not specified, default to CESM_output_dir for either a list or a single value
             # -----
             if isinstance(timeseries_params["case_name"], list):
                 ts_input_dirs = []
@@ -129,7 +132,8 @@ def run_timeseries(
                     timeseries_params["case_name"] + f"/{component}/hist/",
                 ]
 
-            if "ts_dir" in global_params:
+
+            if "ts_dir" in global_params and global_params["ts_dir"] is None:
                 if isinstance(global_params["ts_dir"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:

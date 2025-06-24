@@ -48,6 +48,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     test_case_name = c_dict["global_params"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
+    ts_dir = os.path.join(c_dict["global_params"].get("ts_dir", DOUT))
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
@@ -64,7 +65,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
-        DOUT,
+        ts_dir,
         test_case_name,
         "atm",
         "proc",
@@ -72,7 +73,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
-        DOUT,
+        ts_dir,
         test_case_name,
         "atm",
         "proc",
@@ -115,10 +116,6 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         c_dict["global_params"].get("base_case_output_dir", DOUT),
         base_case_name,
     )
-    base_case_ts_dir = os.path.join(
-        c_dict["global_params"].get("ts_dir", base_case_output_dir),
-        base_case_name,
-    )
     base_start_date = get_date_from_ts(
         c_ts["atm"],
         "start_years",
@@ -140,13 +137,15 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
-        base_case_ts_dir,
+        ts_dir,
+        base_case_name,
         "atm",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
-        base_case_ts_dir,
+        ts_dir,
+        base_case_name,
         "atm",
         "proc",
         "climo",
@@ -175,7 +174,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
-        base_case_ts_dir,
+        ts_dir,
         base_case_name,
         "atm",
         "proc",
