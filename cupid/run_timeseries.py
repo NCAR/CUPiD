@@ -132,7 +132,6 @@ def run_timeseries(
                     timeseries_params["case_name"] + f"/{component}/hist/",
                 ]
 
-
             if "ts_dir" in global_params and global_params["ts_dir"] is None:
                 if isinstance(global_params["ts_dir"], list):
                     ts_output_dirs = []
