@@ -7,6 +7,23 @@ The main function `build()` reads the configuration file (default config.yml),
 extracts the necessary information such as the name of the book and the
 directory containing computed notebooks, and then proceeds to clean and build
 the Jupyter book using the `jupyter-book` command-line tool.
+
+Usage: cupid_webpage.py [OPTIONS] [CONFIG_PATH]
+
+  Build a Jupyter book based on the TOC in CONFIG_PATH. Called by `cupid-
+  webpage`.
+
+  Args:     CONFIG_PATH: str, path to configuration file (default config.yml)
+
+  Returns:     None
+
+Options:
+  -g, --github-pages-dir TEXT  For publishing to GitHub pages: Directory where
+                               the HTML outputs should be copied (into a new
+                               sub-directory in versions/ given by -n/--name)
+  -n, --name TEXT              Name of version to publish
+  -o, --overwrite              Overwrite existing publish directory
+  --help                       Show this message and exit.
 """
 from __future__ import annotations
 
