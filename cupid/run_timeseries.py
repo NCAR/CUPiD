@@ -136,7 +136,7 @@ def run_timeseries(
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.extend([
+                        ts_output_dirs.append([
                             os.path.join(
                                     global_params["ts_dir"],
                                     cname,
@@ -155,7 +155,7 @@ def run_timeseries(
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.extend(
+                        ts_output_dirs.append(
                             os.path.join(
                                     global_params["CESM_output_dir"],
                                     cname,
