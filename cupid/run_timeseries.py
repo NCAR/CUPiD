@@ -132,11 +132,11 @@ def run_timeseries(
                     timeseries_params["case_name"] + f"/{component}/hist/",
                 ]
 
-            if "ts_dir" in global_params and global_params["ts_dir"] is None:
-                if isinstance(global_params["ts_dir"], list):
+            if "ts_dir" in global_params and global_params["ts_dir"] is not None:
+                if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.append([
+                        ts_output_dirs.extend([
                             os.path.join(
                                     global_params["ts_dir"],
                                     cname,
@@ -155,7 +155,7 @@ def run_timeseries(
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.append(
+                        ts_output_dirs.extend(
                             os.path.join(
                                     global_params["CESM_output_dir"],
                                     cname,
