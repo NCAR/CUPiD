@@ -180,6 +180,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         base_case_name,
         "atm",
         "proc",
+        "tseries",
         "regrid",
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
