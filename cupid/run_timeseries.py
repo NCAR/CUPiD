@@ -136,13 +136,13 @@ def run_timeseries(
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.append([
+                        ts_output_dirs.append(
                             os.path.join(
                                     global_params["ts_dir"],
                                     cname,
                                     f"{component}", "proc", "tseries",
                             ),
-                        ])
+                        )
                 else:
                     ts_output_dirs = [
                         os.path.join(
