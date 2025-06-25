@@ -166,6 +166,16 @@ def generate_cupid_config(
     for component in my_dict["timeseries"]:
         if (
             isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
         ):
             # Assumption that end_year is YYYY-01-01, so we want end_year to be YYYY-1
