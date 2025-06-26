@@ -15,7 +15,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
-import cupid
+import cupid  # noqa: E402
 
 print("sys.path:", sys.path)
 print(f"cupid: {cupid.__file__}")
