@@ -103,7 +103,7 @@ def run_diagnostics(
     if "global_params" in control:
         global_params = control["global_params"]
 
-    global_params["serial"] = serial
+    global_params["CUPiD_config"]["serial"] = serial
 
     ####################################################################
 
