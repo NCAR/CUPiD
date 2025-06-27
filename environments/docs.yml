@@ -3,10 +3,14 @@ channels:
     - conda-forge
 dependencies:
     - python>=3.9,<3.12
+    - pip
     - ipykernel
     - ipython
     - jupyter_client
     - sphinx-book-theme
     - myst-nb
     - sphinx-design
+    - sphinx-click
     - nbsphinx
+    - pip:
+      - -e ../

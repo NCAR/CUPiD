@@ -10,9 +10,10 @@
 # is formatted as YYYY-MM-DD and print out the updated
 # string in the same format
 add_years() {
-  YEAR=`echo $1 | cut -d '-' -f 1`
-  MM=`echo $1 | cut -d '-' -f 2`
-  DD=`echo $1 | cut -d '-' -f 3`
+  IFS='-' read -r YEAR MM DD <<< "$1"
+  YEAR=$((10#$YEAR))  # Force base-10
+  MM=$((10#$MM))
+  DD=$((10#$DD))
   NEW_YEAR=`printf '%04d' "$((YEAR + $2))"`-`printf '%02d' "${MM}"`-`printf '%02d' "${DD}"`
   echo ${NEW_YEAR}
 }
@@ -154,5 +155,5 @@ if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
   ${SRCROOT}/tools/CUPiD/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/cupid_webpage.py
+  ${SRCROOT}/tools/CUPiD/cupid/generate_webpage.py
 fi
