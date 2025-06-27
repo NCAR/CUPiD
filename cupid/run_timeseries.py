@@ -115,6 +115,9 @@ def run_timeseries(
         if comp_bool:
 
             # set time series input and output directory:
+            # if timeseries params contain a list make a list of input directories, or make  one input directory
+            # if ts_dir is specified and contains a list make a list of output dirs; or make just one output dir
+            # if ts_dir is not specified, default to CESM_output_dir for either a list or a single value
             # -----
             if isinstance(timeseries_params["case_name"], list):
                 ts_input_dirs = []
@@ -129,20 +132,22 @@ def run_timeseries(
                     timeseries_params["case_name"] + f"/{component}/hist/",
                 ]
 
-            if "ts_output_dir" in timeseries_params:
-                if isinstance(timeseries_params["ts_output_dir"], list):
+            if "ts_dir" in global_params and global_params["ts_dir"] is not None:
+                if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
-                    for ts_outdir in timeseries_params["ts_output_dir"]:
-                        ts_output_dirs.append([
+                    for cname in timeseries_params["case_name"]:
+                        ts_output_dirs.append(
                             os.path.join(
-                                    ts_outdir,
+                                    global_params["ts_dir"],
+                                    cname,
                                     f"{component}", "proc", "tseries",
                             ),
-                        ])
+                        )
                 else:
                     ts_output_dirs = [
                         os.path.join(
-                                timeseries_params["ts_output_dir"],
+                                global_params["ts_dir"],
+                                timeseries_params["case_name"],
                                 f"{component}", "proc", "tseries",
                         ),
                     ]
