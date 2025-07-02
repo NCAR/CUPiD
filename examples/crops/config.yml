@@ -57,48 +57,8 @@ timeseries:
   overwrite_ts: [False, False]
   case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
 
-  atm:
-    vars: ['PSL']
-    derive_vars: []
-    hist_str: 'cam.h0a'
-    start_years: [1,1]
-    end_years: [100,100]
-    level: 'lev'
-
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
-    derive_vars: []
-    hist_str: 'h0'
-    start_years: [1,1]
-    end_years: [100,100]
-    level: 'lev'
-
-  ocn:
-    vars: []
-    derive_vars: []
-    hist_str: 'h.z'
-    start_years: [1,1]
-    end_years: [100,100]
-    level: 'lev'
-
-  ice:
-    vars: ['aice','hi','hs']
-    derive_vars: []
-    hist_str: 'cice.h'
-    start_years: [1,1]
-    end_years: [100,100]
-    level: 'lev'
-
-  glc:
-    vars: []
-    derive_vars: []
-    hist_str: 'initial_hist'
-    start_years: [1,1]
-    end_years: [100,100]
-    level: 'lev'
-
-  rof:
-    vars: []
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
@@ -119,66 +79,7 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    atm:
-      Global_PSL_NMSE_compare_obs_lens:
-        parameter_groups:
-          none:
-            regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
-            validation_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
-      link_to_ADF:
-        kernel_name: cupid-infrastructure
-        parameter_groups:
-          none:
-            adf_root: ../../examples/key_metrics/ADF_output/
-        external_tool:
-          tool_name: 'ADF'
-          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
-          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
-          analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
-
-    glc:
-      Greenland_SMB_visual_compare_obs:
-        parameter_groups:
-          none:
-            obs_path: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/glc/analysis_datasets/multi_grid/annual_avg/SMB_data'
-            obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
-            climo_nyears: 40
-
-#    rof:
-#      global_discharge_gauge_compare_obs:
-#        parameter_groups:
-#          none:
-#            analysis_name: ""
-#            grid_name: 'f09_f09_mosart' # ROF grid name
-#            rof_start_date: '0091-01-01'
-#            rof_end_date: '0101-01-01'
-#            figureSave: False
-#      global_discharge_ocean_compare_obs:
-#        parameter_groups:
-#          none:
-#            analysis_name: ""
-#            grid_name: 'f09_f09_mosart' # ROF grid name
-#            rof_start_date: '0091-01-01'
-#            rof_end_date: '0101-01-01'
-#            figureSave: False
-
-    ice:
-      Hemis_seaice_visual_compare_obs_lens:
-        parameter_groups:
-          none:
-            climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-            path_nsidc: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/ice/analysis_datasets/hemispheric_data/NSIDC_SeaIce_extent'
-
     lnd:
-      # Global_TerrestrialCouplingIndex_VisualCompareObs:
-      #   parameter_groups:
-      #     none:
-      #       clmFile_h: '.h0.'
-      #       fluxnet_comparison: True
-      #       obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
       Global_crop_yield_compare_obs:
         parameter_groups:
           none:
@@ -189,19 +90,6 @@ compute_notebooks:
             dev_mode: False
             verbose: False
 
-#    ocn:
-#      ocean_surface:
-#        parameter_groups:
-#          none:
-#            Case: b.e23_alpha16b.BLT1850.ne30_t232.054
-#            savefigs: False
-#            mom6_tools_config:
-#              start_date: '0091-01-01'
-#              end_date: '0101-01-01'
-#              Fnames:
-#                native: 'mom6.h.native.????-??.nc'
-#                static: 'mom6.h.static.nc'
-#              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -225,27 +113,10 @@ book_toc:
     # Each chapter is the name of one of the notebooks that you executed
     # in compute_notebooks above, also without .ipynb
 
-    - caption: Atmosphere
-      chapters:
-        - file: atm/Global_PSL_NMSE_compare_obs_lens
-        - file: atm/link_to_ADF
-
-    # - caption: Ocean
-    #   chapters:
-    #       - file: ocn/ocean_surface
-
     - caption: Land
       chapters:
         # - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
         - file: lnd/Global_crop_yield_compare_obs
-
-    - caption: Sea Ice
-      chapters:
-        - file: ice/Hemis_seaice_visual_compare_obs_lens
-
-    - caption: Land Ice
-      chapters:
-        - file: glc/Greenland_SMB_visual_compare_obs
 
 #####################################
 # Keys for Jupyter Book _config.yml #
