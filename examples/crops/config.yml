@@ -43,7 +43,7 @@ computation_config:
 global_params:
   case_name: 'ctsm53019_f09_BNF_hist'
   base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
-  CESM_output_dir: /glade/work/samrabin
+  CESM_output_dir: /glade/work/samrabin/clm6_crop_reparam_outputs
   start_date: '0001-01-01'
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
@@ -83,9 +83,8 @@ compute_notebooks:
       Global_crop_yield_compare_obs:
         parameter_groups:
           none:
-            clmFile_h: '.h5.'
-            fluxnet_comparison: True
-            obsDir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data/lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
+            start_year: 1961
+            end_year: 1965
             # The following are default True, but that's only really useful during development (running the notebook manually)
             dev_mode: False
             verbose: False
