@@ -54,6 +54,9 @@ class TestGitHelper(unittest.TestCase):
     # ------------------------------------------------------------------------
 
     def setUp(self):
+        """
+        Run automatically at the beginning of every test
+        """
         # Create and change to a temporary directory, saving the original directory for later
         self._return_dir = os.getcwd()
         self._tempdir = tempfile.mkdtemp()
@@ -71,6 +74,9 @@ class TestGitHelper(unittest.TestCase):
         check_call_suppress_output("git commit -m 'initial commit'", shell=True, cwd=self._pubdir)
 
     def tearDown(self):
+        """
+        Run automatically at the end of every test
+        """
         # Change back to original directory
         os.chdir(self._return_dir)
         # Delete temporary directory
