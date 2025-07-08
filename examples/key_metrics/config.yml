@@ -188,10 +188,10 @@ compute_notebooks:
             key_plots: ["SOIL_ANN_LatLon_Vector_Mean.png", "GPP_ANN_LatLon_Mean.png", "some_other_plot.png", "some_other_plot_2.png"]
         external_tool:
           tool_name: 'LDF'
-          vars: ['GPP', 'ET', 'QSNOMELT']
-          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
-          analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
+          vars: ['TSA','PREC','ELAI','GPP', 'ET','RAIN','SNOW','TOTRUNOFF','QOVER','QDRAI','QRGWL','QSNOFRZ','QSNOMELT','QSNWCPICE']
+          plotting_scripts:  ["global_latlon_map", "global_mean_timeseries_lnd", "regional_climatology"]
+          analysis_scripts: ["lmwg_table"]
+          base_regridded_output: False
           region_list: ["Global", "N Hemisphere Land"]
 
 #    ocn:
