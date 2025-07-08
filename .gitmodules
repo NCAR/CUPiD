@@ -7,3 +7,4 @@
 [submodule "externals/LDF"]
 	path = externals/LDF
 	url = https://github.com/NCAR/ADF
+	branch = clm-diags

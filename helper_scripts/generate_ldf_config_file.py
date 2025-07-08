@@ -51,7 +51,7 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
-    # Set case names for ADF config
+    # Set case names for LDF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
 
@@ -59,14 +59,14 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
         DOUT,
         test_case_name,
-        "atm",
+        "lnd",
         "hist",
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
         DOUT,
         test_case_name,
-        "atm",
+        "lnd",
         "proc",
         "tseries",
     )
@@ -74,13 +74,13 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
         DOUT,
         test_case_name,
-        "atm",
+        "lnd",
         "proc",
         "climo",
     )
     # UPDATE PATHS FOR REGRIDDED DATA
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
             "regridded_output"
         ]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
@@ -101,8 +101,8 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     test_case_cupid_ts_index = (
         ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
     )
-    start_date = get_date_from_ts(c_ts["atm"], "start_years", test_case_cupid_ts_index)
-    end_date = get_date_from_ts(c_ts["atm"], "end_years", test_case_cupid_ts_index)
+    start_date = get_date_from_ts(c_ts["lnd"], "start_years", test_case_cupid_ts_index)
+    end_date = get_date_from_ts(c_ts["lnd"], "end_years", test_case_cupid_ts_index)
     a_dict["diag_cam_climo"]["start_year"] = start_date
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
@@ -116,12 +116,12 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
         base_case_name,
     )
     base_start_date = get_date_from_ts(
-        c_ts["atm"],
+        c_ts["lnd"],
         "start_years",
         base_case_cupid_ts_index,
     )
     base_end_date = get_date_from_ts(
-        c_ts["atm"],
+        c_ts["lnd"],
         "end_years",
         base_case_cupid_ts_index,
     )
@@ -132,23 +132,23 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
 
     a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
         base_case_output_dir,
-        "atm",
+        "lnd",
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
         base_case_output_dir,
-        "atm",
+        "lnd",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
         base_case_output_dir,
-        "atm",
+        "lnd",
         "proc",
         "climo",
     )
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
             "base_regridded_output"
         ]:
             a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
@@ -168,31 +168,32 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
-    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"]
+    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
         DOUT,
         base_case_name,
-        "atm",
+        "lnd",
         "proc",
         "regrid",
-    )  # This is where ADF will make "regrid" files
+    )  # This is where LDF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
         cupid_config_loc,
-        "ADF_output",
-    )  # this is where ADF will put plots, and "website" directory
+        "LDF_output",
+    )  # this is where LDF will put plots, and "website" directory
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
     analysis_scripts = []
     plotting_scripts = []
+    region_list = []
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
             if (
                 c_dict["compute_notebooks"][component][nb]
                 .get("external_tool", {})
                 .get("tool_name")
-                == "ADF"
+                == "LDF"
             ):
                 for var in c_dict["compute_notebooks"][component][nb][
                     "external_tool"
@@ -209,12 +210,19 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
+                for region in c_dict["compute_notebooks"][component][nb][
+                    "external_tool"
+                ].get("region_list", []):
+                    if region not in region_list:
+                        region_list.append(region)
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
     if analysis_scripts:
         a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
+    if region_list:
+        a_dict["region_list"] = region_list
 
     # os.getenv("USER")
 
