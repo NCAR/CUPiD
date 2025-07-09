@@ -10,7 +10,7 @@ Install cupid analysis and infrastructure environments per the [usual setup inst
 - Look at `cime_config/config_tool.xml` for more detailed `env_postprocessing` xml variables
 
 ## Adjust CUPiD configuration within CESM
-XML changes are a simple way to change the CUPiD configuration when you are running from CESM. See variables that you may want to adjust in your case directory with `grep -rnw -e <case dir> "CUPID*"`.
+XML changes are a simple way to change the CUPiD configuration when you are running from CESM. See variables that you may want to adjust in your case directory with `./xmlquery -p CUPID`.
 Adjust any variables that you would like (eg, the base case to compare against, how long to run for, etc) with `./xmlchange <VARIABLE>=<VALUE>`
 
 ## How to run CUPiD
