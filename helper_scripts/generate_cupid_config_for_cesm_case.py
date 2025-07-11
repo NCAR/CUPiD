@@ -45,6 +45,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
+@click.option ("--cupid-remapping", default=False, help="CUPiD remappign")
+
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -56,6 +58,7 @@ def generate_cupid_config(
     cupid_base_startdate,
     cupid_base_enddate,
     adf_output_root,
+    cupid_remapping
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -111,7 +114,57 @@ def generate_cupid_config(
     --------
     config.yml : file
         A YAML file containing the generated configuration based on the provided CESM case
-        and CUPiD example.
+        and sys.path.append(os.path.join(cesm_root, "cime"))
+    from CIME.case import Case
+
+    # Is adf_output_root provided?
+    if adf_output_root is None:
+        adf_output_root = case_root
+
+    # Is cupid_example a valid value?
+    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    cupid_examples = os.path.join(cupid_root, "examples")
+    valid_examples = [
+        example
+        for example in next(os.walk(cupid_examples))[1]
+        if example not in ["ilamb"]
+    ]
+    if cupid_example not in valid_examples:
+        error_msg = f"argument --cupid-example: invalid choice '{cupid_example}'"
+        raise KeyError(
+            f"{error_msg} (choose from subdirectories of {cupid_examples}: {valid_examples})",
+        )
+
+    with Case(case_root, read_only=False, record=True) as cesm_case:
+        case = cesm_case.get_value("CASE")
+        dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
+
+    # TODO: these sea-ice specific vars (and some glc vars) should also be added as environment vars
+    # See https://github.com/NCAR/CUPiD/issues/189
+    climo_nyears = 35
+    base_climo_nyears = 40
+
+    # --------------------------------------------------------------------------------
+    with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
+        my_dict = yaml.safe_load(f)
+
+    my_dict["data_sources"]["nb_path_root"] = os.path.join(
+        cesm_root,
+        "tools",
+        "CUPiD",
+        "nblibrary",
+    )
+    my_dict["global_params"]["case_name"] = case
+    my_dict["global_params"]["start_date"] = cupid_startdate
+    my_dict["global_params"]["end_date"] = cupid_enddate
+    my_dict["global_params"]["base_case_name"] = cupid_baseline_case
+    my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["base_start_date"] = cupid_base_startdate
+    my_dict["global_params"]["base_end_date"] = cupid_base_enddate
+    my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
+
+    for component in my_dict["timeseries"]:
+ CUPiD example.
     """
 
     sys.path.append(os.path.join(cesm_root, "cime"))
@@ -195,6 +248,7 @@ def generate_cupid_config(
                 cupid_start_year,
                 cupid_base_start_year,
             ]
+    
     if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
