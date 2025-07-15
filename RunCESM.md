@@ -10,8 +10,11 @@ Install cupid analysis and infrastructure environments per the [usual setup inst
 - Look at `cime_config/config_tool.xml` for more detailed `env_postprocessing` xml variables
 
 ## Adjust CUPiD configuration within CESM
-XML changes are a simple way to change the CUPiD configuration when you are running from CESM. See variables that you may want to adjust in your case directory with `grep -rnw -e <case dir> "CUPID*"`.
+XML changes are a simple way to change the CUPiD configuration when you are running from CESM. See variables that you may want to adjust in your case directory with `./xmlquery -p CUPID`.
 Adjust any variables that you would like (eg, the base case to compare against, how long to run for, etc) with `./xmlchange <VARIABLE>=<VALUE>`
+
+## Adjust wallclock time
+You can adjust the wallclock time for CUPiD specifically by running the following command: `./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME={new time}`. You might want to do this if you are for instance running an example with lots of computationally intensive diagnostic notebooks.
 
 ## How to run CUPiD
 If you want to run CUPiD automatically after the short-term archiver finishes, you can run the following command from your case directory in order to turn on postprocessing: `./xmlchange RUN_POSTPROCESSING=TRUE`.

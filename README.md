@@ -94,7 +94,6 @@ Usage: cupid-diagnostics [OPTIONS] CONFIG_PATH
 
 Options:
   -s, --serial        Do not use LocalCluster objects
-  -ts, --time-series  Run time series generation scripts prior to diagnostics
   -atm, --atmosphere  Run atmosphere component diagnostics
   -ocn, --ocean       Run ocean component diagnostics
   -lnd, --land        Run land component diagnostics
