@@ -1,5 +1,5 @@
 """
-Timeseries generation tool adapted from ADF for general CUPiD use.
+Tool to remap timeseries files given an ESMF mapping file.
 """
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 def call_ncremap(cmd):
-    """This is an internal function to `create_time_series`
+    """This is an internal function to `remap_time_series`
     It just wraps the subprocess.call() function, so it can be
     used with the multiprocessing Pool that is constructed below.
     It is declared as global to avoid AttributeError.
@@ -28,15 +28,13 @@ def remap_time_series(
     case_names,
     hist_str,
     ts_dir,
-    start_years,
-    end_years,
     mapping_files,
     num_procs,
     serial,
     logger,
 ):
     """
-    Generate time series versions of the history file data.
+    Remap time series files given an ESMF mapping file.
 
     Args
     ----
@@ -50,10 +48,6 @@ def remap_time_series(
          CESM history number, ie h0, h1, etc.
      - ts_dir: list, str
          location where time series files will be saved, or pre-made time series files exist
-     - start_years: list of ints
-         first year for desired range of years
-     - end_years: list of ints
-         last year for desired range of years
      - mapping_files: list, str
          name of ESMF mapping files to use with ncremap
          (must be same length as case_names)
