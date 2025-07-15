@@ -168,8 +168,6 @@ def run_remapping(
                 timeseries_params["case_name"],
                 timeseries_params[component]["hist_str"],
                 ts_output_dirs,
-                timeseries_params[component]["start_years"],
-                timeseries_params[component]["end_years"],
                 timeseries_params[component]["mapping_file"],
                 num_procs,
                 serial,
