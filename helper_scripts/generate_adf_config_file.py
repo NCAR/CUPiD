@@ -112,10 +112,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
 
-    base_case_output_dir = os.path.join(
-        c_dict["global_params"].get("base_case_output_dir", DOUT),
-        base_case_name,
-    )
+    base_case_output_dir = c_dict["global_params"].get("base_case_output_dir", DOUT)
     base_start_date = get_date_from_ts(
         c_ts["atm"],
         "start_years",
@@ -133,6 +130,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
 
     a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
         base_case_output_dir,
+        base_case_name,
         "atm",
         "hist",
     )

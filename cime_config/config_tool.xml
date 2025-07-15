@@ -95,7 +95,7 @@
 
   <entry id="CUPID_BASELINE_ROOT">
     <type>char</type>
-    <default_value>$DOUT_S_ROOT</default_value>
+    <default_value>$(dirname "$DOUT_S_ROOT")</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
     <desc>Baseline case root to use in CUPiD analysis</desc>
