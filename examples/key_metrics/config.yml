@@ -123,12 +123,12 @@ compute_notebooks:
           none: {}
 
     atm:
-      # Global_PSL_NMSE_compare_obs_lens:
-      #   parameter_groups:
-      #     none:
-      #       regridded_output: True # it looks like output is already on f09 grid, didn't need to regrid time-series file
-      #       base_regridded_output: True
-      #       validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
+      Global_PSL_NMSE_compare_obs_lens:
+        parameter_groups:
+          none:
+            regridded_output: True # it looks like output is already on f09 grid, didn't need to regrid time-series file
+            base_regridded_output: True
+            validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
       link_to_ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
@@ -150,29 +150,29 @@ compute_notebooks:
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
             climo_nyears: 40
 
-    #rof:
-      # global_discharge_gauge_compare_obs:
-      #   parameter_groups:
-      #     none:
-      #       analysis_name: ""
-      #       grid_name: 'f09_f09_mosart' # ROF grid name
-      #       climo_nyears: 10
-      #       figureSave: False
-      # global_discharge_ocean_compare_obs:
-      #   parameter_groups:
-      #     none:
-      #       analysis_name: ""
-      #       grid_name: 'f09_f09_mosart' # ROF grid name
-      #       climo_nyears: 10
-      #       figureSave: False
+    # rof:
+    #   global_discharge_gauge_compare_obs:
+    #     parameter_groups:
+    #        none:
+    #         analysis_name: ""
+    #         grid_name: 'f09_f09_mosart' # ROF grid name
+    #         climo_nyears: 10
+    #         figureSave: False
+    #   global_discharge_ocean_compare_obs:
+    #     parameter_groups:
+    #       none:
+    #         analysis_name: ""
+    #         grid_name: 'f09_f09_mosart' # ROF grid name
+    #         climo_nyears: 10
+    #         figureSave: False
 
-    #ice:
-      # Hemis_seaice_visual_compare_obs_lens:
-      #   parameter_groups:
-      #     none:
-      #       climo_nyears: 35
-      #       grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-      #       path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+    ice:
+      Hemis_seaice_visual_compare_obs_lens:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
 
 
     lnd:
@@ -240,10 +240,10 @@ book_toc:
       chapters:
         - file: glc/Greenland_SMB_visual_compare_obs
 
-    - caption: River Runoff
-      chapters:
-        - file: rof/global_discharge_gauge_compare_obs
-        - file: rof/global_discharge_ocean_compare_obs
+    # - caption: River Runoff
+    #   chapters:
+    #     - file: rof/global_discharge_gauge_compare_obs
+    #     - file: rof/global_discharge_ocean_compare_obs
 
 #####################################
 # Keys for Jupyter Book _config.yml #
