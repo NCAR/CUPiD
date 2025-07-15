@@ -115,9 +115,11 @@ def run_timeseries(
         if comp_bool:
             # set time series input and output directory or directories:
             # INPUT ts dir:
-            #    if timeseries params contain a list of cases, make a list of input directories, if not, make one input ts directory
+            #    if timeseries params contain a list of cases, make a list of input directories
+            #        if not, make one input ts directory
             # OUTPUT ts dir:
-            #    if ts_dir is specified and there is a list of cases, make a list of output dirs; if not,  make one output ts dir
+            #    if ts_dir is specified and there is a list of cases, make a list of output dirs;
+            #        if not, make one output ts dir
             #    if ts_dir is not specified, default to CESM_output_dir for either a list or a single value
 
             # if there is a list of case names, create a list of ts input directories
@@ -159,7 +161,7 @@ def run_timeseries(
                                 f"{component}", "proc", "tseries",
                         ),
                     ]
-            # if ts_dir is not specified or is null, use the CESM_output_dir to determine where to write timeseries files
+            # if ts_dir is not specified or is null, use CESM_output_dir to determine where to write timeseries files
             else:
                 # for a list of cases, use the CESM_output_dir to write a list of output ts directories
                 if isinstance(timeseries_params["case_name"], list):
