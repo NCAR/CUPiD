@@ -182,6 +182,19 @@ compute_notebooks:
             clmFile_h: '.h0.'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
+      link_to_LDF:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            ldf_root: ../../examples/key_metrics/LDF_output/
+            key_plots: ["SOIL_ANN_LatLon_Vector_Mean.png", "GPP_ANN_LatLon_Mean.png", "some_other_plot.png", "some_other_plot_2.png"]
+        external_tool:
+          tool_name: 'LDF'
+          vars: ['TSA','PREC','ELAI','GPP', 'ET','RAIN','SNOW','TOTRUNOFF','QOVER','QDRAI','QRGWL','QSNOFRZ','QSNOMELT','QSNWCPICE']
+          plotting_scripts:  ["global_latlon_map", "global_mean_timeseries_lnd", "regional_climatology"]
+          analysis_scripts: ["lmwg_table"]
+          base_regridded_output: False
+          region_list: ["Global", "N Hemisphere Land"]
 
 #    ocn:
 #      ocean_surface:
