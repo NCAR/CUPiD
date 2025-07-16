@@ -41,16 +41,17 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  start_date: '0001-01-01'
-  end_date: '0101-01-01'
-  base_start_date: '0001-01-01'
-  base_end_date: '0101-01-01'
-  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
-  lc_kwargs:
-    threads_per_worker: 1
+  CUPiD_config:
+    case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
+    base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
+    CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+    start_date: '0001-01-01'
+    end_date: '0101-01-01'
+    base_start_date: '0001-01-01'
+    base_end_date: '0101-01-01'
+    obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+    lc_kwargs:
+      threads_per_worker: 1
 
 timeseries:
   num_procs: 8

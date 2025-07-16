@@ -43,9 +43,9 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
 
     # read parameters from CUPID
     # use `get` to default to None
-    DOUT = c_dict["global_params"]["CESM_output_dir"]
-    base_case_name = c_dict["global_params"]["base_case_name"]
-    test_case_name = c_dict["global_params"]["case_name"]
+    DOUT = c_dict["global_params"]["CUPiD_config"]["CESM_output_dir"]
+    base_case_name = c_dict["global_params"]["CUPiD_config"]["base_case_name"]
+    test_case_name = c_dict["global_params"]["CUPiD_config"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
     if not ts_case_names:
@@ -112,7 +112,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     )
 
     base_case_output_dir = os.path.join(
-        c_dict["global_params"].get("base_case_output_dir", DOUT),
+        c_dict["global_params"]["CUPiD_config"].get("base_case_output_dir", DOUT),
         base_case_name,
     )
     base_start_date = get_date_from_ts(
