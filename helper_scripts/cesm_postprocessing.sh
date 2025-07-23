@@ -136,5 +136,5 @@ if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
   ${SRCROOT}/tools/CUPiD/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/cupid_webpage.py
+  ${SRCROOT}/tools/CUPiD/cupid/generate_webpage.py
 fi

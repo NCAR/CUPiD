@@ -123,7 +123,7 @@ compute_notebooks:
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
+          base_regridded_output: False
 
     lnd:
       link_to_ILAMB:
