@@ -177,7 +177,7 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: '.h0.'
+            clmFile_h: '.h0'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
       link_to_LDF:
@@ -185,7 +185,7 @@ compute_notebooks:
         parameter_groups:
           none:
             ldf_root: ../../examples/key_metrics/LDF_output/
-            key_plots: ["SOIL_ANN_LatLon_Vector_Mean.png", "GPP_ANN_LatLon_Mean.png", "some_other_plot.png", "some_other_plot_2.png"]
+            key_plots: ["GPP_ANN_LatLon_Mean.png", "ELAI_ANN_LatLon_Mean.png", "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png"]
         external_tool:
           tool_name: 'LDF'
           vars: ['TSA','PREC','ELAI','GPP', 'ET','RAIN','SNOW','TOTRUNOFF','QOVER','QDRAI','QRGWL','QSNOFRZ','QSNOMELT','QSNWCPICE']
