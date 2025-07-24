@@ -119,6 +119,13 @@
     <desc>Number of tasks used in CUPiD analysis</desc>
   </entry>
 
+  <entry id="CUPID_MEM_PER_TASK">
+    <type>integer</type>
+    <group>cupid</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Memory per task to use for postprocessing, units are specified in config_batch.xml</desc>
+  </entry>
+
   <entry id="CUPID_TASKS_PER_NODE">
     <type>integer</type>
     <default_value>$MAX_MPITASKS_PER_NODE</default_value>
@@ -126,7 +133,7 @@
     <file>env_postprocessing.xml</file>
     <desc>Number of mpi tasks per node used in CUPiD analysis</desc>
   </entry>
-  
+
   <entry id="CUPID_RUN_ALL">
     <type>char</type>
     <valid_values>TRUE,FALSE</valid_values>
