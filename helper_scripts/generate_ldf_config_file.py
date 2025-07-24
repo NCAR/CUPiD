@@ -64,7 +64,8 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
-        DOUT,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         test_case_name,
         "lnd",
         "proc",
@@ -72,7 +73,8 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
-        DOUT,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         test_case_name,
         "lnd",
         "proc",
@@ -136,13 +138,17 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
-        base_case_output_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
+        base_case_name,
         "lnd",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
-        base_case_output_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
+        base_case_name,
         "lnd",
         "proc",
         "climo",
@@ -171,7 +177,8 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
-        DOUT,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         base_case_name,
         "lnd",
         "proc",
