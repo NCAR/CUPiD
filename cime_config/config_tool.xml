@@ -121,7 +121,8 @@
 
   <entry id="CUPID_MEM_PER_TASK">
     <type>integer</type>
-    <group>cupid</group>
+    <default_value>$MEM_PER_TASK</default_value>
+    <group>cupid_run_components</group>
     <file>env_postprocessing.xml</file>
     <desc>Memory per task to use for postprocessing, units are specified in config_batch.xml</desc>
   </entry>
