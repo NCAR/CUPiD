@@ -127,15 +127,6 @@
     <desc>Number of mpi tasks per node used in CUPiD analysis</desc>
   </entry>
   
-  <entry id="CUPID_RUN_SERIAL">
-    <type>char</type>
-    <valid_values>TRUE,FALSE</valid_values>
-    <default_value>FALSE</default_value>
-    <group>cupid_run_components</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Boolean value that determines whether notebooks that can run with dask are run serially instead</desc>
-  </entry>
-
   <entry id="CUPID_RUN_ALL">
     <type>char</type>
     <valid_values>TRUE,FALSE</valid_values>
