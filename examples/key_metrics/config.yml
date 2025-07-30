@@ -118,7 +118,8 @@ compute_notebooks:
     infrastructure:
       summary_tables:
         parameter_groups:
-          none: {}
+          none:
+            ilamb_vars_highlight: []
 
     atm:
       Global_PSL_NMSE_compare_obs_lens:
