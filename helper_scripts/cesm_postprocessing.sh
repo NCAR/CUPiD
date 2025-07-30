@@ -95,7 +95,6 @@ unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
-#can try adding print statements to see why I am having issues with the root
 ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cesm-root ${SRCROOT} \
    --case-root ${CASEROOT} \

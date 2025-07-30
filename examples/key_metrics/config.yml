@@ -48,6 +48,8 @@ global_params:
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0101-01-01'
+  regridded_output: False
+  base_regridded_output: True
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   lc_kwargs:
     threads_per_worker: 1
@@ -126,8 +128,6 @@ compute_notebooks:
       Global_PSL_NMSE_compare_obs_lens:
         parameter_groups:
           none:
-            regridded_output: True # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
       link_to_ADF:
         kernel_name: cupid-infrastructure
@@ -140,7 +140,6 @@ compute_notebooks:
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -150,21 +149,21 @@ compute_notebooks:
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
             climo_nyears: 40
 
-    # rof:
-    #   global_discharge_gauge_compare_obs:
-    #     parameter_groups:
-    #        none:
-    #         analysis_name: ""
-    #         grid_name: 'f09_f09_mosart' # ROF grid name
-    #         climo_nyears: 10
-    #         figureSave: False
-    #   global_discharge_ocean_compare_obs:
-    #     parameter_groups:
-    #       none:
-    #         analysis_name: ""
-    #         grid_name: 'f09_f09_mosart' # ROF grid name
-    #         climo_nyears: 10
-    #         figureSave: False
+    rof:
+      global_discharge_gauge_compare_obs:
+        parameter_groups:
+           none:
+            analysis_name: ""
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            climo_nyears: 10
+            figureSave: False
+      global_discharge_ocean_compare_obs:
+        parameter_groups:
+          none:
+            analysis_name: ""
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            climo_nyears: 10
+            figureSave: False
 
     ice:
       Hemis_seaice_visual_compare_obs_lens:
@@ -240,10 +239,10 @@ book_toc:
       chapters:
         - file: glc/Greenland_SMB_visual_compare_obs
 
-    # - caption: River Runoff
-    #   chapters:
-    #     - file: rof/global_discharge_gauge_compare_obs
-    #     - file: rof/global_discharge_ocean_compare_obs
+    - caption: River Runoff
+      chapters:
+        - file: rof/global_discharge_gauge_compare_obs
+        - file: rof/global_discharge_ocean_compare_obs
 
 #####################################
 # Keys for Jupyter Book _config.yml #

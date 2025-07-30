@@ -45,7 +45,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
-@click.option("--cupid-remapping", default=False, help="CUPiD remappign")
+@click.option("--cupid-remapping", default=False, help="CUPiD remapping")
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -214,6 +214,7 @@ def generate_cupid_config(
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
+    my_dict["global_params"]["regridded_output"] = cupid_remapping
 
     for component in my_dict["timeseries"]:
         if (
