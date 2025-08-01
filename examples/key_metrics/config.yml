@@ -242,6 +242,7 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
+        - file: lnd/link_to_LDF
 
     - caption: Sea Ice
       chapters:
