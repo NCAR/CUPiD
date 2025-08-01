@@ -51,6 +51,7 @@ global_params:
   regridded_output: False
   base_regridded_output: True
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
     threads_per_worker: 1
 
