@@ -191,9 +191,6 @@ def build(config_path, github_pages_dir, name, overwrite):
                             f"{run_dir}/{tool_name}_output",
                             os.path.join(html_output_path, tool_name),
                         )
-                        print('copied tool output to')
-                        print(f"{run_dir}/{tool_name}_output")
-                        print(os.path.join(html_output_path, tool_name))
                     else:
                         print(f"Warning: no directory {run_dir}/{tool_name}_output")
 
