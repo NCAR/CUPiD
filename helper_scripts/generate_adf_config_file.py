@@ -54,6 +54,8 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     # Set case names for ADF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
+    a_dict["diag_cam_climo"]["case_nickname"] = test_case_name
+    a_dict["diag_cam_baseline_climo"]["case_nickname"] = base_case_name
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
