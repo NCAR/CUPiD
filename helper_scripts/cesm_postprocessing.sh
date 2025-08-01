@@ -27,6 +27,7 @@ CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
 CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
+CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
 CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
 CUPID_NYEARS=`./xmlquery --value CUPID_NYEARS`
 CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
@@ -101,6 +102,7 @@ ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
+   --cupid-ts-dir ${CUPID_TS_DIR} \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
@@ -134,5 +136,5 @@ if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
   ${SRCROOT}/tools/CUPiD/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/cupid_webpage.py
+  ${SRCROOT}/tools/CUPiD/cupid/generate_webpage.py
 fi

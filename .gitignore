@@ -8,6 +8,8 @@
 cupid.egg-info
 **/.ipynb_checkpoints
 **/__pycache__
+**/ADF_config.yaml
+**/LDF_config.yaml
 
 # Text editor temp files
 **/*.swp
@@ -17,3 +19,4 @@ cupid.egg-info
 /docs/README.md
 /docs/NCARtips.md
 /docs/Contributors.md
+/docs/runCESM.md

@@ -1,4 +1,11 @@
 repos:
+  - repo: local
+    hooks:
+      - id: numeric-execution-count
+        name: numeric-execution-count
+        entry: bash -c '! (find nblibrary -name "*.ipynb" | xargs grep -l "execution_count.*[0-9]" && echo "ERROR need to clean notebooks listed above")'
+        language: system
+        pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
