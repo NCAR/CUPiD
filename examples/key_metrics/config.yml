@@ -185,14 +185,26 @@ compute_notebooks:
         parameter_groups:
           none:
             ldf_root: ../../examples/key_metrics/LDF_output/
-            key_plots: ["GPP_ANN_LatLon_Mean.png", "ELAI_ANN_LatLon_Mean.png", "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png"]
+            key_plots: ["GPP_ANN_LatLon_Mean.png",
+                        "ELAI_ANN_LatLon_Mean.png",
+                        "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png",
+                        "RegionalClimo_Amazonia_RegionalClimo_Mean.png"]
         external_tool:
           tool_name: 'LDF'
-          vars: ['TSA','PREC','ELAI','GPP', 'ET','RAIN','SNOW','TOTRUNOFF','QOVER','QDRAI','QRGWL','QSNOFRZ','QSNOMELT','QSNWCPICE']
-          plotting_scripts:  ["global_latlon_map", "global_mean_timeseries_lnd", "regional_climatology"]
+          vars: ['TSA','PREC','ELAI','FSDS','FLDS','ASA','RNET',
+                 'FSH','ET','TOTRUNOFF','SNOWDP','GPP','NPP','NEE','NBP',
+                 'BTRANMN','TOTVEGC','TOTECOSYSC','TOTSOMC_1m',
+                 'ALTMAX','FAREA_BURNED']
+          plotting_scripts:  ["global_latlon_map","polar_map",
+                              "global_mean_timeseries_lnd", "regional_climatology"]
           analysis_scripts: ["lmwg_table"]
           base_regridded_output: False
-          region_list: ["Global", "N Hemisphere Land"]
+          region_list: ["Global", "N Hemisphere Land","Polar",
+                        "Canadian Arctic",'Russian Arctic','Greenland',
+                        'Northwest Canada','Northern Europe','Western Siberia',
+                        'Western US','Eastern US','Europe',
+                        'Amazonia','Central Africa','Indonesia',
+                        'Brazil','Sahel','Southern Africa','India']
 
 #    ocn:
 #      ocean_surface:
