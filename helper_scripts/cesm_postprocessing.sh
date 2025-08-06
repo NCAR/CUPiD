@@ -21,6 +21,7 @@ add_years() {
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
+CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
@@ -95,7 +96,7 @@ unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
-${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
+${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cesm-root ${SRCROOT} \
    --case-root ${CASEROOT} \
    --adf-output-root ${PWD} \
@@ -110,31 +111,31 @@ ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_adf_config_file.py \
+  ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
      --cesm-root ${SRCROOT} \
      --cupid-config-loc . \
-     --adf-template ${SRCROOT}/tools/CUPiD/externals/ADF/config_amwg_default_plots.yaml \
+     --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
      --out-file adf_config.yml
 fi
 
 # 3. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
-   ${SRCROOT}/tools/CUPiD/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
+   ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
 #4. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
-  ${SRCROOT}/tools/CUPiD/externals/ADF/run_adf_diag adf_config.yml
+  ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
 # 5. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
+  ${CUPID_ROOT}/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/generate_webpage.py
+  ${CUPID_ROOT}/cupid/generate_webpage.py
 fi
