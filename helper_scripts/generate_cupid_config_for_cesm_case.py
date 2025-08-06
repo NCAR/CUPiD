@@ -28,6 +28,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
     help="Base case root directory",
 )
+@click.option(
+    "--cupid-ts-dir",
+    default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+    help="Timeseries directory root; eg, if permission issues, use your scratch",
+)
 @click.option("--cupid-startdate", default="0001-01-01", help="CUPiD case start date")
 @click.option("--cupid-enddate", default="0101-01-01", help="CUPiD case end date")
 @click.option(
@@ -51,6 +56,7 @@ def generate_cupid_config(
     cupid_example,
     cupid_baseline_case,
     cupid_baseline_root,
+    cupid_ts_dir,
     cupid_startdate,
     cupid_enddate,
     cupid_base_startdate,
@@ -89,6 +95,9 @@ def generate_cupid_config(
 
     cupid_baseline_root : str
         The root directory of the base case.
+
+    cupid_ts_dir : str
+        The root directory for the timeseries.
 
     cupid_startdate : str
         The start date of the case being analyzed ("YYYY-MM-DD").
@@ -159,11 +168,22 @@ def generate_cupid_config(
     my_dict["global_params"]["end_date"] = cupid_enddate
     my_dict["global_params"]["base_case_name"] = cupid_baseline_case
     my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["ts_dir"] = cupid_ts_dir
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
         if (
             isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]

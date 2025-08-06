@@ -7,6 +7,15 @@ The main function `clean()` takes the path to the configuration file as input, r
 to obtain the "run_dir" variable, and then deletes the contents of the "computed_notebooks" folder
 at that location.
 
+Usage: clean.py [OPTIONS] [CONFIG_PATH]
+
+  Cleans the contents of the "computed_notebooks" folder at the location
+  specified by the "run_dir" variable in the CONFIG_PATH.
+
+  Args: CONFIG_PATH - The path to the configuration file.
+
+Options:
+  --help  Show this message and exit.
 """
 from __future__ import annotations
 
@@ -54,6 +63,7 @@ def clean(config_path):
 
     Args: CONFIG_PATH - The path to the configuration file.
 
+    Called by ``cupid-clean``.
     """
     logger = util.setup_logging(config_path)
     run_dir = read_config_file(config_path)
