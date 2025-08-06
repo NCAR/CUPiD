@@ -192,8 +192,6 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
     )  # this is where LDF will put plots, and "website" directory
     a_dict["user"] = os.environ["USER"]
 
-    a_dict["diag_basic_info"]["defaults_file"] = "../../externals/LDF/lib/ldf_variable_defaults.yaml"
-
     diag_var_list = []
     analysis_scripts = []
     plotting_scripts = []
