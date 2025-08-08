@@ -49,7 +49,8 @@ CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
 # Note if CUPID_ROOT is not tools/CUPiD
-if [ "${CUPID_ROOT}" != "${CESM_CUPID}" ]; then
+# (but don't complain if user adds a trailing "/")
+if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
   echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
 fi
 # Create directory for running CUPiD
