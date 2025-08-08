@@ -97,8 +97,9 @@ conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
-   --cesm-root ${SRCROOT} \
    --case-root ${CASEROOT} \
+   --cesm-root ${SRCROOT} \
+   --cupid-root ${CUPID_ROOT} \
    --adf-output-root ${PWD} \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \

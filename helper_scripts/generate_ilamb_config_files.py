@@ -14,6 +14,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option(
+    "--cupid-root",
+    default=None,
+    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
+)
+@click.option(
     "--cupid-config-loc",
     default=None,
     help="CUPiD config file to use information from for model_setup.txt",
@@ -23,7 +28,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     required=True,
     help="either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)",
 )
-def generate_all_cfg(cesm_root, cupid_config_loc, run_type):
+def generate_all_cfg(cesm_root, cupid_root, cupid_config_loc, run_type):
     """Generate all files necessary to run ILAMB based on
     the CUPiD configuration file and the run type (BGC or SP)
     by running both generate_ilamb_cfg() and generate_ilamb_model_setup().
@@ -34,16 +39,9 @@ def generate_all_cfg(cesm_root, cupid_config_loc, run_type):
     cupid_config_loc: str, CUPiD config file location
     run_type: str, either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)
     """
-    generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type)
-    generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type)
+    if cupid_root is None:
+        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
 
-
-def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
-    """Create ILAMB config file with correct paths to ILAMB auxiliary files
-    given information from CUPiD configuration file"""
-    sys.path.append(os.path.join(cesm_root, "cime"))
-
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     # Is cupid_config_loc a valid value?
     if cupid_config_loc is None:
         cupid_config_loc = os.path.join(
@@ -53,6 +51,15 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
         )
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
+
+    generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type)
+    generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type)
+
+
+def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
+    """Create ILAMB config file with correct paths to ILAMB auxiliary files
+    given information from CUPiD configuration file"""
+    sys.path.append(os.path.join(cesm_root, "cime"))
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
@@ -96,17 +103,6 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
 def generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type):
     """Create model_setup.txt file for use in ILAMB"""
     sys.path.append(os.path.join(cesm_root, "cime"))
-
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
-    # Is cupid_config_loc a valid value?
-    if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(
-            cupid_root,
-            "examples",
-            "external_diag_packages",
-        )
-    if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
-        raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)

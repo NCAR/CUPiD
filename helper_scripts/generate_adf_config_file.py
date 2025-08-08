@@ -13,6 +13,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option(
+    "--cupid-root",
+    default=None,
+    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
+)
+@click.option(
     "--cupid-config-loc",
     default=None,
     help="CUPiD example to use as template for config.yml",
@@ -23,13 +28,20 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="an adf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
+def generate_adf_config(
+    cesm_root,
+    cupid_root,
+    cupid_config_loc,
+    adf_template,
+    out_file,
+):
     """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
     to produce out_file by modifying adf_template with data from cupid config file.
     """
     sys.path.append(os.path.join(cesm_root, "cime"))
 
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    if cupid_root is None:
+        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     # Is cupid_config_loc a valid value?
     if cupid_config_loc is None:
         cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
