@@ -4,7 +4,15 @@
 
 <entry_id version="3.0">
 
-  <!-- Variables that configure which part(s) of CUPiD are run -->
+  <!-- Variables that configure where to find CUPiD which part(s) of CUPiD are run -->
+
+  <entry id="CUPID_ROOT">
+    <type>char</type>
+    <default_value>$SRCROOT/tools/CUPiD</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Location of CUPiD for CESM workflow</desc>
+  </entry>
 
   <entry id="CUPID_GEN_TIMESERIES">
     <type>char</type>
