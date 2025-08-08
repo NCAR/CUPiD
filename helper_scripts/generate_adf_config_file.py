@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import sys
 
 import click
 import yaml
@@ -11,15 +10,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("--cesm-root", required=True, help="Location of CESM source code")
-@click.option(
-    "--cupid-root",
-    default=None,
-    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
-)
 @click.option(
     "--cupid-config-loc",
-    default=None,
+    required=True,
     help="CUPiD example to use as template for config.yml",
 )
 @click.option(
@@ -29,8 +22,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 )
 @click.option("--out-file", required=True, help="the output file to save")
 def generate_adf_config(
-    cesm_root,
-    cupid_root,
     cupid_config_loc,
     adf_template,
     out_file,
@@ -38,13 +29,6 @@ def generate_adf_config(
     """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
     to produce out_file by modifying adf_template with data from cupid config file.
     """
-    sys.path.append(os.path.join(cesm_root, "cime"))
-
-    if cupid_root is None:
-        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
-    # Is cupid_config_loc a valid value?
-    if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
@@ -60,7 +44,10 @@ def generate_adf_config(
     test_case_name = c_dict["global_params"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
-    ts_dir = os.path.join(c_dict["global_params"].get("ts_dir", CESM_output_dir))
+    ts_dir = c_dict["global_params"].get("ts_dir")
+    if ts_dir is None:
+        ts_dir = CESM_output_dir
+    ts_dir = os.path.join(ts_dir)
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
@@ -242,7 +229,6 @@ def generate_adf_config(
         )
         f.write(f"# It is based off of {cupid_config_loc}/config.yml\n")
         f.write("# Arguments:\n")
-        f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_config_loc=}\n")
         f.write(f"# {adf_template=}\n")
         f.write(f"# Output: {out_file=}\n")

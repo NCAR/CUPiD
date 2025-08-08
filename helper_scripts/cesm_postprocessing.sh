@@ -118,7 +118,6 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
-     --cesm-root ${SRCROOT} \
      --cupid-config-loc . \
      --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
      --out-file adf_config.yml
