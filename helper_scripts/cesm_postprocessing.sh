@@ -23,10 +23,6 @@ CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
 CESM_CUPID=${SRCROOT}/tools/CUPiD
 CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
-
-if [ "${CUPID_ROOT}" != "${CESM_CUPID}" ]; then
-  echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
-fi
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
@@ -52,6 +48,10 @@ CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
+# Note if CUPID_ROOT is not tools/CUPiD
+if [ "${CUPID_ROOT}" != "${CESM_CUPID}" ]; then
+  echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
+fi
 # Create directory for running CUPiD
 mkdir -p cupid-postprocessing
 cd cupid-postprocessing
