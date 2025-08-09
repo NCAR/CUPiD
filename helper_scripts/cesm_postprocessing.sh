@@ -36,7 +36,7 @@ CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_NYEARS=`./xmlquery --value CUPID_BASE_NYEARS`
 CUPID_BASE_ENDDATE=`add_years ${CUPID_BASE_STARTDATE} ${CUPID_BASE_NYEARS}`
-CUPID_RUN_SERIAL=`./xmlquery --value CUPID_RUN_SERIAL`
+CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
 CUPID_RUN_OCN=`./xmlquery --value CUPID_RUN_OCN`
@@ -85,7 +85,7 @@ if [ "${CUPID_RUN_ALL}" == "FALSE" ]; then
   fi
 fi
 
-if [ "${CUPID_RUN_SERIAL}" == "TRUE" ]; then
+if [ "${CUPID_NTASKS}" == "1" ]; then
   echo "CUPiD will not use dask in any notebooks"
   CUPID_FLAG_STRING+=" --serial"
 fi
