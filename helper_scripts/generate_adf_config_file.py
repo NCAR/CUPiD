@@ -181,11 +181,13 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         cupid_config_loc,
         "ADF_output",
     )  # this is where ADF will put plots, and "website" directory
+
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
     analysis_scripts = []
     plotting_scripts = []
+    cvdp_args = {}
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
             if (
@@ -209,12 +211,35 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
+                for key,val in c_dict["compute_notebooks"][component][nb][
+                    "external_tool"
+                ].get("diag_cvdp_info", {}).items():
+                    if key not in cvdp_args:
+                        #a_dict["diag_cvdp_info"][key] = val
+                        cvdp_args[key] = val
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
     if analysis_scripts:
         a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
+    if cvdp_args:
+        a_dict["diag_cvdp_info"] = cvdp_args
+    '''cvdp_info = a_dict.get("diag_cvdp_info", {})
+    if cvdp_info:
+        if cvdp_info.get("cvdp_run",False):
+            if "cvdp_loc" in a_dict["diag_cvdp_info"]:
+                a_dict["diag_cvdp_info"]["cvdp_loc"] = cvdp_root
+                #a_dict["diag_cvdp_info"].get("cvdp_loc", a_dict["diag_basic_info"]["cam_diag_plot_loc"])
+            #else:
+            #    a_dict["diag_cvdp_info"]["cvdp_loc"] = a_dict["diag_basic_info"]["cam_diag_plot_loc"]
+            """if "cvdp_codebase_loc" in a_dict["diag_cvdp_info"]:
+                a_dict["diag_cvdp_info"].get("cvdp_codebase_loc", "")
+            else:
+                a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = """""
+        else:
+            a_dict["diag_cvdp_info"] = {}
+    '''
 
     # os.getenv("USER")
 
