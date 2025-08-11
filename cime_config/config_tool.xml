@@ -33,7 +33,7 @@
     <desc>When TRUE, CUPiD will generate web pages from the diagnostic plots</desc>
   </entry>
 
-  <entry id="CUPID_REMAPPING">
+  <entry id="CUPID_REMAP">
     <type>char</type>
     <valid_values>TRUE,FALSE</valid_values>
     <default_value>FALSE</default_value>

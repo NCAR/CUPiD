@@ -25,7 +25,7 @@ CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
-CUPID_REMAPPING=`./xmlquery --value CUPID_REMAPPING`
+CUPID_REMAP=`./xmlquery --value CUPID_REMAP`
 CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
@@ -108,7 +108,7 @@ ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
-   --cupid-remapping ${CUPID_REMAPPING} \
+   --cupid-remap ${CUPID_REMAP} \
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
@@ -125,7 +125,7 @@ if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
 fi
 
 # 4. Remapping of timeseries files
-if [ "${CUPID_REMAPPING}" == "TRUE" ]; then
+if [ "${CUPID_REMAP}" == "TRUE" ]; then
    ${SRCROOT}/tools/CUPiD/cupid/run_remapping.py ${CUPID_FLAG_STRING}
 fi
 

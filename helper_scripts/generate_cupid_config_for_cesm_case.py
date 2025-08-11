@@ -50,7 +50,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
-@click.option("--cupid-remapping", default=False, help="CUPiD remapping")
+@click.option("--cupid-remap", default=False, help="Remap with CUPiD")
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -63,7 +63,7 @@ def generate_cupid_config(
     cupid_base_startdate,
     cupid_base_enddate,
     adf_output_root,
-    cupid_remapping,
+    cupid_remap,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -83,40 +83,46 @@ def generate_cupid_config(
     Arguments:
     ----------
     case_root : str
-       The root directory of the CESM case from which case-specific data will be retrieved.
+        The root directory of the CESM case from which case-specific data will be retrieved.
 
     cesm_root : str
-       The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
+        The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
 
     cupid_example : str
-       The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
-       Must be a valid subdirectory within the CUPiD examples directory.
+        The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
+        Must be a valid subdirectory within the CUPiD examples directory.
 
     cupid_baseline_case : str
-       The name of the base case.
+        The name of the base case.
 
     cupid_baseline_root : str
-       The root directory of the base case.
+        The root directory of the base case.
 
     cupid_ts_dir : str
-       The root directory for the timeseries.
+        The root directory for the timeseries.
 
     cupid_startdate : str
-       The start date of the case being analyzed ("YYYY-MM-DD").
+        The start date of the case being analyzed ("YYYY-MM-DD").
 
     cupid_enddate : str
-       The end date of the case being analyzed ("YYYY-MM-DD").
+        The end date of the case being analyzed ("YYYY-MM-DD").
 
     cupid_base_startdate : str
-       The start date of the base case ("YYYY-MM-DD").
+        The start date of the base case ("YYYY-MM-DD").
 
     cupid_base_enddate : str
-       The end date of the base case ("YYYY-MM-DD").
+        The end date of the base case ("YYYY-MM-DD").
+
+    adf_output_root : str
+        Location where ADF output will be generated
+
+    cupid_remap : bool
+        If true, perform remapping. If false, skip remapping.
 
     Raises:
     -------
     KeyError:
-       If the provided CUPiD example is not found in the valid CUPiD examples directory.
+        If the provided CUPiD example is not found in the valid CUPiD examples directory.
 
     Outputs:
     --------
@@ -174,7 +180,7 @@ def generate_cupid_config(
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
-    my_dict["global_params"]["regridded_output"] = cupid_remapping
+    my_dict["global_params"]["regridded_output"] = cupid_remap
 
     for component in my_dict["timeseries"]:
         if (
