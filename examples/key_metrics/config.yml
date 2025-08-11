@@ -138,6 +138,11 @@ compute_notebooks:
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
+          diag_cvdp_info:
+            run_cvdp: True
+            #cvdp_loc: /glade/derecho/scratch/${user}/ADF/cvdp/
+            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            cvdp_tar: False
           base_regridded_output: True
 
     glc:
