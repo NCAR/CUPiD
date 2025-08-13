@@ -127,13 +127,28 @@
 
   <!-- Variables that define which components are analyzed (and whether analysis is parallelized) -->
 
-  <entry id="CUPID_RUN_SERIAL">
-    <type>char</type>
-    <valid_values>TRUE,FALSE</valid_values>
-    <default_value>FALSE</default_value>
+  <entry id="CUPID_NTASKS">
+    <type>integer</type>
+    <default_value>1</default_value>
     <group>cupid_run_components</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Boolean value that determines whether notebooks that can run with dask are run serially instead</desc>
+    <file>env_mach_pes.xml</file>
+    <desc>Number of tasks used in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_MEM_PER_TASK">
+    <type>integer</type>
+    <default_value>$MEM_PER_TASK</default_value>
+    <group>cupid_run_components</group>
+    <file>env_mach_pes.xml</file>
+    <desc>Memory per task to use for postprocessing, units are specified in config_batch.xml</desc>
+  </entry>
+
+  <entry id="CUPID_TASKS_PER_NODE">
+    <type>integer</type>
+    <default_value>$MAX_MPITASKS_PER_NODE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_mach_pes.xml</file>
+    <desc>Number of mpi tasks per node used in CUPiD analysis</desc>
   </entry>
 
   <entry id="CUPID_RUN_ALL">
