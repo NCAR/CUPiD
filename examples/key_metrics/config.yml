@@ -195,9 +195,10 @@ compute_notebooks:
         external_tool:
           tool_name: 'LDF'
           vars: ['TSA','PREC','ELAI','FSDS','FLDS','ASA','RNET',
-                 'FSH','ET','TOTRUNOFF','SNOWDP','GPP','NPP','NEE','NBP',
+                 'FSH','ET','FCTR','FGEV','FCEV','QRUNOFF_TO_COUPLER',
+                 'SNOWDP','GPP','NPP','NEE','NBP',
                  'BTRANMN','TOTVEGC','TOTECOSYSC','TOTSOMC_1m',
-                 'ALTMAX','FAREA_BURNED']
+                 'ALTMAX','FAREA_BURNED','DSTFLXT','MEG_isoprene']
           plotting_scripts:  ["global_latlon_map","polar_map",
                               "global_mean_timeseries_lnd", "regional_climatology"]
           analysis_scripts: ["lmwg_table"]
