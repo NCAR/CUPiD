@@ -21,6 +21,8 @@ add_years() {
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
+CESM_CUPID=${SRCROOT}/tools/CUPiD
+CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
@@ -34,7 +36,7 @@ CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_NYEARS=`./xmlquery --value CUPID_BASE_NYEARS`
 CUPID_BASE_ENDDATE=`add_years ${CUPID_BASE_STARTDATE} ${CUPID_BASE_NYEARS}`
-CUPID_RUN_SERIAL=`./xmlquery --value CUPID_RUN_SERIAL`
+CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
 CUPID_RUN_OCN=`./xmlquery --value CUPID_RUN_OCN`
@@ -46,6 +48,11 @@ CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
+# Note if CUPID_ROOT is not tools/CUPiD
+# (but don't complain if user adds a trailing "/")
+if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
+  echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
+fi
 # Create directory for running CUPiD
 mkdir -p cupid-postprocessing
 cd cupid-postprocessing
@@ -78,7 +85,7 @@ if [ "${CUPID_RUN_ALL}" == "FALSE" ]; then
   fi
 fi
 
-if [ "${CUPID_RUN_SERIAL}" == "TRUE" ]; then
+if [ "${CUPID_NTASKS}" == "1" ]; then
   echo "CUPiD will not use dask in any notebooks"
   CUPID_FLAG_STRING+=" --serial"
 fi
@@ -95,9 +102,10 @@ unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
-${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
-   --cesm-root ${SRCROOT} \
+${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --case-root ${CASEROOT} \
+   --cesm-root ${SRCROOT} \
+   --cupid-root ${CUPID_ROOT} \
    --adf-output-root ${PWD} \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
@@ -110,31 +118,30 @@ ${SRCROOT}/tools/CUPiD/helper_scripts/generate_cupid_config_for_cesm_case.py \
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_adf_config_file.py \
-     --cesm-root ${SRCROOT} \
+  ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
      --cupid-config-loc . \
-     --adf-template ${SRCROOT}/tools/CUPiD/externals/ADF/config_amwg_default_plots.yaml \
+     --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
      --out-file adf_config.yml
 fi
 
 # 3. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
-   ${SRCROOT}/tools/CUPiD/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
+   ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
 #4. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
-  ${SRCROOT}/tools/CUPiD/externals/ADF/run_adf_diag adf_config.yml
+  ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
 # 5. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
+  ${CUPID_ROOT}/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/cupid/generate_webpage.py
+  ${CUPID_ROOT}/cupid/generate_webpage.py
 fi
