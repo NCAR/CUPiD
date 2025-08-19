@@ -11,10 +11,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option(
     "--cupid-config-loc",
-    default=None,
+    required=True,
     help="CUPiD example to use as template for config.yml",
 )
 @click.option(
@@ -23,16 +22,10 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="an ldf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
+def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     """Use cupid config file (YAML) from cupid_config_loc and ldf_template (YAML)
     to produce out_file by modifying ldf_template with data from cupid config file.
     """
-    sys.path.append(os.path.join(cesm_root, "cime"))
-
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
-    # Is cupid_config_loc a valid value?
-    if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
@@ -242,7 +235,6 @@ def generate_ldf_config(cesm_root, cupid_config_loc, ldf_template, out_file):
         )
         f.write(f"# It is based off of {cupid_config_loc}/config.yml\n")
         f.write("# Arguments:\n")
-        f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_config_loc=}\n")
         f.write(f"# {ldf_template=}\n")
         f.write(f"# Output: {out_file=}\n")
