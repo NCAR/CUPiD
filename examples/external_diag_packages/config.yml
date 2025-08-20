@@ -140,6 +140,7 @@ compute_notebooks:
         parameter_groups:
           none:
             ldf_root: ../../examples/external_diag_packages/LDF_output/
+            defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
             key_plots: ["GPP_ANN_LatLon_Mean.png",
                         "ELAI_ANN_LatLon_Mean.png",
                         "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png",
