@@ -14,6 +14,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option("--case-root", default=os.getcwd(), help="CESM case directory")
 @click.option(
+    "--cupid-root",
+    default=None,
+    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
+)
+@click.option(
     "--cupid-example",
     default="key_metrics",
     help="CUPiD example to use as template for config.yml",
@@ -54,6 +59,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def generate_cupid_config(
     case_root,
     cesm_root,
+    cupid_root,
     cupid_example,
     cupid_baseline_case,
     cupid_baseline_root,
@@ -86,7 +92,10 @@ def generate_cupid_config(
         The root directory of the CESM case from which case-specific data will be retrieved.
 
     cesm_root : str
-        The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
+        The root directory of the CESM installation, where CIME scripts reside.
+
+    cupid_root : str
+        The root directory where CUPiD examples reside (defaults to subdirectory of cesm_root).
 
     cupid_example : str
         The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
@@ -139,7 +148,8 @@ def generate_cupid_config(
         adf_output_root = case_root
 
     # Is cupid_example a valid value?
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    if cupid_root is None:
+        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     cupid_examples = os.path.join(cupid_root, "examples")
     valid_examples = [
         example
