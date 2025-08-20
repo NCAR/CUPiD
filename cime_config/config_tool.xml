@@ -77,6 +77,22 @@
     <desc>Number of years of output to include in CUPiD analysis</desc>
   </entry>
 
+  <!-- <entry id="CUPID_OPTION">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years of output to include in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_N">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years of output to include in CUPiD analysis</desc>
+  </entry> -->
+
   <entry id="CUPID_BASE_STARTDATE">
     <type>char</type>
     <default_value>0001-01-01</default_value>
@@ -92,6 +108,22 @@
     <file>env_postprocessing.xml</file>
     <desc>Number of years of baseline output to include in CUPiD analysis</desc>
   </entry>
+
+  <!-- <entry id="CUPID_BASE_OPTION">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years of baseline output to include in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_N">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years of baseline output to include in CUPiD analysis</desc>
+  </entry> -->
 
   <entry id="CUPID_BASELINE_CASE">
     <type>char</type>
