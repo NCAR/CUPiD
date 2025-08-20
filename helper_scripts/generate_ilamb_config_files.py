@@ -95,15 +95,22 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
             c_dict["global_params"]["CESM_output_dir"],
             c_dict["global_params"]["base_case_name"],
         )
+
+    shift_str_case = ""
+    shift_str_base_case = ""
+    if "BLT1850" in c_dict["global_params"]["case_name"]:
+        shift_str_case = ", 50, 2000"
+    if "BLT1850" in c_dict["global_params"]["base_case_name"]:
+        shift_str_base_case = ", 50, 2000"
     with open(os.path.join(cupid_config_loc, "model_setup.txt"), "w") as ms:
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/{shift_str_case}\n",
         )
         ms.write(
-            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/\n",
+            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/{shift_str_base_case}\n",  # noqa: E501
         )
     print(f"wrote {os.path.join(cupid_config_loc, 'model_setup.txt')}")
     print(
