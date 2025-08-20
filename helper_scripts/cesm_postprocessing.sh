@@ -45,6 +45,7 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
@@ -124,19 +125,34 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
      --out-file adf_config.yml
 fi
 
-# 3. Generate timeseries files
+# 3. Generate LDF config file
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  ${CUPID_ROOT}/helper_scripts/generate_ldf_config_file.py \
+     --cupid-config-loc . \
+     --ldf-template ${CUPID_ROOT}/externals/LDF/config_clm_unstructured_plots.yaml \
+     --out-file ldf_config.yml
+fi
+
+# 4. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
-#4. Run ADF
+# 5. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 5. Run CUPiD and build webpage
+# 6. Run LDF
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
+fi
+
+# 7. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
