@@ -115,7 +115,7 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
     )
     print("---------")
     print("conda activate cupid-analysis")
-    print(f"export ILAMB_ROOT={os.path.join(cupid_config_loc, 'ilamb_aux')}")
+    print("export ILAMB_ROOT=../../ilamb_aux")
     if os.path.exists(os.path.join(cupid_config_loc, "ILAMB_output/")):
         print(
             f"WARNING: directory {os.path.join(cupid_config_loc, 'ILAMB_output/')} exists; this may cause issues with runnign ILAMB. It is recommended to remove this directory prior to running the following command.",  # noqa: E501
