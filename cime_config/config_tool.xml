@@ -128,6 +128,7 @@
   <entry id="CUPID_RUN_TYPE">
     <type>char</type>
     <valid_values>BGC,SP</valid_values>
+    <default_value>BGC</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
     <desc>Type of CTSM run: either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)</desc>
