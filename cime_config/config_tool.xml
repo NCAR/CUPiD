@@ -125,6 +125,15 @@
     <desc>Example to use in CUPiD analysis</desc>
   </entry>
 
+  <entry id="CUPID_RUN_TYPE">
+    <type>char</type>
+    <valid_values>BGC,SP</valid_values>
+    <default_value>BGC</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Type of CTSM run: either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)</desc>
+  </entry>
+
   <!-- Variables that define which components are analyzed (and whether analysis is parallelized) -->
 
   <entry id="CUPID_NTASKS">
@@ -230,6 +239,15 @@
     <group>cupid_run_components</group>
     <file>env_postprocessing.xml</file>
     <desc>Boolean value that determines whether or not LDF diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ILAMB">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ILAMB diagnostics are run</desc>
   </entry>
 
   <help>
