@@ -31,7 +31,14 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Calendar type. See cftime calendar types for additional information.",
 )
 def find_enddate(start_date, n, option, calendar):
+    # Process inputs
     year, month, day = (int(i) for i in start_date.split("-"))
+    calendar = (calendar.lower()).replace(
+        "_",
+        "",
+    )  # GREGORIAN -> gregorian, NO_LEAP -> noleap
+    n = int(n)
+
     start_date = cftime.datetime(year, month, day, calendar=calendar)
     end_date = start_date
 
@@ -56,11 +63,8 @@ if the calendar is uncommon).""",
         time_delta = datetime.timedelta(days=n)
         end_date = end_date + time_delta
 
-    return end_date
+    print(end_date.strftime("%Y-%m-%d"))  # for the bash script to use
 
 
 if __name__ == "__main__":
-
-    end_date = find_enddate()
-
-    print(end_date)  # for the bash script to use
+    find_enddate()
