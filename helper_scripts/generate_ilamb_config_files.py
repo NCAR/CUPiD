@@ -21,7 +21,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     required=True,
     help="either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)",
 )
-def generate_all_cfg(cupid_config_loc, run_type):
+@click.option(
+    "--cupid-root",
+    required=False,
+    help="CUPiD root if running via CESM workflow",
+)
+def generate_all_cfg(cupid_config_loc, run_type, cupid_root=None):
     """Generate all files necessary to run ILAMB based on
     the CUPiD configuration file and the run type (BGC or SP)
     by running both generate_ilamb_cfg() and generate_ilamb_model_setup().
@@ -29,11 +34,11 @@ def generate_all_cfg(cupid_config_loc, run_type):
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
-    generate_ilamb_cfg(cupid_config_loc, run_type)
+    generate_ilamb_cfg(cupid_config_loc, run_type, cupid_root)
     generate_ilamb_model_setup(cupid_config_loc, run_type)
 
 
-def generate_ilamb_cfg(cupid_config_loc, run_type):
+def generate_ilamb_cfg(cupid_config_loc, run_type, cupid_root=None):
     """Create ILAMB config file with correct paths to ILAMB auxiliary files
     given information from CUPiD configuration file"""
 
@@ -49,7 +54,10 @@ def generate_ilamb_cfg(cupid_config_loc, run_type):
         )
         raise KeyError
 
-    ilamb_config_loc = os.path.join(cupid_config_loc, "../../ilamb_aux")
+    if cupid_root == None:  # this works fine if running standalone
+        ilamb_config_loc = os.path.join(cupid_config_loc, "../../ilamb_aux")
+    else: # this is needed in CESM workflow
+        ilamb_config_loc = os.path.join(cupid_root, "ilamb_aux")
     with open(
         os.path.join(
             ilamb_config_loc,

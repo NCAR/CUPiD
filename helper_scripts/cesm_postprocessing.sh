@@ -130,9 +130,9 @@ fi
 # 3. Generate ILAMB config file
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
   ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
-     --cesm-root ${SRCROOT} \
      --cupid-config-loc . \
      --run-type ${CUPID_RUN_TYPE}
+     --cupid-root ${CUPID_ROOT} \
 fi
 
 # 4. Generate LDF config file
