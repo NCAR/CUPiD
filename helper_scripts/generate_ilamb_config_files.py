@@ -125,6 +125,7 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
         f"WARNING: ILAMB requires regridded output to be in {base_case_output_dir}/lnd/hist/regrid/ directory.",
     )
     print("You can now run ILAMB with the following commands:")
+    print("If running via the CESM workflow, this will be run automatically.")
     print(
         "(Users on a super computer should make sure they are on a compute node rather than a login node)",
     )
