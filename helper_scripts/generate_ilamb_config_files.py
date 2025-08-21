@@ -54,9 +54,9 @@ def generate_ilamb_cfg(cupid_config_loc, run_type, cupid_root=None):
         )
         raise KeyError
 
-    if cupid_root == None:  # this works fine if running standalone
+    if cupid_root is None:  # this works fine if running standalone
         ilamb_config_loc = os.path.join(cupid_config_loc, "../../ilamb_aux")
-    else: # this is needed in CESM workflow
+    else:  # this is needed in CESM workflow
         ilamb_config_loc = os.path.join(cupid_root, "ilamb_aux")
     with open(
         os.path.join(
