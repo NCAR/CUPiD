@@ -40,7 +40,7 @@ CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
 CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
 CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_cupid_enddate.py \ --start-date ${CUPID_BASE_STARTDATE} --option ${CUPID_BASE_STOP_OPTION} --n ${CUPID_BASE_STOP_N} --calendar ${CALENDAR}`
-CUPID_RUN_SERIAL=`./xmlquery --value CUPID_RUN_SERIAL`
+CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
 CUPID_RUN_OCN=`./xmlquery --value CUPID_RUN_OCN`
@@ -49,6 +49,7 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 
 # Note if CUPID_ROOT is not tools/CUPiD
 # (but don't complain if user adds a trailing "/")
@@ -87,7 +88,7 @@ if [ "${CUPID_RUN_ALL}" == "FALSE" ]; then
   fi
 fi
 
-if [ "${CUPID_RUN_SERIAL}" == "TRUE" ]; then
+if [ "${CUPID_NTASKS}" == "1" ]; then
   echo "CUPiD will not use dask in any notebooks"
   CUPID_FLAG_STRING+=" --serial"
 fi
@@ -122,19 +123,34 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
      --out-file adf_config.yml
 fi
 
-# 3. Generate timeseries files
+# 3. Generate LDF config file
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  ${CUPID_ROOT}/helper_scripts/generate_ldf_config_file.py \
+     --cupid-config-loc . \
+     --ldf-template ${CUPID_ROOT}/externals/LDF/config_clm_unstructured_plots.yaml \
+     --out-file ldf_config.yml
+fi
+
+# 4. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
-#4. Run ADF
+# 5. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 5. Run CUPiD and build webpage
+# 6. Run LDF
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
+fi
+
+# 7. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
