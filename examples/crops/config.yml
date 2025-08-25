@@ -85,6 +85,7 @@ compute_notebooks:
           none:
             start_year: 1961
             end_year: 1965
+            externals_path: ../../externals
             # The following are default True, but that's only really useful during development (running the notebook manually)
             dev_mode: False
             verbose: False
