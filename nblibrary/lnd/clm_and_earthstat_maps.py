@@ -8,7 +8,35 @@ from time import time
 
 import cartopy.crs as ccrs
 import numpy as np
+import xarray as xr
 from matplotlib import pyplot as plt
+
+
+class Results:
+    """
+    For holding a dict of map DataArrays and some ancillary information
+    """
+
+    def __init__(self):
+        self.result_dict = {}
+        self.vmin = np.inf
+        self.vmax = -np.inf
+
+    def __getitem__(self, key):
+        """instance[key] syntax should return corresponding value in result_dict"""
+        return self.result_dict[key]
+
+    def __setitem__(self, key: str, value: xr.DataArray):
+        """instance[key]=value syntax should set corresponding key=value in result_dict"""
+        self.vmin = min(self.vmin, np.nanmin(value.values))
+        self.vmax = max(self.vmax, np.nanmax(value.values))
+        self.result_dict[key] = value
+
+    def vrange(self):
+        """
+        Return list representing colorbar range
+        """
+        return [self.vmin, self.vmax]
 
 
 def _cut_off_antarctica(da, antarctica_border=-60):
@@ -77,6 +105,46 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     fig.show()
 
 
+def _get_clm_yield_map(grid_one_variable, lon_pm2idl, crop, case):
+    """
+    Get yield map from CLM
+    """
+    ds = case.cft_ds.sel(cft=case.crop_list[crop].pft_nums)
+    ds = ds.drop_vars(["date_written", "time_written"])
+    cft_yield = ds["YIELD_ANN"].mean(dim="time")
+    ds = ds.mean(dim="time")
+    ds["wtd_yield_across_cfts"] = cft_yield.weighted(ds["pfts1d_wtgcell"]).mean(
+        dim="cft",
+    )
+    map_clm = grid_one_variable(ds, "wtd_yield_across_cfts")
+    map_clm = lon_pm2idl(map_clm)
+    map_clm *= 1e-6 * 1e4  # Convert g/m2 to t/ha
+    map_clm.name = "Yield"
+    map_clm.attrs["units"] = "tons / ha"
+    return map_clm
+
+
+def _get_earthstat_yield_map(case, earthstat_crop_list, earthstat, crop, case_name):
+    """
+    Get yield map from EarthStat
+    """
+    case_res = case.cft_ds.attrs["resolution"].name
+    map_obs = None
+    try:
+        earthstat_crop_idx = earthstat_crop_list.index(crop)
+    except ValueError:
+        print(f"{crop} not in EarthStat res {case_res}; skipping")
+        return map_obs
+    try:
+        earthstat_ds = earthstat[case_res]
+    except KeyError:
+        print(f"{case_res} not in EarthStat; skipping {case_name}")
+        return map_obs
+    map_obs = earthstat_ds["Yield"].isel(crop=earthstat_crop_idx).mean(dim="time")
+    map_obs = _cut_off_antarctica(map_obs)
+    return map_obs
+
+
 def clm_and_earthstat_maps(
     *,
     case_list: list,
@@ -113,9 +181,7 @@ def clm_and_earthstat_maps(
             print(crop)
 
         # Set up for maps of CLM yield
-        vmin_clm = np.inf
-        vmax_clm = -np.inf
-        result_dict_clm = {}
+        results_clm = Results()
 
         # Set up for maps of CLM minus EarthStat yield
         vmin_diff = np.inf
@@ -127,47 +193,23 @@ def clm_and_earthstat_maps(
             case_name = case_name_list[i]
 
             # Get CLM yield map
-            ds = case.cft_ds.sel(cft=case.crop_list[crop].pft_nums)
-            ds = ds.drop_vars(["date_written", "time_written"])
-            cft_yield = ds["YIELD_ANN"].mean(dim="time")
-            ds = ds.mean(dim="time")
-            ds["wtd_yield_across_cfts"] = cft_yield.weighted(
-                ds["pfts1d_wtgcell"],
-            ).mean(
-                dim="cft",
+            results_clm[case_name] = _cut_off_antarctica(
+                _get_clm_yield_map(grid_one_variable, lon_pm2idl, crop, case),
             )
-            map_clm = grid_one_variable(ds, "wtd_yield_across_cfts")
-            map_clm = lon_pm2idl(map_clm)
-            map_clm *= 1e-6 * 1e4  # Convert g/m2 to t/ha
-            map_clm.name = "Yield"
-            map_clm.attrs["units"] = "tons / ha"
-
-            # Save CLM yield map
-            map_clm = _cut_off_antarctica(map_clm)
-            result_dict_clm[case_name] = map_clm
-            vmin_clm = min(vmin_clm, np.nanmin(map_clm.values))
-            vmax_clm = max(vmax_clm, np.nanmax(map_clm.values))
-            vrange_clm = [vmin_clm, vmax_clm]
 
             # Get observed yield map
-            case_res = case.cft_ds.attrs["resolution"].name
-            try:
-                earthstat_crop_idx = earthstat_crop_list.index(crop)
-            except ValueError:
-                print(f"{crop} not in EarthStat res {case_res}; skipping")
-                continue
-            try:
-                earthstat_ds = earthstat[case_res]
-            except KeyError:
-                print(f"{case_res} not in EarthStat; skipping {case_name}")
-                continue
-            map_obs = (
-                earthstat_ds["Yield"].isel(crop=earthstat_crop_idx).mean(dim="time")
+            map_obs = _get_earthstat_yield_map(
+                case,
+                earthstat_crop_list,
+                earthstat,
+                crop,
+                case_name,
             )
-            map_obs = _cut_off_antarctica(map_obs)
+            if map_obs is None:
+                continue
 
             # Get yield difference map
-            map_diff = _get_difference_map(map_obs, map_clm)
+            map_diff = _get_difference_map(map_obs, results_clm[case_name])
             map_diff.name = "Yield difference, CLM minus EarthStat"
             map_diff.attrs["units"] = "tons / ha"
 
@@ -184,27 +226,29 @@ def clm_and_earthstat_maps(
         # Plot
         for i, ax_clm in enumerate(axes_clm.ravel()):
             try:
-                case = case_list[i]
+                case_name = case_name_list[i]
             except IndexError:
                 ax_clm.set_visible(False)
                 continue
-            case_name = case_name_list[i]
 
-            result_clm = result_dict_clm[case_name]
-            im_clm = _map_subplot(result_clm, ax_clm, vrange_clm, case_name)
+            im_clm = _map_subplot(
+                results_clm[case_name],
+                ax_clm,
+                results_clm.vrange(),
+                case_name,
+            )
 
-            ax_diff = axes_diff.ravel()[i]
             result_diff = result_dict_diff[case_name]
             im_diff = _map_subplot(
                 result_diff,
-                ax_diff,
+                axes_diff.ravel()[i],
                 vrange_diff,
                 case_name,
                 cmap="coolwarm",
             )
 
         # Finish up
-        _mapfig_finishup(fig_clm, im_clm, result_clm, crop, layout)
+        _mapfig_finishup(fig_clm, im_clm, results_clm[case_name], crop, layout)
         _mapfig_finishup(fig_diff, im_diff, result_diff, crop, layout)
         if verbose:
             end = time()
