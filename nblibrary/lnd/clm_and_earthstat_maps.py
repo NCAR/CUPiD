@@ -182,6 +182,23 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     fig.show()
 
 
+def _get_clm_ds_result_yield(ds):
+    cft_var = ds["YIELD_ANN"].mean(dim="time")
+    ds = ds.mean(dim="time")
+    ds["result"] = cft_var.weighted(ds["pfts1d_wtgcell"]).mean(
+        dim="cft",
+    )
+    return ds
+
+
+def _get_clm_ds_result_prod(ds):
+    cft_area = ds["pfts1d_gridcellarea"] * ds["pfts1d_wtgcell"]
+    cft_area *= 1e6  # Convert km2 to m2
+    cft_prod = ds["YIELD_ANN"] * cft_area
+    ds["result"] = cft_prod.sum(dim="cft").mean(dim="time")
+    return ds
+
+
 def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
     """
     Get yield map from CLM
@@ -189,27 +206,30 @@ def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
 
     # Define some things based on what map we want
     if which == "yield":
-        which_var = "YIELD_ANN"
+        get_clm_ds_result = _get_clm_ds_result_yield
         units = "tons / ha"
         conversion_factor = 1e-6 * 1e4  # Convert g/m2 to t/ha
         name = "Yield"
+    elif which == "prod":
+        get_clm_ds_result = _get_clm_ds_result_prod
+        units = "Mt"
+        conversion_factor = 1e-6 * 1e-6  # Convert g to Mt
+        name = "Production"
     else:
         raise NotImplementedError(
-            f"_get_clm_map(which, ...) only works for 'yield', not '{which}'",
+            f"_get_clm_map() doesn't work for which='{which}'",
         )
 
     # Extract the data
     ds = case.cft_ds.sel(cft=case.crop_list[crop].pft_nums)
     ds = ds.drop_vars(["date_written", "time_written"])
-    cft_var = ds[which_var].mean(dim="time")
-    ds = ds.mean(dim="time")
-    ds["wtd_var_across_cfts"] = cft_var.weighted(ds["pfts1d_wtgcell"]).mean(
-        dim="cft",
-    )
+    ds = get_clm_ds_result(ds)
 
     # Grid the data
-    map_clm = grid_one_variable(ds, "wtd_var_across_cfts")
+    map_clm = grid_one_variable(ds, "result")
     map_clm = lon_pm2idl(map_clm)
+
+    # Finish up
     map_clm *= conversion_factor
     map_clm.name = name
     map_clm.attrs["units"] = units
@@ -239,14 +259,19 @@ def _get_earthstat_map(which, case, earthstat_crop_list, earthstat, crop, case_n
     # Define some things based on what map we want
     if which == "yield":
         which_var = "Yield"
+        conversion_factor = 1  # Already tons/ha
+    elif which == "prod":
+        which_var = "Production"
+        conversion_factor = 1e-6  # Convert tons to Mt
     else:
         raise NotImplementedError(
-            f"_get_clm_map(which, ...) only works for 'yield', not '{which}'",
+            f"_get_earthstat_map() doesn't work for which='{which}'",
         )
 
     # Actually get the map
     map_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx).mean(dim="time")
     map_obs = _cut_off_antarctica(map_obs)
+    map_obs *= conversion_factor
 
     return map_obs
 
