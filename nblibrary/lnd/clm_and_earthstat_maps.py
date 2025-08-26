@@ -182,29 +182,47 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     fig.show()
 
 
-def _get_clm_yield_map(grid_one_variable, lon_pm2idl, crop, case):
+def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
     """
     Get yield map from CLM
     """
+
+    # Define some things based on what map we want
+    if which == "yield":
+        which_var = "YIELD_ANN"
+        units = "tons / ha"
+        conversion_factor = 1e-6 * 1e4  # Convert g/m2 to t/ha
+        name = "Yield"
+    else:
+        raise NotImplementedError(
+            f"_get_clm_map(which, ...) only works for 'yield', not '{which}'",
+        )
+
+    # Extract the data
     ds = case.cft_ds.sel(cft=case.crop_list[crop].pft_nums)
     ds = ds.drop_vars(["date_written", "time_written"])
-    cft_yield = ds["YIELD_ANN"].mean(dim="time")
+    cft_var = ds[which_var].mean(dim="time")
     ds = ds.mean(dim="time")
-    ds["wtd_yield_across_cfts"] = cft_yield.weighted(ds["pfts1d_wtgcell"]).mean(
+    ds["wtd_var_across_cfts"] = cft_var.weighted(ds["pfts1d_wtgcell"]).mean(
         dim="cft",
     )
-    map_clm = grid_one_variable(ds, "wtd_yield_across_cfts")
+
+    # Grid the data
+    map_clm = grid_one_variable(ds, "wtd_var_across_cfts")
     map_clm = lon_pm2idl(map_clm)
-    map_clm *= 1e-6 * 1e4  # Convert g/m2 to t/ha
-    map_clm.name = "Yield"
-    map_clm.attrs["units"] = "tons / ha"
+    map_clm *= conversion_factor
+    map_clm.name = name
+    map_clm.attrs["units"] = units
+
     return map_clm
 
 
-def _get_earthstat_yield_map(case, earthstat_crop_list, earthstat, crop, case_name):
+def _get_earthstat_map(which, case, earthstat_crop_list, earthstat, crop, case_name):
     """
     Get yield map from EarthStat
     """
+
+    # First, check whether this crop is even in EarthStat. Return early if not.
     case_res = case.cft_ds.attrs["resolution"].name
     map_obs = None
     try:
@@ -217,13 +235,25 @@ def _get_earthstat_yield_map(case, earthstat_crop_list, earthstat, crop, case_na
     except KeyError:
         print(f"{case_res} not in EarthStat; skipping {case_name}")
         return map_obs
-    map_obs = earthstat_ds["Yield"].isel(crop=earthstat_crop_idx).mean(dim="time")
+
+    # Define some things based on what map we want
+    if which == "yield":
+        which_var = "Yield"
+    else:
+        raise NotImplementedError(
+            f"_get_clm_map(which, ...) only works for 'yield', not '{which}'",
+        )
+
+    # Actually get the map
+    map_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx).mean(dim="time")
     map_obs = _cut_off_antarctica(map_obs)
+
     return map_obs
 
 
 def clm_and_earthstat_maps(
     *,
+    which: str,
     case_list: list,
     case_name_list: list,
     earthstat: dict,
@@ -245,23 +275,24 @@ def clm_and_earthstat_maps(
         if verbose:
             print(crop)
 
-        # Set up for maps of CLM yield
+        # Set up for maps of CLM
         results_clm = Results(layout)
 
-        # Set up for maps of CLM minus EarthStat yield
+        # Set up for maps of CLM minus EarthStat
         results_diff = Results(layout, symmetric_0=True)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         for i, case in enumerate(case_list):
             case_name = case_name_list[i]
 
-            # Get CLM yield map
+            # Get CLM map
             results_clm[case_name] = _cut_off_antarctica(
-                _get_clm_yield_map(grid_one_variable, lon_pm2idl, crop, case),
+                _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case),
             )
 
-            # Get observed yield map
-            map_obs = _get_earthstat_yield_map(
+            # Get observed map
+            map_obs = _get_earthstat_map(
+                which,
                 case,
                 earthstat_crop_list,
                 earthstat,
@@ -271,13 +302,15 @@ def clm_and_earthstat_maps(
             if map_obs is None:
                 continue
 
-            # Get yield difference map
+            # Get difference map
             results_diff[case_name] = _get_difference_map(
                 map_obs,
                 results_clm[case_name],
             )
-            results_diff[case_name].name = "Yield difference, CLM minus EarthStat"
-            results_diff[case_name].attrs["units"] = "tons / ha"
+            results_diff[
+                case_name
+            ].name = f"{results_clm[case_name].name} difference, CLM minus EarthStat"
+            results_diff[case_name].attrs["units"] = results_clm[case_name].units
 
         # Plot
         results_clm.plot(case_name_list=case_name_list, crop=crop)
