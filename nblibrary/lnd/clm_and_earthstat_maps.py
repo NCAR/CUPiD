@@ -35,7 +35,7 @@ def _get_difference_map(da0, da1):
     return da_diff
 
 
-def _map_subplot(da, ax, vmin, vmax, title, cmap="viridis"):
+def _map_subplot(da, ax, vrange, title, cmap="viridis"):
     """
     Plot a map in a subplot
     """
@@ -43,8 +43,8 @@ def _map_subplot(da, ax, vmin, vmax, title, cmap="viridis"):
     im = da.plot(
         ax=ax,
         transform=ccrs.PlateCarree(),
-        vmin=vmin,
-        vmax=vmax,
+        vmin=vrange[0],
+        vmax=vrange[1],
         add_colorbar=False,
         cmap=cmap,
     )
@@ -147,6 +147,7 @@ def clm_and_earthstat_maps(
             result_dict_clm[case_name] = map_clm
             vmin_clm = min(vmin_clm, np.nanmin(map_clm.values))
             vmax_clm = max(vmax_clm, np.nanmax(map_clm.values))
+            vrange_clm = [vmin_clm, vmax_clm]
 
             # Get observed yield map
             case_res = case.cft_ds.attrs["resolution"].name
@@ -178,6 +179,7 @@ def clm_and_earthstat_maps(
         # Set upper and lower limits of difference colorbar to the same value
         vmax_diff = max(abs(vmin_diff), abs(vmax_diff))
         vmin_diff = -vmax_diff
+        vrange_diff = [vmin_diff, vmax_diff]
 
         # Plot
         for i, ax_clm in enumerate(axes_clm.ravel()):
@@ -189,15 +191,14 @@ def clm_and_earthstat_maps(
             case_name = case_name_list[i]
 
             result_clm = result_dict_clm[case_name]
-            im_clm = _map_subplot(result_clm, ax_clm, vmin_clm, vmax_clm, case_name)
+            im_clm = _map_subplot(result_clm, ax_clm, vrange_clm, case_name)
 
             ax_diff = axes_diff.ravel()[i]
             result_diff = result_dict_diff[case_name]
             im_diff = _map_subplot(
                 result_diff,
                 ax_diff,
-                vmin_diff,
-                vmax_diff,
+                vrange_diff,
                 case_name,
                 cmap="coolwarm",
             )
