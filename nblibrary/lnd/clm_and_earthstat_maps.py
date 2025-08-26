@@ -328,6 +328,7 @@ def clm_and_earthstat_maps(
                 continue
 
             # Get difference map
+            map_obs = lon_pm2idl(map_obs)
             results_diff[case_name] = _get_difference_map(
                 map_obs,
                 results_clm[case_name],
