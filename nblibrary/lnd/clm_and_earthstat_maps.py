@@ -17,10 +17,17 @@ class Results:
     For holding a dict of map DataArrays and some ancillary information
     """
 
-    def __init__(self):
+    def __init__(self, layout):
         self.result_dict = {}
         self.vmin = np.inf
         self.vmax = -np.inf
+
+        self.fig, self.axes = plt.subplots(
+            nrows=layout["nrows"],
+            ncols=layout["ncols"],
+            figsize=layout["figsize"],
+            subplot_kw={"projection": ccrs.PlateCarree()},
+        )
 
     def __getitem__(self, key):
         """instance[key] syntax should return corresponding value in result_dict"""
@@ -32,11 +39,51 @@ class Results:
         self.vmax = max(self.vmax, np.nanmax(value.values))
         self.result_dict[key] = value
 
-    def vrange(self):
+    def vrange(self, *, symmetric_0=False):
         """
         Return list representing colorbar range
         """
-        return [self.vmin, self.vmax]
+        vmin = self.vmin
+        vmax = self.vmax
+
+        # Set upper and lower to same value, with lower the opposite left of zero
+        if symmetric_0:
+            vmax = max(abs(vmin), abs(vmax))
+            vmin = -vmax
+
+        return [vmin, vmax]
+
+
+class Timing:
+    """
+    For holding, calculating, and printing info about clm_and_earthstat_maps() timing
+    """
+
+    def __init__(self):
+        self._start_all = time()
+        self._start = None
+
+    def start(self):
+        """
+        Start timer for one loop
+        """
+        self._start = time()
+
+    def end(self, crop, verbose):
+        """
+        End timer for one loop
+        """
+        end = time()
+        if verbose:
+            print(f"{crop} took {end - self._start} s")
+
+    def end_all(self, verbose):
+        """
+        End timer across all loops
+        """
+        end_all = time()
+        if verbose:
+            print(f"Maps took {int(end_all - self._start_all)} s.")
 
 
 def _cut_off_antarctica(da, antarctica_border=-60):
@@ -162,31 +209,17 @@ def clm_and_earthstat_maps(
     1. With subplots showing mean CLM map for each case
     2. With subplots showing difference between mean CLM and EarthStat maps for each case
     """
-    start_all = time()
+    timer = Timing()
     for crop in crops_to_include:
-        fig_clm, axes_clm = plt.subplots(
-            nrows=layout["nrows"],
-            ncols=layout["ncols"],
-            figsize=layout["figsize"],
-            subplot_kw={"projection": ccrs.PlateCarree()},
-        )
-        fig_diff, axes_diff = plt.subplots(
-            nrows=layout["nrows"],
-            ncols=layout["ncols"],
-            figsize=layout["figsize"],
-            subplot_kw={"projection": ccrs.PlateCarree()},
-        )
-        start = time()
+        timer.start()
         if verbose:
             print(crop)
 
         # Set up for maps of CLM yield
-        results_clm = Results()
+        results_clm = Results(layout)
 
         # Set up for maps of CLM minus EarthStat yield
-        vmin_diff = np.inf
-        vmax_diff = -np.inf
-        result_dict_diff = {}
+        results_diff = Results(layout)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         for i, case in enumerate(case_list):
@@ -209,22 +242,15 @@ def clm_and_earthstat_maps(
                 continue
 
             # Get yield difference map
-            map_diff = _get_difference_map(map_obs, results_clm[case_name])
-            map_diff.name = "Yield difference, CLM minus EarthStat"
-            map_diff.attrs["units"] = "tons / ha"
-
-            # Save yield difference map
-            result_dict_diff[case_name] = map_diff
-            vmin_diff = min(vmin_diff, np.nanmin(map_diff.values))
-            vmax_diff = max(vmax_diff, np.nanmax(map_diff.values))
-
-        # Set upper and lower limits of difference colorbar to the same value
-        vmax_diff = max(abs(vmin_diff), abs(vmax_diff))
-        vmin_diff = -vmax_diff
-        vrange_diff = [vmin_diff, vmax_diff]
+            results_diff[case_name] = _get_difference_map(
+                map_obs,
+                results_clm[case_name],
+            )
+            results_diff[case_name].name = "Yield difference, CLM minus EarthStat"
+            results_diff[case_name].attrs["units"] = "tons / ha"
 
         # Plot
-        for i, ax_clm in enumerate(axes_clm.ravel()):
+        for i, ax_clm in enumerate(results_clm.axes.ravel()):
             try:
                 case_name = case_name_list[i]
             except IndexError:
@@ -238,22 +264,23 @@ def clm_and_earthstat_maps(
                 case_name,
             )
 
-            result_diff = result_dict_diff[case_name]
             im_diff = _map_subplot(
-                result_diff,
-                axes_diff.ravel()[i],
-                vrange_diff,
+                results_diff[case_name],
+                results_diff.axes.ravel()[i],
+                results_diff.vrange(symmetric_0=True),
                 case_name,
                 cmap="coolwarm",
             )
 
         # Finish up
-        _mapfig_finishup(fig_clm, im_clm, results_clm[case_name], crop, layout)
-        _mapfig_finishup(fig_diff, im_diff, result_diff, crop, layout)
-        if verbose:
-            end = time()
-            print(f"{crop} took {end - start} s")
+        _mapfig_finishup(results_clm.fig, im_clm, results_clm[case_name], crop, layout)
+        _mapfig_finishup(
+            results_diff.fig,
+            im_diff,
+            results_diff[case_name],
+            crop,
+            layout,
+        )
+        timer.end(crop, verbose)
 
-    if verbose:
-        end_all = time()
-        print(f"Maps took {int(end_all - start_all)} s.")
+    timer.end_all(verbose)
