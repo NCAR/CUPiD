@@ -14,18 +14,27 @@ from matplotlib import pyplot as plt
 
 class Results:
     """
-    For holding a dict of map DataArrays and some ancillary information
+    For holding a dict of map DataArrays, plus some ancillary information and functions
     """
 
-    def __init__(self, layout):
+    # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, layout, *, symmetric_0=False):
         self.result_dict = {}
         self.vmin = np.inf
         self.vmax = -np.inf
 
+        self.layout = layout
+        self.symmetric_0 = symmetric_0
+        if self.symmetric_0:
+            self.cmap = "coolwarm"
+        else:
+            self.cmap = "viridis"
+
         self.fig, self.axes = plt.subplots(
-            nrows=layout["nrows"],
-            ncols=layout["ncols"],
-            figsize=layout["figsize"],
+            nrows=self.layout["nrows"],
+            ncols=self.layout["ncols"],
+            figsize=self.layout["figsize"],
             subplot_kw={"projection": ccrs.PlateCarree()},
         )
 
@@ -39,7 +48,7 @@ class Results:
         self.vmax = max(self.vmax, np.nanmax(value.values))
         self.result_dict[key] = value
 
-    def vrange(self, *, symmetric_0=False):
+    def vrange(self):
         """
         Return list representing colorbar range
         """
@@ -47,11 +56,32 @@ class Results:
         vmax = self.vmax
 
         # Set upper and lower to same value, with lower the opposite left of zero
-        if symmetric_0:
+        if self.symmetric_0:
             vmax = max(abs(vmin), abs(vmax))
             vmin = -vmax
 
         return [vmin, vmax]
+
+    def plot(self, *, case_name_list: list, crop: str):
+        """
+        Fill out figure with all subplots, colorbar, etc.
+        """
+        for i, ax in enumerate(self.axes.ravel()):
+            try:
+                case_name = case_name_list[i]
+            except IndexError:
+                ax.set_visible(False)
+                continue
+
+            im = _map_subplot(
+                self[case_name],
+                ax,
+                self.vrange(),
+                case_name,
+                cmap=self.cmap,
+            )
+
+        _mapfig_finishup(self.fig, im, self[case_name], crop, self.layout)
 
 
 class Timing:
@@ -219,7 +249,7 @@ def clm_and_earthstat_maps(
         results_clm = Results(layout)
 
         # Set up for maps of CLM minus EarthStat yield
-        results_diff = Results(layout)
+        results_diff = Results(layout, symmetric_0=True)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         for i, case in enumerate(case_list):
@@ -250,37 +280,9 @@ def clm_and_earthstat_maps(
             results_diff[case_name].attrs["units"] = "tons / ha"
 
         # Plot
-        for i, ax_clm in enumerate(results_clm.axes.ravel()):
-            try:
-                case_name = case_name_list[i]
-            except IndexError:
-                ax_clm.set_visible(False)
-                continue
+        results_clm.plot(case_name_list=case_name_list, crop=crop)
+        results_diff.plot(case_name_list=case_name_list, crop=crop)
 
-            im_clm = _map_subplot(
-                results_clm[case_name],
-                ax_clm,
-                results_clm.vrange(),
-                case_name,
-            )
-
-            im_diff = _map_subplot(
-                results_diff[case_name],
-                results_diff.axes.ravel()[i],
-                results_diff.vrange(symmetric_0=True),
-                case_name,
-                cmap="coolwarm",
-            )
-
-        # Finish up
-        _mapfig_finishup(results_clm.fig, im_clm, results_clm[case_name], crop, layout)
-        _mapfig_finishup(
-            results_diff.fig,
-            im_diff,
-            results_diff[case_name],
-            crop,
-            layout,
-        )
         timer.end(crop, verbose)
 
     timer.end_all(verbose)
