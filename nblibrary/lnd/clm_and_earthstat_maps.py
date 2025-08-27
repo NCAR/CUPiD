@@ -9,7 +9,9 @@ from time import time
 import cartopy.crs as ccrs
 import numpy as np
 import xarray as xr
+from earthstat import EarthStat
 from matplotlib import pyplot as plt
+from plotting_utils import cut_off_antarctica
 
 
 class Results:
@@ -114,14 +116,6 @@ class Timing:
         end_all = time()
         if verbose:
             print(f"Maps took {int(end_all - self._start_all)} s.")
-
-
-def _cut_off_antarctica(da, antarctica_border=-60):
-    """
-    Cut off the bottom of the map, from latitude antarctica_border south
-    """
-    da = da.sel(lat=slice(antarctica_border, 90))
-    return da
 
 
 def _get_difference_map(da0, da1):
@@ -237,53 +231,14 @@ def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
     return map_clm
 
 
-def _get_earthstat_map(which, case, earthstat_crop_list, earthstat, crop, case_name):
-    """
-    Get yield map from EarthStat
-    """
-
-    # First, check whether this crop is even in EarthStat. Return early if not.
-    case_res = case.cft_ds.attrs["resolution"].name
-    map_obs = None
-    try:
-        earthstat_crop_idx = earthstat_crop_list.index(crop)
-    except ValueError:
-        print(f"{crop} not in EarthStat res {case_res}; skipping")
-        return map_obs
-    try:
-        earthstat_ds = earthstat[case_res]
-    except KeyError:
-        print(f"{case_res} not in EarthStat; skipping {case_name}")
-        return map_obs
-
-    # Define some things based on what map we want
-    if which == "yield":
-        which_var = "Yield"
-        conversion_factor = 1  # Already tons/ha
-    elif which == "prod":
-        which_var = "Production"
-        conversion_factor = 1e-6  # Convert tons to Mt
-    else:
-        raise NotImplementedError(
-            f"_get_earthstat_map() doesn't work for which='{which}'",
-        )
-
-    # Actually get the map
-    map_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx).mean(dim="time")
-    map_obs = _cut_off_antarctica(map_obs)
-    map_obs *= conversion_factor
-
-    return map_obs
-
-
+# TODO: Just pass utils, which has this and lon_pm2idl methods. For type hinting: types.ModuleType
 def clm_and_earthstat_maps(
     *,
     which: str,
     case_list: list,
     case_name_list: list,
-    earthstat: dict,
+    earthstat_data: EarthStat,
     crops_to_include: list,
-    earthstat_crop_list: list,
     layout: dict,
     grid_one_variable: Callable,
     lon_pm2idl: Callable,
@@ -311,16 +266,14 @@ def clm_and_earthstat_maps(
             case_name = case_name_list[i]
 
             # Get CLM map
-            results_clm[case_name] = _cut_off_antarctica(
+            results_clm[case_name] = cut_off_antarctica(
                 _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case),
             )
 
             # Get observed map
-            map_obs = _get_earthstat_map(
+            map_obs = earthstat_data.get_map(
                 which,
-                case,
-                earthstat_crop_list,
-                earthstat,
+                case.cft_ds.attrs["resolution"].name,
                 crop,
                 case_name,
             )
