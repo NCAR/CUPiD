@@ -18,19 +18,17 @@ class EarthStat:
         self,
         earthstat_dir,
         sim_resolutions,
-        start_year,
-        end_year,
-        crops_to_include,
+        opts,
     ):
         # Define variables
         self.crops = []
         self._data = {}
 
         # Import EarthStat crop list
-        self._get_crop_list(earthstat_dir, crops_to_include)
+        self._get_crop_list(earthstat_dir, opts["crops_to_include"])
 
         # Import EarthStat maps
-        self._import_data(earthstat_dir, sim_resolutions, start_year, end_year)
+        self._import_data(earthstat_dir, sim_resolutions, opts)
 
     def __getitem__(self, key):
         """instance[key] syntax should return corresponding value in data dict"""
@@ -75,7 +73,7 @@ class EarthStat:
             if crop not in self.crops:
                 print(f"WARNING: {crop} not found in self.crops")
 
-    def _import_data(self, earthstat_dir, sim_resolutions, start_year, end_year):
+    def _import_data(self, earthstat_dir, sim_resolutions, opts):
         """
         Import EarthStat maps corresponding to simulated CLM resolutions
         """
@@ -88,6 +86,8 @@ class EarthStat:
 
             # Open file
             ds = xr.open_dataset(os.path.join(earthstat_dir, res + ".nc"))
+            start_year = opts["start_year"]
+            end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
 
             self[res] = ds

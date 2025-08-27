@@ -14,17 +14,9 @@ class CaseList(list):
     def __init__(
         self,
         *args,
-        case_name_list,
-        CESM_output_dir,
         CropCase,
         identify_resolution,
-        clm_file_h,
-        cfts_to_include,
-        crops_to_include,
-        start_year,
-        end_year,
-        verbose,
-        dev_mode,
+        opts,
         **kwargs,
     ):
         # Initialize as a normal list...
@@ -32,20 +24,13 @@ class CaseList(list):
         # ...And then add all the extra stuff
 
         # Define extra variables
-        self.names = case_name_list
+        self.names = opts["case_name_list"]
 
         # Import cases
         self._import_cases(
-            CESM_output_dir,
             CropCase,
             identify_resolution,
-            clm_file_h,
-            cfts_to_include,
-            crops_to_include,
-            start_year,
-            end_year,
-            verbose,
-            dev_mode,
+            opts,
         )
         self.resolutions = {case.cft_ds.attrs["resolution"].name for case in self}
 
@@ -55,22 +40,15 @@ class CaseList(list):
 
     def _import_cases(
         self,
-        CESM_output_dir,
         CropCase,  # pylint: disable=invalid-name
         identify_resolution,
-        clm_file_h,
-        cfts_to_include,
-        crops_to_include,
-        start_year,
-        end_year,
-        verbose,
-        dev_mode,
+        opts,
     ):
         start = time()
         for i, case in enumerate(self.names):
             print(f"Importing {case}...")
             case_output_dir = os.path.join(
-                CESM_output_dir,
+                opts["CESM_output_dir"],
                 case,
                 "lnd",
                 "hist",
@@ -79,16 +57,16 @@ class CaseList(list):
                 CropCase(
                     case,
                     case_output_dir,
-                    clm_file_h,
-                    cfts_to_include,
-                    crops_to_include,
-                    start_year,
-                    end_year,
-                    verbose=verbose,
+                    opts["clm_file_h"],
+                    opts["cfts_to_include"],
+                    opts["crops_to_include"],
+                    opts["start_year"],
+                    opts["end_year"],
+                    verbose=opts["verbose"],
                 ),
             )
 
-            if dev_mode:
+            if opts["dev_mode"]:
                 start_load = time()
                 print("Loading...")
                 self[-1].cft_ds.load()
@@ -116,7 +94,7 @@ class CaseList(list):
             ds.attrs["resolution"] = identify_resolution(ds)
 
         print("Done.")
-        if verbose:
+        if opts["verbose"]:
             end = time()
             print(f"Importing took {int(end - start)} s")
 

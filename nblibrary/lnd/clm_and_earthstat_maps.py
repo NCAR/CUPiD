@@ -237,15 +237,17 @@ def clm_and_earthstat_maps(
     which: str,
     case_list: CaseList,
     earthstat_data: EarthStat,
-    crops_to_include: list,
     utils: ModuleType,
-    verbose: bool,
+    opts: dict,
 ):
     """
     For each crop, make two figures:
     1. With subplots showing mean CLM map for each case
     2. With subplots showing difference between mean CLM and EarthStat maps for each case
     """
+    crops_to_include = opts["crops_to_include"]
+    verbose = opts["verbose"]
+
     timer = Timing()
     for crop in crops_to_include:
         timer.start()
