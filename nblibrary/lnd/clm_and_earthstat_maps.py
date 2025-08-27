@@ -3,8 +3,8 @@ clm_and_earthstat_maps() function intended for (re)use in Global_crop_yield_comp
 """
 from __future__ import annotations
 
-from collections.abc import Callable
 from time import time
+from types import ModuleType
 
 import cartopy.crs as ccrs
 import numpy as np
@@ -193,7 +193,7 @@ def _get_clm_ds_result_prod(ds):
     return ds
 
 
-def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
+def _get_clm_map(which, utils, crop, case):
     """
     Get yield map from CLM
     """
@@ -220,8 +220,8 @@ def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
     ds = get_clm_ds_result(ds)
 
     # Grid the data
-    map_clm = grid_one_variable(ds, "result")
-    map_clm = lon_pm2idl(map_clm)
+    map_clm = utils.grid_one_variable(ds, "result")
+    map_clm = utils.lon_pm2idl(map_clm)
 
     # Finish up
     map_clm *= conversion_factor
@@ -231,7 +231,6 @@ def _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case):
     return map_clm
 
 
-# TODO: Just pass utils, which has this and lon_pm2idl methods. For type hinting: types.ModuleType
 def clm_and_earthstat_maps(
     *,
     which: str,
@@ -240,8 +239,7 @@ def clm_and_earthstat_maps(
     earthstat_data: EarthStat,
     crops_to_include: list,
     layout: dict,
-    grid_one_variable: Callable,
-    lon_pm2idl: Callable,
+    utils: ModuleType,
     verbose: bool,
 ):
     """
@@ -267,7 +265,7 @@ def clm_and_earthstat_maps(
 
             # Get CLM map
             results_clm[case_name] = cut_off_antarctica(
-                _get_clm_map(which, grid_one_variable, lon_pm2idl, crop, case),
+                _get_clm_map(which, utils, crop, case),
             )
 
             # Get observed map
@@ -281,7 +279,7 @@ def clm_and_earthstat_maps(
                 continue
 
             # Get difference map
-            map_obs = lon_pm2idl(map_obs)
+            map_obs = utils.lon_pm2idl(map_obs)
             results_diff[case_name] = _get_difference_map(
                 map_obs,
                 results_clm[case_name],
