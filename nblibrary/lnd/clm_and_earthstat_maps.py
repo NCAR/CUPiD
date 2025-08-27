@@ -9,6 +9,7 @@ from types import ModuleType
 import cartopy.crs as ccrs
 import numpy as np
 import xarray as xr
+from caselist import CaseList
 from earthstat import EarthStat
 from matplotlib import pyplot as plt
 from plotting_utils import cut_off_antarctica
@@ -234,11 +235,9 @@ def _get_clm_map(which, utils, crop, case):
 def clm_and_earthstat_maps(
     *,
     which: str,
-    case_list: list,
-    case_name_list: list,
+    case_list: CaseList,
     earthstat_data: EarthStat,
     crops_to_include: list,
-    layout: dict,
     utils: ModuleType,
     verbose: bool,
 ):
@@ -254,14 +253,14 @@ def clm_and_earthstat_maps(
             print(crop)
 
         # Set up for maps of CLM
-        results_clm = Results(layout)
+        results_clm = Results(case_list.mapfig_layout)
 
         # Set up for maps of CLM minus EarthStat
-        results_diff = Results(layout, symmetric_0=True)
+        results_diff = Results(case_list.mapfig_layout, symmetric_0=True)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         for i, case in enumerate(case_list):
-            case_name = case_name_list[i]
+            case_name = case_list.names[i]
 
             # Get CLM map
             results_clm[case_name] = cut_off_antarctica(
@@ -290,8 +289,8 @@ def clm_and_earthstat_maps(
             results_diff[case_name].attrs["units"] = results_clm[case_name].units
 
         # Plot
-        results_clm.plot(case_name_list=case_name_list, crop=crop)
-        results_diff.plot(case_name_list=case_name_list, crop=crop)
+        results_clm.plot(case_name_list=case_list.names, crop=crop)
+        results_diff.plot(case_name_list=case_list.names, crop=crop)
 
         timer.end(crop, verbose)
 
