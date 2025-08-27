@@ -11,6 +11,10 @@ import xarray as xr
 
 
 class CaseList(list):
+    """
+    A class for holding a list of cases and information about them
+    """
+
     def __init__(
         self,
         *args,
@@ -45,17 +49,17 @@ class CaseList(list):
         opts,
     ):
         start = time()
-        for i, case in enumerate(self.names):
-            print(f"Importing {case}...")
+        for case_name in self.names:
+            print(f"Importing {case_name}...")
             case_output_dir = os.path.join(
                 opts["CESM_output_dir"],
-                case,
+                case_name,
                 "lnd",
                 "hist",
             )
             self.append(
                 CropCase(
-                    case,
+                    case_name,
                     case_output_dir,
                     opts["clm_file_h"],
                     opts["cfts_to_include"],
@@ -75,15 +79,7 @@ class CaseList(list):
 
             # Get gridcell area
             ds = self[-1].cft_ds
-            area_g = []
-            for i, lon in enumerate(ds["grid1d_lon"].values):
-                lat = ds["grid1d_lat"].values[i]
-                area_g.append(ds["area"].sel(lat=lat, lon=lon))
-            area_g = np.array(area_g)
-            area_p = []
-            for i in ds["pfts1d_gi"].isel(cft=0).values:
-                area_p.append(area_g[int(i) - 1])
-            area_p = np.array(area_p)
+            area_p = self._get_area_p(ds)
             ds["pfts1d_gridcellarea"] = xr.DataArray(
                 data=area_p,
                 coords={"pft": ds["pft"].values},
@@ -97,6 +93,21 @@ class CaseList(list):
         if opts["verbose"]:
             end = time()
             print(f"Importing took {int(end - start)} s")
+
+    def _get_area_p(self, ds):
+        """
+        Get area of gridcell that is parent of each pft (patch)
+        """
+        area_g = []
+        for i, lon in enumerate(ds["grid1d_lon"].values):
+            lat = ds["grid1d_lat"].values[i]
+            area_g.append(ds["area"].sel(lat=lat, lon=lon))
+        area_g = np.array(area_g)
+        area_p = []
+        for i in ds["pfts1d_gi"].isel(cft=0).values:
+            area_p.append(area_g[int(i) - 1])
+        area_p = np.array(area_p)
+        return area_p
 
     def _get_mapfig_layout(self):
         """
