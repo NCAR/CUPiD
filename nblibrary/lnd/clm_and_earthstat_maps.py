@@ -178,7 +178,7 @@ def _mapfig_finishup(fig, im, da, crop, layout):
 
 
 def _get_clm_ds_result_yield(ds):
-    cft_var = ds["YIELD_ANN"].mean(dim="time")
+    cft_var = ds["crop_cft_yield"].mean(dim="time")
     ds = ds.mean(dim="time")
     ds["result"] = cft_var.weighted(ds["pfts1d_wtgcell"]).mean(
         dim="cft",
@@ -187,9 +187,7 @@ def _get_clm_ds_result_yield(ds):
 
 
 def _get_clm_ds_result_prod(ds):
-    cft_area = ds["pfts1d_gridcellarea"] * ds["pfts1d_wtgcell"]
-    cft_area *= 1e6  # Convert km2 to m2
-    cft_prod = ds["YIELD_ANN"] * cft_area
+    cft_prod = ds["crop_cft_prod"]
     ds["result"] = cft_prod.sum(dim="cft").mean(dim="time")
     return ds
 
@@ -216,8 +214,7 @@ def _get_clm_map(which, utils, crop, case):
         )
 
     # Extract the data
-    ds = case.cft_ds.sel(cft=case.crop_list[crop].pft_nums)
-    ds = ds.drop_vars(["date_written", "time_written"])
+    ds = case.cft_ds.sel(crop=crop)
     ds = get_clm_ds_result(ds)
 
     # Grid the data
