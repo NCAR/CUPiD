@@ -16,7 +16,6 @@ CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 unset PYTHONPATH
 
 # cupid-analysis env required for end date calculation
-module load conda
 conda activate ${CUPID_ANALYSIS_ENV}
 
 # Set variables that come from environment or CESM XML files
@@ -35,7 +34,7 @@ CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
 CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
 CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
 CALENDAR=`./xmlquery --value CALENDAR`
-CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_cupid_enddate.py --start-date ${CUPID_STARTDATE} --option ${CUPID_STOP_OPTION} --n ${CUPID_STOP_N} --calendar ${CALENDAR}`
+CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_cupid_enddate.py --start-date ${CUPID_STARTDATE} --stop_option ${CUPID_STOP_OPTION} --stop_n ${CUPID_STOP_N} --calendar ${CALENDAR}`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
 CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`

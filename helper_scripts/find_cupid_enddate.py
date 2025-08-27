@@ -16,12 +16,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Starting date, format is YYYY-MM-DD.",
 )
 @click.option(
-    "--option",
+    "--stop_option",
     required=True,
     help="Unit to increment date by.",
 )
 @click.option(
-    "--n",
+    "--stop_n",
     required=True,
     help="Number of units (option) to increment date by.",
 )
@@ -30,37 +30,51 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     required=True,
     help="Calendar type. See cftime calendar types for additional information.",
 )
-def find_enddate(start_date, n, option, calendar):
+def find_enddate(start_date, stop_n, stop_option, calendar):
     # Process inputs
     year, month, day = (int(i) for i in start_date.split("-"))
-    calendar = (calendar.lower()).replace(
-        "_",
-        "",
-    )  # GREGORIAN -> gregorian, NO_LEAP -> noleap
-    n = int(n)
+    calendar_map = {"GREGORIAN": "proleptic_gregorian", "NO_LEAP": "noleap"}
+    calendar = calendar_map[calendar]
+    stop_n = int(stop_n)
 
     start_date = cftime.datetime(year, month, day, calendar=calendar)
     end_date = start_date
 
     # Catch edge cases
-    if option == "nyears" or option == "nmonths":
-        if start_date.day != 1:
+    if stop_option == "nmonths":
+        if start_date.day > 27:
             raise ValueError(
-                """If running with "nyears" or "nmonths" as CUPID_OPTION, the model run must begin on the
-1st of the month. Otherwise use "ndays" (you might need to calculate the conversion yourself
-if the calendar is uncommon).""",
+                "CUPID_STARTDATE >= 28. No standard for resolving monthly increments starting at the end of a month.",
             )
 
     # Make modifications
-    if option == "nyears":
-        end_year = start_date.year + n
-        end_date = cftime.datetime(end_year, start_date.month, start_date.day)
-    if option == "nmonths":
-        end_month = start_date.month + n % 12
-        end_year = start_date.year + n // 12
-        end_date = cftime.datetime(end_year, end_month, start_date.day)
-    if option == "ndays":
-        time_delta = datetime.timedelta(days=n)
+    if stop_option == "nyears":
+        end_year = start_date.year + stop_n
+        # Check Feb edge case
+        if start_date.month == 2 and start_date.day == 29:
+            if cftime.is_leap_year(end_year, calendar=calendar):
+                end_day = 29
+            else:
+                end_day = 28
+        else:
+            end_day = start_date.day
+        end_date = cftime.datetime(
+            end_year,
+            start_date.month,
+            end_day,
+            calendar=calendar,
+        )
+    if stop_option == "nmonths":
+        end_month = start_date.month + stop_n % 12
+        end_year = start_date.year + stop_n // 12
+        end_date = cftime.datetime(
+            end_year,
+            end_month,
+            start_date.day,
+            calendar=calendar,
+        )
+    if stop_option == "ndays":
+        time_delta = datetime.timedelta(days=stop_n)
         end_date = end_date + time_delta
 
     print(end_date.strftime("%Y-%m-%d"))  # for the bash script to use
