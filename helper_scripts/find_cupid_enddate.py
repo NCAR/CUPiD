@@ -40,45 +40,45 @@ def find_enddate(start_date, stop_n, stop_option, calendar):
     start_date = cftime.datetime(year, month, day, calendar=calendar)
     end_date = start_date
 
-    # Catch edge cases
-    if stop_option == "nmonths":
-        if start_date.day > 27:
-            raise ValueError(
-                "CUPID_STARTDATE >= 28. No standard for resolving monthly increments starting at the end of a month.",
-            )
-
     # Make modifications
     if stop_option == "nyears":
+        end_day = start_date.day
+        end_month = start_date.month
         end_year = start_date.year + stop_n
-        # Check Feb edge case
-        if start_date.month == 2 and start_date.day == 29:
-            if cftime.is_leap_year(end_year, calendar=calendar):
-                end_day = 29
-            else:
-                end_day = 28
-        else:
-            end_day = start_date.day
-        end_date = cftime.datetime(
-            end_year,
-            start_date.month,
-            end_day,
-            calendar=calendar,
-        )
-    if stop_option == "nmonths":
+    elif stop_option == "nmonths":
+        end_day = start_date.day
         end_month = start_date.month + stop_n % 12
         end_year = start_date.year + stop_n // 12
-        end_date = cftime.datetime(
-            end_year,
-            end_month,
-            start_date.day,
-            calendar=calendar,
-        )
-    if stop_option == "ndays":
+    elif stop_option == "ndays":
         time_delta = datetime.timedelta(days=stop_n)
         end_date = end_date + time_delta
 
-    print(end_date.strftime("%Y-%m-%d"))  # for the bash script to use
+    # If stop_option is nyears or nmonths, need to handle edge cases where
+    # start_date.day is not a valid date in end_date.month (e.g. running
+    # for one month from March 31st). In these cases, we stop at the end of
+    # the computed end_month (April 30th in the example above).
+    if stop_option in ["nyears", "nmonths"]:
+        try:
+            end_date = cftime.datetime(
+                end_year,
+                end_month,
+                end_day,
+                calendar=calendar,
+            )
+        except ValueError:
+            end_day = cftime.datetime(end_year, end_month, 1).daysinmonth
+            end_date = cftime.datetime(
+                end_year,
+                end_month,
+                end_day,
+                calendar=calendar,
+            )
+
+    return end_date
 
 
 if __name__ == "__main__":
-    find_enddate()
+    # standalone_mode=False lets the sript print the result to stdout
+    # (Note that find_enddate() returns a cftime.datetime object if
+    # imported directly in a python script.)
+    print(find_enddate(standalone_mode=False).strftime("%Y-%m-%d"))
