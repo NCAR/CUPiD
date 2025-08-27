@@ -118,6 +118,9 @@ class EarthStat:
         elif which == "prod":
             which_var = "Production"
             conversion_factor = 1e-6  # Convert tons to Mt
+        elif which == "area":
+            which_var = "HarvestArea"
+            conversion_factor = 1e-6  # Convert ha to Mha
         else:
             raise NotImplementedError(
                 f"_get_earthstat_map() doesn't work for which='{which}'",

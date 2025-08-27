@@ -192,6 +192,12 @@ def _get_clm_ds_result_prod(ds):
     return ds
 
 
+def _get_clm_ds_result_area(ds):
+    cft_area = ds["crop_cft_area"]
+    ds["result"] = cft_area.sum(dim="cft").mean(dim="time")
+    return ds
+
+
 def _get_clm_map(which, utils, crop, case):
     """
     Get yield map from CLM
@@ -208,6 +214,11 @@ def _get_clm_map(which, utils, crop, case):
         units = "Mt"
         conversion_factor = 1e-6 * 1e-6  # Convert g to Mt
         name = "Production"
+    elif which == "area":
+        get_clm_ds_result = _get_clm_ds_result_area
+        units = "Mha"
+        conversion_factor = 1e-4 * 1e-6  # Convert m2 to Mha
+        name = "Area"
     else:
         raise NotImplementedError(
             f"_get_clm_map() doesn't work for which='{which}'",
