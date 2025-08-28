@@ -276,6 +276,10 @@ def clm_and_earthstat_maps(
             results_clm[case_name] = cut_off_antarctica(
                 _get_clm_map(which, utils, crop, case),
             )
+            if which == "area":
+                results_clm[case_name] = results_clm[case_name].where(
+                    results_clm[case_name] > 0,
+                )
 
             # Get observed map
             map_obs = earthstat_data.get_map(
