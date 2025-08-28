@@ -230,6 +230,10 @@ def _get_clm_map(which, utils, crop, case):
 
     # Grid the data
     map_clm = utils.grid_one_variable(ds, "result")
+    if which == "prod":
+        ds_area = _get_clm_ds_result_area(ds)
+        map_area = utils.grid_one_variable(ds_area, "result")
+        map_clm = map_clm.where(map_area > 0)
     map_clm = utils.lon_pm2idl(map_clm)
 
     # Finish up
