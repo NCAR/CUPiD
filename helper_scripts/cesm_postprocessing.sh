@@ -6,17 +6,10 @@
 # and then update this to python as well (and take a CIME Case object as
 # an argument)
 
-# Query these early for python evnironment usage
-CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
-CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
-
 # Note: on derecho, the cesmdev module creates a python conflict
 #       by setting $PYTHONPATH; since this is conda-based we
 #       want an empty PYTHONPATH environment variable
 unset PYTHONPATH
-
-# cupid-analysis env required for end date calculation
-conda activate ${CUPID_ANALYSIS_ENV}
 
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
@@ -34,11 +27,9 @@ CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
 CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
 CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
 CALENDAR=`./xmlquery --value CALENDAR`
-CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_cupid_enddate.py --start-date ${CUPID_STARTDATE} --stop_option ${CUPID_STOP_OPTION} --stop_n ${CUPID_STOP_N} --calendar ${CALENDAR}`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
 CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
-CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_cupid_enddate.py --start-date ${CUPID_BASE_STARTDATE} --stop_option ${CUPID_BASE_STOP_OPTION} --stop_n ${CUPID_BASE_STOP_N} --calendar ${CALENDAR}`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -49,6 +40,26 @@ CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
+CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
+CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
+
+# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
+# cupid-analysis env required for end date calculation
+conda activate ${CUPID_ANALYSIS_ENV}
+# calendar name needs to be changed for cftime standards
+CFTIME_CALENDAR=$CALENDAR
+CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
+CFTIME_CALENDAR="${CFTIME_CALENDAR/NO_LEAP/noleap}"
+CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_STARTDATE} \
+  --stop-option ${CUPID_STOP_OPTION} \
+  --stop-n ${CUPID_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
+CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_BASE_STARTDATE} \
+  --stop-option ${CUPID_BASE_STOP_OPTION} \
+  --stop-n ${CUPID_BASE_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
 
 # Note if CUPID_ROOT is not tools/CUPiD
 # (but don't complain if user adds a trailing "/")
