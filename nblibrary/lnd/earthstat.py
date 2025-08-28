@@ -93,23 +93,23 @@ class EarthStat:
             self[res] = ds
         print("Done.")
 
-    def get_map(self, which, case_res, crop, case_name):
+    def get_data(self, which, case_res, crop, case_name=""):
         """
-        Get map from EarthStat for comparing with CLM output
+        Get data from EarthStat
         """
 
         # First, check whether this crop is even in EarthStat. Return early if not.
-        map_obs = None
+        data_obs = None
         try:
             earthstat_crop_idx = self.crops.index(crop)
         except ValueError:
             print(f"{crop} not in EarthStat res {case_res}; skipping")
-            return map_obs
+            return data_obs
         try:
             earthstat_ds = self[case_res]
         except KeyError:
             print(f"{case_res} not in EarthStat; skipping {case_name}")
-            return map_obs
+            return data_obs
 
         # Define some things based on what map we want
         if which == "yield":
@@ -126,9 +126,17 @@ class EarthStat:
                 f"_get_earthstat_map() doesn't work for which='{which}'",
             )
 
+        data_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx)
+        data_obs *= conversion_factor
+        return data_obs
+
+    def get_map(self, which, case_res, crop, case_name=""):
+        """
+        Get map from EarthStat for comparing with CLM output
+        """
         # Actually get the map
-        map_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx).mean(dim="time")
+        data_obs = self.get_data(which, case_res, crop, case_name)
+        map_obs = data_obs.mean(dim="time")
         map_obs = cut_off_antarctica(map_obs)
-        map_obs *= conversion_factor
 
         return map_obs

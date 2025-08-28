@@ -25,20 +25,13 @@ def _setup_fig(opts):
 
 def _plot_clm_cases(case_list, opts, var_details, crop):
     for c, case in enumerate(case_list):
-        # Do NOT use crop_cft_yield here, because you need to sum across cft and pft before
-        # doing the division
-        crop_prod_ts = (
-            case.cft_ds["crop_cft_prod"].sel(crop=crop).sum(dim=["cft", "pft"])
-        )
-        crop_area_ts = (
-            case.cft_ds["crop_cft_area"].sel(crop=crop).sum(dim=["cft", "pft"])
-        )
-        crop_yield_ts = crop_prod_ts / crop_area_ts
+
+        crop_data_ts = var_details["function"](crop, case)
 
         # Plot data
-        crop_yield_ts *= var_details["conversion_factor"]
-        crop_yield_ts.name = var_details["da_name"]
-        crop_yield_ts.attrs["units"] = var_details["ctsm_units"]
+        crop_data_ts *= var_details["conversion_factor"]
+        crop_data_ts.name = var_details["da_name"]
+        crop_data_ts.attrs["units"] = var_details["ctsm_units"]
 
         # Change line style for one line that overlaps another for some crops
         # TODO: Optionally define linestyle for each case in config.yml
@@ -50,11 +43,28 @@ def _plot_clm_cases(case_list, opts, var_details, crop):
             linestyle = "-"
 
             # Plot
-        crop_yield_ts.plot(linestyle=linestyle)
+        crop_data_ts.plot(linestyle=linestyle)
 
 
-def _finish_fig(opts, hspace, wspace, fig):
-    plt.subplots_adjust(wspace=wspace, hspace=hspace)
+def _get_clm_yield(crop, case):
+    # Do NOT use crop_cft_yield here, because you need to sum across cft and pft before
+    # doing the division
+    crop_prod_ts = case.cft_ds["crop_cft_prod"].sel(crop=crop).sum(dim=["cft", "pft"])
+    crop_area_ts = case.cft_ds["crop_cft_area"].sel(crop=crop).sum(dim=["cft", "pft"])
+    crop_yield_ts = crop_prod_ts / crop_area_ts
+    return crop_yield_ts
+
+
+def _get_clm_prod(crop, case):
+    return case.cft_ds["crop_cft_prod"].sel(crop=crop).sum(dim=["cft", "pft"])
+
+
+def _get_clm_area(crop, case):
+    return case.cft_ds["crop_cft_area"].sel(crop=crop).sum(dim=["cft", "pft"])
+
+
+def _finish_fig(opts, fig_opts, fig):
+    plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
     fig.legend(
         labels=opts["case_legend_list"]
         + ["FAOSTAT", f"EarthStat {EARTHSTAT_RES_TO_PLOT}"],
@@ -63,7 +73,7 @@ def _finish_fig(opts, hspace, wspace, fig):
         ncol=3,
         bbox_transform=fig.transFigure,
     )
-    fig.suptitle("Global yield", fontsize="x-large", fontweight="bold")
+    fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
     plt.show()
 
 
@@ -81,43 +91,76 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
     )
 
 
-def _plot_earthstat(earthstat_data, earthstat_ds_to_plot, crop, ax):
-    earthstat_crop_idx = None
-    try:
-        earthstat_crop_idx = earthstat_data.crops.index(crop)
-    except ValueError:
-        print(f"{crop} not in EarthStat res {EARTHSTAT_RES_TO_PLOT}; skipping")
-    if earthstat_crop_idx is not None:
-        earthstat_crop_ds = earthstat_ds_to_plot.isel(crop=earthstat_crop_idx)
-        earthstat_area_da_tyx = earthstat_crop_ds["HarvestArea"]
-        earthstat_prod_da_tyx = earthstat_crop_ds["Production"]
-        earthstat_prod_da_t = earthstat_prod_da_tyx.sum(dim=["lat", "lon"])
-        earthstat_area_da_t = earthstat_area_da_tyx.sum(dim=["lat", "lon"])
-        earthstat_yield_da_t = earthstat_prod_da_t / earthstat_area_da_t
-        ax.plot(
-            earthstat_yield_da_t["time"],
-            earthstat_yield_da_t.values,
-            "0.5",  # gray
+def _plot_earthstat(which, earthstat_data, crop, ax):
+    if which == "yield":
+        earthstat_prod = earthstat_data.get_data("prod", EARTHSTAT_RES_TO_PLOT, crop)
+        earthstat_area = earthstat_data.get_data("area", EARTHSTAT_RES_TO_PLOT, crop)
+        if earthstat_prod is None or earthstat_area is None:
+            return
+        earthstat_var = earthstat_prod.sum(dim=["lat", "lon"]) / earthstat_area.sum(
+            dim=["lat", "lon"],
+        )
+    else:
+        earthstat_var = earthstat_data.get_data(which, EARTHSTAT_RES_TO_PLOT, crop)
+        if earthstat_var is None:
+            return
+        earthstat_var = earthstat_var.sum(dim=["lat", "lon"])
+
+    ax.plot(
+        earthstat_var["time"],
+        earthstat_var.values,
+        "0.5",  # gray
+    )
+
+
+def _get_var_details(which, fao_data_world):
+    var_details = {}
+    if which == "yield":
+        var_details["da_name"] = "Yield"
+        var_details["ctsm_units"] = "t/ha"
+        var_details["conversion_factor"] = 1e-6 * 1e4  # Convert g/m2 to tons/ha
+        var_details["function"] = _get_clm_yield
+    elif which == "prod":
+        var_details["da_name"] = "Production"
+        var_details["ctsm_units"] = "Mt"
+        var_details["conversion_factor"] = 1e-6 * 1e-6  # Convert g to Mt
+        var_details["function"] = _get_clm_prod
+        fao_data_world["Value"] = fao_data_world["Value"] * 1e-6
+        fao_data_world["Unit"] = "Mt"
+    elif which == "area":
+        var_details["da_name"] = "Area"
+        var_details["ctsm_units"] = "Mha"
+        var_details["conversion_factor"] = 1e-4 * 1e-6  # Convert m2 to Mha
+        var_details["function"] = _get_clm_area
+        fao_data_world["Value"] *= 1e-6
+        fao_data_world["Unit"] = "Mha"
+    else:
+        raise NotImplementedError(
+            f"crop_timeseries_figs() not set up for which={which}",
         )
 
+    return var_details
 
-def main(earthstat_data, case_list, fao_yield, opts):
+
+def main(which, earthstat_data, case_list, fao_data, opts):
     """
     For making timeseries figures of CLM crop outputs
     """
 
     # Get figure layout info
     hspace, wspace, fig, axes = _setup_fig(opts)
+    fig_opts = {}
+    fig_opts["wspace"] = wspace
+    fig_opts["hspace"] = hspace
 
-    fao_yield_world = fao_yield.query("Area == 'World'")
+    # This .copy() prevents spooky side effects from operational persistence
+    fao_data_world = fao_data.copy().query("Area == 'World'")
 
-    earthstat_ds_to_plot = earthstat_data[EARTHSTAT_RES_TO_PLOT]
-
-    var_details = {}
-    var_details["da_name"] = "Yield"
-    var_details["ctsm_units"] = "t/ha"
-    # TODO: Increase robustness of unit conversion: Check that it really is g/m2 to start with.
-    var_details["conversion_factor"] = 1e-6 * 1e4  # Convert g/m2 to tons/ha
+    # Set up for the variable we want
+    # TODO: Increase robustness of unit conversion: Check that it really is, e.g., g/m2 to start
+    # with.
+    var_details = _get_var_details(which, fao_data_world)
+    fig_opts["title"] = "Global " + var_details["da_name"].lower()
 
     for i, crop in enumerate(opts["crops_to_include"]):
         ax = axes.ravel()[i]
@@ -128,7 +171,7 @@ def main(earthstat_data, case_list, fao_yield, opts):
 
         # Plot FAOSTAT data
         _plot_faostat(
-            fao_yield_world,
+            fao_data_world,
             crop,
             ax,
             case_list[0].cft_ds["time"],
@@ -136,10 +179,10 @@ def main(earthstat_data, case_list, fao_yield, opts):
         )
 
         # Plot EarthStat data
-        _plot_earthstat(earthstat_data, earthstat_ds_to_plot, crop, ax)
+        _plot_earthstat(which, earthstat_data, crop, ax)
 
         # Finish plot
         ax.set_title(crop)
         plt.xlabel("")
 
-    _finish_fig(opts, hspace, wspace, fig)
+    _finish_fig(opts, fig_opts, fig)
