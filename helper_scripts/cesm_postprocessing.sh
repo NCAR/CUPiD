@@ -6,10 +6,6 @@
 # and then update this to python as well (and take a CIME Case object as
 # an argument)
 
-# Note: on derecho, the cesmdev module creates a python conflict
-#       by setting $PYTHONPATH; since this is conda-based we
-#       want an empty PYTHONPATH environment variable
-unset PYTHONPATH
 
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
@@ -43,9 +39,14 @@ CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
-# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
+# Note: on derecho, the cesmdev module creates a python conflict
+#       by setting $PYTHONPATH; since this is conda-based we
+#       want an empty PYTHONPATH environment variable
+unset PYTHONPATH
 # cupid-analysis env required for end date calculation
 conda activate ${CUPID_ANALYSIS_ENV}
+
+# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
 # calendar name needs to be changed for cftime standards
 CFTIME_CALENDAR=$CALENDAR
 CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
