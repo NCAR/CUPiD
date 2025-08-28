@@ -9,18 +9,19 @@ EARTHSTAT_RES_TO_PLOT = "f09"
 
 
 def _setup_fig(opts):
+    fig_opts = {}
     n_crops_to_include = len(opts["crops_to_include"])
     if 5 <= n_crops_to_include <= 6:
         nrows = 2
         ncols = 3
         height = 10.5
         width = 15
-        hspace = 0.25
-        wspace = 0.35
+        fig_opts["hspace"] = 0.25
+        fig_opts["wspace"] = 0.35
     else:
         raise RuntimeError(f"Specify figure layout for Ncrops=={n_crops_to_include}")
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(width, height))
-    return hspace, wspace, fig, axes
+    return fig_opts, fig, axes
 
 
 def _plot_clm_cases(case_list, opts, var_details, crop):
@@ -148,10 +149,7 @@ def main(which, earthstat_data, case_list, fao_data, opts):
     """
 
     # Get figure layout info
-    hspace, wspace, fig, axes = _setup_fig(opts)
-    fig_opts = {}
-    fig_opts["wspace"] = wspace
-    fig_opts["hspace"] = hspace
+    fig_opts, fig, axes = _setup_fig(opts)
 
     # This .copy() prevents spooky side effects from operational persistence
     fao_data_world = fao_data.copy().query("Area == 'World'")
