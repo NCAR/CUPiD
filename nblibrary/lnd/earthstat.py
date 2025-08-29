@@ -1,5 +1,5 @@
 """
-A class to handle importing and working with EarthStat data
+Classes to handle importing and working with EarthStat data
 """
 from __future__ import annotations
 
@@ -9,9 +9,71 @@ import xarray as xr
 from plotting_utils import cut_off_antarctica
 
 
+class EarthStatDataset(xr.Dataset):
+    """
+    An xarray Dataset with some extra functionality
+    """
+
+    # pylint: disable=too-many-ancestors
+
+    # Custom attributes we want to add on top of what xr.Dataset has
+    __slots__ = ["crops"]
+
+    def __init__(self, ds_in, crops):
+
+        # Initialize as a normal Dataset
+        data_vars = {}
+        for key, value in ds_in.variables.items():
+            if key in ds_in.coords:
+                continue
+            data_vars[key] = value
+        super().__init__(data_vars=data_vars, coords=ds_in.coords, attrs=ds_in.attrs)
+
+        # Save some extra stuff
+        self.crops = crops
+
+    def get_data(self, which, crop):
+        """
+        Get data from EarthStat
+        """
+
+        # First, check whether this crop is even in EarthStat. Return early if not.
+        earthstat_crop_idx = self.crops.index(crop)
+
+        # Define some things based on what map we want
+        if which == "yield":
+            which_var = "Yield"
+            conversion_factor = 1  # Already tons/ha
+        elif which == "prod":
+            which_var = "Production"
+            conversion_factor = 1e-6  # Convert tons to Mt
+        elif which == "area":
+            which_var = "HarvestArea"
+            conversion_factor = 1e-6  # Convert ha to Mha
+        else:
+            raise NotImplementedError(
+                f"_get_earthstat_map() doesn't work for which='{which}'",
+            )
+
+        data_obs = self[which_var].isel(crop=earthstat_crop_idx)
+        data_obs *= conversion_factor
+        return data_obs
+
+    def get_map(self, which, crop):
+        """
+        Get map from EarthStat for comparing with CLM output
+        """
+        # Actually get the map
+        data_obs = self.get_data(which, crop)
+        map_obs = data_obs.mean(dim="time")
+        map_obs = cut_off_antarctica(map_obs)
+
+        return map_obs
+
+
 class EarthStat:
     """
-    A class to handle importing and working with EarthStat data
+    A class to handle importing EarthStat data
     """
 
     def __init__(
@@ -90,53 +152,8 @@ class EarthStat:
             end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
 
-            self[res] = ds
+            # Save as EarthStatDataset, which has more functionality
+            esd = EarthStatDataset(ds, self.crops)
+
+            self[res] = esd
         print("Done.")
-
-    def get_data(self, which, case_res, crop, case_name=""):
-        """
-        Get data from EarthStat
-        """
-
-        # First, check whether this crop is even in EarthStat. Return early if not.
-        data_obs = None
-        try:
-            earthstat_crop_idx = self.crops.index(crop)
-        except ValueError:
-            print(f"{crop} not in EarthStat res {case_res}; skipping")
-            return data_obs
-        try:
-            earthstat_ds = self[case_res]
-        except KeyError:
-            print(f"{case_res} not in EarthStat; skipping {case_name}")
-            return data_obs
-
-        # Define some things based on what map we want
-        if which == "yield":
-            which_var = "Yield"
-            conversion_factor = 1  # Already tons/ha
-        elif which == "prod":
-            which_var = "Production"
-            conversion_factor = 1e-6  # Convert tons to Mt
-        elif which == "area":
-            which_var = "HarvestArea"
-            conversion_factor = 1e-6  # Convert ha to Mha
-        else:
-            raise NotImplementedError(
-                f"_get_earthstat_map() doesn't work for which='{which}'",
-            )
-
-        data_obs = earthstat_ds[which_var].isel(crop=earthstat_crop_idx)
-        data_obs *= conversion_factor
-        return data_obs
-
-    def get_map(self, which, case_res, crop, case_name=""):
-        """
-        Get map from EarthStat for comparing with CLM output
-        """
-        # Actually get the map
-        data_obs = self.get_data(which, case_res, crop, case_name)
-        map_obs = data_obs.mean(dim="time")
-        map_obs = cut_off_antarctica(map_obs)
-
-        return map_obs

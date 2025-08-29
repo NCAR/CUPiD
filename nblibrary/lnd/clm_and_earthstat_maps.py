@@ -223,8 +223,7 @@ def _mask_where_neither_has_area(
     utils,
     crop,
     case,
-    case_name,
-    earthstat_data,
+    earthstat_ds,
     map_clm,
     map_obs,
 ):
@@ -233,11 +232,9 @@ def _mask_where_neither_has_area(
     """
     which = "area"
     area_clm = cut_off_antarctica(_get_clm_map(which, utils, crop, case))
-    area_obs = earthstat_data.get_map(
+    area_obs = earthstat_ds.get_map(
         which,
-        case.cft_ds.attrs["resolution"].name,
         crop,
-        case_name,
     )
     area_obs = utils.lon_pm2idl(area_obs)
 
@@ -275,24 +272,22 @@ def clm_and_earthstat_maps(
         results_diff = Results(case_list.mapfig_layout, symmetric_0=True)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
-        for i, case in enumerate(case_list):
-            case_name = case_list.names[i]
+        for case in case_list:
 
             # Get CLM map
-            results_clm[case_name] = cut_off_antarctica(
+            results_clm[case.name] = cut_off_antarctica(
                 _get_clm_map(which, utils, crop, case),
             )
             if which == "area":
-                results_clm[case_name] = results_clm[case_name].where(
-                    results_clm[case_name] > 0,
+                results_clm[case.name] = results_clm[case.name].where(
+                    results_clm[case.name] > 0,
                 )
 
             # Get observed map
-            map_obs = earthstat_data.get_map(
+            earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"].name]
+            map_obs = earthstat_ds.get_map(
                 which,
-                case.cft_ds.attrs["resolution"].name,
                 crop,
-                case_name,
             )
             if map_obs is None:
                 continue
@@ -300,28 +295,27 @@ def clm_and_earthstat_maps(
 
             # Mask where neither CLM nor EarthStat have area (HarvestArea)
             # 1. Fill all missing values with 0
-            results_clm[case_name] = results_clm[case_name].fillna(0)
+            results_clm[case.name] = results_clm[case.name].fillna(0)
             map_obs = map_obs.fillna(0)
             # 2. Mask
-            results_clm[case_name], map_obs = _mask_where_neither_has_area(
+            results_clm[case.name], map_obs = _mask_where_neither_has_area(
                 utils=utils,
                 crop=crop,
                 case=case,
-                case_name=case_name,
-                earthstat_data=earthstat_data,
-                map_clm=results_clm[case_name],
+                earthstat_ds=earthstat_ds,
+                map_clm=results_clm[case.name],
                 map_obs=map_obs,
             )
 
             # Get difference map
-            results_diff[case_name] = _get_difference_map(
+            results_diff[case.name] = _get_difference_map(
                 map_obs,
-                results_clm[case_name],
+                results_clm[case.name],
             )
             results_diff[
-                case_name
-            ].name = f"{results_clm[case_name].name} difference, CLM minus EarthStat"
-            results_diff[case_name].attrs["units"] = results_clm[case_name].units
+                case.name
+            ].name = f"{results_clm[case.name].name} difference, CLM minus EarthStat"
+            results_diff[case.name].attrs["units"] = results_clm[case.name].units
 
         # Plot
         results_clm.plot(case_name_list=case_list.names, crop=crop)
