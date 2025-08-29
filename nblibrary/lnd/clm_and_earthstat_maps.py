@@ -177,27 +177,6 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     fig.show()
 
 
-def _get_clm_ds_result_yield(ds):
-    cft_var = ds["crop_cft_yield"].mean(dim="time")
-    ds = ds.mean(dim="time")
-    ds["result"] = cft_var.weighted(ds["pfts1d_wtgcell"]).mean(
-        dim="cft",
-    )
-    return ds
-
-
-def _get_clm_ds_result_prod(ds):
-    cft_prod = ds["crop_cft_prod"]
-    ds["result"] = cft_prod.sum(dim="cft").mean(dim="time")
-    return ds
-
-
-def _get_clm_ds_result_area(ds):
-    cft_area = ds["crop_cft_area"]
-    ds["result"] = cft_area.sum(dim="cft").mean(dim="time")
-    return ds
-
-
 def _get_clm_map(which, utils, crop, case):
     """
     Get yield map from CLM
@@ -205,17 +184,14 @@ def _get_clm_map(which, utils, crop, case):
 
     # Define some things based on what map we want
     if which == "yield":
-        get_clm_ds_result = _get_clm_ds_result_yield
         units = "tons / ha"
         conversion_factor = 1e-6 * 1e4  # Convert g/m2 to t/ha
         name = "Yield"
     elif which == "prod":
-        get_clm_ds_result = _get_clm_ds_result_prod
         units = "Mt"
         conversion_factor = 1e-6 * 1e-6  # Convert g to Mt
         name = "Production"
     elif which == "area":
-        get_clm_ds_result = _get_clm_ds_result_area
         units = "Mha"
         conversion_factor = 1e-4 * 1e-6  # Convert m2 to Mha
         name = "Area"
@@ -225,15 +201,13 @@ def _get_clm_map(which, utils, crop, case):
         )
 
     # Extract the data
-    ds = case.cft_ds.sel(crop=crop)
-    ds = get_clm_ds_result(ds)
+    ds = case.cft_ds.sel(crop=crop).mean(dim="time")
+    ds["result"] = ds["crop_" + which]
+    if which == "prod":
+        ds["result"] = ds["result"].where(ds["crop_area"] > 0)
 
     # Grid the data
     map_clm = utils.grid_one_variable(ds, "result")
-    if which == "prod":
-        ds_area = _get_clm_ds_result_area(ds)
-        map_area = utils.grid_one_variable(ds_area, "result")
-        map_clm = map_clm.where(map_area > 0)
     map_clm = utils.lon_pm2idl(map_clm)
 
     # Finish up
