@@ -218,6 +218,34 @@ def _get_clm_map(which, utils, crop, case):
     return map_clm
 
 
+def _mask_where_neither_has_area(
+    *,
+    utils,
+    crop,
+    case,
+    case_name,
+    earthstat_data,
+    map_clm,
+    map_obs,
+):
+    """
+    Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
+    """
+    which = "area"
+    area_clm = cut_off_antarctica(_get_clm_map(which, utils, crop, case))
+    area_obs = earthstat_data.get_map(
+        which,
+        case.cft_ds.attrs["resolution"].name,
+        crop,
+        case_name,
+    )
+    area_obs = utils.lon_pm2idl(area_obs)
+
+    mask = (area_clm > 0) | (area_obs > 0)
+
+    return map_clm.where(mask), map_obs.where(mask)
+
+
 def clm_and_earthstat_maps(
     *,
     which: str,
@@ -268,9 +296,24 @@ def clm_and_earthstat_maps(
             )
             if map_obs is None:
                 continue
+            map_obs = utils.lon_pm2idl(map_obs)
+
+            # Mask where neither CLM nor EarthStat have area (HarvestArea)
+            # 1. Fill all missing values with 0
+            results_clm[case_name] = results_clm[case_name].fillna(0)
+            map_obs = map_obs.fillna(0)
+            # 2. Mask
+            results_clm[case_name], map_obs = _mask_where_neither_has_area(
+                utils=utils,
+                crop=crop,
+                case=case,
+                case_name=case_name,
+                earthstat_data=earthstat_data,
+                map_clm=results_clm[case_name],
+                map_obs=map_obs,
+            )
 
             # Get difference map
-            map_obs = utils.lon_pm2idl(map_obs)
             results_diff[case_name] = _get_difference_map(
                 map_obs,
                 results_clm[case_name],
