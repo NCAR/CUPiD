@@ -61,7 +61,6 @@ class CaseList(list):
                 CropCase(
                     case_name,
                     case_output_dir,
-                    opts["clm_file_h"],
                     opts["cfts_to_include"],
                     opts["crops_to_include"],
                     opts["start_year"],
