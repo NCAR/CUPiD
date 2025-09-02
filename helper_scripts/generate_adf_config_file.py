@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import sys
 
 import click
 import yaml
@@ -11,10 +10,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option(
     "--cupid-config-loc",
-    default=None,
+    required=True,
     help="CUPiD example to use as template for config.yml",
 )
 @click.option(
@@ -23,16 +21,14 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="an adf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
+def generate_adf_config(
+    cupid_config_loc,
+    adf_template,
+    out_file,
+):
     """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
     to produce out_file by modifying adf_template with data from cupid config file.
     """
-    sys.path.append(os.path.join(cesm_root, "cime"))
-
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
-    # Is cupid_config_loc a valid value?
-    if cupid_config_loc is None:
-        cupid_config_loc = os.path.join(cupid_root, "examples", "key_metrics")
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
@@ -43,11 +39,15 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
 
     # read parameters from CUPID
     # use `get` to default to None
-    DOUT = c_dict["global_params"]["CESM_output_dir"]
+    CESM_output_dir = c_dict["global_params"]["CESM_output_dir"]
     base_case_name = c_dict["global_params"]["base_case_name"]
     test_case_name = c_dict["global_params"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
+    ts_dir = c_dict["global_params"].get("ts_dir")
+    if ts_dir is None:
+        ts_dir = CESM_output_dir
+    ts_dir = os.path.join(ts_dir)
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
@@ -57,14 +57,14 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
-        DOUT,
+        CESM_output_dir,
         test_case_name,
         "atm",
         "hist",
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
-        DOUT,
+        ts_dir,
         test_case_name,
         "atm",
         "proc",
@@ -72,7 +72,7 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
-        DOUT,
+        ts_dir,
         test_case_name,
         "atm",
         "proc",
@@ -111,9 +111,9 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
 
-    base_case_output_dir = os.path.join(
-        c_dict["global_params"].get("base_case_output_dir", DOUT),
-        base_case_name,
+    base_case_output_dir = c_dict["global_params"].get(
+        "base_case_output_dir",
+        CESM_output_dir,
     )
     base_start_date = get_date_from_ts(
         c_ts["atm"],
@@ -132,17 +132,20 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
 
     a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
         base_case_output_dir,
+        base_case_name,
         "atm",
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
-        base_case_output_dir,
+        ts_dir,
+        base_case_name,
         "atm",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
-        base_case_output_dir,
+        ts_dir,
+        base_case_name,
         "atm",
         "proc",
         "climo",
@@ -171,17 +174,17 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
-        DOUT,
+        ts_dir,
         base_case_name,
         "atm",
         "proc",
+        "tseries",
         "regrid",
     )  # This is where ADF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
         cupid_config_loc,
         "ADF_output",
     )  # this is where ADF will put plots, and "website" directory
-
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
@@ -215,7 +218,6 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
                     "external_tool"
                 ].get("diag_cvdp_info", {}).items():
                     if key not in cvdp_args:
-                        #a_dict["diag_cvdp_info"][key] = val
                         cvdp_args[key] = val
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
@@ -225,23 +227,13 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         a_dict["plotting_scripts"] = plotting_scripts
     if cvdp_args:
         a_dict["diag_cvdp_info"] = cvdp_args
-    '''cvdp_info = a_dict.get("diag_cvdp_info", {})
-    if cvdp_info:
-        if cvdp_info.get("cvdp_run",False):
-            if "cvdp_loc" in a_dict["diag_cvdp_info"]:
-                a_dict["diag_cvdp_info"]["cvdp_loc"] = cvdp_root
-                #a_dict["diag_cvdp_info"].get("cvdp_loc", a_dict["diag_basic_info"]["cam_diag_plot_loc"])
-            #else:
-            #    a_dict["diag_cvdp_info"]["cvdp_loc"] = a_dict["diag_basic_info"]["cam_diag_plot_loc"]
-            """if "cvdp_codebase_loc" in a_dict["diag_cvdp_info"]:
-                a_dict["diag_cvdp_info"].get("cvdp_codebase_loc", "")
-            else:
-                a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = """""
-        else:
-            a_dict["diag_cvdp_info"] = {}
-    '''
-
-    # os.getenv("USER")
+        a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = "../externals/ADF/lib/externals/CVDP/"
+        # this is where CVDP code base lives in the ADF
+        
+        a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
+            cupid_config_loc,
+            "CVDP_output/",
+        )  # this is where CVDP will put plots, and "website" directory
 
     with open(out_file, "w") as f:
         # Header of file is a comment logging provenance
@@ -250,7 +242,6 @@ def generate_adf_config(cesm_root, cupid_config_loc, adf_template, out_file):
         )
         f.write(f"# It is based off of {cupid_config_loc}/config.yml\n")
         f.write("# Arguments:\n")
-        f.write(f"# {cesm_root=}\n")
         f.write(f"# {cupid_config_loc=}\n")
         f.write(f"# {adf_template=}\n")
         f.write(f"# Output: {out_file=}\n")
