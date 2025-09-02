@@ -138,7 +138,6 @@ def generate_cupid_config(
     # Is adf_output_root provided?
     if adf_output_root is None:
         adf_output_root = case_root
-    print("adf_output_root",adf_output_root)
 
     # Is cupid_example a valid value?
     if cupid_root is None:
