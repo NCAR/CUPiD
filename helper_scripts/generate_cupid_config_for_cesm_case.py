@@ -14,6 +14,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--cesm-root", required=True, help="Location of CESM source code")
 @click.option("--case-root", default=os.getcwd(), help="CESM case directory")
 @click.option(
+    "--cupid-root",
+    default=None,
+    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
+)
+@click.option(
     "--cupid-example",
     default="key_metrics",
     help="CUPiD example to use as template for config.yml",
@@ -27,6 +32,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     "--cupid-baseline-root",
     default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
     help="Base case root directory",
+)
+@click.option(
+    "--cupid-ts-dir",
+    default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+    help="Timeseries directory root; eg, if permission issues, use your scratch",
 )
 @click.option("--cupid-startdate", default="0001-01-01", help="CUPiD case start date")
 @click.option("--cupid-enddate", default="0101-01-01", help="CUPiD case end date")
@@ -48,9 +58,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def generate_cupid_config(
     case_root,
     cesm_root,
+    cupid_root,
     cupid_example,
     cupid_baseline_case,
     cupid_baseline_root,
+    cupid_ts_dir,
     cupid_startdate,
     cupid_enddate,
     cupid_base_startdate,
@@ -78,7 +90,10 @@ def generate_cupid_config(
         The root directory of the CESM case from which case-specific data will be retrieved.
 
     cesm_root : str
-        The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
+        The root directory of the CESM installation, where CIME scripts reside.
+
+    cupid_root : str
+        The root directory where CUPiD examples reside (defaults to subdirectory of cesm_root).
 
     cupid_example : str
         The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
@@ -89,6 +104,9 @@ def generate_cupid_config(
 
     cupid_baseline_root : str
         The root directory of the base case.
+
+    cupid_ts_dir : str
+        The root directory for the timeseries.
 
     cupid_startdate : str
         The start date of the case being analyzed ("YYYY-MM-DD").
@@ -120,9 +138,11 @@ def generate_cupid_config(
     # Is adf_output_root provided?
     if adf_output_root is None:
         adf_output_root = case_root
+    print("adf_output_root",adf_output_root)
 
     # Is cupid_example a valid value?
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    if cupid_root is None:
+        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     cupid_examples = os.path.join(cupid_root, "examples")
     valid_examples = [
         example
@@ -159,11 +179,22 @@ def generate_cupid_config(
     my_dict["global_params"]["end_date"] = cupid_enddate
     my_dict["global_params"]["base_case_name"] = cupid_baseline_case
     my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["ts_dir"] = cupid_ts_dir
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
         if (
             isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
@@ -189,6 +220,10 @@ def generate_cupid_config(
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(adf_output_root, "ADF_output")
+    if "link_to_CVDP" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["link_to_CVDP"]["parameter_groups"]["none"][
+            "cvdp_loc"
+        ] = os.path.join(adf_output_root, "CVDP_output")
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
