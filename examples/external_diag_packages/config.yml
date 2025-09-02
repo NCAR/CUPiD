@@ -122,7 +122,18 @@ compute_notebooks:
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
+          diag_cvdp_info:
+            cvdp_run: True
+            cvdp_tar: False
           base_regridded_output: True
+      link_to_CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     lnd:
       link_to_ILAMB:
@@ -160,6 +171,7 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/link_to_ADF
+        - file: atm/link_to_CVDP
 
     - caption: Land
       chapters:

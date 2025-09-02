@@ -49,6 +49,7 @@ global_params:
   base_start_date: '0001-01-01'
   base_end_date: '0101-01-01'
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
     threads_per_worker: 1
 
@@ -65,6 +66,8 @@ timeseries:
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
+    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
 
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
@@ -139,11 +142,17 @@ compute_notebooks:
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
           diag_cvdp_info:
-            run_cvdp: True
-            #cvdp_loc: /glade/derecho/scratch/${user}/ADF/cvdp/
-            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            cvdp_run: True
             cvdp_tar: False
           base_regridded_output: True
+      link_to_CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -226,6 +235,7 @@ book_toc:
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
         - file: atm/link_to_ADF
+        - file: atm/link_to_CVDP
 
     # - caption: Ocean
     #   chapters:
