@@ -45,9 +45,10 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     """
     Finish up a figure with map subplots
     """
-    fig.suptitle(crop, fontsize="x-large", fontweight="bold")
+    suptitle = f"{da.name}: {crop}"
+    fig.suptitle(suptitle, fontsize="x-large", fontweight="bold")
     fig.subplots_adjust(
-        top=layout["subplots_adjust_colorbar_top"],
+        top=layout["subplots_adjust_colorbar_top"]-0.04,
         bottom=layout["subplots_adjust_colorbar_bottom"],
     )
     cbar_ax = fig.add_axes(rect=layout["cbar_ax_rect"])
@@ -55,7 +56,7 @@ def _mapfig_finishup(fig, im, da, crop, layout):
         im,
         cax=cbar_ax,
         orientation="horizontal",
-        label=f"{da.name} ({da.attrs['units']})",
+        label=da.attrs["units"],
     )
     fig.show()
 
