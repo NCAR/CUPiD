@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 EARTHSTAT_RES_TO_PLOT = "f09"
 
 
-def _setup_fig(opts):
+def setup_fig(opts):
     fig_opts = {}
     n_crops_to_include = len(opts["crops_to_include"])
     if 5 <= n_crops_to_include <= 6:
@@ -64,11 +64,13 @@ def _get_clm_area(crop, case):
     return case.cft_ds["crop_cft_area"].sel(crop=crop).sum(dim=["cft", "pft"])
 
 
-def _finish_fig(opts, fig_opts, fig):
+def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
     plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
+    labels = opts["case_legend_list"].copy()
+    if incl_obs:
+        labels += ["FAOSTAT", f"EarthStat {EARTHSTAT_RES_TO_PLOT}"]
     fig.legend(
-        labels=opts["case_legend_list"]
-        + ["FAOSTAT", f"EarthStat {EARTHSTAT_RES_TO_PLOT}"],
+        labels=labels,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.96),
         ncol=3,
@@ -149,7 +151,7 @@ def main(which, earthstat_data, case_list, fao_data, opts):
     """
 
     # Get figure layout info
-    fig_opts, fig, axes = _setup_fig(opts)
+    fig_opts, fig, axes = setup_fig(opts)
 
     # This .copy() prevents spooky side effects from operational persistence
     fao_data_world = fao_data.copy().query("Area == 'World'")
@@ -183,4 +185,4 @@ def main(which, earthstat_data, case_list, fao_data, opts):
         ax.set_title(crop)
         plt.xlabel("")
 
-    _finish_fig(opts, fig_opts, fig)
+    finish_fig(opts, fig_opts, fig)
