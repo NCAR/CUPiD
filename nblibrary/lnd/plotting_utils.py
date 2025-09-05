@@ -68,17 +68,21 @@ class ResultsMaps:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, layout, *, symmetric_0=False):
+    def __init__(self, layout, *, symmetric_0=False, vrange=None):
         self.result_dict = {}
-        self.vmin = np.inf
-        self.vmax = -np.inf
-
         self.layout = layout
-        self.symmetric_0 = symmetric_0
-        if self.symmetric_0:
-            self.cmap = "coolwarm"
-        else:
-            self.cmap = "viridis"
+
+        # Default color map
+        self.cmap = "viridis"
+
+        # If vrange isn't provided, it will be calculated automatically
+        self._vrange = vrange
+        if not self._vrange:
+            self.vmin = np.inf
+            self.vmax = -np.inf
+            self.symmetric_0 = symmetric_0
+            if self.symmetric_0:
+                self.cmap = "coolwarm"
 
         self.fig, self.axes = plt.subplots(
             nrows=self.layout["nrows"],
@@ -93,14 +97,18 @@ class ResultsMaps:
 
     def __setitem__(self, key: str, value: xr.DataArray):
         """instance[key]=value syntax should set corresponding key=value in result_dict"""
-        self.vmin = min(self.vmin, np.nanmin(value.values))
-        self.vmax = max(self.vmax, np.nanmax(value.values))
+        if not self._vrange:
+            self.vmin = min(self.vmin, np.nanmin(value.values))
+            self.vmax = max(self.vmax, np.nanmax(value.values))
         self.result_dict[key] = value
 
     def vrange(self):
         """
         Return list representing colorbar range
         """
+        if self._vrange:
+            return self._vrange
+
         vmin = self.vmin
         vmax = self.vmax
 
