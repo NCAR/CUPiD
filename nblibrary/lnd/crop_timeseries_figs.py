@@ -44,7 +44,9 @@ def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area):
         else:
             linestyle = "-"
 
-            # Plot
+        # Plot
+        if use_earthstat_area:
+            crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
         crop_data_ts.plot(linestyle=linestyle)
 
 
