@@ -30,6 +30,9 @@ def check_dim_alignment(earthstat_ds, clm_ds):
     if "crop" not in earthstat_ds.coords:
         earthstat_ds = earthstat_ds.assign_coords({"crop": clm_ds["crop"]})
 
+    # Align time coordinates
+    earthstat_ds = align_time(earthstat_ds, clm_ds["time"])
+
     for dim in earthstat_ds.dims:
         if not earthstat_ds[dim].equals(clm_ds[dim]):
             raise RuntimeError(f"Misalignment in {dim}")
@@ -115,7 +118,6 @@ class EarthStat:
         self,
         earthstat_dir,
         sim_resolutions,
-        target_time,
         opts,
     ):
         # Define variables
@@ -126,7 +128,7 @@ class EarthStat:
         self._get_crop_list(earthstat_dir, opts["crops_to_include"])
 
         # Import EarthStat maps
-        self._import_data(earthstat_dir, sim_resolutions, target_time, opts)
+        self._import_data(earthstat_dir, sim_resolutions, opts)
 
     def __getitem__(self, key):
         """instance[key] syntax should return corresponding value in data dict"""
@@ -176,7 +178,7 @@ class EarthStat:
             if crop not in self.crops:
                 print(f"WARNING: {crop} not found in self.crops")
 
-    def _import_data(self, earthstat_dir, sim_resolutions, target_time, opts):
+    def _import_data(self, earthstat_dir, sim_resolutions, opts):
         """
         Import EarthStat maps corresponding to simulated CLM resolutions
         """
@@ -192,9 +194,6 @@ class EarthStat:
             start_year = opts["start_year"]
             end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
-
-            # Align time
-            ds = align_time(ds, target_time)
 
             # Save as EarthStatDataset, which has more functionality
             esd = EarthStatDataset(ds, self.crops)

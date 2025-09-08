@@ -3,6 +3,7 @@ For making timeseries figures of CLM crop outputs
 """
 from __future__ import annotations
 
+from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
@@ -102,7 +103,7 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
     )
 
 
-def _plot_earthstat(which, earthstat_data, crop, ax):
+def _plot_earthstat(which, earthstat_data, crop, ax, target_time):
     if which == "yield":
         earthstat_prod = earthstat_data[EARTHSTAT_RES_TO_PLOT].get_data("prod", crop)
         earthstat_area = earthstat_data[EARTHSTAT_RES_TO_PLOT].get_data("area", crop)
@@ -116,6 +117,9 @@ def _plot_earthstat(which, earthstat_data, crop, ax):
         if earthstat_var is None:
             return
         earthstat_var = earthstat_var.sum(dim=["lat", "lon"])
+
+    # Align EarthStat data with CLM time axis
+    earthstat_var = align_time(earthstat_var, target_time)
 
     ax.plot(
         earthstat_var["time"],
@@ -191,7 +195,7 @@ def main(which, earthstat_data, case_list, fao_data, opts, *, use_earthstat_area
         )
 
         # Plot EarthStat data
-        _plot_earthstat(which, earthstat_data, crop, ax)
+        _plot_earthstat(which, earthstat_data, crop, ax, case_list[0].cft_ds["time"])
 
         # Finish plot
         ax.set_title(crop)
