@@ -15,10 +15,14 @@ def align_time(da_to_align, target_time):
     the CLM outputs. If you don't do this, you will get all NaNs when you try to assign something
     from EarthStat to the CLM Dataset.
     """
-    first_year = min(target_time.values).year
-    last_year = max(target_time.values).year
+
+    # Align EarthStat with CLM axis
+    orig_time = da_to_align["time"]
+    first_year = min(orig_time.values).year
+    last_year = max(orig_time.values).year
     this_slice = slice(f"{first_year}-01-01", f"{last_year}-12-31")
     new_time_coord = target_time.sel(time=this_slice)
+
     return da_to_align.assign_coords({"time": new_time_coord})
 
 
@@ -35,6 +39,12 @@ def check_dim_alignment(earthstat_ds, clm_ds):
 
     for dim in earthstat_ds.dims:
         if not earthstat_ds[dim].equals(clm_ds[dim]):
+            # Special handling for time: It's okay for CLM to have more timesteps than EarthStat,
+            # but every timestep in EarthStat needs to be in CLM.
+            if dim == "time":
+                if all(x in clm_ds[dim].values for x in earthstat_ds[dim].values):
+                    continue
+
             raise RuntimeError(f"Misalignment in {dim}")
 
     return earthstat_ds
