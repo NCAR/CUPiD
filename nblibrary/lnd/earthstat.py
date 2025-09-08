@@ -136,6 +136,11 @@ class EarthStat:
         """instance[key]=value syntax should set corresponding key=value in data dict"""
         self._data[key] = value
 
+    def __print__(self):
+        print(
+            f"Dict containing Datasets for the following resolutions: {','.join(self._data.keys())}",
+        )
+
     def _get_crop_list(self, earthstat_dir, crops_to_include):
         """
         Get the list of crops in EarthStat
