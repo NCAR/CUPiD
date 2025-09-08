@@ -9,6 +9,34 @@ import xarray as xr
 from plotting_utils import cut_off_antarctica
 
 
+def align_time(da_to_align, target_time):
+    """
+    EarthStat and CLM time axes don't match. This function gives the EarthStat data the time axis of
+    the CLM outputs. If you don't do this, you will get all NaNs when you try to assign something
+    from EarthStat to the CLM Dataset.
+    """
+    first_year = min(target_time.values).year
+    last_year = max(target_time.values).year
+    this_slice = slice(f"{first_year}-01-01", f"{last_year}-12-31")
+    new_time_coord = target_time.sel(time=this_slice)
+    return da_to_align.assign_coords({"time": new_time_coord})
+
+
+def check_dim_alignment(earthstat_ds, clm_ds):
+    """
+    Ensure that EarthStat and CLM datasets are aligned on all dimensions
+    """
+    # Align crop coordinates
+    if "crop" not in earthstat_ds.coords:
+        earthstat_ds = earthstat_ds.assign_coords({"crop": clm_ds["crop"]})
+
+    for dim in earthstat_ds.dims:
+        if not earthstat_ds[dim].equals(clm_ds[dim]):
+            raise RuntimeError(f"Misalignment in {dim}")
+
+    return earthstat_ds
+
+
 class EarthStatDataset(xr.Dataset):
     """
     An xarray Dataset with some extra functionality
@@ -43,12 +71,15 @@ class EarthStatDataset(xr.Dataset):
         # Define some things based on what map we want
         if which == "yield":
             which_var = "Yield"
+            converting = ["tonnes/ha", "tonnes/ha"]
             conversion_factor = 1  # Already tons/ha
         elif which == "prod":
             which_var = "Production"
+            converting = ["tonnes", "Mt"]
             conversion_factor = 1e-6  # Convert tons to Mt
         elif which == "area":
             which_var = "HarvestArea"
+            converting = ["ha", "Mha"]
             conversion_factor = 1e-6  # Convert ha to Mha
         else:
             raise NotImplementedError(
@@ -56,7 +87,11 @@ class EarthStatDataset(xr.Dataset):
             )
 
         data_obs = self[which_var].isel(crop=earthstat_crop_idx)
+        units_in = data_obs.attrs["units"]
+        if units_in != converting[0]:
+            raise RuntimeError(f"Expected {converting[0]}, got {units_in}")
         data_obs *= conversion_factor
+        data_obs.attrs["units"] = converting[1]
         return data_obs
 
     def get_map(self, which, crop):
@@ -80,6 +115,7 @@ class EarthStat:
         self,
         earthstat_dir,
         sim_resolutions,
+        target_time,
         opts,
     ):
         # Define variables
@@ -90,7 +126,7 @@ class EarthStat:
         self._get_crop_list(earthstat_dir, opts["crops_to_include"])
 
         # Import EarthStat maps
-        self._import_data(earthstat_dir, sim_resolutions, opts)
+        self._import_data(earthstat_dir, sim_resolutions, target_time, opts)
 
     def __getitem__(self, key):
         """instance[key] syntax should return corresponding value in data dict"""
@@ -135,7 +171,7 @@ class EarthStat:
             if crop not in self.crops:
                 print(f"WARNING: {crop} not found in self.crops")
 
-    def _import_data(self, earthstat_dir, sim_resolutions, opts):
+    def _import_data(self, earthstat_dir, sim_resolutions, target_time, opts):
         """
         Import EarthStat maps corresponding to simulated CLM resolutions
         """
@@ -151,6 +187,9 @@ class EarthStat:
             start_year = opts["start_year"]
             end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+
+            # Align time
+            ds = align_time(ds, target_time)
 
             # Save as EarthStatDataset, which has more functionality
             esd = EarthStatDataset(ds, self.crops)
