@@ -47,6 +47,28 @@ def _one_case(opts, case):
     case_ds["crop_cft_prod"] = crop_cft_prod_da
 
     # Calculate CFT-level yield
+    case_ds = get_yield_and_croplevel_stats(
+        case_ds,
+        cft_crop_array,
+        crop_cft_area_da,
+        crop_cft_prod_da,
+    )
+
+    # Area harvested
+    case_ds = _harvest_area_stats(case_ds)
+
+    return case
+
+
+def get_yield_and_croplevel_stats(
+    case_ds,
+    cft_crop_array,
+    crop_cft_area_da,
+    crop_cft_prod_da,
+):
+    """
+    Calculate yield, then consolidate CFT-level stats to crop-level
+    """
     case_ds["crop_cft_yield"] = crop_cft_prod_da / crop_cft_area_da
     case_ds["crop_cft_yield"].attrs["units"] = (
         crop_cft_prod_da.attrs["units"] + "/" + crop_cft_area_da.attrs["units"]
@@ -69,7 +91,10 @@ def _one_case(opts, case):
         coords={"cft": case_ds["cft"]},
     )
 
-    # Area harvested
+    return case_ds
+
+
+def _harvest_area_stats(case_ds):
     hr = case_ds["HARVEST_REASON_PERHARV"]
     cft_planted_area = (
         case_ds["pfts1d_gridcellarea"] * case_ds["pfts1d_wtgcell"]
@@ -103,7 +128,7 @@ def _one_case(opts, case):
         .rename({"cft_crop": "crop"})
     )
 
-    return case
+    return case_ds
 
 
 def _one_crop(
