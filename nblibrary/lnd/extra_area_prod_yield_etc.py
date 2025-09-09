@@ -31,7 +31,7 @@ def _one_case(opts, case):
     crop_cft_prod_da = None
     for i, crop in enumerate(opts["crops_to_include"]):
         # Get data for CFTs of this crop
-        crop_cft_area_da, crop_cft_prod_da = _one_crop(
+        cft_crop_array, crop_cft_area_da, crop_cft_prod_da = _one_crop(
             opts,
             case,
             case_ds,
@@ -181,4 +181,4 @@ def _one_crop(
             dim="crop",
         )
 
-    return crop_cft_area_da, crop_cft_prod_da
+    return cft_crop_array, crop_cft_area_da, crop_cft_prod_da
