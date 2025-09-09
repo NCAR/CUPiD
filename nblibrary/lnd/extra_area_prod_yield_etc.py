@@ -42,17 +42,19 @@ def _one_case(opts, case):
             crop_cft_prod_da,
         )
 
+    # Save cft_crop variable
+    case_ds["cft_crop"] = xr.DataArray(
+        data=cft_crop_array,
+        dims=["cft"],
+        coords={"cft": case_ds["cft"]},
+    )
+
     # Add crop_cft_* variables to case_ds
     case_ds["crop_cft_area"] = crop_cft_area_da
     case_ds["crop_cft_prod"] = crop_cft_prod_da
 
     # Calculate CFT-level yield
-    case_ds = get_yield_and_croplevel_stats(
-        case_ds,
-        cft_crop_array,
-        crop_cft_area_da,
-        crop_cft_prod_da,
-    )
+    case_ds = _get_yield_and_croplevel_stats(case_ds)
 
     # Area harvested
     case_ds = _harvest_area_stats(case_ds)
@@ -60,35 +62,25 @@ def _one_case(opts, case):
     return case
 
 
-def get_yield_and_croplevel_stats(
-    case_ds,
-    cft_crop_array,
-    crop_cft_area_da,
-    crop_cft_prod_da,
-):
+def _get_yield_and_croplevel_stats(case_ds):
     """
     Calculate yield, then consolidate CFT-level stats to crop-level
     """
-    case_ds["crop_cft_yield"] = crop_cft_prod_da / crop_cft_area_da
+    case_ds["crop_cft_yield"] = case_ds["crop_cft_prod"] / case_ds["crop_cft_area"]
     case_ds["crop_cft_yield"].attrs["units"] = (
-        crop_cft_prod_da.attrs["units"] + "/" + crop_cft_area_da.attrs["units"]
+        case_ds["crop_cft_prod"].attrs["units"]
+        + "/"
+        + case_ds["crop_cft_area"].attrs["units"]
     )
 
     # Collapse CFTs to individual crops
-    case_ds["crop_area"] = crop_cft_area_da.sum(dim="cft", keep_attrs=True)
-    case_ds["crop_prod"] = crop_cft_prod_da.sum(dim="cft", keep_attrs=True)
+    case_ds["crop_area"] = case_ds["crop_cft_area"].sum(dim="cft", keep_attrs=True)
+    case_ds["crop_prod"] = case_ds["crop_cft_prod"].sum(dim="cft", keep_attrs=True)
 
     # Calculate crop-level yield
     case_ds["crop_yield"] = case_ds["crop_prod"] / case_ds["crop_area"]
     case_ds["crop_yield"].attrs["units"] = (
         case_ds["crop_prod"].attrs["units"] + "/" + case_ds["crop_area"].attrs["units"]
-    )
-
-    # Save cft_crop variable
-    case_ds["cft_crop"] = xr.DataArray(
-        data=cft_crop_array,
-        dims=["cft"],
-        coords={"cft": case_ds["cft"]},
     )
 
     return case_ds
