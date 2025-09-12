@@ -155,6 +155,7 @@ compute_notebooks:
       global_discharge_gauge_compare_obs:
         parameter_groups:
           none:
+            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
             analysis_name: ""
             grid_name: 'f09_f09_mosart' # ROF grid name
             climo_nyears: 10
@@ -162,6 +163,7 @@ compute_notebooks:
       global_discharge_ocean_compare_obs:
         parameter_groups:
           none:
+            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
             analysis_name: ""
             grid_name: 'f09_f09_mosart' # ROF grid name
             climo_nyears: 10
