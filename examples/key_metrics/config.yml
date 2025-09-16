@@ -153,7 +153,7 @@ compute_notebooks:
     rof:
       global_discharge_gauge_compare_obs:
         parameter_groups:
-           none:
+          none:
             analysis_name: ""
             grid_name: 'f09_f09_mosart' # ROF grid name
             climo_nyears: 10
