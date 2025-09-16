@@ -56,6 +56,7 @@ CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
   echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
 fi
+
 # Create directory for running CUPiD
 mkdir -p cupid-postprocessing
 cd cupid-postprocessing
@@ -129,7 +130,6 @@ fi
 
 # 3. Generate ILAMB config file
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
-  ./xmlchange JOB_WALLCLOCK_TIME=06:00:00
   ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
      --cupid-config-loc . \
      --run-type ${CUPID_RUN_TYPE} \
@@ -158,6 +158,7 @@ fi
 
 # 7. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange JOB_WALLCLOCK_TIME) before running ILAMB"
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   export ILAMB_ROOT=ilamb_aux
