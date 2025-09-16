@@ -117,7 +117,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-base-enddate ${CUPID_BASE_ENDDATE}
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
@@ -129,10 +129,11 @@ fi
 
 # 3. Generate ILAMB config file
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  ./xmlchange JOB_WALLCLOCK_TIME=06:00:00
   ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
      --cupid-config-loc . \
-     --run-type ${CUPID_RUN_TYPE}
-     --cupid-root ${CUPID_ROOT} \
+     --run-type ${CUPID_RUN_TYPE} \
+     --cupid-root ${CUPID_ROOT}
 fi
 
 # 4. Generate LDF config file
