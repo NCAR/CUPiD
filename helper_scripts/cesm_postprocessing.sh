@@ -158,7 +158,7 @@ fi
 
 # 7. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
-  echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange JOB_WALLCLOCK_TIME) before running ILAMB"
+  echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME=06:00:00) before running ILAMB"
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   export ILAMB_ROOT=ilamb_aux
