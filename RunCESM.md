@@ -14,7 +14,7 @@ XML changes are a simple way to change the CUPiD configuration when you are runn
 Adjust any variables that you would like (eg, the base case to compare against, how long to run for, etc) with `./xmlchange <VARIABLE>=<VALUE>`
 
 ## Adjust wallclock time
-You can adjust the wallclock time for CUPiD specifically by running the following command: `./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME={new time}`. You might want to do this if you are for instance running an example with lots of computationally intensive diagnostic notebooks.
+You can adjust the wallclock time for CUPiD specifically by running the following command: `./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME={new time}`. You might want to do this if you are running an example with lots of computationally intensive diagnostic notebooks (for instance, a wallclock time of 6hr may be necessary for ILAMB).
 
 ## How to run CUPiD
 If you want to run CUPiD automatically after the short-term archiver finishes, you can run the following command from your case directory in order to turn on postprocessing: `./xmlchange RUN_POSTPROCESSING=TRUE`.
