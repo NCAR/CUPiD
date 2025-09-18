@@ -90,38 +90,42 @@ def remap_time_series(
                 + ".".join([case_name, hist_str, var, "*", "nc"])
             )
 
+            # print("ts_infile_str:",ts_infile_str)
+
             # Check if files already exist in time series directory:
             ts_file_list = glob.glob(ts_infile_str)
 
-        list_of_commands = []
-        for ts_file in ts_file_list:
-            # Set up path to output file (creating toplevel dir if necessary)
-            ts_file_nopath = os.path.basename(ts_file)
-            ts_file_path = os.path.dirname(ts_file)
-            out_file = os.path.join(ts_file_path, "regrid", ts_file_nopath)
-            Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
+            list_of_commands = []
+            for ts_file in ts_file_list:
+                print(ts_file)
+                # Set up path to output file (creating toplevel dir if necessary)
+                ts_file_nopath = os.path.basename(ts_file)
+                ts_file_path = os.path.dirname(ts_file)
+                out_file = os.path.join(ts_file_path, "regrid", ts_file_nopath)
+                Path(os.path.dirname(out_file)).mkdir(parents=True, exist_ok=True)
 
-            # Notify user that remapped file is being created
-            if Path(out_file).is_file():
-                logger.warning(
-                    f"[{__name__}]: {out_file} exists and will not be overwritten",
-                )
-                continue
-            logger.info(f"\t - regridding time series file {var}")
+                # Notify user that remapped file is being created
+                if Path(out_file).is_file():
+                    logger.warning(
+                        f"[{__name__}]: {out_file} exists and will not be overwritten",
+                    )
+                    continue
+                logger.info(f"\t - regridding time series file {var}")
 
-            cmd = ["ncremap", "-m", mapping_file, ts_file, out_file]
+                cmd = ["ncremap", "-m", mapping_file, ts_file, out_file]
 
-            # Add to command list for use in multi-processing pool:
-            list_of_commands.append(cmd)
+                # Add to command list for use in multi-processing pool:
+                list_of_commands.append(cmd)
 
-        if serial:
-            for cmd in list_of_commands:
-                call_ncremap(cmd)
-        else:  # if not serial
-            # Now run the "ncrcat" subprocesses in parallel:
-            with mp.Pool(processes=num_procs) as mpool:
-                _ = mpool.map(call_ncremap, list_of_commands)
-            # End with
+            if serial:
+                for cmd in list_of_commands:
+                    print(cmd)
+                    call_ncremap(cmd)
+            else:  # if not serial
+                # Now run the "ncrcat" subprocesses in parallel:
+                with mp.Pool(processes=num_procs) as mpool:
+                    _ = mpool.map(call_ncremap, list_of_commands)
+                # End with
     # End cases loop
 
     # Notify user that script has ended:

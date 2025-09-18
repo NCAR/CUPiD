@@ -52,11 +52,11 @@ def generate_all_cfg(cesm_root, cupid_root, cupid_config_loc, run_type):
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
-    generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type)
+    generate_ilamb_cfg(cesm_root, cupid_root, cupid_config_loc, run_type)
     generate_ilamb_model_setup(cesm_root, cupid_config_loc, run_type)
 
 
-def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
+def generate_ilamb_cfg(cesm_root, cupid_root, cupid_config_loc, run_type):
     """Create ILAMB config file with correct paths to ILAMB auxiliary files
     given information from CUPiD configuration file"""
     sys.path.append(os.path.join(cesm_root, "cime"))
@@ -73,7 +73,7 @@ def generate_ilamb_cfg(cesm_root, cupid_config_loc, run_type):
         )
         raise KeyError
 
-    ilamb_config_loc = os.path.join(cesm_root, "tools", "CUPiD", "ilamb_aux")
+    ilamb_config_loc = os.path.join(cupid_root, "ilamb_aux")
     with open(
         os.path.join(
             ilamb_config_loc,
