@@ -118,8 +118,8 @@ def create_time_series(
         # End if
 
         # Check if history files actually exist. If not then kill script:
-        if not list(starting_location.glob("*" + hist_str + "*.nc")):
-            emsg = f"No history *{hist_str}.*.nc files found in '{starting_location}'."
+        if not list(starting_location.glob("*." + hist_str + ".*.nc")):
+            emsg = f"No history *.{hist_str}.*.nc files found in '{starting_location}'."
             emsg += " Script is ending here."
             raise FileNotFoundError(emsg)
         # End if
@@ -131,7 +131,7 @@ def create_time_series(
         for year in range(start_year, end_year + 1):
             # Add files to main file list:
             for fname in starting_location.glob(
-                f"*{hist_str}*{str(year).zfill(4)}*.nc",
+                f"*.{hist_str}.*{str(year).zfill(4)}*.nc",
             ):
                 files_list.append(fname)
             # End for
