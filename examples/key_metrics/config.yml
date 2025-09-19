@@ -180,7 +180,7 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: 'h0'
+            clmFile_h: 'clm2.h0'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
       link_to_ILAMB:
