@@ -32,6 +32,7 @@
  - Isla Simpson (NCAR), [@islasimpson](https://github.com/islasimpson)
  - Gary Strand (NCAR), [@strandwg](https://github.com/strandwg)
  - Kate Thayer-Calder (NCAR), [@Katetc](https://github.com/Katetc)
+ - Jazzy Turner (University of Utah), [@JazSpaz24](https://github.com/JazSpaz24)
  - Will Wieder (NCAR), [@wwieder](https://github.com/wwieder)
  - Anissa Zacharias (NCAR), [@anissa111](https://github.com/anissa111)
  - Feng Zhu (NCAR), [@fzhu2e](https://github.com/fzhu2e)
