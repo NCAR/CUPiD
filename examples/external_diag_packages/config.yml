@@ -125,7 +125,7 @@ compute_notebooks:
           diag_cvdp_info:
             cvdp_run: False
             cvdp_tar: False
-          base_regridded_output: True
+          base_regridded_output: False
       link_to_CVDP:
         kernel_name: cupid-infrastructure
         parameter_groups:
