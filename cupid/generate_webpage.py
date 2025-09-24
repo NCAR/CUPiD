@@ -196,7 +196,7 @@ def build(config_path, github_pages_dir, name, overwrite):
                 tool_name = control["compute_notebooks"][component][notebook][
                     "external_tool"
                 ].get("tool_name")
-                if tool_name in ["ADF", "CVDP", "ILAMB"]:
+                if tool_name in ["ADF", "LDF", "CVDP", "ILAMB"]:
                     shutil.copytree(
                         f"{run_dir}/{tool_name}_output",
                         os.path.join(html_output_path, tool_name),
