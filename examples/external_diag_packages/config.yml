@@ -130,7 +130,7 @@ compute_notebooks:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
-            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            cvdp_root: ../../examples/external_diag_packages/CVDP_output/
             key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
         external_tool:
           tool_name: 'CVDP'
