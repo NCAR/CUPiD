@@ -90,8 +90,6 @@ def remap_time_series(
                 + ".".join([case_name, hist_str, var, "*", "nc"])
             )
 
-            # print("ts_infile_str:",ts_infile_str)
-
             # Check if files already exist in time series directory:
             ts_file_list = glob.glob(ts_infile_str)
 
