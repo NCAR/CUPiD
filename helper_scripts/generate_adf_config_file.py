@@ -227,7 +227,7 @@ def generate_adf_config(
         a_dict["plotting_scripts"] = plotting_scripts
     if cvdp_args:
         a_dict["diag_cvdp_info"] = cvdp_args
-        a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = "../externals/ADF/lib/externals/CVDP/"
+        a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = "../../externals/ADF/lib/externals/CVDP/"
         # this is where CVDP code base lives in the ADF
         
         a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
