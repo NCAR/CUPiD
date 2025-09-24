@@ -201,8 +201,8 @@ def build(config_path, github_pages_dir, name, overwrite):
                         f"{run_dir}/{tool_name}_output",
                         os.path.join(html_output_path, tool_name),
                     )
-                    else:
-                        print(f"Warning: no directory {run_dir}/{tool_name}_output")
+                else:
+                    print(f"Warning: no directory {run_dir}/{tool_name}_output")
 
     if github_pages_dir:
         github_pages_publish(
