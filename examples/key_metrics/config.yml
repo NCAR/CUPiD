@@ -142,7 +142,7 @@ compute_notebooks:
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
           diag_cvdp_info:
-            cvdp_run: True
+            cvdp_run: False
             cvdp_tar: False
           base_regridded_output: True
       link_to_CVDP:
