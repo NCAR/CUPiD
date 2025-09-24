@@ -122,7 +122,9 @@ compute_notebooks:
       summary_tables:
         parameter_groups:
           none:
-            ilamb_vars_highlight: []
+            adf_root: ../../examples/key_metrics/ADF_output/
+            ilamb_root: ../../examples/key_metrics/ILAMB_output/
+            ilamb_vars_highlight: ["Gross Primary Productivity","Runoff","Snow Water Equivalent","Surface Relative Humidity","Precipitation"]
 
     atm:
       Global_PSL_NMSE_compare_obs_lens:
