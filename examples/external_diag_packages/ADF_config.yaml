@@ -1,0 +1,93 @@
+# This file has been auto-generated using generate_adf_config_file.py
+# It is based off of ./config.yml
+# Arguments:
+# cupid_config_loc='.'
+# adf_template='../../externals/ADF/config_amwg_default_plots.yaml'
+# Output: out_file='ADF_config.yaml'
+user: richling
+diag_basic_info:
+  compare_obs: false
+  create_html: true
+  obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
+  cam_regrid_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e30_beta02.BLT1850.ne30_t232.104/atm/proc/tseries/regrid
+  cam_overwrite_regrid: false
+  cam_diag_plot_loc: ./ADF_output
+  plot_press_levels:
+  - 200
+  - 850
+  central_longitude: 180
+  num_procs: 8
+  redo_plot: false
+  hist_str: cam.h0a
+diag_cam_climo:
+  hist_str: cam.h0a
+  calc_cam_climo: true
+  cam_overwrite_climo: false
+  cam_case_name: f.e23_alpha17f.FLTHIST_ne30.roughtopo.099
+  case_nickname: null
+  cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/f.e23_alpha17f.FLTHIST_ne30.roughtopo.099/atm/hist
+  cam_climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/f.e23_alpha17f.FLTHIST_ne30.roughtopo.099/atm/proc/climo
+  start_year: 1
+  end_year: 100
+  cam_ts_done: false
+  cam_ts_save: true
+  cam_overwrite_ts: false
+  cam_ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/f.e23_alpha17f.FLTHIST_ne30.roughtopo.099/atm/proc/tseries
+  tem_hist_str: cam.h4
+  cam_tem_loc: /glade/derecho/scratch/${user}/${diag_cam_climo.cam_case_name}/tem/
+  overwrite_tem: false
+diag_cam_baseline_climo:
+  hist_str: cam.h0a
+  calc_cam_climo: true
+  cam_overwrite_climo: false
+  cam_case_name: b.e30_beta02.BLT1850.ne30_t232.104
+  case_nickname: null
+  cam_hist_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e30_beta02.BLT1850.ne30_t232.104/atm/hist/regrid
+  cam_climo_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e30_beta02.BLT1850.ne30_t232.104/atm/proc/climo/regrid
+  start_year: 1
+  end_year: 100
+  cam_ts_done: false
+  cam_ts_save: true
+  cam_overwrite_ts: false
+  cam_ts_loc: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/b.e30_beta02.BLT1850.ne30_t232.104/atm/proc/tseries/regrid
+  tem_hist_str: cam.h4
+  cam_tem_loc: /glade/derecho/scratch/${user}/${diag_cam_baseline_climo.cam_case_name}/tem/
+  overwrite_tem: false
+diag_cvdp_info:
+  cvdp_run: true
+  cvdp_tar: false
+  cvdp_codebase_loc: ../externals/ADF/lib/externals/CVDP/
+  cvdp_loc: ./CVDP_output/
+diag_mdtf_info:
+  mdtf_run: false
+  mdtf_input_settings_filename: mdtf_input.json
+  mdtf_codebase_path: /glade/campaign/cgd/amp/amwg/mdtf
+  mdtf_codebase_loc: ${mdtf_codebase_path}/MDTF-diagnostics.v3.1.20230817.ADF
+  conda_root: /glade/u/apps/opt/conda
+  conda_env_root: ${mdtf_codebase_path}/miniconda2/envs.MDTFv3.1.20230412/
+  OBS_DATA_ROOT: ${mdtf_codebase_path}/obs_data
+  MODEL_DATA_ROOT: ${diag_cam_climo.cam_ts_loc}/mdtf/inputdata/model
+  pod_list:
+  - MJO_suite
+  make_variab_tar: false
+  save_ps: false
+  save_nc: false
+  overwrite: true
+  verbose: 3
+  test_mode: false
+  dry_run: false
+  data_type: single_run
+  data_manager: Local_File
+  environment_manager: Conda
+time_averaging_scripts:
+- create_climo_files
+regridding_scripts:
+- regrid_and_vert_interp
+analysis_scripts:
+- amwg_table
+plotting_scripts:
+- global_latlon_map
+- global_latlon_vect_map
+diag_var_list:
+- PRECT
+- SST
