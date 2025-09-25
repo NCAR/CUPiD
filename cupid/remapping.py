@@ -95,7 +95,6 @@ def remap_time_series(
 
             list_of_commands = []
             for ts_file in ts_file_list:
-                print(ts_file)
                 # Set up path to output file (creating toplevel dir if necessary)
                 ts_file_nopath = os.path.basename(ts_file)
                 ts_file_path = os.path.dirname(ts_file)
