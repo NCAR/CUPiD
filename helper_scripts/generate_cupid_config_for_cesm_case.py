@@ -231,6 +231,13 @@ def generate_cupid_config(
             "parameter_groups"
         ]["none"]["base_climo_nyears"] = base_climo_nyears
 
+    # Regional Ocean Open Boundary Conditions needs access to ocean input directory
+    # The ocean input directory is (hackily) accessible through the case root directory
+    if "Regional_Ocean_OBC" in my_dict["compute_notebooks"].get("ocn", {}):
+        my_dict["compute_notebooks"]["ocn"]["Regional_Ocean_OBC"]["parameter_groups"][
+            "none"
+        ]["case_root"] = case_root
+
     # replace with environment variable
     my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
 

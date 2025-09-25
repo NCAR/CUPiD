@@ -43,7 +43,7 @@ computation_config:
 global_params:
   case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
   base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
+  CESM_output_dir:
   start_date: '0001-01-01'
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
