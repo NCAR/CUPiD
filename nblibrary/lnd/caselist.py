@@ -30,6 +30,10 @@ class CaseList(list):
         # Define extra variables
         self.names = opts["case_name_list"]
 
+        # Get map figure layout info
+        self.mapfig_layout = {}
+        self._get_mapfig_layout()
+
         # Import cases
         self._import_cases(
             CropCase,
@@ -37,10 +41,6 @@ class CaseList(list):
             opts,
         )
         self.resolutions = {case.cft_ds.attrs["resolution"].name for case in self}
-
-        # Get map figure layout info
-        self.mapfig_layout = {}
-        self._get_mapfig_layout()
 
     def _import_cases(
         self,
