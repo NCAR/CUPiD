@@ -113,18 +113,12 @@ class CaseList(list):
         Get map figure layout info
         """
         n_cases = len(self.names)
-        if 1 <= n_cases <= 2:
-            self.mapfig_layout["nrows"] = 1
-            self.mapfig_layout["subplots_adjust_colorbar_top"] = 0.95
-            self.mapfig_layout["subplots_adjust_colorbar_bottom"] = 0.2
-            self.mapfig_layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
-        elif 3 <= n_cases <= 4:
-            self.mapfig_layout["nrows"] = 2
-            self.mapfig_layout["subplots_adjust_colorbar_top"] = 0.95
-            self.mapfig_layout["subplots_adjust_colorbar_bottom"] = 0.2
-            self.mapfig_layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
-        else:
-            raise RuntimeError(f"Specify figure layout for N_cases=={n_cases}")
+
+        self.mapfig_layout["nrows"] = int(np.ceil(n_cases / 2))
+        self.mapfig_layout["subplots_adjust_colorbar_top"] = 0.95
+        self.mapfig_layout["subplots_adjust_colorbar_bottom"] = 0.2
+        self.mapfig_layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
+
         height = 3.75 * self.mapfig_layout["nrows"]
         width = 15
         self.mapfig_layout["figsize"] = (width, height)
