@@ -197,12 +197,13 @@ def build(config_path, github_pages_dir, name, overwrite):
                     "external_tool"
                 ].get("tool_name")
                 if tool_name in ["ADF", "LDF", "CVDP", "ILAMB"]:
-                    shutil.copytree(
-                        f"{run_dir}/{tool_name}_output",
-                        os.path.join(html_output_path, tool_name),
-                    )
-                else:
-                    print(f"Warning: no directory {run_dir}/{tool_name}_output")
+                    if os.path.isdir(f"{run_dir}/{tool_name}_output"):
+                        shutil.copytree(
+                            f"{run_dir}/{tool_name}_output",
+                            os.path.join(html_output_path, tool_name),
+                        )
+                    else:
+                        print(f"Warning: no directory {run_dir}/{tool_name}_output")
 
     if github_pages_dir:
         github_pages_publish(
