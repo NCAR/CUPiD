@@ -48,6 +48,8 @@ global_params:
   end_date: '0101-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0101-01-01'
+  regridded_output: False
+  base_regridded_output: True
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
@@ -66,7 +68,7 @@ timeseries:
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
-    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+    mapping_file: ['/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc', '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
 
 
   lnd:
@@ -127,8 +129,6 @@ compute_notebooks:
       Global_PSL_NMSE_compare_obs_lens:
         parameter_groups:
           none:
-            regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
       link_to_ADF:
         kernel_name: cupid-infrastructure
@@ -141,7 +141,6 @@ compute_notebooks:
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
 
     glc:
       Greenland_SMB_visual_compare_obs:
