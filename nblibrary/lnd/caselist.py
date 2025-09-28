@@ -7,7 +7,6 @@ import os
 from time import time
 
 import numpy as np
-import xarray as xr
 
 
 class CaseList(list):
@@ -69,44 +68,13 @@ class CaseList(list):
                 ),
             )
 
-            if opts["dev_mode"]:
-                start_load = time()
-                print("Loading...")
-                self[-1].cft_ds.load()
-                end_load = time()
-                print(f"Loading took {int(end_load - start_load)} s")
-
-            # Get gridcell area
-            ds = self[-1].cft_ds
-            area_p = self._get_area_p(ds)
-            ds["pfts1d_gridcellarea"] = xr.DataArray(
-                data=area_p,
-                coords={"pft": ds["pft"].values},
-                dims=["pft"],
-            )
-
             # Get resolution
-            ds.attrs["resolution"] = identify_resolution(ds)
+            self[-1].cft_ds.attrs["resolution"] = identify_resolution(self[-1].cft_ds)
 
         print("Done.")
         if opts["verbose"]:
             end = time()
             print(f"Importing took {int(end - start)} s")
-
-    def _get_area_p(self, ds):
-        """
-        Get area of gridcell that is parent of each pft (patch)
-        """
-        area_g = []
-        for i, lon in enumerate(ds["grid1d_lon"].values):
-            lat = ds["grid1d_lat"].values[i]
-            area_g.append(ds["area"].sel(lat=lat, lon=lon))
-        area_g = np.array(area_g)
-        area_p = []
-        for i in ds["pfts1d_gi"].isel(cft=0).values:
-            area_p.append(area_g[int(i) - 1])
-        area_p = np.array(area_p)
-        return area_p
 
     def _get_mapfig_layout(self):
         """
