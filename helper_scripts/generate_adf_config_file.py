@@ -234,7 +234,7 @@ def generate_adf_config(
         
         a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
             cupid_config_loc,
-            "CVDP_output/",
+            "CVDP_output",
         )  # this is where CVDP will put plots, and "website" directory
 
     with open(out_file, "w") as f:
