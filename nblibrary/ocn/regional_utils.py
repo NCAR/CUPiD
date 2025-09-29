@@ -28,24 +28,33 @@ from matplotlib.ticker import MaxNLocator
 # will likely be migrated to mom6-tools.
 
 
-def chooseColorMap(sMin, sMax, difference=None):
+def chooseColorMap(var):
     """
     Based on the min/max extremes of the data, choose a colormap that fits the data.
     """
-    if difference is True:
-        return "dunnePM"
-    elif sMin < 0 and sMax > 0:
-        return "dunnePM"
-    # elif sMax>0 and sMin<0.1*sMax: return 'hot'
-    # elif sMin<0 and sMax>0.1*sMin: return 'hot_r'
-    else:
-        return "dunneRainbow"
+    try:
+        import cmocean
+
+        if var in ["thetao", "temp", "tos", "SST", "hfds"]:
+            return cmocean.cm.thermal
+        elif var in ["speed"]:
+            return cmocean.cm.speed
+        elif var in ["SSS", "sos", "salt", "so"]:
+            return cmocean.cm.haline
+        elif var in ["SSH", "ssh", "h", "e"]:
+            return cmocean.cm.balance
+        elif var in ["uo", "vo", "SSV", "SSU", "u", "v", "tauuo", "tauvo"]:
+            return cmocean.cm.delta
+        else:
+            return cmocean.cm.balance
+    except ImportError:
+        return plt.get_cmap("gist_ncar")
 
 
 def chooseColorLevels(
     sMin,
     sMax,
-    colorMapName,
+    colorMap,
     clim=None,
     nbins=None,
     steps=[1, 2, 2.5, 5, 10],
@@ -105,12 +114,8 @@ def chooseColorLevels(
     if extend in ["both", "max"]:
         eColors[1] = 1
 
-    cmap = plt.get_cmap(colorMapName)  # ,lut=nColors+eColors[0]+eColors[1])
-    # cmap0 = cmap(0.)
-    # cmap1 = cmap(1.)
-    # cmap = ListedColormap(cmap(range(eColors[0],nColors+1-eColors[1]+eColors[0])))#, N=nColors)
-    # if eColors[0]>0: cmap.set_under(cmap0)
-    # if eColors[1]>0: cmap.set_over(cmap1)
+    cmap = colorMap  # ,lut=nColors+eColors[0]+eColors[1])
+
     if logscale:
         norm = LogNorm(vmin=levels[0], vmax=levels[-1])
     else:
@@ -168,9 +173,9 @@ def label(label, units):
 def plot_2D_latlon_field_plot(
     field,
     grid,
+    area_var="areacello",
     lon_var="geolon",
     lat_var="geolat",
-    area_var=None,
     xlabel=None,
     xunits=None,
     ylabel=None,
@@ -217,17 +222,14 @@ def plot_2D_latlon_field_plot(
         )  # maskedField = field.copy()
 
     # Diagnose statistics
-    if area_var is None:
-        area_cell = grid["areacello"].to_numpy()
-    else:
-        area_cell = grid[area_var].to_numpy()
+    area_cell = grid[area_var].to_numpy()
     sMin, sMax, sMean, sStd, sRMS = myStats(maskedField, area_cell, debug=debug)
 
     # Choose colormap
     if nbins is None and (clim is None or len(clim) == 2):
         nbins = 35
     if colormap is None:
-        colormap = chooseColorMap(sMin, sMax)
+        colormap = chooseColorMap()
         if clim is None and sStd is not None:
             lower = sMean - sigma * sStd
             upper = sMean + sigma * sStd
@@ -380,7 +382,10 @@ def plot_2D_latlon_field_plot(
     return pm
 
 
-def visualize_regional_domain(grd_xr, save=None):
+def visualize_regional_domain(
+    grd_xr,
+    save=None,
+):
     # Grab useful variables
     central_longitude = float(
         (grd_xr["geolon"].max().values + grd_xr["geolon"].min().values) / 2,
@@ -602,11 +607,15 @@ def create_2d_field_animation(
     return anim
 
 
-def plot_area_averaged_timeseries(sfc_data, static_data, variables):
+def plot_area_averaged_timeseries(
+    data,
+    weights,
+    variables,
+):
 
-    valid_variables = [v for v in variables if v in sfc_data]
+    valid_variables = [v for v in variables if v in data]
     if not valid_variables:
-        print("ERROR: None of the requested variables were found in the dataset.")
+        print("ERROR: None of the requested variable(s) were found in the dataset.")
         return
 
     n_vars = len(valid_variables)
@@ -619,13 +628,9 @@ def plot_area_averaged_timeseries(sfc_data, static_data, variables):
         squeeze=False,
     )
 
-    weights = static_data["areacello"]
-    if "time" in weights.dims:
-        weights = weights.isel(time=0, drop=True)
-
     for i, var_name in enumerate(valid_variables):
         ax = axes[i, 0]
-        da = sfc_data[var_name]
+        da = data[var_name]
 
         spatial_dims = [dim for dim in da.dims if dim != "time"]
         area_avg_da = da.weighted(weights).mean(dim=spatial_dims)

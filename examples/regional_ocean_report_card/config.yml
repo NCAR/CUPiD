@@ -189,19 +189,26 @@ compute_notebooks:
         parameter_groups:
           none:
             serial: True
+            savefigs: True
+            img_output_dir: null  # if None, will be created in case directory
       Regional_Ocean_OBC:
         parameter_groups:
           none:
             serial: True
             case_root: null
+            savefigs: True
+            img_output_dir: null
       Regional_Ocean_Atmospheric_Forcing:
         parameter_groups:
           none:
             serial: True
+            savefigs: True
+            img_output_dir: null
       Regional_Ocean_Animations:
         parameter_groups:
           none:
             serial: True
+            savefigs: True
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -233,9 +240,9 @@ book_toc:
     - caption: Ocean
       chapters:
           - file: ocn/Regional_Ocean_Report_Card
-          - file: ocn/Regional_Ocean_Surface_Timeseries
-          - file: ocn/Regional_Ocean_OBC
           - file: ocn/Regional_Ocean_Animations
+          - file: ocn/Regional_Ocean_OBC
+          - file: ocn/Regional_Ocean_Atmospheric_Forcing
 
     # - caption: Land
     #   chapters:
