@@ -155,7 +155,6 @@ compute_notebooks:
       global_discharge_gauge_compare_obs:
         parameter_groups:
           none:
-            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
             analysis_name: ""
             grid_name: 'f09_f09_mosart' # ROF grid name
             climo_nyears: 10
@@ -163,7 +162,6 @@ compute_notebooks:
       global_discharge_ocean_compare_obs:
         parameter_groups:
           none:
-            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
             analysis_name: ""
             grid_name: 'f09_f09_mosart' # ROF grid name
             climo_nyears: 10
@@ -182,45 +180,10 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: 'h0'
+            clmFile_h: '.h0.'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
-      link_to_ILAMB:
-        parameter_groups:
-          none:
-            ilamb_root: ../../examples/key_metrics/ILAMB_output
-            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/*_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/*1_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/*_global_accumulate.png", "HydrologyCycle/Permafrost/Brown2002/*_global_bias.png"]
-            print_table: True
-        external_tool:
-          tool_name: 'ILAMB'
-          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
-        kernel_name: cupid-infrastructure
-        parameter_groups:
-          none:
-            ldf_root: ../../examples/key_metrics/LDF_output/
-            key_plots: ["GPP_ANN_LatLon_Mean.png",
-                        "ELAI_ANN_LatLon_Mean.png",
-                        "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png",
-                        "RegionalClimo_Amazonia_RegionalClimo_Mean.png"]
-        external_tool:
-          tool_name: 'LDF'
-          vars: ['TSA','PREC','ELAI','FSDS','FLDS','ASA','RNET',
-                 'FSH','ET','FCTR','FGEV','FCEV','QRUNOFF_TO_COUPLER',
-                 'SNOWDP','GPP','NPP','NEE','NBP',
-                 'BTRANMN','TOTVEGC','TOTECOSYSC','TOTSOMC_1m',
-                 'ALTMAX','FAREA_BURNED','DSTFLXT','MEG_isoprene']
-          plotting_scripts:  ["global_latlon_map","polar_map",
-                              "global_mean_timeseries_lnd", "regional_climatology"]
-          analysis_scripts: ["lmwg_table"]
-          base_regridded_output: False
-          region_list: ["Global", "N Hemisphere Land","Polar",
-                        "Canadian Arctic",'Russian Arctic','Greenland',
-                        'Northwest Canada','Northern Europe','Western Siberia',
-                        'Western US','Eastern US','Europe',
-                        'Amazonia','Central Africa','Indonesia',
-                        'Brazil','Sahel','Southern Africa','India']
-          defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
+
 #    ocn:
 #      ocean_surface:
 #        parameter_groups:
@@ -269,8 +232,6 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
 
     - caption: Sea Ice
       chapters:
