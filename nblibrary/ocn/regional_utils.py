@@ -222,14 +222,19 @@ def plot_2D_latlon_field_plot(
         )  # maskedField = field.copy()
 
     # Diagnose statistics
-    area_cell = grid[area_var].to_numpy()
+    area_cell = grid[area_var]
+
+    maskedField = field.fillna(0.0) * area_cell
+
+    # sMin, sMax, sMean, sStd, sRMS = maskedField.min(), maskedField.max(),
+    # maskedField.mean(), maskedField.std(), np.sqrt((np.square(maskedField)).mean())
     sMin, sMax, sMean, sStd, sRMS = myStats(maskedField, area_cell, debug=debug)
 
     # Choose colormap
     if nbins is None and (clim is None or len(clim) == 2):
         nbins = 35
     if colormap is None:
-        colormap = chooseColorMap()
+        colormap = chooseColorMap(field.name)
         if clim is None and sStd is not None:
             lower = sMean - sigma * sStd
             upper = sMean + sigma * sStd
@@ -326,21 +331,21 @@ def plot_2D_latlon_field_plot(
     if annotate:
         axis.annotate(
             f"max={sMax:.5g}\nmin={sMin:.5g}",
-            xy=(0.0, 1.01),
+            xy=(0.0, -0.01),
             xycoords="axes fraction",
             verticalalignment="bottom",
         )
         if area_cell is not None:
             axis.annotate(
                 f"mean={sMean:.5g}\nrms={sRMS:.5g}",
-                xy=(1.0, 1.01),
+                xy=(1.0, -0.01),
                 xycoords="axes fraction",
                 verticalalignment="bottom",
                 horizontalalignment="right",
             )
             axis.annotate(
                 " sd=%.5g\n" % (sStd),
-                xy=(1.0, 1.01),
+                xy=(1.0, -0.01),
                 xycoords="axes fraction",
                 verticalalignment="bottom",
                 horizontalalignment="left",

@@ -1,3 +1,4 @@
+
 ################## SETUP ##################
 
 ################
@@ -49,7 +50,7 @@ global_params:
   base_start_date: ''
   base_end_date: ''
   # obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
-  ts_dir: /glade/derecho/scratch/ajanney/archive/ # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
+  ts_dir: '/glade/derecho/scratch/ajanney/archive/' # null # '/glade/derecho/scratch/$USER/archive/' # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch archive directory
   lc_kwargs:
     threads_per_worker: 1
 
@@ -85,27 +86,24 @@ compute_notebooks:
       Regional_Ocean_Report_Card:
         parameter_groups:
           none:
-            serial: True
             savefigs: True
-            img_output_dir: null  # if None, will be created in case directory
+            img_output_dir: null  # if null, will be created in CESM output directory
       Regional_Ocean_OBC:
         parameter_groups:
           none:
-            serial: True
             case_root: null
             savefigs: True
             img_output_dir: null
       Regional_Ocean_Atmospheric_Forcing:
         parameter_groups:
           none:
-            serial: True
             savefigs: True
             img_output_dir: null
       Regional_Ocean_Animations:
         parameter_groups:
           none:
-            serial: True
             savefigs: True
+            img_output_dir: null
 
 ########### JUPYTER BOOK CONFIG ###########
 
