@@ -39,11 +39,11 @@ computation_config:
 ############################
 
 # All parameters under global_params get passed to all the notebooks
-# /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/CROCODILE_tutorial_nwa12_MARBL
+
 global_params:
-  case_name: 'CROCODILE_tutorial_nwa12_MARBL'
-  base_case_name: 'CROCODILE_tutorial_nwa12_MARBL'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
+  case_name: 'gustavo-glorys-2'
+  base_case_name: 'gustavo-glorys-2'
+  CESM_output_dir: /glade/u/home/manishrv/scratch/archive/
   start_date: ''
   end_date: ''
   base_start_date: ''
@@ -57,15 +57,57 @@ timeseries:
   num_procs: 8
   ts_done: [False]
   overwrite_ts: [False]
-  case_name: ['CROCODILE_tutorial_nwa12_MARBL']
+  case_name: ['gustavo-glorys-2']
+
+  # atm:
+  #   vars: ['PSL']
+  #   derive_vars: []
+  #   hist_str: 'cam.h0a'
+  #   start_years: [1,1]
+  #   end_years: [100,100]
+  #   level: 'lev'
+  #   mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
+
+  # lnd:
+  #   vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
+  #   derive_vars: []
+  #   hist_str: 'h0'
+  #   start_years: [1,1]
+  #   end_years: [100,100]
+  #   level: 'lev'
 
   ocn:
-    vars: ['vo', 'uo', 'thetao', 'so']
+    vars: ['SSH','sos','tos','SSV','SSU','speed']
     derive_vars: []
-    hist_str: 'mom6.h.z'
+    hist_str: 'mom6.h.sfc'
     start_years: [2000]
     end_years: [2000]
-    level: 'z_l' # ?
+    level: null # ?
+
+  # ice:
+  #   vars: ['aice','hi','hs']
+  #   derive_vars: []
+  #   hist_str: 'cice.h'
+  #   start_years: [1,1]
+  #   end_years: [100,100]
+  #   level: 'lev'
+
+  # glc:
+  #   vars: []
+  #   derive_vars: []
+  #   hist_str: 'initial_hist'
+  #   start_years: [1,1]
+  #   end_years: [100,100]
+  #   level: 'lev'
+
+  # rof:
+  #   vars: []
+  #   derive_vars: []
+  #   hist_str: 'h0'
+  #   start_years: [1,1]
+  #   end_years: [100,100]
+  #   level: 'lev'
 
 compute_notebooks:
 
@@ -80,6 +122,67 @@ compute_notebooks:
       index:
         parameter_groups:
           none: {}
+
+    # atm:
+    #   Global_PSL_NMSE_compare_obs_lens:
+    #     parameter_groups:
+    #       none:
+    #         regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
+    #         base_regridded_output: True
+    #         validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
+    #   link_to_ADF:
+    #     kernel_name: cupid-infrastructure
+    #     parameter_groups:
+    #       none:
+    #         adf_root: ../../examples/key_metrics/ADF_output/
+    #         key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
+    #     external_tool:
+    #       tool_name: 'ADF'
+    #       vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
+    #       plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+    #       analysis_scripts: ["amwg_table"]
+    #       base_regridded_output: True
+
+    # glc:
+    #   Greenland_SMB_visual_compare_obs:
+    #     parameter_groups:
+    #       none:
+    #         obs_path: 'glc/analysis_datasets/multi_grid/annual_avg/SMB_data'
+    #         obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+    #         climo_nyears: 40
+
+    # rof:
+    #   global_discharge_gauge_compare_obs:
+    #     parameter_groups:
+    #       none:
+    #         analysis_name: ""
+    #         grid_name: 'f09_f09_mosart' # ROF grid name
+    #         climo_nyears: 10
+    #         figureSave: False
+    #   global_discharge_ocean_compare_obs:
+    #     parameter_groups:
+    #       none:
+    #         analysis_name: ""
+    #         grid_name: 'f09_f09_mosart' # ROF grid name
+    #         climo_nyears: 10
+    #         figureSave: False
+
+    # ice:
+    #   Hemis_seaice_visual_compare_obs_lens:
+    #     parameter_groups:
+    #       none:
+    #         climo_nyears: 35
+    #         grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
+    #         path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+
+
+    # lnd:
+    #   Global_TerrestrialCouplingIndex_VisualCompareObs:
+    #     parameter_groups:
+    #       none:
+    #         clmFile_h: '.h0.'
+    #         fluxnet_comparison: True
+    #         obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
 
     ocn:
       Regional_Ocean_Report_Card:
@@ -129,12 +232,34 @@ book_toc:
     # Each chapter is the name of one of the notebooks that you executed
     # in compute_notebooks above, also without .ipynb
 
+    # - caption: Atmosphere
+    #   chapters:
+    #     - file: atm/Global_PSL_NMSE_compare_obs_lens
+    #     - file: atm/link_to_ADF
+
     - caption: Ocean
       chapters:
           - file: ocn/Regional_Ocean_Report_Card
           - file: ocn/Regional_Ocean_Animations
           - file: ocn/Regional_Ocean_OBC
           - file: ocn/Regional_Ocean_Atmospheric_Forcing
+
+    # - caption: Land
+    #   chapters:
+    #     - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
+
+    # - caption: Sea Ice
+    #   chapters:
+    #     - file: ice/Hemis_seaice_visual_compare_obs_lens
+
+    # - caption: Land Ice
+    #   chapters:
+    #     - file: glc/Greenland_SMB_visual_compare_obs
+
+    # - caption: River Runoff
+    #   chapters:
+    #     - file: rof/global_discharge_gauge_compare_obs
+    #     - file: rof/global_discharge_ocean_compare_obs
 
 #####################################
 # Keys for Jupyter Book _config.yml #
