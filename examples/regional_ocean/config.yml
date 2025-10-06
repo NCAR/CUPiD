@@ -43,16 +43,20 @@ computation_config:
 # /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/CROCODILE_tutorial_nwa12_MARBL
 global_params:
   case_name: 'CROCODILE_tutorial_nwa12_MARBL'
-  base_case_name: 'CROCODILE_tutorial_nwa12_MARBL'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/
+  base_case_name: null
+  CESM_output_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/CESM_Output/'
   start_date: ''
   end_date: ''
   base_start_date: ''
   base_end_date: ''
   # obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
-  ts_dir: '/glade/derecho/scratch/ajanney/archive/' # null # '/glade/derecho/scratch/$USER/archive/' # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch archive directory
+  # ts_dir: null # If this is set to null, it will default to CESM_output_dir
   lc_kwargs:
     threads_per_worker: 1
+
+  # Specific to regional_ocean example
+  savefigs: True
+  fig_output_dir: null  # if null, will be created in CESM output directory
 
 timeseries:
   num_procs: 8
@@ -85,25 +89,20 @@ compute_notebooks:
     ocn:
       Regional_Ocean_Report_Card:
         parameter_groups:
-          none:
-            savefigs: True
-            img_output_dir: null  # if null, will be created in CESM output directory
-      Regional_Ocean_OBC:
-        parameter_groups:
-          none:
-            case_root: null
-            savefigs: True
-            img_output_dir: null
-      Regional_Ocean_Atmospheric_Forcing:
-        parameter_groups:
-          none:
-            savefigs: True
-            img_output_dir: null
+          none: {}
       Regional_Ocean_Animations:
         parameter_groups:
+          none: {}
+      Regional_Ocean_Atmospheric_Forcing:
+        parameter_groups:
+          none: {}
+      Regional_Ocean_OBC: # needs to access regional MOM6 input directory (see INPUTDIR in user_nl_mom)
+        parameter_groups: # if mom6_input_dir is given, will ignore case_root, otherwise looks for INPUTDIR in case_root
           none:
-            savefigs: True
-            img_output_dir: null
+            case_root: null
+            mom6_input_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/Input_Dir/CROCODILE_tutorial_nwa12_MARBL_ocnice'
+            obc_file_str: 'forcing_obc_segment_00*.nc' # pattern for boundary condition file names
+
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -131,8 +130,8 @@ book_toc:
       chapters:
           - file: ocn/Regional_Ocean_Report_Card
           - file: ocn/Regional_Ocean_Animations
-          - file: ocn/Regional_Ocean_OBC
           - file: ocn/Regional_Ocean_Atmospheric_Forcing
+          - file: ocn/Regional_Ocean_OBC
 
 #####################################
 # Keys for Jupyter Book _config.yml #
