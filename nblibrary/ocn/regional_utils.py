@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import math
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 from cartopy import crs as ccrs
 from cartopy import feature as cfeature
 from matplotlib.animation import FuncAnimation
@@ -11,8 +12,6 @@ from matplotlib.colors import BoundaryNorm
 from matplotlib.colors import ListedColormap
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import MaxNLocator
-
-# import xarray as xr
 
 # from mom6_tools.MOM6grid import MOM6grid
 # from mom6_tools.m6plot import (
@@ -30,7 +29,7 @@ from matplotlib.ticker import MaxNLocator
 
 def chooseColorMap(var):
     """
-    Based on the min/max extremes of the data, choose a colormap that fits the data.
+    Based on the variable being plotted, choose variable.
     """
     try:
         import cmocean
@@ -123,40 +122,34 @@ def chooseColorLevels(
     return cmap, norm, extend
 
 
-def myStats(s, area, debug=False):
+def oceanStats2D(
+    field: xr.DataArray,
+    area_weights: xr.DataArray = None,
+    lsm_2D: xr.DataArray = None,
+    lat_var: str = "latitude",
+    lon_var: str = "longitude",
+):
     """
-    Calculates mean, standard deviation and root-mean-square of s.
+    Compute area-weighted mean and standard deviation for an ocean field.
     """
-    sMin = np.ma.min(s)
-    sMax = np.ma.max(s)
-    if debug:
-        print("myStats: min(s) =", sMin)
-    if debug:
-        print("myStats: max(s) =", sMax)
-    if area is None:
-        return sMin, sMax, None, None, None
-    weight = area.copy()
-    if debug:
-        print("myStats: sum(area) =", np.ma.sum(weight))
-    if not np.ma.getmask(s).any() == np.ma.nomask:
-        weight[s.mask] = 0.0
-    sumArea = np.ma.sum(weight)
-    if debug:
-        print("myStats: sum(area) =", sumArea, "after masking")
-    if debug:
-        print("myStats: sum(s) =", np.ma.sum(s))
-    if debug:
-        print("myStats: sum(area*s) =", np.ma.sum(weight * s))
-    mean = np.ma.sum(weight * s) / sumArea
-    std = math.sqrt(np.ma.sum(weight * ((s - mean) ** 2)) / sumArea)
-    rms = math.sqrt(np.ma.sum(weight * (s**2)) / sumArea)
-    if debug:
-        print("myStats: mean(s) =", mean)
-    if debug:
-        print("myStats: std(s) =", std)
-    if debug:
-        print("myStats: rms(s) =", rms)
-    return sMin, sMax, mean, std, rms
+    if lat_var in field.dims and lon_var in field.dims and len(field.dims) > 2:
+        raise Exception(
+            "Field must be 2D in lat and lon with no time variable. \
+                        Select a time if field is 2D. If Field is 3D, \
+                        select a level or use oceanStats3D.",
+        )
+
+    min = field.min(skipna=True).compute().item()
+    max = field.max(skipna=True).compute().item()
+
+    weighted_field = field.weighted(area_weights * lsm_2D)
+
+    mean = weighted_field.mean(skipna=True).compute().item()
+    std_dev = weighted_field.std(skipna=True).compute().item()
+
+    stats = {"max": max, "min": min, "mean": mean, "std_dev": std_dev}
+
+    return stats
 
 
 def label(label, units):
@@ -174,6 +167,7 @@ def plot_2D_latlon_field_plot(
     field,
     grid,
     area_var="areacello",
+    lsm_var="wet",
     lon_var="geolon",
     lat_var="geolat",
     xlabel=None,
@@ -195,40 +189,36 @@ def plot_2D_latlon_field_plot(
     dpi=150,
     sigma=2.0,
     annotate=True,
-    ignore=None,
-    save=None,
+    save_fig=None,
+    save_path=".",
     debug=False,
-    show=False,
+    show=True,
     logscale=False,
     projection=None,
     coastlines=True,
     res=None,
     coastcolor=[0, 0, 0],
     landcolor=[0.75, 0.75, 0.75],
-    coast_linewidth=0.5,
+    coast_linewidth=0.3,
     fontsize=22,
     gridlines=False,
+    find_stats=True,
 ):
     # Preplotting
     plt.rc("font", size=fontsize)
 
-    # Mask ignored values
-    if ignore is not None:
-        maskedField = np.ma.masked_array(field, mask=[field == ignore])
-    else:
-        maskedField = np.ma.masked_array(
-            field,
-            mask=np.isnan(field),
-        )  # maskedField = field.copy()
+    if find_stats:
+        # Diagnose statistics
+        area_cell = grid[area_var]
+        lsm = grid[lsm_var]
 
-    # Diagnose statistics
-    area_cell = grid[area_var]
-
-    maskedField = field.fillna(0.0) * area_cell
-
-    # sMin, sMax, sMean, sStd, sRMS = maskedField.min(), maskedField.max(),
-    # maskedField.mean(), maskedField.std(), np.sqrt((np.square(maskedField)).mean())
-    sMin, sMax, sMean, sStd, sRMS = myStats(maskedField, area_cell, debug=debug)
+        stats = oceanStats2D(field, area_cell, lsm)
+        sMin, sMax, sMean, sStd = (
+            stats["min"],
+            stats["max"],
+            stats["mean"],
+            stats["std_dev"],
+        )
 
     # Choose colormap
     if nbins is None and (clim is None or len(clim) == 2):
@@ -314,7 +304,7 @@ def plot_2D_latlon_field_plot(
                 bbox.height,  # height
             ],
         )
-        cb = plt.colorbar(pm, cax=cbar_ax, extend=extend)
+        cb = fig.colorbar(pm, cax=cbar_ax, extend=extend)
         if cbar_label is not None:
             cb.set_label(cbar_label)
     if centerlabels and len(clim) > 2:
@@ -329,28 +319,16 @@ def plot_2D_latlon_field_plot(
     # axis.set_ylim( yLims )
 
     if annotate:
+        annotation = f"Max: {stats['max']:.3f}, Min: {stats['min']:.3f} \nMean: \
+            {stats['mean']:.3f}, Std Dev: {stats['std_dev']:.3f}"
         axis.annotate(
-            f"max={sMax:.5g}\nmin={sMin:.5g}",
-            xy=(0.0, -0.01),
+            annotation,
+            xy=(0.5, -0.05),
             xycoords="axes fraction",
-            verticalalignment="bottom",
+            ha="center",
+            va="top",
+            fontsize=10,
         )
-        if area_cell is not None:
-            axis.annotate(
-                f"mean={sMean:.5g}\nrms={sRMS:.5g}",
-                xy=(1.0, -0.01),
-                xycoords="axes fraction",
-                verticalalignment="bottom",
-                horizontalalignment="right",
-            )
-            axis.annotate(
-                " sd=%.5g\n" % (sStd),
-                xy=(1.0, -0.01),
-                xycoords="axes fraction",
-                verticalalignment="bottom",
-                horizontalalignment="left",
-            )
-
     if xlabel and xunits:
         if len(xlabel + xunits) > 0:
             axis.set_xlabel(label(xlabel, xunits))
@@ -380,9 +358,9 @@ def plot_2D_latlon_field_plot(
         plt.show(block=False)
     elif created_own_axis:
         plt.show(block=True)
-    if save is not None:
-        plt.savefig(save)
-        plt.close()
+    if save_fig:
+        plt.savefig(os.path.join(save_path, f"field_plot_{field.name}.png"))
+    plt.close()
 
     return pm
 
@@ -536,6 +514,7 @@ def visualize_regional_domain(
         colormap=ListedColormap(["tan", "cornflowerblue"]),
         coast_linewidth=0.2,
         add_cbar=False,
+        find_stats=False,
     )
     pm = ax2.set_title("Land/Ocean Mask", fontsize=10)
     pm.sticky_edges.x[:] = []
@@ -553,21 +532,28 @@ def visualize_regional_domain(
 def create_2d_field_animation(
     da,
     grid,
+    lat_var="geolat",
+    lon_var="geolon",
+    area_var="areacello",
+    lsm_var="wet",
     time_dim="time",
     interval=200,
     verbose=False,
-    **kwargs,
 ):
 
-    plot_kwargs = kwargs.copy()
     base_title = da.long_name
 
-    field_t0 = da.isel({time_dim: 0}).to_numpy()
+    field_t0 = da.isel({time_dim: 0})
     pm = plot_2D_latlon_field_plot(
         field=field_t0,
         grid=grid,
+        lat_var=lat_var,
+        lon_var=lon_var,
+        area_var=area_var,
+        lsm_var=lsm_var,
         show=False,
-        **plot_kwargs,
+        find_stats=True,
+        add_cbar=False,
     )
 
     fig = pm.figure
@@ -590,7 +576,7 @@ def create_2d_field_animation(
 
         axis.set_title(
             f"{base_title}\n{time_str}",
-            fontsize=plot_kwargs.get("fontsize", 22) * 1.5,
+            fontsize=22,
         )
 
         if verbose:
@@ -616,6 +602,8 @@ def plot_area_averaged_timeseries(
     data,
     weights,
     variables,
+    save_fig=False,
+    save_path=".",
 ):
 
     valid_variables = [v for v in variables if v in data]
@@ -654,3 +642,5 @@ def plot_area_averaged_timeseries(
 
     plt.tight_layout(rect=[0, 0, 1, 1])
     plt.show()
+    if save_fig:
+        plt.savefig(os.path.join(save_path, "area_avg_timeseries.png"))
