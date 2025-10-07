@@ -216,9 +216,11 @@ def generate_adf_config(
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
-                for key,val in c_dict["compute_notebooks"][component][nb][
-                    "external_tool"
-                ].get("diag_cvdp_info", {}).items():
+                for key, val in (
+                    c_dict["compute_notebooks"][component][nb]["external_tool"]
+                    .get("diag_cvdp_info", {})
+                    .items()
+                ):
                     if key not in cvdp_args:
                         cvdp_args[key] = val
     if diag_var_list:
@@ -229,9 +231,11 @@ def generate_adf_config(
         a_dict["plotting_scripts"] = plotting_scripts
     if cvdp_args:
         a_dict["diag_cvdp_info"] = cvdp_args
-        a_dict["diag_cvdp_info"]["cvdp_codebase_loc"] = "../../externals/ADF/lib/externals/CVDP/"
+        a_dict["diag_cvdp_info"][
+            "cvdp_codebase_loc"
+        ] = "../../externals/ADF/lib/externals/CVDP/"
         # this is where CVDP code base lives in the ADF
-        
+
         a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
             cupid_config_loc,
             "CVDP_output",
