@@ -20,10 +20,9 @@ class CaseList(list):
         CropCase,
         identify_resolution,
         opts,
-        **kwargs,
     ):
         # Initialize as a normal list...
-        super().__init__(*args, **kwargs)
+        super().__init__(*args)
         # ...And then add all the extra stuff
 
         # Define extra variables
@@ -65,6 +64,7 @@ class CaseList(list):
                     opts["start_year"],
                     opts["end_year"],
                     verbose=opts["verbose"],
+                    force_new_cft_ds_file=opts["force_new_cft_ds_file"],
                 ),
             )
 
