@@ -39,7 +39,7 @@ class CaseList(list):
             identify_resolution,
             opts,
         )
-        self.resolutions = {case.cft_ds.attrs["resolution"].name for case in self}
+        self.resolutions = {case.cft_ds.attrs["resolution"] for case in self}
 
     def _import_cases(
         self,
@@ -69,7 +69,9 @@ class CaseList(list):
             )
 
             # Get resolution
-            self[-1].cft_ds.attrs["resolution"] = identify_resolution(self[-1].cft_ds)
+            self[-1].cft_ds.attrs["resolution"] = identify_resolution(
+                self[-1].cft_ds,
+            ).name
 
         print("Done.")
         if opts["verbose"]:

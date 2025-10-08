@@ -8,7 +8,8 @@ from types import ModuleType
 
 from caselist import CaseList
 from earthstat import EarthStat
-from plotting_utils import cut_off_antarctica, ResultsMaps
+from plotting_utils import cut_off_antarctica
+from plotting_utils import ResultsMaps
 
 
 class Timing:
@@ -166,7 +167,7 @@ def clm_and_earthstat_maps(
                 )
 
             # Get observed map
-            earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"].name]
+            earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
             map_obs = earthstat_ds.get_map(
                 which,
                 crop,
