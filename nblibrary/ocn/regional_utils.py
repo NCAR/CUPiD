@@ -8,10 +8,6 @@ import xarray as xr
 from cartopy import crs as ccrs
 from cartopy import feature as cfeature
 from matplotlib.animation import FuncAnimation
-from matplotlib.colors import BoundaryNorm
-from matplotlib.colors import ListedColormap
-from matplotlib.colors import LogNorm
-from matplotlib.ticker import MaxNLocator
 
 # from mom6_tools.MOM6grid import MOM6grid
 # from mom6_tools.m6plot import (
@@ -25,6 +21,55 @@ from matplotlib.ticker import MaxNLocator
 # The above functions are duplicated below so these utilities can run without
 # access to mom6-tools, this will be updated in the future and these utilities
 # will likely be migrated to mom6-tools.
+
+plt.rcParams["figure.dpi"] = 200
+plt.rcParams["savefig.dpi"] = 300
+
+
+def chooseGeoCoords(dimensions):
+    if "xh" in dimensions and "yh" in dimensions:
+        lon_var = "geolon"
+        lat_var = "geolat"
+    elif "xq" in dimensions and "yq" in dimensions:
+        lon_var = "geolon_c"
+        lat_var = "geolat_c"
+    elif "xq" in dimensions and "yh" in dimensions:
+        lon_var = "geolon_u"
+        lat_var = "geolat_u"
+    elif "xh" in dimensions and "yq" in dimensions:
+        lon_var = "geolon_v"
+        lat_var = "geolat_v"
+    else:
+        raise ValueError(f"Could not determine geocoords for dims: {dimensions}")
+    return {"longitude": lon_var, "latitude": lat_var}
+
+
+def chooseAreacello(dimensions):
+    if "xh" in dimensions and "yh" in dimensions:
+        area_var = "areacello"
+    elif "xq" in dimensions and "yq" in dimensions:
+        area_var = "areacello_bu"
+    elif "xq" in dimensions and "yh" in dimensions:
+        area_var = "areacello_cu"
+    elif "xh" in dimensions and "yq" in dimensions:
+        area_var = "areacello_cv"
+    else:
+        raise ValueError(f"Could not determine areacello for dims: {dimensions}")
+    return area_var
+
+
+def chooseWetMask(dimensions):
+    if "xh" in dimensions and "yh" in dimensions:
+        wet_var = "wet"
+    elif "xq" in dimensions and "yq" in dimensions:
+        wet_var = "wet_c"
+    elif "xq" in dimensions and "yh" in dimensions:
+        wet_var = "wet_u"
+    elif "xh" in dimensions and "yq" in dimensions:
+        wet_var = "wet_v"
+    else:
+        raise ValueError(f"Could not determine wet mask for dims: {dimensions}")
+    return wet_var
 
 
 def chooseColorMap(var):
@@ -50,89 +95,29 @@ def chooseColorMap(var):
         return plt.get_cmap("gist_ncar")
 
 
-def chooseColorLevels(
-    sMin,
-    sMax,
-    colorMap,
-    clim=None,
-    nbins=None,
-    steps=[1, 2, 2.5, 5, 10],
-    extend=None,
-    logscale=False,
-    autocenter=False,
-):
+def chooseColorLevels(sMin, sMax, sMean=None, sStd=None):
     """
-    If nbins is a positive integer, choose sensible color levels with nbins colors.
-    If clim is a 2-element tuple, create color levels within the clim range
-    or if clim is a vector, use clim as contour levels.
-    If clim provides more than 2 color interfaces, nbins must be absent.
-    If clim is absent, the sMin,sMax are used as the color range bounds.
-    If autocenter is True and clim is None then the automatic color levels are centered.
-
-    Returns cmap, norm and extend.
+    Choose color levels for plotting based on min, max, mean, and std dev.
+    Uses [mean - 2*std, mean + 2*std] as bounds, clipped to [min, max].
+    Returns levels (numpy array).
     """
-    if nbins is None and clim is None:
-        raise Exception("At least one of clim or nbins is required.")
-    if clim is not None:
-        if len(clim) < 2:
-            raise Exception("clim must be at least 2 values long.")
-        if nbins is None and len(clim) == 2:
-            raise Exception(
-                "nbins must be provided when clims specifies a color range.",
-            )
-        if nbins is not None and len(clim) > 2:
-            raise Exception(
-                "nbins cannot be provided when clims specifies color levels.",
-            )
-    if clim is None:
-        if autocenter:
-            levels = MaxNLocator(nbins=nbins, steps=steps).tick_values(
-                min(sMin, -sMax),
-                max(sMax, -sMin),
-            )
-        else:
-            levels = MaxNLocator(nbins=nbins, steps=steps).tick_values(sMin, sMax)
-    elif len(clim) == 2:
-        levels = MaxNLocator(nbins=nbins, steps=steps).tick_values(clim[0], clim[1])
-    else:
-        levels = clim
-
-    # nColors = len(levels) - 1
-    if extend is None:
-        if sMin < levels[0] and sMax > levels[-1]:
-            extend = "both"  # ; eColors=[1,1]
-        elif sMin < levels[0] and sMax <= levels[-1]:
-            extend = "min"  # ; eColors=[1,0]
-        elif sMin >= levels[0] and sMax > levels[-1]:
-            extend = "max"  # ; eColors=[0,1]
-        else:
-            extend = "neither"  # ; eColors=[0,0]
-    eColors = [0, 0]
-    if extend in ["both", "min"]:
-        eColors[0] = 1
-    if extend in ["both", "max"]:
-        eColors[1] = 1
-
-    cmap = colorMap  # ,lut=nColors+eColors[0]+eColors[1])
-
-    if logscale:
-        norm = LogNorm(vmin=levels[0], vmax=levels[-1])
-    else:
-        norm = BoundaryNorm(levels, ncolors=cmap.N)
-    return cmap, norm, extend
+    if sMean is None or sStd is None:
+        levels = np.linspace(sMin, sMax, 35)
+        return levels
+    lower = max(sMin, sMean - 2 * sStd)
+    upper = min(sMax, sMean + 2 * sStd)
+    levels = np.linspace(lower, upper, 35)
+    return levels
 
 
 def oceanStats2D(
     field: xr.DataArray,
     area_weights: xr.DataArray = None,
-    lsm_2D: xr.DataArray = None,
-    lat_var: str = "latitude",
-    lon_var: str = "longitude",
 ):
     """
     Compute area-weighted mean and standard deviation for an ocean field.
     """
-    if lat_var in field.dims and lon_var in field.dims and len(field.dims) > 2:
+    if len(field.dims) > 2:
         raise Exception(
             "Field must be 2D in lat and lon with no time variable. \
                         Select a time if field is 2D. If Field is 3D, \
@@ -142,7 +127,30 @@ def oceanStats2D(
     min = field.min(skipna=True).compute().item()
     max = field.max(skipna=True).compute().item()
 
-    weighted_field = field.weighted(area_weights * lsm_2D)
+    # MOM6 output puts NaNs over land, which mean automatically ignores
+    weighted_field = field.weighted(area_weights)
+
+    mean = weighted_field.mean().compute().item()
+    std_dev = weighted_field.std().compute().item()
+
+    stats = {"max": max, "min": min, "mean": mean, "std_dev": std_dev}
+
+    return stats
+
+
+def oceanStats3D(
+    field: xr.DataArray,
+    volume_weights: xr.DataArray = None,
+):
+    if len(field.dims) > 3:
+        raise Exception(
+            "Field must be 3D with lat, lon, and levels with no time variable.",
+        )
+
+    min = field.min(skipna=True).compute().item()
+    max = field.max(skipna=True).compute().item()
+
+    weighted_field = field.weighted(volume_weights)
 
     mean = weighted_field.mean(skipna=True).compute().item()
     std_dev = weighted_field.std(skipna=True).compute().item()
@@ -152,229 +160,134 @@ def oceanStats2D(
     return stats
 
 
-def label(label, units):
+def statsToAnnotation(stats: dict):
     """
-    Combines a label string and units string together in the form 'label [units]'
-    unless one of the other is empty.
+    Convert stats dictionary to annotation string.
+
+    Args:
+        stats (dict): Dictionary containing statistical information.
+
+    Returns:
+        str: Formatted annotation string.
     """
-    string = r"" + label
-    if len(units) > 0:
-        string = string + " [" + units + "]"
-    return string
+    annotation = f"Max: {stats['max']:.3f}, Min: {stats['min']:.3f} \n"
+    annotation += f"Mean: {stats['mean']:.3f}, Std Dev: {stats['std_dev']:.3f}"
+    return annotation
 
 
-def plot_2D_latlon_field_plot(
-    field,
-    grid,
-    area_var="areacello",
-    lsm_var="wet",
-    lon_var="geolon",
-    lat_var="geolat",
-    xlabel=None,
-    xunits=None,
-    ylabel=None,
-    yunits=None,
-    title="",
-    suptitle="",
-    clim=None,
-    colormap=None,
-    norm=None,
-    extend=None,
-    centerlabels=False,
-    nbins=None,
-    axis=None,
-    add_cbar=True,
-    cbar_label=None,
-    figsize=[16, 9],
-    dpi=150,
-    sigma=2.0,
-    annotate=True,
-    save_fig=None,
-    save_path=".",
-    debug=False,
-    show=True,
-    logscale=False,
-    projection=None,
-    coastlines=True,
-    res=None,
-    coastcolor=[0, 0, 0],
-    landcolor=[0.75, 0.75, 0.75],
-    coast_linewidth=0.3,
-    fontsize=22,
-    gridlines=False,
-    find_stats=True,
+def plotLatLonField(
+    field: xr.DataArray,
+    latitude: xr.DataArray,
+    longitude: xr.DataArray,
+    stats: bool = False,
+    area_weights: xr.DataArray = None,
+    projection: ccrs.Projection = ccrs.PlateCarree(),
+    levels: np.linspace = None,
+    ax: plt.Axes = None,
+    show: bool = True,
+    save: bool = False,
+    save_path: str = None,
 ):
-    # Preplotting
-    plt.rc("font", size=fontsize)
+    """
+    Wrap basic xr.DataArray.plot functionality with projection options and stats.
 
-    if find_stats:
-        # Diagnose statistics
-        area_cell = grid[area_var]
-        lsm = grid[lsm_var]
+    Args:
+        field (xr.DataArray): _description_
+        lat (xr.DataArray): _description_
+        lon (xr.DataArray): _description_
+        stats (bool, optional): _description_. Defaults to False.
+        area_weights (xr.DataArray, optional): _description_. Defaults to None.
+        projection (_type_, optional): _description_. Defaults to ccrs.PlateCarree().
+    """
+    # Assign lat lon as coords to field_plot
+    field_plot = field.assign_coords(latitude=latitude, longitude=longitude)
 
-        stats = oceanStats2D(field, area_cell, lsm)
-        sMin, sMax, sMean, sStd = (
-            stats["min"],
-            stats["max"],
-            stats["mean"],
-            stats["std_dev"],
+    # Colorbar Selection
+    cmap = chooseColorMap(field.name)
+    if levels is None:
+        levels = chooseColorLevels(
+            field.min().compute().item(),
+            field.max().compute().item(),
         )
 
-    # Choose colormap
-    if nbins is None and (clim is None or len(clim) == 2):
-        nbins = 35
-    if colormap is None:
-        colormap = chooseColorMap(field.name)
-        if clim is None and sStd is not None:
-            lower = sMean - sigma * sStd
-            upper = sMean + sigma * sStd
-            if lower < sMin:
-                lower = sMin
-            if upper > sMax:
-                upper = sMax
-            cmap, norm, extend = chooseColorLevels(
-                lower,
-                upper,
-                colormap,
-                clim=clim,
-                nbins=nbins,
-                extend=extend,
-                logscale=logscale,
-            )
-        else:
-            cmap, norm, extend = chooseColorLevels(
-                sMin,
-                sMax,
-                colormap,
-                clim=clim,
-                nbins=nbins,
-                extend=extend,
-                logscale=logscale,
-            )
+    # Check if we want to calculate stats
+    if stats:
+        if area_weights is None:
+            raise Exception("Area weights must be provided to calculate stats.")
+        field_stats = oceanStats2D(field, area_weights)
+        annotation = statsToAnnotation(field_stats)
+
+    # Set up subplot_kws
+    if ax is None:
+        subplot_kws = {"projection": projection, "facecolor": "lightgray"}
     else:
-        cmap = colormap
+        subplot_kws = None
 
-    # Set up figure and axis
-    if projection is None:
-        central_longitude = float(
-            (grid[lon_var].max().values + grid[lon_var].min().values) / 2,
-        )
-        projection = ccrs.Robinson(central_longitude=central_longitude)
-    created_own_axis = False
-    if axis is None:
-        created_own_axis = True
-        fig = plt.figure(dpi=dpi, figsize=figsize)
-        axis = fig.add_subplot(1, 1, 1, projection=projection)
-
-    # Plot Color Mesh
-    pm = axis.pcolormesh(
-        grid[lon_var],
-        grid[lat_var],
-        field,
+    # Create the plot
+    p = field_plot.plot(
+        x="longitude",
+        y="latitude",
+        ax=ax,
         cmap=cmap,
-        norm=norm,
+        levels=levels,
+        add_colorbar=True,
         transform=ccrs.PlateCarree(),
+        subplot_kws=subplot_kws,
     )
 
-    # Add Land and Coastlines
-    if res is None:
-        res = "50m"  # can be adjusted to estimate a best res between 10m, 50m, and 110m, also use other methods
-    if coastlines:
-        axis.coastlines(
-            resolution=res,
-            color=coastcolor,
-            linewidth=coast_linewidth,
-        )
-    axis.set_facecolor(landcolor)
-
-    # Add the fancy bits
-    if add_cbar:
-        # Get position of the axis
-        bbox = axis.get_position()
-        fig = axis.figure  # Get the figure the axis belongs to
-
-        # Create new axes for the colorbar, scaled to axis size
-        cbar_width = 0.01  # width as fraction of figure
-        cbar_padding = 0.01
-        cbar_ax = fig.add_axes(
-            [
-                bbox.x1 + cbar_padding,  # left
-                bbox.y0,  # bottom
-                cbar_width,  # width
-                bbox.height,  # height
-            ],
-        )
-        cb = fig.colorbar(pm, cax=cbar_ax, extend=extend)
-        if cbar_label is not None:
-            cb.set_label(cbar_label)
-    if centerlabels and len(clim) > 2:
-        if not add_cbar:
-            raise ValueError(
-                "Argument Mismatch: add_cbar must be true if you also specify centerlabels to be true.",
-            )
-        cb.set_ticks(0.5 * (clim[:-1] + clim[1:]))
-
-    axis.set_facecolor(landcolor)
-    # axis.set_xlim( xLims )
-    # axis.set_ylim( yLims )
-
-    if annotate:
-        annotation = f"Max: {stats['max']:.3f}, Min: {stats['min']:.3f} \nMean: \
-            {stats['mean']:.3f}, Std Dev: {stats['std_dev']:.3f}"
-        axis.annotate(
+    # Apply annotations
+    if stats:
+        p.axes.annotate(
             annotation,
-            xy=(0.5, -0.05),
+            xy=(0.5, -0.07),
             xycoords="axes fraction",
             ha="center",
             va="top",
             fontsize=10,
         )
-    if xlabel and xunits:
-        if len(xlabel + xunits) > 0:
-            axis.set_xlabel(label(xlabel, xunits))
-    if ylabel and yunits:
-        if len(ylabel + yunits) > 0:
-            axis.set_ylabel(label(ylabel, yunits))
-    if len(title) > 0:
-        axis.set_title(title, fontsize=fontsize * 1.5)
-    if len(suptitle) > 0:
-        if annotate:
-            plt.suptitle(suptitle, y=1.01)
+
+    # Add coastlines, gridlines, and suptitle
+    p.axes.coastlines(resolution="50m", color="black", linewidth=0.3)
+
+    gl = p.axes.gridlines(draw_labels=True, linewidth=0.3, color="gray", alpha=0.5)
+    gl.top_labels = False
+    gl.right_labels = False
+    gl.xlabel_style = {"size": 8}
+    gl.ylabel_style = {"size": 8}
+
+    long_name = field.long_name if "long_name" in field.attrs else field.name
+    if len(long_name) > 50:
+        suptitle = field.name
+    else:
+        suptitle = long_name
+    suptitle += f" [{field.units}]" if "units" in field.attrs else ""
+    plt.suptitle(suptitle, y=0.95, fontsize=16)
+
+    if save:
+        if save_path is None:
+            print("Save path not provided, saving to current directory.")
+            plt.savefig(f"{field.name}.png", dpi=300)
         else:
-            plt.suptitle(suptitle)
+            plt.savefig(os.path.join(save_path, f"{field.name}.png"), dpi=300)
 
-    if gridlines:
-        gl = axis.gridlines(
-            draw_labels=True,
-            lw=0.5,
-            color="gray",
-            alpha=0.5,
-        )
-        gl.top_labels = False
-        gl.right_labels = False
+    if show is False:
+        plt.close()
 
-    # Only show if we created our own axis
-    if created_own_axis and show:
-        plt.show(block=False)
-    elif created_own_axis:
-        plt.show(block=True)
-    if save_fig:
-        plt.savefig(os.path.join(save_path, f"field_plot_{field.name}.png"))
-    plt.close()
-
-    return pm
+    return p
 
 
-def visualize_regional_domain(
-    grd_xr,
-    save=None,
+def visualizeRegionalDomain(
+    static_data: xr.Dataset,
+    show: bool = True,
+    save: bool = False,
+    save_path: str = None,
 ):
     # Grab useful variables
     central_longitude = float(
-        (grd_xr["geolon"].max().values + grd_xr["geolon"].min().values) / 2,
+        (static_data["geolon"].max().values + static_data["geolon"].min().values) / 2,
     )
-    lon = grd_xr["geolon_c"].values
-    lat = grd_xr["geolat_c"].values
+    lon = static_data["geolon_c"].values
+    lat = static_data["geolat_c"].values
 
     # Set up figure, need to add subplots individually because of projections
     fig = plt.figure(dpi=200, figsize=(14, 8))
@@ -496,151 +409,163 @@ def visualize_regional_domain(
     gl.xlabel_style = {"size": 8}
     gl.ylabel_style = {"size": 8}
 
-    # ----------------------------- #
     # Final plot with land-sea mask #
-    # ----------------------------- #
-
     ax2 = fig.add_subplot(
         1,
         3,
         3,
         projection=ccrs.PlateCarree(central_longitude=central_longitude),
     )
-    plot_2D_latlon_field_plot(
-        field=grd_xr["wet"],
-        grid=grd_xr,
-        axis=ax2,
-        annotate=False,
-        colormap=ListedColormap(["tan", "cornflowerblue"]),
-        coast_linewidth=0.2,
-        add_cbar=False,
-        find_stats=False,
+    static_data["wet"].plot(
+        ax=ax2,
+        cmap="Blues",
+        add_colorbar=False,
+        transform=ccrs.PlateCarree(),
+        facecolor="lightgray",
     )
     pm = ax2.set_title("Land/Ocean Mask", fontsize=10)
     pm.sticky_edges.x[:] = []
     pm.sticky_edges.y[:] = []
     ax2.margins(x=0.05, y=0.05)
+    ax2.coastlines(linewidth=0.3, resolution="50m")
     # ax2.legend([color = '')
 
     fig.subplots_adjust(wspace=0.2)
 
-    if save is not None:
-        plt.savefig(save)
+    if save:
+        if save_path is None:
+            print("Save path not provided, saving to current directory.")
+            plt.savefig("visualize_regional_domain.png.png", dpi=300)
+        else:
+            plt.savefig(
+                os.path.join(save_path, "visualize_regional_domain.png"),
+                dpi=300,
+            )
+
+    if show is False:
         plt.close()
+    else:
+        plt.show()
 
 
-def create_2d_field_animation(
-    da,
-    grid,
-    lat_var="geolat",
-    lon_var="geolon",
-    area_var="areacello",
-    lsm_var="wet",
-    time_dim="time",
-    interval=200,
-    verbose=False,
+def create2DFieldAnimation(
+    field: xr.DataArray,
+    latitude: xr.DataArray,
+    longitude: xr.DataArray,
+    iter_dim: str = "time",
+    interval: int = 200,
+    verbose: bool = False,
+    save: bool = False,
+    save_path: str = None,
 ):
+    """
+    Create an animation of a 2D field over a specified dimension (e.g., time or depth).
+    Uses plotLatLonField for plotting.
+    """
+    # Initial field for plotting
+    field0 = field.isel({iter_dim: 0})
 
-    base_title = da.long_name
-
-    field_t0 = da.isel({time_dim: 0})
-    pm = plot_2D_latlon_field_plot(
-        field=field_t0,
-        grid=grid,
-        lat_var=lat_var,
-        lon_var=lon_var,
-        area_var=area_var,
-        lsm_var=lsm_var,
+    # Create initial plot using plotLatLonField
+    plt.ioff()  # Turn off interactive mode for animation
+    fig = plt.figure()
+    p = plotLatLonField(
+        field0,
+        latitude=latitude,
+        longitude=longitude,
+        stats=False,
+        ax=None,
         show=False,
-        find_stats=True,
-        add_cbar=False,
+        save=False,
     )
+    im = p
+    ax = p.axes
 
-    fig = pm.figure
-    axis = pm.axes
-
-    plt.close()
+    plt.close(fig)  # Prevent duplicate display in notebooks
 
     def update(i):
-        field_at_time_i = da.isel({time_dim: i}).to_numpy()
-
-        pm.set_array(field_at_time_i.ravel())
-
+        field_i = field.isel({iter_dim: i})
+        im.set_array(field_i.values.flatten())
         try:
             import pandas as pd
 
-            time_step = da[time_dim].isel({time_dim: i})
-            time_str = pd.to_datetime(str(time_step.values)).strftime("%Y-%m-%d")
-        except (ImportError, ValueError):
-            time_str = f"Frame {i}"
-
-        axis.set_title(
-            f"{base_title}\n{time_str}",
-            fontsize=22,
-        )
-
+            label_val = field[iter_dim].isel({iter_dim: i}).values
+            if np.issubdtype(type(label_val), np.datetime64):
+                time_str = pd.to_datetime(str(label_val)).strftime("%Y-%m-%d")
+            else:
+                time_str = str(label_val)
+        except Exception:
+            time_str = f"{iter_dim}={i}"
+        ax.set_title(f"{field.name} [{iter_dim}: {time_str}]", fontsize=14)
         if verbose:
-            print(f"Processing frame {i+1}/{len(da[time_dim])}", end="\r")
+            print(f"Frame {i+1}/{field.sizes[iter_dim]}", end="\r")
+        return (im,)
 
-        return (pm,)
-
-    num_frames = len(da[time_dim])
+    n_frames = field.sizes[iter_dim]
     anim = FuncAnimation(
         fig,
         update,
-        frames=num_frames,
+        frames=n_frames,
         interval=interval,
         blit=False,
     )
 
     if verbose:
         print("\nAnimation object created successfully.")
+
+    # Save the animation if requested
+    if save:
+        if save_path is None:
+            print("Save path not provided, saving to current directory.")
+            anim.save(f"{field.name}_animation.gif", writer="pillow")
+        else:
+            anim.save(
+                os.path.join(save_path, f"{field.name}_animation.gif"),
+                writer="pillow",
+            )
+        if verbose:
+            print(f"Animation saved to {save_path if save_path else os.getcwd()}")
+
     return anim
 
 
-def plot_area_averaged_timeseries(
-    data,
-    weights,
-    variables,
-    save_fig=False,
-    save_path=".",
+def plotAvgTimseries(
+    field: xr.DataArray,
+    weights: xr.DataArray,
+    save: bool = False,
+    save_path: str = None,
+    show: bool = True,
 ):
+    """
+    Plot a time series of the area-weighted average of a 2D field.
 
-    valid_variables = [v for v in variables if v in data]
-    if not valid_variables:
-        print("ERROR: None of the requested variable(s) were found in the dataset.")
-        return
+    Args:
+        field (xr.DataArray): 2D field with time dimension.
+        weights (xr.DataArray): Area weights for the field.
+        save (bool, optional): Whether to save the plot. Defaults to False.
+        save_path (str, optional): Path to save the plot. Defaults to None.
+    """
+    if "time" not in field.dims:
+        raise ValueError("Field must have a time dimension.")
 
-    n_vars = len(valid_variables)
+    avg_dims = [dim for dim in field.dims if dim != "time"]
 
-    fig, axes = plt.subplots(
-        nrows=n_vars,
-        ncols=1,
-        figsize=(12, 4 * n_vars),
-        sharex=True,
-        squeeze=False,
-    )
+    # Compute area-weighted average over all spatial dimensions
+    weighted_field = field.weighted(weights)
+    ts_avg = weighted_field.mean(dim=avg_dims)
 
-    for i, var_name in enumerate(valid_variables):
-        ax = axes[i, 0]
-        da = data[var_name]
+    # Create the plot
+    ts_avg.plot()
 
-        spatial_dims = [dim for dim in da.dims if dim != "time"]
-        area_avg_da = da.weighted(weights).mean(dim=spatial_dims)
-        area_avg_da.plot(ax=ax)
-
-        long_name = da.attrs.get("long_name", var_name)
-        units = da.attrs.get("units", "unitless")
-
-        ax.set_title(long_name, fontsize=14)
-        ax.set_ylabel(units, fontsize=12)
-        ax.set_xlabel("")
-        ax.grid(True, linestyle="--", alpha=0.6)
-
-    fig.suptitle("Area-Averaged Time Series", fontsize=18, y=1.02)
-    axes[-1, 0].set_xlabel("Time", fontsize=12)
-
-    plt.tight_layout(rect=[0, 0, 1, 1])
-    plt.show()
-    if save_fig:
-        plt.savefig(os.path.join(save_path, "area_avg_timeseries.png"))
+    if save:
+        if save_path is None:
+            print("Save path not provided, saving to current directory.")
+            plt.savefig(f"{field.name}_{len(ts_avg)}D_timeseries.png", dpi=300)
+        else:
+            plt.savefig(
+                os.path.join(save_path, f"{field.name}_{len(ts_avg)}D_timeseries.png"),
+                dpi=300,
+            )
+    if not show:
+        plt.close()
+    else:
+        plt.show()

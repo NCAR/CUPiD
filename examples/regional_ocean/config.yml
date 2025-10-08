@@ -45,7 +45,7 @@ global_params:
   base_case_name: null
   CESM_output_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/CESM_Output/'
   start_date: '2000-01-01'
-  end_date: '2000-02-01'
+  end_date: '2000-11-01'
   base_start_date: ''
   base_end_date: ''
   # obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
