@@ -16,42 +16,34 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="CUPiD example to use as template for config.yml",
 )
 @click.option(
-    "--adf-template",
+    "--ldf-template",
     required=True,
-    help="an adf config file to use as a base",
+    help="an ldf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-def generate_adf_config(
-    cupid_config_loc,
-    adf_template,
-    out_file,
-):
-    """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
-    to produce out_file by modifying adf_template with data from cupid config file.
+def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
+    """Use cupid config file (YAML) from cupid_config_loc and ldf_template (YAML)
+    to produce out_file by modifying ldf_template with data from cupid config file.
     """
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    with open(adf_template, encoding="UTF-8") as a:
+    with open(ldf_template, encoding="UTF-8") as a:
         a_dict = yaml.safe_load(a)
 
     # read parameters from CUPID
     # use `get` to default to None
-    CESM_output_dir = c_dict["global_params"]["CESM_output_dir"]
+    DOUT = c_dict["global_params"]["CESM_output_dir"]
     base_case_name = c_dict["global_params"]["base_case_name"]
     test_case_name = c_dict["global_params"]["case_name"]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
-    ts_dir = c_dict["global_params"].get("ts_dir")
-    if ts_dir is None:
-        ts_dir = CESM_output_dir
-    ts_dir = os.path.join(ts_dir)
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
-    # Set case names for ADF config
+    # Set case names for LDF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
     a_dict["diag_cam_climo"]["case_nickname"] = test_case_name
@@ -59,30 +51,32 @@ def generate_adf_config(
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
-        CESM_output_dir,
+        DOUT,
         test_case_name,
-        "atm",
+        "lnd",
         "hist",
     )
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
-        ts_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         test_case_name,
-        "atm",
+        "lnd",
         "proc",
         "tseries",
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
-        ts_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         test_case_name,
-        "atm",
+        "lnd",
         "proc",
         "climo",
     )
     # UPDATE PATHS FOR REGRIDDED DATA
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
             "regridded_output"
         ]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
@@ -103,8 +97,8 @@ def generate_adf_config(
     test_case_cupid_ts_index = (
         ts_case_names.index(test_case_name) if test_case_name in ts_case_names else None
     )
-    start_date = get_date_from_ts(c_ts["atm"], "start_years", test_case_cupid_ts_index)
-    end_date = get_date_from_ts(c_ts["atm"], "end_years", test_case_cupid_ts_index)
+    start_date = get_date_from_ts(c_ts["lnd"], "start_years", test_case_cupid_ts_index)
+    end_date = get_date_from_ts(c_ts["lnd"], "end_years", test_case_cupid_ts_index)
     a_dict["diag_cam_climo"]["start_year"] = start_date
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
@@ -113,17 +107,17 @@ def generate_adf_config(
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
 
-    base_case_output_dir = c_dict["global_params"].get(
-        "base_case_output_dir",
-        CESM_output_dir,
+    base_case_output_dir = os.path.join(
+        c_dict["global_params"].get("base_case_output_dir", DOUT),
+        base_case_name,
     )
     base_start_date = get_date_from_ts(
-        c_ts["atm"],
+        c_ts["lnd"],
         "start_years",
         base_case_cupid_ts_index,
     )
     base_end_date = get_date_from_ts(
-        c_ts["atm"],
+        c_ts["lnd"],
         "end_years",
         base_case_cupid_ts_index,
     )
@@ -134,26 +128,27 @@ def generate_adf_config(
 
     a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
         base_case_output_dir,
-        base_case_name,
-        "atm",
+        "lnd",
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
-        ts_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         base_case_name,
-        "atm",
+        "lnd",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
-        ts_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         base_case_name,
-        "atm",
+        "lnd",
         "proc",
         "climo",
     )
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
             "base_regridded_output"
         ]:
             a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
@@ -172,33 +167,36 @@ def generate_adf_config(
         pass
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
-
-    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"]
+    a_dict["diag_basic_info"]["defaults_file"] = c_dict["compute_notebooks"]["lnd"][
+        "link_to_LDF"
+    ]["external_tool"]["defaults_file"]
+    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
-        ts_dir,
+        "/glade/derecho/scratch",
+        os.environ["USER"],
         base_case_name,
-        "atm",
+        "lnd",
         "proc",
-        "tseries",
         "regrid",
-    )  # This is where ADF will make "regrid" files
+    )  # This is where LDF will make "regrid" files
     a_dict["diag_basic_info"]["cam_diag_plot_loc"] = os.path.join(
         cupid_config_loc,
-        "ADF_output",
-    )  # this is where ADF will put plots, and "website" directory
+        "LDF_output",
+    )  # this is where LDF will put plots, and "website" directory
     a_dict["user"] = os.environ["USER"]
 
     diag_var_list = []
     analysis_scripts = []
     plotting_scripts = []
+    region_list = []
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
             if (
                 c_dict["compute_notebooks"][component][nb]
                 .get("external_tool", {})
                 .get("tool_name")
-                == "ADF"
+                == "LDF"
             ):
                 for var in c_dict["compute_notebooks"][component][nb][
                     "external_tool"
@@ -215,24 +213,31 @@ def generate_adf_config(
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
+                for region in c_dict["compute_notebooks"][component][nb][
+                    "external_tool"
+                ].get("region_list", []):
+                    if region not in region_list:
+                        region_list.append(region)
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
     if analysis_scripts:
         a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
+    if region_list:
+        a_dict["region_list"] = region_list
 
     # os.getenv("USER")
 
     with open(out_file, "w") as f:
         # Header of file is a comment logging provenance
         f.write(
-            "# This file has been auto-generated using generate_adf_config_file.py\n",
+            "# This file has been auto-generated using generate_ldf_config_file.py\n",
         )
         f.write(f"# It is based off of {cupid_config_loc}/config.yml\n")
         f.write("# Arguments:\n")
         f.write(f"# {cupid_config_loc=}\n")
-        f.write(f"# {adf_template=}\n")
+        f.write(f"# {ldf_template=}\n")
         f.write(f"# Output: {out_file=}\n")
         # enter in each element of the dictionary into the new file
         yaml.dump(a_dict, f, sort_keys=False)
@@ -253,4 +258,4 @@ def get_date_from_ts(data: dict, keyname: str, listindex: int, default=None):
 
 
 if __name__ == "__main__":
-    generate_adf_config()
+    generate_ldf_config()
