@@ -107,8 +107,17 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
             f"CTSM units ({ctsm_units}) do not match FAOSTAT units ({faostat_units})",
         )
     fao_yield_world_thiscrop = fao_yield_world.query(f"Crop == '{crop}'")
+
+    # Only include dates from time_da that are in the limits of the FAO data
+    fao_years = (
+        fao_yield_world_thiscrop.index.get_level_values("Year").unique().tolist()
+    )
+    fao_start = min(fao_years)
+    fao_end = max(fao_years)
+    time_slice = slice(f"{fao_start}-01-01", f"{fao_end}-12-31")
+
     ax.plot(
-        time_da,
+        time_da.sel(time=time_slice),
         fao_yield_world_thiscrop["Value"].values,
         "-k",
     )
