@@ -219,6 +219,10 @@ def generate_cupid_config(
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(adf_output_root, "ADF_output")
+    if "link_to_CVDP" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["link_to_CVDP"]["parameter_groups"]["none"][
+            "cvdp_loc"
+        ] = os.path.join(adf_output_root, "CVDP_output")
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
