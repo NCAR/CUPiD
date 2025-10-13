@@ -55,7 +55,7 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e23_alpha17f.BLT1850.ne30_t232.092','b.e30_beta02.BLT1850.ne30_t232.104']
+  case_name: ['b.e23_alpha17f.BLT1850.ne30_t232.092', 'b.e30_beta02.BLT1850.ne30_t232.104']
 
   atm:
     vars: ['PSL']
@@ -123,7 +123,19 @@ compute_notebooks:
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
+          diag_cvdp_info:
+            cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
+            cvdp_tar: False
+          regridded_output: False
           base_regridded_output: False
+      link_to_CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/external_diag_packages/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     lnd:
       link_to_ILAMB:
@@ -188,6 +200,7 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/link_to_ADF
+        - file: atm/link_to_CVDP
 
     - caption: Land
       chapters:
