@@ -1,0 +1,147 @@
+################## SETUP ##################
+
+################
+# Data Sources #
+################
+data_sources:
+    # run_dir is the path to the folder you want
+    ### all the files associated with this configuration
+    ### to be created in
+    run_dir: .
+
+    # nb_path_root is the path to the folder that cupid will
+    ### look for your template notebooks in. It doesn't have to
+    ### be inside run_dir, or be specific to this project, as
+    ### long as the notebooks are there
+    nb_path_root: ../../nblibrary
+
+######################
+# Computation Config #
+######################
+
+computation_config:
+
+    # default_kernel_name is the name of the environment that
+    ### the notebooks in this configuration will be run in by default.
+    ### It must already be installed on your machine. You can also
+    ### specify a different environment than the default for any
+    ### notebook in NOTEBOOK CONFIG
+    default_kernel_name: cupid-analysis
+
+    # log level sets the level of how verbose logging will be.
+    # options include: debug, info, warning, error
+    log_level: 'info'
+
+############# NOTEBOOK CONFIG #############
+
+############################
+# Notebooks and Parameters #
+############################
+
+# All parameters under global_params get passed to all the notebooks
+# /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/CROCODILE_tutorial_nwa12_MARBL
+global_params:
+  case_name: 'CROCODILE_tutorial_nwa12_MARBL'
+  CESM_output_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/CESM_Output/'
+  start_date: ''
+  end_date: ''
+  # ts_dir: null # If this is set to null, it will default to CESM_output_dir
+  save_figs: True  # Specific to regional_ocean example
+  fig_output_dir: null  # also specific to regional_ocean_example, if null, will be created in CESM output directory
+  lc_kwargs:
+    threads_per_worker: 1
+
+
+# Timseries parameters
+timeseries:
+  num_procs: 8
+  ts_done: [False]
+  overwrite_ts: [False]
+  case_name: ['CROCODILE_tutorial_nwa12_MARBL']
+
+  ocn:
+    vars: ['vo', 'uo', 'thetao', 'so']
+    derive_vars: []
+    hist_str: 'mom6.h.z'
+    start_years: [2000]
+    end_years: [2000]
+    level: 'z_l'
+
+compute_notebooks:
+
+  # This is where all the notebooks you want run and their
+  # parameters are specified. Several examples of different
+  # types of notebooks are provided.
+
+  # The first key (here infrastructure) is the name of the
+  # notebook from nb_path_root, minus the .ipynb
+
+    infrastructure:
+      index:
+        parameter_groups:
+          none: {}
+
+    ocn:
+      Regional_Ocean_Report_Card:
+        parameter_groups:
+          none:
+            sfc_variables: ['SSH', 'tos', 'sos', 'speed', 'SSV', 'SSU']
+            monthly_variables: ['thetao', 'so', 'uo', 'vo']
+      Regional_Ocean_Animations:
+        parameter_groups:
+          none:
+            sfc_variables: ['SSH', 'tos', 'sos'] # 'SSV', 'SSU']
+            max_frames: 60 # max frames for GIFs
+      Regional_Ocean_Atmospheric_Forcing:
+        parameter_groups:
+          none:
+            atm_variables: ['tauuo', 'tauvo', 'hfds']
+            ocn_variables: ['uo', 'vo', 'thetao']
+      Regional_Ocean_OBC: # needs to access regional MOM6 input directory (see INPUTDIR in user_nl_mom)
+        parameter_groups: # if mom6_input_dir is given, will ignore case_root, otherwise looks for INPUTDIR in case_root
+          none:
+            case_root: null
+            mom6_input_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/Input_Dir/CROCODILE_tutorial_nwa12_MARBL_ocnice/ocnice'
+            obc_file_str: 'forcing_obc_segment_00*.nc' # pattern for boundary condition file names
+            ocn_variables: ['uo', 'vo', 'thetao', 'so']
+
+
+
+########### JUPYTER BOOK CONFIG ###########
+
+##################################
+# Jupyter Book Table of Contents #
+##################################
+book_toc:
+
+  # See https://jupyterbook.org/en/stable/structure/configure.html for
+  # complete documentation of Jupyter book construction options
+
+  format: jb-book
+
+  # All filenames are notebook filename without the .ipynb, similar to above
+
+  root: infrastructure/index # root is the notebook that will be the homepage for the book
+  parts:
+
+    # Parts group notebooks into different sections in the Jupyter book
+    # table of contents, so you can organize different parts of your project.
+    # Each chapter is the name of one of the notebooks that you executed
+    # in compute_notebooks above, also without .ipynb
+
+    - caption: Ocean
+      chapters:
+          - file: ocn/Regional_Ocean_Report_Card
+          - file: ocn/Regional_Ocean_Animations
+          - file: ocn/Regional_Ocean_Atmospheric_Forcing
+          - file: ocn/Regional_Ocean_OBC
+
+#####################################
+# Keys for Jupyter Book _config.yml #
+#####################################
+book_config_keys:
+
+  title: Regional Ocean Modeling Metrics   # Title of your jupyter book
+
+  # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
+  ### for many more options
