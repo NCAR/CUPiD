@@ -4,3 +4,7 @@
 [submodule "externals/mom6-tools"]
 	path = externals/mom6-tools
 	url = https://github.com/NCAR/mom6-tools.git
+[submodule "externals/LDF"]
+	path = externals/LDF
+	url = https://github.com/NCAR/ADF
+	branch = clm-diags
