@@ -95,18 +95,21 @@ def chooseColorMap(var):
         return plt.get_cmap("gist_ncar")
 
 
-def chooseColorLevels(sMin, sMax, sMean=None, sStd=None):
+def chooseColorLevels(sMin, sMax, sMean=None, sStd=None, sigma_cbar=True):
     """
     Choose color levels for plotting based on min, max, mean, and std dev.
-    Uses [mean - 2*std, mean + 2*std] as bounds, clipped to [min, max].
+    sigma_cbar: if True, uses [mean - 2*std, mean + 2*std] as bounds, clipped to [min, max].
     Returns levels (numpy array).
     """
     if sMean is None or sStd is None:
         levels = np.linspace(sMin, sMax, 35)
         return levels
-    lower = max(sMin, sMean - 2 * sStd)
-    upper = min(sMax, sMean + 2 * sStd)
-    levels = np.linspace(lower, upper, 35)
+    if sigma_cbar:
+        lower = max(sMin, sMean - 2 * sStd)
+        upper = min(sMax, sMean + 2 * sStd)
+        levels = np.linspace(lower, upper, 35)
+    else:
+        levels = np.linspace(sMin, sMax, 35)
     return levels
 
 
@@ -465,6 +468,8 @@ def create2DFieldAnimation(
     # Initial field for plotting
     field0 = field.isel({iter_dim: 0})
 
+    levels = np.linspace(field.min().compute().item(), field.max().compute().item(), 35)
+
     # Create initial plot using plotLatLonField
     plt.ioff()  # Turn off interactive mode for animation
     fig = plt.figure()
@@ -473,6 +478,7 @@ def create2DFieldAnimation(
         latitude=latitude,
         longitude=longitude,
         stats=False,
+        levels=levels,
         ax=None,
         show=False,
         save=False,
@@ -528,7 +534,7 @@ def create2DFieldAnimation(
     return anim
 
 
-def plotAvgTimseries(
+def plotAvgTimeseries(
     field: xr.DataArray,
     weights: xr.DataArray,
     save: bool = False,
@@ -554,7 +560,7 @@ def plotAvgTimseries(
     ts_avg = weighted_field.mean(dim=avg_dims)
 
     # Create the plot
-    ts_avg.plot()
+    ts_avg.plot(subplot_kws={"title": f"Area-Weighted Mean {field.name}"})
 
     if save:
         if save_path is None:

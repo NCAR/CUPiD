@@ -42,21 +42,17 @@ computation_config:
 # /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing/CROCODILE_tutorial_nwa12_MARBL
 global_params:
   case_name: 'CROCODILE_tutorial_nwa12_MARBL'
-  base_case_name: null
   CESM_output_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/CESM_Output/'
-  start_date: '2000-01-01'
-  end_date: '2000-11-01'
-  base_start_date: ''
-  base_end_date: ''
-  # obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  start_date: ''
+  end_date: ''
   # ts_dir: null # If this is set to null, it will default to CESM_output_dir
+  save_figs: True  # Specific to regional_ocean example
+  fig_output_dir: null  # also specific to regional_ocean_example, if null, will be created in CESM output directory
   lc_kwargs:
     threads_per_worker: 1
 
-  # Specific to regional_ocean example
-  savefigs: True
-  fig_output_dir: null  # if null, will be created in CESM output directory
 
+# Timseries parameters
 timeseries:
   num_procs: 8
   ts_done: [False]
@@ -69,7 +65,7 @@ timeseries:
     hist_str: 'mom6.h.z'
     start_years: [2000]
     end_years: [2000]
-    level: 'z_l' # ?
+    level: 'z_l'
 
 compute_notebooks:
 
@@ -88,19 +84,26 @@ compute_notebooks:
     ocn:
       Regional_Ocean_Report_Card:
         parameter_groups:
-          none: {}
+          none:
+            sfc_variables: ['SSH', 'tos', 'sos', 'speed', 'SSV', 'SSU']
+            monthly_variables: ['thetao', 'so', 'uo', 'vo']
       Regional_Ocean_Animations:
         parameter_groups:
-          none: {}
+          none:
+            sfc_variables: ['SSH', 'tos', 'sos'] # 'SSV', 'SSU']
+            max_frames: 60 # max frames for GIFs
       Regional_Ocean_Atmospheric_Forcing:
         parameter_groups:
-          none: {}
+          none:
+            atm_variables: ['tauuo', 'tauvo', 'hfds']
+            ocn_variables: ['uo', 'vo', 'thetao']
       Regional_Ocean_OBC: # needs to access regional MOM6 input directory (see INPUTDIR in user_nl_mom)
         parameter_groups: # if mom6_input_dir is given, will ignore case_root, otherwise looks for INPUTDIR in case_root
           none:
             case_root: null
             mom6_input_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/Input_Dir/CROCODILE_tutorial_nwa12_MARBL_ocnice'
             obc_file_str: 'forcing_obc_segment_00*.nc' # pattern for boundary condition file names
+
 
 
 ########### JUPYTER BOOK CONFIG ###########
