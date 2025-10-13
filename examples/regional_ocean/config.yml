@@ -101,8 +101,9 @@ compute_notebooks:
         parameter_groups: # if mom6_input_dir is given, will ignore case_root, otherwise looks for INPUTDIR in case_root
           none:
             case_root: null
-            mom6_input_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/Input_Dir/CROCODILE_tutorial_nwa12_MARBL_ocnice'
+            mom6_input_dir: '/glade/campaign/cgd/oce/projects/CROCODILE/workshops/2025/Diagnostics/Input_Dir/CROCODILE_tutorial_nwa12_MARBL_ocnice/ocnice'
             obc_file_str: 'forcing_obc_segment_00*.nc' # pattern for boundary condition file names
+            ocn_variables: ['uo', 'vo', 'thetao', 'so']
 
 
 
