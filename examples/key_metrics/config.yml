@@ -141,7 +141,19 @@ compute_notebooks:
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
+          diag_cvdp_info:
+            cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
+            cvdp_tar: False
+          regridded_output: False
+          base_regridded_output: False
+      link_to_CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -261,6 +273,7 @@ book_toc:
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
         - file: atm/link_to_ADF
+        - file: atm/link_to_CVDP
 
     # - caption: Ocean
     #   chapters:
