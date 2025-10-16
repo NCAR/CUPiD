@@ -8,3 +8,6 @@
 	path = externals/LDF
 	url = https://github.com/NCAR/ADF
 	branch = clm-diags
+[submodule "externals/MDTF-diagnostics"]
+	path = externals/MDTF-diagnostics
+	url = https://github.com/NOAA-GFDL/MDTF-diagnostics.git
