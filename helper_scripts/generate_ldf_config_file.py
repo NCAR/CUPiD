@@ -99,8 +99,8 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     )
     start_date = get_date_from_ts(c_ts["lnd"], "start_years", test_case_cupid_ts_index)
     end_date = get_date_from_ts(c_ts["lnd"], "end_years", test_case_cupid_ts_index)
-    a_dict["diag_cam_climo"]["start_year"] = start_date
-    a_dict["diag_cam_climo"]["end_year"] = end_date
+    a_dict["diag_cam_climo"]["start_year"] = c_dict["global_params"]["climo_start_date"]
+    a_dict["diag_cam_climo"]["end_year"] = c_dict["global_params"]["climo_end_date"]
 
     # Set values for BASELINE
     base_case_cupid_ts_index = (
@@ -165,8 +165,12 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
             )
     except:  # noqa: E722
         pass
-    a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
-    a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
+    a_dict["diag_cam_baseline_climo"]["start_year"] = c_dict["global_params"][
+        "base_climo_start_date"
+    ]
+    a_dict["diag_cam_baseline_climo"]["end_year"] = c_dict["global_params"][
+        "base_climo_end_date"
+    ]
     a_dict["diag_basic_info"]["defaults_file"] = c_dict["compute_notebooks"]["lnd"][
         "link_to_LDF"
     ]["external_tool"]["defaults_file"]
