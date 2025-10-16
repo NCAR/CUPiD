@@ -112,7 +112,7 @@ compute_notebooks:
           none: {}
 
     atm:
-      link_to_ADF:
+      ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -128,7 +128,7 @@ compute_notebooks:
             cvdp_tar: False
           regridded_output: False
           base_regridded_output: False
-      link_to_CVDP:
+      CVDP:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -138,7 +138,7 @@ compute_notebooks:
           tool_name: 'CVDP'
 
     lnd:
-      link_to_ILAMB:
+      ILAMB:
         parameter_groups:
           none:
             ilamb_root: ../../examples/external_diag_packages/ILAMB_output
@@ -147,7 +147,7 @@ compute_notebooks:
         external_tool:
           tool_name: 'ILAMB'
           ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
+      LDF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -199,13 +199,13 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-        - file: atm/link_to_ADF
-        - file: atm/link_to_CVDP
+        - file: atm/ADF
+        - file: atm/CVDP
 
     - caption: Land
       chapters:
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
+        - file: lnd/ILAMB
+        - file: lnd/LDF
 
 #####################################
 # Keys for Jupyter Book _config.yml #

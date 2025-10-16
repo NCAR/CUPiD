@@ -130,7 +130,7 @@ compute_notebooks:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
             base_regridded_output: True
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
-      link_to_ADF:
+      ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -146,7 +146,7 @@ compute_notebooks:
             cvdp_tar: False
           regridded_output: False
           base_regridded_output: False
-      link_to_CVDP:
+      CVDP:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -197,7 +197,7 @@ compute_notebooks:
             clmFile_h: 'clm2.h0'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
-      link_to_ILAMB:
+      ILAMB:
         parameter_groups:
           none:
             ilamb_root: ../../examples/key_metrics/ILAMB_output
@@ -206,7 +206,7 @@ compute_notebooks:
         external_tool:
           tool_name: 'ILAMB'
           ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
+      LDF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -272,8 +272,8 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
-        - file: atm/link_to_ADF
-        - file: atm/link_to_CVDP
+        - file: atm/ADF
+        - file: atm/CVDP
 
     # - caption: Ocean
     #   chapters:
@@ -282,8 +282,8 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
+        - file: lnd/ILAMB
+        - file: lnd/LDF
 
     - caption: Sea Ice
       chapters:
