@@ -192,7 +192,7 @@ def run_timeseries(
                 timeseries_params[component]["vars"],
                 timeseries_params[component]["derive_vars"],
                 timeseries_params["case_name"],
-                timeseries_params[component]["hist_str"],
+                timeseries_params[component]["hist_str"], #TODO: or maybe we run this twice-- once for base case & once for case!
                 ts_input_dirs,
                 ts_output_dirs,
                 timeseries_params["ts_done"],
