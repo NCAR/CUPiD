@@ -166,7 +166,8 @@ def run_remapping(
                 component,
                 timeseries_params[component]["vars"],
                 timeseries_params["case_name"],
-                timeseries_params[component]["hist_str"], # TODO: maybe we just call this twice-- once for base case & once for case?
+                timeseries_params[component]["hist_str"],
+                # TODO: maybe we just call this twice-- once for base case & once for case?
                 ts_output_dirs,
                 timeseries_params[component]["mapping_file"],
                 num_procs,

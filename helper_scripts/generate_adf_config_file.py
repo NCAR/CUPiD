@@ -173,7 +173,9 @@ def generate_adf_config(
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
-    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"] # TODO: figure out how to deal with this in ADF
+    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"][
+        "hist_str"
+    ]  # TODO: figure out how to deal with this in ADF
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
         ts_dir,

@@ -118,7 +118,9 @@ def create_time_series(
         # End if
 
         # Check if history files actually exist. If not then kill script:
-        if not list(starting_location.glob("*." + hist_str + ".*.nc")): # TODO: separate out hist str & base hist str before this!
+        if not list(
+            starting_location.glob("*." + hist_str + ".*.nc"),
+        ):  # TODO: separate out hist str & base hist str before this!
             emsg = f"No history *.{hist_str}.*.nc files found in '{starting_location}'."
             emsg += " Script is ending here."
             raise FileNotFoundError(emsg)
@@ -131,7 +133,7 @@ def create_time_series(
         for year in range(start_year, end_year + 1):
             # Add files to main file list:
             for fname in starting_location.glob(
-                f"*.{hist_str}.*{str(year).zfill(4)}*.nc", # TODO: adjust this
+                f"*.{hist_str}.*{str(year).zfill(4)}*.nc",  # TODO: adjust this
             ):
                 files_list.append(fname)
             # End for
@@ -262,7 +264,9 @@ def create_time_series(
             ts_outfil_str = (
                 ts_dir[case_idx]
                 + os.sep
-                + ".".join([case_name, hist_str, var, time_string, "nc"]) # TODO: choose correct hist str
+                + ".".join(
+                    [case_name, hist_str, var, time_string, "nc"],
+                )  # TODO: choose correct hist str
             )
 
             # Check if files already exist in time series directory:
@@ -288,7 +292,9 @@ def create_time_series(
 
             if has_lev and vert_coord_type:
                 # For now, only add these variables if using CAM:
-                if "cam" in hist_str:  # Could also use if "cam" in component #TODO: separate out case & base case!
+                if (
+                    "cam" in hist_str
+                ):  # Could also use if "cam" in component #TODO: separate out case & base case!
                     # PS might be in a different history file. If so, continue without error.
                     ncrcat_var_list = ncrcat_var_list + ",hyam,hybm,hyai,hybi"
 
