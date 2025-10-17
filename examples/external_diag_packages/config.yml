@@ -60,15 +60,17 @@ timeseries:
   atm:
     vars: ['PSL']
     derive_vars: []
-    hist_str: 'cam.h0a'
+    hist_str: ['cam.h0a', 'cam.h0a']
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
+    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
 
   lnd:
     vars: []
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: ['h0', 'h0']
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -76,7 +78,7 @@ timeseries:
   ocn:
     vars: []
     derive_vars: []
-    hist_str: 'h.z'
+    hist_str: ['h.z', 'h.z']
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -84,7 +86,7 @@ timeseries:
   ice:
     vars: []
     derive_vars: []
-    hist_str: 'h'
+    hist_str: ['cice.h', 'cice.h']
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -92,7 +94,7 @@ timeseries:
   glc:
     vars: []
     derive_vars: []
-    hist_str: 'initial_hist'
+    hist_str: ['initial_hist', 'initial_hist']
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
