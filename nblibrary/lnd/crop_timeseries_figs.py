@@ -55,8 +55,8 @@ def _get_clm_yield(crop, case, use_earthstat_area):
         this_area = "crop_area_es"
         this_prod = "crop_prod_es"
     else:
-        this_area = "crop_cft_area"
-        this_prod = "crop_cft_prod"
+        this_area = "crop_area"
+        this_prod = "crop_prod"
 
     da_prod = case.cft_ds[this_prod].sel(crop=crop)
     da_area = case.cft_ds[this_area].sel(crop=crop)
@@ -71,7 +71,7 @@ def _get_clm_prod(crop, case, use_earthstat_area):
     if use_earthstat_area:
         this_var = "crop_prod_es"
     else:
-        this_var = "crop_cft_prod"
+        this_var = "crop_prod"
     da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
@@ -80,7 +80,7 @@ def _get_clm_area(crop, case, use_earthstat_area):
     if use_earthstat_area:
         da = case.cft_ds["crop_area_es"].sel(crop=crop)
     else:
-        da = case.cft_ds["crop_cft_area"].sel(crop=crop)
+        da = case.cft_ds["crop_area"].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 

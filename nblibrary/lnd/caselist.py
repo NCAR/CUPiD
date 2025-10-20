@@ -65,6 +65,7 @@ class CaseList(list):
                     opts["end_year"],
                     verbose=opts["verbose"],
                     force_new_cft_ds_file=opts["force_new_cft_ds_file"],
+                    force_no_cft_ds_file=opts["force_no_cft_ds_file"],
                 ),
             )
 
