@@ -9,6 +9,22 @@ import xarray as xr
 from matplotlib import pyplot as plt
 
 
+def get_difference_map(da0, da1):
+    """
+    Get difference between two maps (da1-da0), ensuring sizes/coordinates match
+    """
+    if not all(da1.sizes[d] == da0.sizes[d] for d in da1.dims):
+        raise RuntimeError(
+            f"Size mismatch between da1 ({da1.sizes}) and da0 ({da0.sizes})",
+        )
+    da_diff = da1 - da0
+    if not all(da1.sizes[d] == da_diff.sizes[d] for d in da1.dims):
+        raise RuntimeError(
+            f"Size mismatch between da1 ({da1.sizes}) and map_diff ({da_diff.sizes})",
+        )
+    return da_diff
+
+
 def _cut_off_antarctica(da, antarctica_border=-60):
     """
     Cut off the bottom of the map, from latitude antarctica_border south

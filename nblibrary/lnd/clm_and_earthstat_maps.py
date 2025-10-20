@@ -8,6 +8,7 @@ from types import ModuleType
 
 from caselist import CaseList
 from earthstat import EarthStat
+from plotting_utils import get_difference_map
 from plotting_utils import ResultsMaps
 
 
@@ -41,22 +42,6 @@ class Timing:
         end_all = time()
         if verbose:
             print(f"Maps took {int(end_all - self._start_all)} s.")
-
-
-def _get_difference_map(da0, da1):
-    """
-    Get difference between two maps (da1-da0), ensuring sizes/coordinates match
-    """
-    if not all(da1.sizes[d] == da0.sizes[d] for d in da1.dims):
-        raise RuntimeError(
-            f"Size mismatch between da1 ({da1.sizes}) and da0 ({da0.sizes})",
-        )
-    da_diff = da1 - da0
-    if not all(da1.sizes[d] == da_diff.sizes[d] for d in da1.dims):
-        raise RuntimeError(
-            f"Size mismatch between da1 ({da1.sizes}) and map_diff ({da_diff.sizes})",
-        )
-    return da_diff
 
 
 def _get_clm_map(which, utils, crop, case):
@@ -188,7 +173,7 @@ def clm_and_earthstat_maps(
             )
 
             # Get difference map
-            results_diff[case.name] = _get_difference_map(
+            results_diff[case.name] = get_difference_map(
                 map_obs,
                 results_clm[case.name],
             )
