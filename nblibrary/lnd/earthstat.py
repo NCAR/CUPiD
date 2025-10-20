@@ -148,7 +148,7 @@ class EarthStat:
 
     def __print__(self):
         print(
-            f"Dict containing Datasets for the following resolutions: {','.join(self._data.keys())}",
+            f"Dict with Datasets for the following resolutions: {','.join(self._data.keys())}",
         )
 
     def _get_crop_list(self, earthstat_dir, crops_to_include):
