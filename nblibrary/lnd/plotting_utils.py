@@ -33,33 +33,6 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _map_subplot(da, ax, vrange, title, cmap="viridis", cut_off_antarctica=True):
-    """
-    Plot a map in a subplot
-    """
-
-    if cut_off_antarctica:
-        da = _cut_off_antarctica(da)
-
-    plt.sca(ax)
-    im = da.plot(
-        ax=ax,
-        transform=ccrs.PlateCarree(),
-        vmin=vrange[0],
-        vmax=vrange[1],
-        add_colorbar=False,
-        cmap=cmap,
-    )
-    ax.coastlines(linewidth=0.5)
-    plt.title(title)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_xlabel("")
-    ax.set_ylabel("")
-
-    return im
-
-
 def _mapfig_finishup(fig, im, da, crop, layout):
     """
     Finish up a figure with map subplots
@@ -87,9 +60,17 @@ class ResultsMaps:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, layout, *, symmetric_0=False, vrange=None):
+    def __init__(
+        self,
+        layout,
+        *,
+        symmetric_0=False,
+        vrange=None,
+        cut_off_antarctica=True,
+    ):
         self.result_dict = {}
         self.layout = layout
+        self.cut_off_antarctica = cut_off_antarctica
 
         # Default color map
         self.cmap = "viridis"
@@ -149,12 +130,37 @@ class ResultsMaps:
                 ax.set_visible(False)
                 continue
 
-            im = _map_subplot(
-                self[case_name],
+            im = self._map_subplot(
                 ax,
-                self.vrange(),
                 case_name,
-                cmap=self.cmap,
             )
 
         _mapfig_finishup(self.fig, im, self[case_name], crop, self.layout)
+
+    def _map_subplot(self, ax, case_name):
+        """
+        Plot a map in a subplot
+        """
+
+        da = self[case_name].copy()
+
+        if self.cut_off_antarctica:
+            da = _cut_off_antarctica(da)
+
+        plt.sca(ax)
+        im = da.plot(
+            ax=ax,
+            transform=ccrs.PlateCarree(),
+            vmin=self.vrange()[0],
+            vmax=self.vrange()[1],
+            add_colorbar=False,
+            cmap=self.cmap,
+        )
+        ax.coastlines(linewidth=0.5)
+        plt.title(case_name)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+        return im
