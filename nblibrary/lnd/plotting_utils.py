@@ -1,16 +1,15 @@
 """
 A module for plotting utilties shared amongst the lnd/ Python
 """
-
 from __future__ import annotations
 
-from matplotlib import pyplot as plt
-import numpy as np
 import cartopy.crs as ccrs
+import numpy as np
 import xarray as xr
+from matplotlib import pyplot as plt
 
 
-def cut_off_antarctica(da, antarctica_border=-60):
+def _cut_off_antarctica(da, antarctica_border=-60):
     """
     Cut off the bottom of the map, from latitude antarctica_border south
     """
@@ -18,10 +17,14 @@ def cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _map_subplot(da, ax, vrange, title, cmap="viridis"):
+def _map_subplot(da, ax, vrange, title, cmap="viridis", cut_off_antarctica=True):
     """
     Plot a map in a subplot
     """
+
+    if cut_off_antarctica:
+        da = _cut_off_antarctica(da)
+
     plt.sca(ax)
     im = da.plot(
         ax=ax,
@@ -48,7 +51,7 @@ def _mapfig_finishup(fig, im, da, crop, layout):
     suptitle = f"{da.name}: {crop}"
     fig.suptitle(suptitle, fontsize="x-large", fontweight="bold")
     fig.subplots_adjust(
-        top=layout["subplots_adjust_colorbar_top"]-0.04,
+        top=layout["subplots_adjust_colorbar_top"] - 0.04,
         bottom=layout["subplots_adjust_colorbar_bottom"],
     )
     cbar_ax = fig.add_axes(rect=layout["cbar_ax_rect"])

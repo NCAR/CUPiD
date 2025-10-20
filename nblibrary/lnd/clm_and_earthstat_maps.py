@@ -8,7 +8,6 @@ from types import ModuleType
 
 from caselist import CaseList
 from earthstat import EarthStat
-from plotting_utils import cut_off_antarctica
 from plotting_utils import ResultsMaps
 
 
@@ -114,7 +113,7 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     which = "area"
-    area_clm = cut_off_antarctica(_get_clm_map(which, utils, crop, case))
+    area_clm = _get_clm_map(which, utils, crop, case)
     area_obs = earthstat_ds.get_map(
         which,
         crop,
@@ -158,9 +157,7 @@ def clm_and_earthstat_maps(
         for case in case_list:
 
             # Get CLM map
-            results_clm[case.name] = cut_off_antarctica(
-                _get_clm_map(which, utils, crop, case),
-            )
+            results_clm[case.name] = _get_clm_map(which, utils, crop, case)
             if which == "area":
                 results_clm[case.name] = results_clm[case.name].where(
                     results_clm[case.name] > 0,

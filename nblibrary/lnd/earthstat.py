@@ -6,7 +6,6 @@ from __future__ import annotations
 import os
 
 import xarray as xr
-from plotting_utils import cut_off_antarctica
 
 
 def align_time(da_to_align, target_time):
@@ -114,7 +113,6 @@ class EarthStatDataset(xr.Dataset):
         # Actually get the map
         data_obs = self.get_data(which, crop)
         map_obs = data_obs.mean(dim="time")
-        map_obs = cut_off_antarctica(map_obs)
 
         return map_obs
 
