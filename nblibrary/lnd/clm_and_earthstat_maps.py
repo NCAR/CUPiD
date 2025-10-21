@@ -3,7 +3,8 @@ clm_and_earthstat_maps() function intended for (re)use in Global_crop_yield_comp
 """
 from __future__ import annotations
 
-from time import time
+import os
+import sys
 from types import ModuleType
 
 from caselist import CaseList
@@ -11,37 +12,14 @@ from earthstat import EarthStat
 from plotting_utils import get_difference_map
 from plotting_utils import ResultsMaps
 
-
-class Timing:
-    """
-    For holding, calculating, and printing info about clm_and_earthstat_maps() timing
-    """
-
-    def __init__(self):
-        self._start_all = time()
-        self._start = None
-
-    def start(self):
-        """
-        Start timer for one loop
-        """
-        self._start = time()
-
-    def end(self, crop, verbose):
-        """
-        End timer for one loop
-        """
-        end = time()
-        if verbose:
-            print(f"{crop} took {end - self._start} s")
-
-    def end_all(self, verbose):
-        """
-        End timer across all loops
-        """
-        end_all = time()
-        if verbose:
-            print(f"Maps took {int(end_all - self._start_all)} s.")
+externals_path = os.path.join(
+    os.path.dirname(__file__),
+    os.pardir,
+    os.pardir,
+    "externals",
+)
+sys.path.append(externals_path)
+from ctsm_postprocessing.timing import Timing  # noqa: E402
 
 
 def _get_clm_map(which, utils, crop, case):
@@ -188,4 +166,4 @@ def clm_and_earthstat_maps(
 
         timer.end(crop, verbose)
 
-    timer.end_all(verbose)
+    timer.end_all("Maps", verbose)
