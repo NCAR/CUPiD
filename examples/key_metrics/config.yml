@@ -72,7 +72,7 @@ timeseries:
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: 'clm2.h0a'
     start_years: [1,1]
     end_years: [100,100]
     level: 'lev'
@@ -128,7 +128,7 @@ compute_notebooks:
         parameter_groups:
           none:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
+            base_regridded_output: False
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
       ADF:
         kernel_name: cupid-infrastructure
@@ -194,7 +194,7 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: 'clm2.h0'
+            clmFile_h: 'clm2.h0a'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
       ILAMB:
