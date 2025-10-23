@@ -41,13 +41,13 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
+  case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232'
+  base_case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-  end_date: '0101-01-01'
+  end_date: '0021-01-01'
   base_start_date: '0001-01-01'
-  base_end_date: '0101-01-01'
+  base_end_date: '0045-01-01'
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
@@ -57,14 +57,14 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
+  case_name: ['b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232', 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228']
 
   atm:
     vars: ['PSL']
     derive_vars: []
     hist_str: 'cam.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
     mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
 
@@ -72,9 +72,9 @@ timeseries:
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: 'clm2.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ocn:
@@ -82,7 +82,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h.z'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ice:
@@ -90,7 +90,7 @@ timeseries:
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   glc:
@@ -98,7 +98,7 @@ timeseries:
     derive_vars: []
     hist_str: 'initial_hist'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   rof:
@@ -106,7 +106,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
 compute_notebooks:
@@ -128,9 +128,9 @@ compute_notebooks:
         parameter_groups:
           none:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
+            base_regridded_output: False
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
-      link_to_ADF:
+      ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -141,7 +141,19 @@ compute_notebooks:
           vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
-          base_regridded_output: True
+          diag_cvdp_info:
+            cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
+            cvdp_tar: False
+          regridded_output: False
+          base_regridded_output: False
+      CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/key_metrics/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     glc:
       Greenland_SMB_visual_compare_obs:
@@ -182,10 +194,10 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: 'h0'
+            clmFile_h: 'clm2.h0a'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
-      link_to_ILAMB:
+      ILAMB:
         parameter_groups:
           none:
             ilamb_root: ../../examples/key_metrics/ILAMB_output
@@ -194,7 +206,7 @@ compute_notebooks:
         external_tool:
           tool_name: 'ILAMB'
           ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
+      LDF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -260,7 +272,8 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
-        - file: atm/link_to_ADF
+        - file: atm/ADF
+        - file: atm/CVDP
 
     # - caption: Ocean
     #   chapters:
@@ -269,8 +282,8 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
+        - file: lnd/ILAMB
+        - file: lnd/LDF
 
     - caption: Sea Ice
       chapters:

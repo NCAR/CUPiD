@@ -192,6 +192,7 @@ def generate_adf_config(
     diag_var_list = []
     analysis_scripts = []
     plotting_scripts = []
+    cvdp_args = {}
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
             if (
@@ -215,14 +216,30 @@ def generate_adf_config(
                 ].get("plotting_scripts", []):
                     if script not in plotting_scripts:
                         plotting_scripts.append(script)
+                for key, val in (
+                    c_dict["compute_notebooks"][component][nb]["external_tool"]
+                    .get("diag_cvdp_info", {})
+                    .items()
+                ):
+                    if key not in cvdp_args:
+                        cvdp_args[key] = val
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
     if analysis_scripts:
         a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
+    if cvdp_args:
+        a_dict["diag_cvdp_info"] = cvdp_args
+        a_dict["diag_cvdp_info"][
+            "cvdp_codebase_loc"
+        ] = "../../externals/ADF/lib/externals/CVDP/"
+        # this is where CVDP code base lives in the ADF
 
-    # os.getenv("USER")
+        a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
+            cupid_config_loc,
+            "CVDP_output/",
+        )  # this is where CVDP will put plots, and "website" directory
 
     with open(out_file, "w") as f:
         # Header of file is a comment logging provenance
