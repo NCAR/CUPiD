@@ -22,6 +22,12 @@ def align_time(da_to_align, target_time):
     this_slice = slice(f"{first_year}-01-01", f"{last_year}-12-31")
     new_time_coord = target_time.sel(time=this_slice)
 
+    # Slice EarthStat to match CLM time span
+    first_year_target = min(target_time.values).year
+    last_year_target = max(target_time.values).year
+    this_slice = slice(f"{first_year_target}-01-01", f"{last_year_target}-12-31")
+    da_to_align = da_to_align.sel(time=this_slice)
+
     return da_to_align.assign_coords({"time": new_time_coord})
 
 
