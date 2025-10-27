@@ -82,7 +82,7 @@ def generate_adf_config(
     )
     # UPDATE PATHS FOR REGRIDDED DATA
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
             "regridded_output"
         ]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
@@ -153,7 +153,7 @@ def generate_adf_config(
         "climo",
     )
     try:
-        if c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["external_tool"][
+        if c_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
             "base_regridded_output"
         ]:
             a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
