@@ -62,18 +62,22 @@ class ResultsMaps:
 
     def __init__(
         self,
-        layout,
+        n_subplots,
         *,
         symmetric_0=False,
         vrange=None,
         cut_off_antarctica=True,
     ):
         self.result_dict = {}
-        self.layout = layout
         self.cut_off_antarctica = cut_off_antarctica
 
         # Default color map
         self.cmap = "viridis"
+
+        # Default figure layout dict
+        self.n_subplots = n_subplots
+        self.layout = {}
+        self._get_mapfig_layout()
 
         # If vrange isn't provided, it will be calculated automatically
         self._vrange = vrange
@@ -101,6 +105,23 @@ class ResultsMaps:
             self.vmin = min(self.vmin, np.nanmin(value.values))
             self.vmax = max(self.vmax, np.nanmax(value.values))
         self.result_dict[key] = value
+
+    def _get_mapfig_layout(self):
+        """
+        Get map figure layout info
+        """
+
+        self.layout["nrows"] = int(np.ceil(self.n_subplots / 2))
+        self.layout["subplots_adjust_colorbar_top"] = 0.95
+        self.layout["subplots_adjust_colorbar_bottom"] = 0.2
+        self.layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
+
+        height = 3.75 * self.layout["nrows"]
+        width = 15
+        self.layout["figsize"] = (width, height)
+        self.layout["ncols"] = 2
+        self.layout["hspace"] = 0
+        self.layout["wspace"] = 0
 
     def vrange(self):
         """

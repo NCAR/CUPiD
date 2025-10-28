@@ -6,8 +6,6 @@ from __future__ import annotations
 import os
 from time import time
 
-import numpy as np
-
 
 class CaseList(list):
     """
@@ -27,10 +25,6 @@ class CaseList(list):
 
         # Define extra variables
         self.names = opts["case_name_list"]
-
-        # Get map figure layout info
-        self.mapfig_layout = {}
-        self._get_mapfig_layout()
 
         # Import cases
         self._import_cases(
@@ -78,21 +72,3 @@ class CaseList(list):
         if opts["verbose"]:
             end = time()
             print(f"Importing took {int(end - start)} s")
-
-    def _get_mapfig_layout(self):
-        """
-        Get map figure layout info
-        """
-        n_cases = len(self.names)
-
-        self.mapfig_layout["nrows"] = int(np.ceil(n_cases / 2))
-        self.mapfig_layout["subplots_adjust_colorbar_top"] = 0.95
-        self.mapfig_layout["subplots_adjust_colorbar_bottom"] = 0.2
-        self.mapfig_layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
-
-        height = 3.75 * self.mapfig_layout["nrows"]
-        width = 15
-        self.mapfig_layout["figsize"] = (width, height)
-        self.mapfig_layout["ncols"] = 2
-        self.mapfig_layout["hspace"] = 0
-        self.mapfig_layout["wspace"] = 0
