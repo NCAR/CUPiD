@@ -120,8 +120,12 @@ compute_notebooks:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/
             key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
+            compare_obs: True
         external_tool:
           tool_name: 'ADF'
+          diag_basic_info:
+            # Eventually a higher-level setting for obs_data_loc, some central obs directory, TBD
+            obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
