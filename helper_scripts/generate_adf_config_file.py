@@ -239,7 +239,7 @@ def generate_adf_config(
     if basic_info_args:
         for script,val in basic_info_args.items():
             a_dict["diag_basic_info"][script]=val
-    compare_obs = c_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"]["compare_obs"]
+    compare_obs = c_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"]["compare_obs"]
     a_dict["diag_basic_info"][
             "compare_obs"
         ] = compare_obs
