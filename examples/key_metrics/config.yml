@@ -136,7 +136,7 @@ compute_notebooks:
           none:
             adf_root: ../../examples/key_metrics/ADF_output/
             key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
-            compare_obs: True
+            compare_obs: False
         external_tool:
           tool_name: 'ADF'
           diag_basic_info:
