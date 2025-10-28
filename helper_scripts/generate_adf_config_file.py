@@ -237,12 +237,12 @@ def generate_adf_config(
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
     if basic_info_args:
-        for script,val in basic_info_args.items():
-            a_dict["diag_basic_info"][script]=val
-    compare_obs = c_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"]["compare_obs"]
-    a_dict["diag_basic_info"][
-            "compare_obs"
-        ] = compare_obs
+        for script, val in basic_info_args.items():
+            a_dict["diag_basic_info"][script] = val
+    compare_obs = c_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
+        "compare_obs"
+    ]
+    a_dict["diag_basic_info"]["compare_obs"] = compare_obs
     if cvdp_args:
         a_dict["diag_cvdp_info"] = cvdp_args
         a_dict["diag_cvdp_info"][
