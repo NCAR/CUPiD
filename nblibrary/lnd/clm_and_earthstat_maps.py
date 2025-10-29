@@ -117,6 +117,8 @@ def clm_and_earthstat_maps(
         results_diff = ResultsMaps(symmetric_0=True)
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
+        suptitle_clm = None
+        suptitle_diff = None
         for case in case_list:
 
             # Get CLM map
@@ -160,9 +162,15 @@ def clm_and_earthstat_maps(
             ].name = f"{results_clm[case.name].name} difference, CLM minus EarthStat"
             results_diff[case.name].attrs["units"] = results_clm[case.name].units
 
+            # Get plot suptitles
+            if suptitle_clm is None:
+                suptitle_clm = f"{results_clm[case.name].name}: {crop}"
+            if suptitle_diff is None:
+                suptitle_diff = f"{results_diff[case.name].name}: {crop}"
+
         # Plot
-        results_clm.plot(subplot_title_list=case_list.names, crop=crop)
-        results_diff.plot(subplot_title_list=case_list.names, crop=crop)
+        results_clm.plot(subplot_title_list=case_list.names, suptitle=suptitle_clm)
+        results_diff.plot(subplot_title_list=case_list.names, suptitle=suptitle_diff)
 
         timer.end(crop, verbose)
 

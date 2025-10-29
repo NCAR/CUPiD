@@ -39,11 +39,10 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _mapfig_finishup(fig, im, da, crop, layout):
+def _mapfig_finishup(fig, im, da, suptitle, layout):
     """
     Finish up a figure with map subplots
     """
-    suptitle = f"{da.name}: {crop}"
     fig.suptitle(suptitle, fontsize="x-large", fontweight="bold")
     fig.subplots_adjust(
         top=layout["subplots_adjust_colorbar_top"] - 0.04,
@@ -145,7 +144,7 @@ class ResultsMaps:
 
         return [vmin, vmax]
 
-    def plot(self, *, subplot_title_list: list, crop: str):
+    def plot(self, *, subplot_title_list: list, suptitle: str):
         """
         Fill out figure with all subplots, colorbar, etc.
         """
@@ -180,7 +179,7 @@ class ResultsMaps:
                 vrange,
             )
 
-        _mapfig_finishup(self.fig, im, self[this_subplot], crop, self.layout)
+        _mapfig_finishup(self.fig, im, self[this_subplot], suptitle, self.layout)
 
     def _map_subplot(self, ax, case_name, vrange):
         """
