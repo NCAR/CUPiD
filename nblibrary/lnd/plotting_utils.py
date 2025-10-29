@@ -29,7 +29,13 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     """
     Cut off the bottom of the map, from latitude antarctica_border south
     """
-    da = da.sel(lat=slice(antarctica_border, 90))
+    first = da["lat"].isel(lat=0)
+    last = da["lat"].isel(lat=-1)
+    if first < last:
+        lat_slice = slice(antarctica_border, 90)
+    else:
+        lat_slice = slice(90, antarctica_border)
+    da = da.sel(lat=lat_slice)
     return da
 
 
