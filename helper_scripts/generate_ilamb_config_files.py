@@ -44,13 +44,13 @@ def generate_ilamb_cfg(cupid_config_loc, run_type, cupid_root=None):
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    if "link_to_ILAMB" in c_dict["compute_notebooks"]["lnd"].keys():
-        ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["link_to_ILAMB"][
+    if "ILAMB" in c_dict["compute_notebooks"]["lnd"].keys():
+        ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["ILAMB"][
             "external_tool"
         ]["ilamb_config_data_loc"]
     else:
         print(
-            "Warning: ILAMB information not in configuration file. Please add link_to_ILAMB",
+            "Warning: ILAMB information not in configuration file. Please add ILAMB",
         )
         raise KeyError
 

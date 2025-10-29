@@ -47,11 +47,12 @@ global_params:
   base_case_nickname: 'BLT1850_228'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-  end_date: '0101-01-01'
+
+  end_date: '0021-01-01'
   climo_start_date: '0081-01-01'
   climo_end_date: '0101-01-01'
   base_start_date: '0001-01-01'
-  base_end_date: '0101-01-01'
+  base_end_date: '0045-01-01'
   base_climo_start_date: '0081-01-01'
   base_climo_end_date: '0101-01-01'
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
@@ -70,7 +71,7 @@ timeseries:
     derive_vars: []
     hist_str: 'cam.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
     mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
 
@@ -78,9 +79,9 @@ timeseries:
   lnd:
     vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: 'clm2.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ocn:
@@ -88,7 +89,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h.z'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ice:
@@ -96,7 +97,7 @@ timeseries:
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   glc:
@@ -104,7 +105,7 @@ timeseries:
     derive_vars: []
     hist_str: 'initial_hist'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   rof:
@@ -112,7 +113,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
 compute_notebooks:
@@ -134,9 +135,9 @@ compute_notebooks:
         parameter_groups:
           none:
             regridded_output: False # it looks like output is already on f09 grid, didn't need to regrid time-series file
-            base_regridded_output: True
+            base_regridded_output: False
             validation_path: 'atm/analysis_datasets/fv0.9x1.25/seasonal_climatology/nmse_validation/PSL/'
-      link_to_ADF:
+      ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -152,7 +153,7 @@ compute_notebooks:
             cvdp_tar: False
           regridded_output: False
           base_regridded_output: False
-      link_to_CVDP:
+      CVDP:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -200,10 +201,10 @@ compute_notebooks:
       Global_TerrestrialCouplingIndex_VisualCompareObs:
         parameter_groups:
           none:
-            clmFile_h: 'clm2.h0'
+            clmFile_h: 'clm2.h0a'
             fluxnet_comparison: True
             obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
-      link_to_ILAMB:
+      ILAMB:
         parameter_groups:
           none:
             ilamb_root: ../../examples/key_metrics/ILAMB_output
@@ -212,7 +213,7 @@ compute_notebooks:
         external_tool:
           tool_name: 'ILAMB'
           ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
+      LDF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
@@ -278,8 +279,8 @@ book_toc:
     - caption: Atmosphere
       chapters:
         - file: atm/Global_PSL_NMSE_compare_obs_lens
-        - file: atm/link_to_ADF
-        - file: atm/link_to_CVDP
+        - file: atm/ADF
+        - file: atm/CVDP
 
     # - caption: Ocean
     #   chapters:
@@ -288,8 +289,8 @@ book_toc:
     - caption: Land
       chapters:
         - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
+        - file: lnd/ILAMB
+        - file: lnd/LDF
 
     - caption: Sea Ice
       chapters:
