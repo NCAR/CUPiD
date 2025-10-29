@@ -169,8 +169,16 @@ def clm_and_earthstat_maps(
                 suptitle_diff = f"{results_diff[case.name].name}: {crop}"
 
         # Plot
-        results_clm.plot(subplot_title_list=case_list.names, suptitle=suptitle_clm)
-        results_diff.plot(subplot_title_list=case_list.names, suptitle=suptitle_diff)
+        results_clm.plot(
+            subplot_title_list=case_list.names,
+            suptitle=suptitle_clm,
+            one_colorbar=True,
+        )
+        results_diff.plot(
+            subplot_title_list=case_list.names,
+            suptitle=suptitle_diff,
+            one_colorbar=True,
+        )
 
         timer.end(crop, verbose)
 

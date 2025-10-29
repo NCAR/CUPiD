@@ -39,22 +39,27 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _mapfig_finishup(fig, im, da, suptitle, layout):
+def _mapfig_finishup(fig, im, da, suptitle, layout, one_colorbar):
     """
     Finish up a figure with map subplots
     """
     fig.suptitle(suptitle, fontsize="x-large", fontweight="bold")
-    fig.subplots_adjust(
-        top=layout["subplots_adjust_colorbar_top"] - 0.04,
-        bottom=layout["subplots_adjust_colorbar_bottom"],
-    )
-    cbar_ax = fig.add_axes(rect=layout["cbar_ax_rect"])
-    fig.colorbar(
-        im,
-        cax=cbar_ax,
-        orientation="horizontal",
-        label=da.attrs["units"],
-    )
+
+    if one_colorbar:
+        fig.subplots_adjust(
+            top=layout["subplots_adjust_colorbar_top"] - 0.04,
+            bottom=layout["subplots_adjust_colorbar_bottom"],
+        )
+        cbar_ax = fig.add_axes(rect=layout["cbar_ax_rect"])
+        fig.colorbar(
+            im,
+            cax=cbar_ax,
+            orientation="horizontal",
+            label=da.attrs["units"],
+        )
+    else:
+        fig.subplots_adjust(top=0.96)
+
     fig.show()
 
 
@@ -110,22 +115,24 @@ class ResultsMaps:
     def __len__(self):
         return len(self.result_dict)
 
-    def _get_mapfig_layout(self):
+    def _get_mapfig_layout(self, one_colorbar):
         """
         Get map figure layout info
         """
 
-        self.layout["nrows"] = int(np.ceil(len(self) / 2))
-        self.layout["subplots_adjust_colorbar_top"] = 0.95
-        self.layout["subplots_adjust_colorbar_bottom"] = 0.2
-        self.layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
+        self.layout["ncols"] = 2
+        self.layout["nrows"] = int(np.ceil(len(self) / self.layout["ncols"]))
 
-        height = 3.75 * self.layout["nrows"]
+        if one_colorbar:
+            self.layout["subplots_adjust_colorbar_top"] = 0.95
+            self.layout["subplots_adjust_colorbar_bottom"] = 0.2
+            self.layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
+            height = 3.75 * self.layout["nrows"]
+        else:
+            height = 4.85 * self.layout["nrows"]
+
         width = 15
         self.layout["figsize"] = (width, height)
-        self.layout["ncols"] = 2
-        self.layout["hspace"] = 0
-        self.layout["wspace"] = 0
 
     def vrange(self):
         """
@@ -144,11 +151,17 @@ class ResultsMaps:
 
         return [vmin, vmax]
 
-    def plot(self, *, subplot_title_list: list, suptitle: str):
+    def plot(
+        self,
+        *,
+        subplot_title_list: list,
+        suptitle: str,
+        one_colorbar: bool = False,
+    ):
         """
         Fill out figure with all subplots, colorbar, etc.
         """
-        self._get_mapfig_layout()
+        self._get_mapfig_layout(one_colorbar)
 
         self.fig, self.axes = plt.subplots(
             nrows=self.layout["nrows"],
@@ -177,11 +190,19 @@ class ResultsMaps:
                 ax,
                 this_subplot,
                 vrange,
+                one_colorbar,
             )
 
-        _mapfig_finishup(self.fig, im, self[this_subplot], suptitle, self.layout)
+        _mapfig_finishup(
+            self.fig,
+            im,
+            self[this_subplot],
+            suptitle,
+            self.layout,
+            one_colorbar,
+        )
 
-    def _map_subplot(self, ax, case_name, vrange):
+    def _map_subplot(self, ax, case_name, vrange, one_colorbar):
         """
         Plot a map in a subplot
         """
@@ -192,13 +213,20 @@ class ResultsMaps:
             da = _cut_off_antarctica(da)
 
         plt.sca(ax)
+
+        if one_colorbar:
+            cbar_kwargs = None
+        else:
+            cbar_kwargs = {"orientation": "horizontal", "location": "bottom"}
+
         im = da.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
             vmin=vrange[0],
             vmax=vrange[1],
-            add_colorbar=False,
+            add_colorbar=not one_colorbar,
             cmap=self.cmap,
+            cbar_kwargs=cbar_kwargs,
         )
         ax.coastlines(linewidth=0.5)
         plt.title(case_name)
