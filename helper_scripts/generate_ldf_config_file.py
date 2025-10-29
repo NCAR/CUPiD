@@ -56,7 +56,9 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     )
     # Set hist strings for test & baseline climo
     a_dict["diag_cam_climo"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
-    a_dict["diag_cam_baseline_climo"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
+    a_dict["diag_cam_baseline_climo"]["hist_str"] = c_dict["timeseries"]["lnd"][
+        "hist_str"
+    ]
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
