@@ -173,7 +173,6 @@ def generate_adf_config(
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
-    a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["atm"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
         ts_dir,
@@ -193,6 +192,7 @@ def generate_adf_config(
     analysis_scripts = []
     plotting_scripts = []
     cvdp_args = {}
+    basic_info_args = {}
     for component in c_dict["compute_notebooks"]:
         for nb in c_dict["compute_notebooks"][component]:
             if (
@@ -218,6 +218,13 @@ def generate_adf_config(
                         plotting_scripts.append(script)
                 for key, val in (
                     c_dict["compute_notebooks"][component][nb]["external_tool"]
+                    .get("diag_basic_info", {})
+                    .items()
+                ):
+                    if key not in basic_info_args:
+                        basic_info_args[key] = val
+                for key, val in (
+                    c_dict["compute_notebooks"][component][nb]["external_tool"]
                     .get("diag_cvdp_info", {})
                     .items()
                 ):
@@ -229,6 +236,13 @@ def generate_adf_config(
         a_dict["analysis_scripts"] = analysis_scripts
     if plotting_scripts:
         a_dict["plotting_scripts"] = plotting_scripts
+    if basic_info_args:
+        for script, val in basic_info_args.items():
+            a_dict["diag_basic_info"][script] = val
+    compare_obs = c_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
+        "compare_obs"
+    ]
+    a_dict["diag_basic_info"]["compare_obs"] = compare_obs
     if cvdp_args:
         a_dict["diag_cvdp_info"] = cvdp_args
         a_dict["diag_cvdp_info"][
