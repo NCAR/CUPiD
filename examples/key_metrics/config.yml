@@ -48,12 +48,12 @@ global_params:
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0021-01-01'
-  climo_start_date: '0081-01-01'
-  climo_end_date: '0101-01-01'
+  climo_start_year: 11
+  climo_end_year: 21
   base_start_date: '0001-01-01'
   base_end_date: '0045-01-01'
-  base_climo_start_date: '0081-01-01'
-  base_climo_end_date: '0101-01-01'
+  base_climo_start_year: 36
+  base_climo_end_year: 45
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
@@ -239,6 +239,7 @@ compute_notebooks:
                         'Amazonia','Central Africa','Indonesia',
                         'Brazil','Sahel','Southern Africa','India']
           defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
+          regions_file: ../../externals/LDF/lib/regions_lnd.yaml
 #    ocn:
 #      ocean_surface:
 #        parameter_groups:
