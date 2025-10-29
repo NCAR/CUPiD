@@ -41,11 +41,13 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'f.e23_alpha17f.FLTHIST_ne30.roughtopo.099'
+  case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
   base_case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-  end_date: '0101-01-01'
+  end_date: '0021-01-01'
+  base_start_date: '0001-01-01'
+  base_end_date: '0045-01-01'
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
@@ -55,14 +57,14 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['f.e23_alpha17f.FLTHIST_ne30.roughtopo.099','b.e30_beta02.BLT1850.ne30_t232.104']
+  case_name: ['b.e23_alpha17f.BLT1850.ne30_t232.092', 'b.e30_beta02.BLT1850.ne30_t232.104']
 
   atm:
     vars: ['PSL']
     derive_vars: []
     hist_str: 'cam.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   lnd:
@@ -70,7 +72,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h0'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ocn:
@@ -78,7 +80,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h.z'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ice:
@@ -86,7 +88,7 @@ timeseries:
     derive_vars: []
     hist_str: 'h'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   glc:
@@ -94,7 +96,7 @@ timeseries:
     derive_vars: []
     hist_str: 'initial_hist'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
 compute_notebooks:
@@ -112,35 +114,50 @@ compute_notebooks:
           none: {}
 
     atm:
-      link_to_ADF:
+      ADF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
             adf_root: ../../examples/external_diag_packages/ADF_output/
             key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
+            compare_obs: False
         external_tool:
           tool_name: 'ADF'
+          diag_basic_info:
+            # Eventually a higher-level setting for obs_data_loc, some central obs directory, TBD
+            obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
           vars: ['PRECT', 'SST']
           plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
+          diag_cvdp_info:
+            cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
+            cvdp_tar: False
+          regridded_output: False
           base_regridded_output: False
+      CVDP:
+        kernel_name: cupid-infrastructure
+        parameter_groups:
+          none:
+            cvdp_root: ../../examples/external_diag_packages/CVDP_output/
+            key_plots: ["nino34.spatialcomp.djf1.png", "nino34.hov.elnino.png", "nino34.hov.lanina.png", "sst.stddev.djf.png", "nino34.monstddev.png"]
+        external_tool:
+          tool_name: 'CVDP'
 
     lnd:
-      link_to_ILAMB:
+      ILAMB:
         parameter_groups:
           none:
             ilamb_root: ../../examples/external_diag_packages/ILAMB_output
-            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "ILAMB_output_backup/HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
+            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/CTSM51_global_bias.png", "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/CTSM51_global_bias.png", "EcosystemandCarbonCycle/GlobalNetEcosystemCarbonBalance/GCP/CTSM51_global_accumulate.png", "HydrologyCycle/Permafrost/Brown2002/CTSM51_global_bias.png"]
             print_table: False
         external_tool:
           tool_name: 'ILAMB'
           ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
-      link_to_LDF:
+      LDF:
         kernel_name: cupid-infrastructure
         parameter_groups:
           none:
             ldf_root: ../../examples/external_diag_packages/LDF_output/
-            defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
             key_plots: ["GPP_ANN_LatLon_Mean.png",
                         "ELAI_ANN_LatLon_Mean.png",
                         "TOTECOSYSC_GlobalMean_ANN_TimeSeries_Mean.png",
@@ -162,6 +179,7 @@ compute_notebooks:
                         'Western US','Eastern US','Europe',
                         'Amazonia','Central Africa','Indonesia',
                         'Brazil','Sahel','Southern Africa','India']
+          defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -187,12 +205,13 @@ book_toc:
 
     - caption: Atmosphere
       chapters:
-        - file: atm/link_to_ADF
+        - file: atm/ADF
+        - file: atm/CVDP
 
     - caption: Land
       chapters:
-        - file: lnd/link_to_ILAMB
-        - file: lnd/link_to_LDF
+        - file: lnd/ILAMB
+        - file: lnd/LDF
 
 #####################################
 # Keys for Jupyter Book _config.yml #

@@ -76,7 +76,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     )
     # UPDATE PATHS FOR REGRIDDED DATA
     try:
-        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"][
             "regridded_output"
         ]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
@@ -148,7 +148,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
         "climo",
     )
     try:
-        if c_dict["compute_notebooks"]["lnd"]["link_to_LDF"]["external_tool"][
+        if c_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"][
             "base_regridded_output"
         ]:
             a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
@@ -168,8 +168,8 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
     a_dict["diag_basic_info"]["defaults_file"] = c_dict["compute_notebooks"]["lnd"][
-        "link_to_LDF"
-    ]["defaults_file"]
+        "LDF"
+    ]["external_tool"]["defaults_file"]
     a_dict["diag_basic_info"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(

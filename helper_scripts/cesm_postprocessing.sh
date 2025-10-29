@@ -35,6 +35,8 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
+CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
@@ -67,6 +69,7 @@ CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
 if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
   echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
 fi
+
 # Create directory for running CUPiD
 mkdir -p cupid-postprocessing
 cd cupid-postprocessing
@@ -124,7 +127,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-base-enddate ${CUPID_BASE_ENDDATE}
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
@@ -134,7 +137,15 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
      --out-file adf_config.yml
 fi
 
-# 3. Generate LDF config file
+# 3. Generate ILAMB config file
+if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
+     --cupid-config-loc . \
+     --run-type ${CUPID_RUN_TYPE} \
+     --cupid-root ${CUPID_ROOT}
+fi
+
+# 4. Generate LDF config file
 if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
   ${CUPID_ROOT}/helper_scripts/generate_ldf_config_file.py \
      --cupid-config-loc . \
@@ -142,26 +153,38 @@ if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
      --out-file ldf_config.yml
 fi
 
-# 4. Generate timeseries files
+# 5. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
-# 5. Run ADF
+# 6. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 6. Run LDF
+# 7. Run ILAMB
+if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME=06:00:00) before running ILAMB"
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  export ILAMB_ROOT=ilamb_aux
+  if [ -d "ILAMB_output" ]; then
+    echo "WARNING: ILAMB_output directory already exists. You may need to clear it before running ILAMB."
+  fi
+  ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir ILAMB_output/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
+fi
+
+# 8. Run LDF
 if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
 fi
 
-# 7. Run CUPiD and build webpage
+# 9. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
