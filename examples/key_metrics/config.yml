@@ -139,11 +139,11 @@ compute_notebooks:
             compare_obs: False
         external_tool:
           tool_name: 'ADF'
+          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP', 'U', 'PSL', 'LANDFRAC', 'TREFHT', 'RELHUM', 'T']
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map", "cam_taylor_diagram"]
           diag_basic_info:
             # Eventually a higher-level setting for obs_data_loc, some central obs directory, TBD
             obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
-          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
-          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
           analysis_scripts: ["amwg_table"]
           diag_cvdp_info:
             cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
