@@ -47,7 +47,6 @@ global_params:
   base_case_nickname: 'BLT1850_228'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
-
   end_date: '0021-01-01'
   climo_start_date: '0081-01-01'
   climo_end_date: '0101-01-01'

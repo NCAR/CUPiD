@@ -38,11 +38,6 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     DOUT = c_dict["global_params"]["CESM_output_dir"]
     base_case_name = c_dict["global_params"]["base_case_name"]
     test_case_name = c_dict["global_params"]["case_name"]
-    base_case_nickname = c_dict["global_params"].get(
-        "base_case_nickname",
-        base_case_name,
-    )
-    test_case_nickname = c_dict["global_params"].get("case_nickname", test_case_name)
     c_ts = c_dict["timeseries"]
     ts_case_names = c_ts.get("case_name")
     if not ts_case_names:
@@ -51,8 +46,14 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     # Set case names for LDF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
-    a_dict["diag_cam_climo"]["case_nickname"] = test_case_nickname
-    a_dict["diag_cam_baseline_climo"]["case_nickname"] = base_case_nickname
+    a_dict["diag_cam_climo"]["case_nickname"] = c_dict["global_params"].get(
+        "case_nickname",
+        test_case_name,
+    )
+    a_dict["diag_cam_baseline_climo"]["case_nickname"] = c_dict["global_params"].get(
+        "base_case_nickname",
+        base_case_name,
+    )
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
