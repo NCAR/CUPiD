@@ -62,7 +62,6 @@ class ResultsMaps:
 
     def __init__(
         self,
-        n_subplots,
         *,
         symmetric_0=False,
         vrange=None,
@@ -74,10 +73,10 @@ class ResultsMaps:
         # Default color map
         self.cmap = "viridis"
 
-        # Default figure layout dict
-        self.n_subplots = n_subplots
+        # Empty figure layout stuff
         self.layout = {}
-        self._get_mapfig_layout()
+        self.axes = None
+        self.fig = None
 
         # If vrange isn't provided, it will be calculated automatically
         self._vrange = vrange
@@ -88,12 +87,8 @@ class ResultsMaps:
             if self.symmetric_0:
                 self.cmap = "coolwarm"
 
-        self.fig, self.axes = plt.subplots(
-            nrows=self.layout["nrows"],
-            ncols=self.layout["ncols"],
-            figsize=self.layout["figsize"],
-            subplot_kw={"projection": ccrs.PlateCarree()},
-        )
+        # Per-plot vranges will override self._vrange if any is ever provided
+        self.plot_vranges = {}
 
     def __getitem__(self, key):
         """instance[key] syntax should return corresponding value in result_dict"""
@@ -105,13 +100,17 @@ class ResultsMaps:
             self.vmin = min(self.vmin, np.nanmin(value.values))
             self.vmax = max(self.vmax, np.nanmax(value.values))
         self.result_dict[key] = value
+        self.plot_vranges[key] = None
+
+    def __len__(self):
+        return len(self.result_dict)
 
     def _get_mapfig_layout(self):
         """
         Get map figure layout info
         """
 
-        self.layout["nrows"] = int(np.ceil(self.n_subplots / 2))
+        self.layout["nrows"] = int(np.ceil(len(self) / 2))
         self.layout["subplots_adjust_colorbar_top"] = 0.95
         self.layout["subplots_adjust_colorbar_bottom"] = 0.2
         self.layout["cbar_ax_rect"] = (0.2, 0.15, 0.6, 0.03)
@@ -140,25 +139,44 @@ class ResultsMaps:
 
         return [vmin, vmax]
 
-    def plot(self, *, case_name_list: list, crop: str):
+    def plot(self, *, subplot_title_list: list, crop: str):
         """
         Fill out figure with all subplots, colorbar, etc.
         """
+        self._get_mapfig_layout()
+
+        self.fig, self.axes = plt.subplots(
+            nrows=self.layout["nrows"],
+            ncols=self.layout["ncols"],
+            figsize=self.layout["figsize"],
+            subplot_kw={"projection": ccrs.PlateCarree()},
+        )
+
         for i, ax in enumerate(self.axes.ravel()):
             try:
-                case_name = case_name_list[i]
+                this_subplot = subplot_title_list[i]
             except IndexError:
                 ax.set_visible(False)
                 continue
 
+            # Use per-plot color range (or entire plot color range) if any is provided
+            if any(v is None for v in self.plot_vranges.values()):
+                if self.plot_vranges[this_subplot]:
+                    vrange = self.plot_vranges[this_subplot]
+                else:
+                    vrange = [None, None]
+            else:
+                vrange = self.vrange
+
             im = self._map_subplot(
                 ax,
-                case_name,
+                this_subplot,
+                vrange,
             )
 
-        _mapfig_finishup(self.fig, im, self[case_name], crop, self.layout)
+        _mapfig_finishup(self.fig, im, self[this_subplot], crop, self.layout)
 
-    def _map_subplot(self, ax, case_name):
+    def _map_subplot(self, ax, case_name, vrange):
         """
         Plot a map in a subplot
         """
@@ -172,8 +190,8 @@ class ResultsMaps:
         im = da.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            vmin=self.vrange()[0],
-            vmax=self.vrange()[1],
+            vmin=vrange[0],
+            vmax=vrange[1],
             add_colorbar=False,
             cmap=self.cmap,
         )
