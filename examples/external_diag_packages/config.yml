@@ -43,11 +43,17 @@ computation_config:
 global_params:
   case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
   base_case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
+  case_nickname: 'BLT1850_92'
+  base_case_nickname: 'BLT1850_104'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0021-01-01'
+  climo_start_date: '0001-01-01'
+  climo_end_date: '0021-01-01'
   base_start_date: '0001-01-01'
   base_end_date: '0045-01-01'
+  base_climo_start_date: '0001-01-01'
+  base_climo_end_date: '0021-01-01'
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
