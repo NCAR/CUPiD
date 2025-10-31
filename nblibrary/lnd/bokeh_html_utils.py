@@ -313,7 +313,7 @@ def create_static_html(
 
     # Check if in Jupyter notebook
     if JUPYTER_AVAILABLE and show_in_notebook:
-        output_notebook()
+        output_notebook(hide_banner=True)
         show(layout)
     else:
         # Set output file and save
