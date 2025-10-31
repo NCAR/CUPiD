@@ -88,6 +88,101 @@ def _mask_where_neither_has_area(
     return map_clm.where(mask), map_obs.where(mask)
 
 
+def clm_and_earthstat_maps_1crop(
+    *,
+    which,
+    case_list,
+    earthstat_data,
+    utils,
+    verbose,
+    timer,
+    crop,
+    fig_path_clm,
+    fig_path_diff_earthstat,
+):
+    """
+    For a crop, make two figures:
+    1. With subplots showing mean CLM map for each case
+    2. With subplots showing difference between mean CLM and EarthStat maps for each case
+    """
+    timer.start()
+    if verbose:
+        print(crop)
+
+    # Set up for maps of CLM
+    results_clm = ResultsMaps()
+
+    # Set up for maps of CLM minus EarthStat
+    results_diff = ResultsMaps(symmetric_0=True)
+
+    # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
+    suptitle_clm = None
+    suptitle_diff = None
+    for case in case_list:
+        # Get CLM map
+        results_clm[case.name] = _get_clm_map(which, utils, crop, case)
+        if which == "area":
+            results_clm[case.name] = results_clm[case.name].where(
+                results_clm[case.name] > 0,
+            )
+
+        # Get observed map
+        earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
+        map_obs = earthstat_ds.get_map(
+            which,
+            crop,
+        )
+        if map_obs is None:
+            continue
+        map_obs = utils.lon_pm2idl(map_obs)
+
+        # Mask where neither CLM nor EarthStat have area (HarvestArea)
+        # 1. Fill all missing values with 0
+        results_clm[case.name] = results_clm[case.name].fillna(0)
+        map_obs = map_obs.fillna(0)
+        # 2. Mask
+        results_clm[case.name], map_obs = _mask_where_neither_has_area(
+            utils=utils,
+            crop=crop,
+            case=case,
+            earthstat_ds=earthstat_ds,
+            map_clm=results_clm[case.name],
+            map_obs=map_obs,
+        )
+
+        # Get difference map
+        results_diff[case.name] = get_difference_map(
+            map_obs,
+            results_clm[case.name],
+        )
+        results_diff[
+            case.name
+        ].name = f"{results_clm[case.name].name} difference, CLM minus EarthStat"
+        results_diff[case.name].attrs["units"] = results_clm[case.name].units
+
+        # Get plot suptitles
+        if suptitle_clm is None:
+            suptitle_clm = f"{results_clm[case.name].name}: {crop}"
+        if suptitle_diff is None:
+            suptitle_diff = f"{results_diff[case.name].name}: {crop}"
+
+    # Plot
+    results_clm.plot(
+        subplot_title_list=case_list.names,
+        suptitle=suptitle_clm,
+        one_colorbar=True,
+        fig_path=fig_path_clm,
+    )
+    results_diff.plot(
+        subplot_title_list=case_list.names,
+        suptitle=suptitle_diff,
+        one_colorbar=True,
+        fig_path=fig_path_diff_earthstat,
+    )
+
+    timer.end(crop, verbose)
+
+
 def clm_and_earthstat_maps(
     *,
     which: str,
@@ -95,6 +190,8 @@ def clm_and_earthstat_maps(
     earthstat_data: EarthStat,
     utils: ModuleType,
     opts: dict,
+    fig_path_clm: str = None,
+    fig_path_diff_earthstat: str = None,
 ):
     """
     For each crop, make two figures:
@@ -106,80 +203,16 @@ def clm_and_earthstat_maps(
 
     timer = Timing()
     for crop in crops_to_include:
-        timer.start()
-        if verbose:
-            print(crop)
-
-        # Set up for maps of CLM
-        results_clm = ResultsMaps()
-
-        # Set up for maps of CLM minus EarthStat
-        results_diff = ResultsMaps(symmetric_0=True)
-
-        # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
-        suptitle_clm = None
-        suptitle_diff = None
-        for case in case_list:
-
-            # Get CLM map
-            results_clm[case.name] = _get_clm_map(which, utils, crop, case)
-            if which == "area":
-                results_clm[case.name] = results_clm[case.name].where(
-                    results_clm[case.name] > 0,
-                )
-
-            # Get observed map
-            earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
-            map_obs = earthstat_ds.get_map(
-                which,
-                crop,
-            )
-            if map_obs is None:
-                continue
-            map_obs = utils.lon_pm2idl(map_obs)
-
-            # Mask where neither CLM nor EarthStat have area (HarvestArea)
-            # 1. Fill all missing values with 0
-            results_clm[case.name] = results_clm[case.name].fillna(0)
-            map_obs = map_obs.fillna(0)
-            # 2. Mask
-            results_clm[case.name], map_obs = _mask_where_neither_has_area(
-                utils=utils,
-                crop=crop,
-                case=case,
-                earthstat_ds=earthstat_ds,
-                map_clm=results_clm[case.name],
-                map_obs=map_obs,
-            )
-
-            # Get difference map
-            results_diff[case.name] = get_difference_map(
-                map_obs,
-                results_clm[case.name],
-            )
-            results_diff[
-                case.name
-            ].name = f"{results_clm[case.name].name} difference, CLM minus EarthStat"
-            results_diff[case.name].attrs["units"] = results_clm[case.name].units
-
-            # Get plot suptitles
-            if suptitle_clm is None:
-                suptitle_clm = f"{results_clm[case.name].name}: {crop}"
-            if suptitle_diff is None:
-                suptitle_diff = f"{results_diff[case.name].name}: {crop}"
-
-        # Plot
-        results_clm.plot(
-            subplot_title_list=case_list.names,
-            suptitle=suptitle_clm,
-            one_colorbar=True,
+        clm_and_earthstat_maps_1crop(
+            which=which,
+            case_list=case_list,
+            earthstat_data=earthstat_data,
+            utils=utils,
+            verbose=verbose,
+            timer=timer,
+            crop=crop,
+            fig_path_clm=fig_path_clm,
+            fig_path_diff_earthstat=fig_path_diff_earthstat,
         )
-        results_diff.plot(
-            subplot_title_list=case_list.names,
-            suptitle=suptitle_diff,
-            one_colorbar=True,
-        )
-
-        timer.end(crop, verbose)
 
     timer.end_all("Maps", verbose)
