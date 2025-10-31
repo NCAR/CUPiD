@@ -30,7 +30,6 @@ except ImportError:
 IMAGE_CONTAINER_WIDTH = 900  # Width of the image container in pixels
 IMAGE_CONTAINER_MIN_HEIGHT = 400  # Minimum height of the image container in pixels
 IMAGE_MAX_HEIGHT = 800  # Maximum height for displayed images in pixels
-DROPDOWN_WIDTH = 300  # Width of dropdown menus in pixels
 RADIO_BUTTON_WIDTH = 200  # Width of radio button groups in pixels
 
 
@@ -229,7 +228,7 @@ def create_static_html(
             title=spec["title"],
             value=spec.get("default", spec["options"][0]),
             options=spec["options"],
-            width=DROPDOWN_WIDTH,
+            sizing_mode="stretch_width",
         )
         dropdowns.append(dropdown)
 
@@ -323,6 +322,7 @@ def create_static_html(
         print(f"\nStatic HTML file created: {output_filename}")
         print("You can open this file directly in any web browser!")
         print(
+            f"Note: Keep the {output_dir}/ folder in the same "
             f"Note: Keep the {output_dir}/ folder in the same "
             "directory as the HTML file.",
         )
