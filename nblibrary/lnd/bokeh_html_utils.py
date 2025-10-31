@@ -117,6 +117,7 @@ def create_static_html(
     output_dir="matplotlib_figures",
     show_in_notebook=False,
     embed_images=None,
+    image_max_height=IMAGE_MAX_HEIGHT,
 ):
     """Create a static HTML file with Bokeh dropdown and radio button controls.
 
@@ -147,6 +148,8 @@ def create_static_html(
         This makes the HTML self-contained but increases file size. Useful for
         embedding in Jupyter notebooks. Default is None, which will convert to
         True or False to match show_in_notebook.
+    image_max_height : number, optional
+        Maximum height of the image displayed in the viewer. Default IMAGE_MAX_HEIGHT.
 
     Raises
     ------
@@ -215,7 +218,7 @@ def create_static_html(
         text=f'<div style="display: flex; justify-content: center; align-items: center; '
         f'min-height: {IMAGE_CONTAINER_MIN_HEIGHT}px;">'
         f'<img src="{initial_path}" '
-        f'style="max-width: 100%; max-height: {IMAGE_MAX_HEIGHT}px; height: auto; width: auto;">'
+        f'style="max-width: 100%; max-height: {image_max_height}px; height: auto; width: auto;">'
         f"</div>",
         width=IMAGE_CONTAINER_WIDTH,
         sizing_mode="stretch_width",
@@ -276,7 +279,7 @@ def create_static_html(
     )
     js_code_parts.append("                 '<img src=\"' + img_path + '\" ' +")
     js_code_parts.append(
-        f"                 'style=\"max-width: 100%; max-height: {IMAGE_MAX_HEIGHT}px; "
+        f"                 'style=\"max-width: 100%; max-height: {image_max_height}px; "
         + "height: auto; width: auto;\">' +",
     )
     js_code_parts.append("                 '</div>';")
