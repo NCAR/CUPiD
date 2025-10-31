@@ -117,7 +117,7 @@ def create_static_html(
     output_filename="figure_viewer.html",
     output_dir="matplotlib_figures",
     show_in_notebook=False,
-    embed_images=False,
+    embed_images=None,
 ):
     """Create a static HTML file with Bokeh dropdown and radio button controls.
 
@@ -143,10 +143,11 @@ def create_static_html(
     show_in_notebook : bool, optional
         If True, display the viewer directly in a Jupyter notebook instead of
         saving to a file. Requires bokeh.io to be available. Default is False.
-    embed_images : bool, optional
+    embed_images : bool/None, optional
         If True, embed images as base64 data URIs instead of using file paths.
         This makes the HTML self-contained but increases file size. Useful for
-        embedding in Jupyter notebooks. Default is False.
+        embedding in Jupyter notebooks. Default is None, which will convert to
+        True or False to match show_in_notebook.
 
     Raises
     ------
@@ -166,6 +167,8 @@ def create_static_html(
         dropdown_specs = []
     if radio_specs is None:
         radio_specs = []
+    if embed_images is None:
+        embed_images = show_in_notebook
 
     if not dropdown_specs and not radio_specs:
         raise ValueError(
