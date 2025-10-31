@@ -60,8 +60,6 @@ def _mapfig_finishup(fig, im, da, suptitle, layout, one_colorbar):
     else:
         fig.subplots_adjust(top=0.96)
 
-    fig.show()
-
 
 class ResultsMaps:
     """
@@ -157,6 +155,7 @@ class ResultsMaps:
         subplot_title_list: list,
         suptitle: str,
         one_colorbar: bool = False,
+        fig_path: str = None,
     ):
         """
         Fill out figure with all subplots, colorbar, etc.
@@ -201,6 +200,11 @@ class ResultsMaps:
             self.layout,
             one_colorbar,
         )
+        if fig_path is None:
+            self.fig.show()
+        else:
+            plt.savefig(fig_path, dpi=150)
+            plt.close()
 
     def _map_subplot(self, ax, case_name, vrange, one_colorbar):
         """
