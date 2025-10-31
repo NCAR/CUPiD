@@ -6,7 +6,9 @@ menus and radio button groups for viewing figures.
 """
 from __future__ import annotations
 
+import base64
 import re
+from pathlib import Path
 
 from bokeh.layouts import column
 from bokeh.layouts import row
@@ -79,12 +81,43 @@ def sanitize_filename(name):
     return name
 
 
+def image_to_data_uri(image_path):
+    """Convert an image file to a base64 data URI.
+
+    Parameters
+    ----------
+    image_path : str or Path
+        Path to the image file.
+
+    Returns
+    -------
+    str
+        Base64-encoded data URI for the image.
+    """
+    path = Path(image_path)
+    with open(path, "rb") as f:
+        image_data = f.read()
+    b64_data = base64.b64encode(image_data).decode("utf-8")
+    # Determine MIME type from extension
+    ext = path.suffix.lower()
+    mime_types = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
+        ".svg": "image/svg+xml",
+    }
+    mime_type = mime_types.get(ext, "image/png")
+    return f"data:{mime_type};base64,{b64_data}"
+
+
 def create_static_html(
     dropdown_specs=None,
     radio_specs=None,
     output_filename="figure_viewer.html",
     output_dir="matplotlib_figures",
     show_in_notebook=False,
+    embed_images=False,
 ):
     """Create a static HTML file with Bokeh dropdown and radio button controls.
 
@@ -110,6 +143,10 @@ def create_static_html(
     show_in_notebook : bool, optional
         If True, display the viewer directly in a Jupyter notebook instead of
         saving to a file. Requires bokeh.io to be available. Default is False.
+    embed_images : bool, optional
+        If True, embed images as base64 data URIs instead of using file paths.
+        This makes the HTML self-contained but increases file size. Useful for
+        embedding in Jupyter notebooks. Default is False.
 
     Raises
     ------
@@ -158,6 +195,12 @@ def create_static_html(
 
     # Build dictionary mapping all option combinations to file paths
     figure_paths = build_figure_paths(output_dir, all_controls)
+
+    # If embedding images, convert paths to data URIs
+    if embed_images:
+        figure_paths = {
+            combo: image_to_data_uri(path) for combo, path in figure_paths.items()
+        }
 
     # Get initial combination (all defaults)
     initial_combo = tuple(ctrl["default"] for ctrl in all_controls)
