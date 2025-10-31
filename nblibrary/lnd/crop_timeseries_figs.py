@@ -97,7 +97,6 @@ def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
         bbox_transform=fig.transFigure,
     )
     fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
-    plt.show()
 
 
 def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
@@ -177,7 +176,16 @@ def _get_var_details(which, fao_data_world):
     return var_details
 
 
-def main(which, earthstat_data, case_list, fao_data, opts, *, use_earthstat_area=False):
+def main(
+    which,
+    earthstat_data,
+    case_list,
+    fao_data,
+    opts,
+    *,
+    use_earthstat_area=False,
+    fig_file=None,
+):
     """
     For making timeseries figures of CLM crop outputs
     """
@@ -222,3 +230,8 @@ def main(which, earthstat_data, case_list, fao_data, opts, *, use_earthstat_area
         plt.xlabel("")
 
     finish_fig(opts, fig_opts, fig)
+    if fig_file is None:
+        plt.show()
+    else:
+        plt.savefig(fig_file, dpi=150)
+        plt.close()
