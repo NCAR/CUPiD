@@ -305,8 +305,9 @@ def create_static_html(
     # Create layout with controls in a row and image below
     all_widgets = dropdowns + radio_groups
     if all_widgets:
-        controls_row = row(*all_widgets)
-        layout = column(controls_row, image_div)
+        radio_group_row = row(*radio_groups)
+        dropdown_row = row(*dropdowns)
+        layout = column(radio_group_row, dropdown_row, image_div)
     else:
         layout = column(image_div)
 
@@ -322,7 +323,6 @@ def create_static_html(
         print(f"\nStatic HTML file created: {output_filename}")
         print("You can open this file directly in any web browser!")
         print(
-            f"Note: Keep the {output_dir}/ folder in the same "
             f"Note: Keep the {output_dir}/ folder in the same "
             "directory as the HTML file.",
         )
