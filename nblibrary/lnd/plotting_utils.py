@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 
 DEFAULT_CMAP_SEQ = "viridis"
 DEFAULT_CMAP_DIV = "coolwarm"
+DEFAULT_CMAP_DIV_DIFFOFABSDIFF = "PiYG_r"
 
 
 def check_grid_match(grid0, grid1, tol=0):
@@ -293,7 +294,10 @@ class ResultsMaps:
         # Get difference from key case
         if key_case is not None and case_name != key_case:
             title += " (diff. from key case)"
-            cmap = DEFAULT_CMAP_DIV
+            if self.symmetric_0:
+                cmap = DEFAULT_CMAP_DIV_DIFFOFABSDIFF
+            else:
+                cmap = DEFAULT_CMAP_DIV
             da_key_case = self[key_case]
             lats_match = check_grid_match(da["lat"], da_key_case["lat"])
             lons_match = check_grid_match(da["lon"], da_key_case["lon"])

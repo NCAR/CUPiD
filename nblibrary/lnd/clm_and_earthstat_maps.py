@@ -7,6 +7,7 @@ import os
 import sys
 from types import ModuleType
 
+from bokeh_html_utils import sanitize_filename
 from caselist import CaseList
 from earthstat import EarthStat
 from plotting_utils import get_difference_map
@@ -88,10 +89,24 @@ def _mask_where_neither_has_area(
     return map_clm.where(mask), map_obs.where(mask)
 
 
+def _get_figpath_with_keycase(fig_path, key_case, key_case_dict):
+    if len(key_case_dict) == 1:
+        return fig_path
+    dirname = os.path.dirname(fig_path)
+    basename = os.path.basename(fig_path)
+    root, ext = os.path.splitext(basename)
+    root += "_" + key_case
+    root = sanitize_filename(root)
+    basename = root + ext
+    fig_path = os.path.join(dirname, basename)
+    return fig_path
+
+
 def clm_and_earthstat_maps_1crop(
     *,
     which,
     case_list,
+    case_legend_list,
     earthstat_data,
     utils,
     verbose,
@@ -99,6 +114,7 @@ def clm_and_earthstat_maps_1crop(
     crop,
     fig_path_clm,
     fig_path_diff_earthstat,
+    key_case_dict,
 ):
     """
     For a crop, make two figures:
@@ -118,12 +134,13 @@ def clm_and_earthstat_maps_1crop(
     # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
     suptitle_clm = None
     suptitle_diff = None
-    for case in case_list:
+    for c, case in enumerate(case_list):
+        case_legend = case_legend_list[c]
         # Get CLM map
-        results_clm[case.name] = _get_clm_map(which, utils, crop, case)
+        results_clm[case_legend] = _get_clm_map(which, utils, crop, case)
         if which == "area":
-            results_clm[case.name] = results_clm[case.name].where(
-                results_clm[case.name] > 0,
+            results_clm[case_legend] = results_clm[case_legend].where(
+                results_clm[case_legend] > 0,
             )
 
         # Get observed map
@@ -138,47 +155,63 @@ def clm_and_earthstat_maps_1crop(
 
         # Mask where neither CLM nor EarthStat have area (HarvestArea)
         # 1. Fill all missing values with 0
-        results_clm[case.name] = results_clm[case.name].fillna(0)
+        results_clm[case_legend] = results_clm[case_legend].fillna(0)
         map_obs = map_obs.fillna(0)
         # 2. Mask
-        results_clm[case.name], map_obs = _mask_where_neither_has_area(
+        results_clm[case_legend], map_obs = _mask_where_neither_has_area(
             utils=utils,
             crop=crop,
             case=case,
             earthstat_ds=earthstat_ds,
-            map_clm=results_clm[case.name],
+            map_clm=results_clm[case_legend],
             map_obs=map_obs,
         )
 
         # Get difference map
-        results_diff[case.name] = get_difference_map(
+        results_diff[case_legend] = get_difference_map(
             map_obs,
-            results_clm[case.name],
+            results_clm[case_legend],
         )
         results_diff[
-            case.name
-        ].name = f"{results_clm[case.name].name} difference, CLM minus EarthStat"
-        results_diff[case.name].attrs["units"] = results_clm[case.name].units
+            case_legend
+        ].name = f"{results_clm[case_legend].name} difference, CLM minus EarthStat"
+        results_diff[case_legend].attrs["units"] = results_clm[case_legend].units
 
         # Get plot suptitles
         if suptitle_clm is None:
-            suptitle_clm = f"{results_clm[case.name].name}: {crop}"
+            suptitle_clm = f"{results_clm[case_legend].name}: {crop}"
         if suptitle_diff is None:
-            suptitle_diff = f"{results_diff[case.name].name}: {crop}"
+            suptitle_diff = f"{results_diff[case_legend].name}: {crop}"
 
-    # Plot
-    results_clm.plot(
-        subplot_title_list=case_list.names,
-        suptitle=suptitle_clm,
-        one_colorbar=True,
-        fig_path=fig_path_clm,
-    )
-    results_diff.plot(
-        subplot_title_list=case_list.names,
-        suptitle=suptitle_diff,
-        one_colorbar=True,
-        fig_path=fig_path_diff_earthstat,
-    )
+    for key_case, key_case_input in key_case_dict.items():
+
+        fig_path_clm_key = _get_figpath_with_keycase(
+            fig_path_clm,
+            key_case,
+            key_case_dict,
+        )
+        fig_path_diff_earthstat_key = _get_figpath_with_keycase(
+            fig_path_diff_earthstat,
+            key_case,
+            key_case_dict,
+        )
+
+        # Plot
+        one_colorbar = key_case_input is None
+        results_clm.plot(
+            subplot_title_list=case_legend_list,
+            suptitle=suptitle_clm,
+            one_colorbar=one_colorbar,
+            fig_path=fig_path_clm_key,
+            key_plot=key_case_input,
+        )
+        results_diff.plot(
+            subplot_title_list=case_legend_list,
+            suptitle=suptitle_diff,
+            one_colorbar=one_colorbar,
+            fig_path=fig_path_diff_earthstat_key,
+            key_plot=key_case_input,
+        )
 
     timer.end(crop, verbose)
 
@@ -192,6 +225,7 @@ def clm_and_earthstat_maps(
     opts: dict,
     fig_path_clm: str = None,
     fig_path_diff_earthstat: str = None,
+    key_case_dict: dict = None,
 ):
     """
     For each crop, make two figures:
@@ -206,6 +240,7 @@ def clm_and_earthstat_maps(
         clm_and_earthstat_maps_1crop(
             which=which,
             case_list=case_list,
+            case_legend_list=opts["case_legend_list"],
             earthstat_data=earthstat_data,
             utils=utils,
             verbose=verbose,
@@ -213,6 +248,7 @@ def clm_and_earthstat_maps(
             crop=crop,
             fig_path_clm=fig_path_clm,
             fig_path_diff_earthstat=fig_path_diff_earthstat,
+            key_case_dict=key_case_dict,
         )
 
     timer.end_all("Maps", verbose)
