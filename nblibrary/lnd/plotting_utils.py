@@ -293,6 +293,7 @@ class ResultsMaps:
 
         # Get difference from key case
         if key_case is not None and case_name != key_case:
+            da.name = f"Diff. from key case in: {da.name}"
             title += " (diff. from key case)"
             if self.symmetric_0:
                 cmap = DEFAULT_CMAP_DIV_DIFFOFABSDIFF

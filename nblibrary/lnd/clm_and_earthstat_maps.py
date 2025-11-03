@@ -185,6 +185,7 @@ def clm_and_earthstat_maps_1crop(
 
     for key_case, key_case_input in key_case_dict.items():
 
+        # Update figure paths with keycase, if needed
         fig_path_clm_key = _get_figpath_with_keycase(
             fig_path_clm,
             key_case,
