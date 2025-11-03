@@ -121,10 +121,10 @@ class ResultsMaps:
 
         # If vrange isn't provided, it will be calculated automatically
         self._vrange = vrange
+        self.symmetric_0 = symmetric_0
         if not self._vrange:
             self.vmin = np.inf
             self.vmax = -np.inf
-            self.symmetric_0 = symmetric_0
             if self.symmetric_0:
                 self.cmap = DEFAULT_CMAP_DIV
 
