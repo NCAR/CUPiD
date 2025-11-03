@@ -3,10 +3,40 @@ A module for plotting utilties shared amongst the lnd/ Python
 """
 from __future__ import annotations
 
+import warnings
+
 import cartopy.crs as ccrs
 import numpy as np
 import xarray as xr
 from matplotlib import pyplot as plt
+
+DEFAULT_CMAP_SEQ = "viridis"
+DEFAULT_CMAP_DIV = "coolwarm"
+
+
+def check_grid_match(grid0, grid1, tol=0):
+    """
+    Check whether latitude or longitude values match
+    """
+    if grid0.shape != grid1.shape:
+        return False, None
+
+    if hasattr(grid0, "values"):
+        grid0 = grid0.values
+    if hasattr(grid1, "values"):
+        grid1 = grid1.values
+
+    abs_diff = np.abs(grid1 - grid0)
+    if np.any(np.isnan(abs_diff)):
+        if np.any(np.isnan(grid0) != np.isnan(grid1)):
+            warnings.warn("NaN(s) in grid don't match", RuntimeWarning)
+            return False, None
+        warnings.warn("NaN(s) in grid", RuntimeWarning)
+
+    max_abs_diff = np.nanmax(abs_diff)
+    match = max_abs_diff < tol
+
+    return match, max_abs_diff
 
 
 def get_difference_map(da0, da1):
@@ -78,8 +108,10 @@ class ResultsMaps:
         self.result_dict = {}
         self.cut_off_antarctica = cut_off_antarctica
 
-        # Default color map
-        self.cmap = "viridis"
+        # Default color map is assumed to be sequential. This applies to all subplots if
+        # ResultsMaps.plot(..., key_plot=None). Otherwise, applies only to the key plot;
+        # other plots will get diverging colormap DEFAULT_CMAP_DIV.
+        self.cmap = DEFAULT_CMAP_SEQ
 
         # Empty figure layout stuff
         self.layout = {}
@@ -93,7 +125,7 @@ class ResultsMaps:
             self.vmax = -np.inf
             self.symmetric_0 = symmetric_0
             if self.symmetric_0:
-                self.cmap = "coolwarm"
+                self.cmap = DEFAULT_CMAP_DIV
 
         # Per-plot vranges will override self._vrange if any is ever provided
         self.plot_vranges = {}
@@ -156,10 +188,15 @@ class ResultsMaps:
         suptitle: str,
         one_colorbar: bool = False,
         fig_path: str = None,
+        key_plot: str = None,
     ):
         """
         Fill out figure with all subplots, colorbar, etc.
         """
+        if one_colorbar and key_plot is not None:
+            warnings.warn("Ignoring one_colorbar=True because key_plot is not None")
+            one_colorbar = False
+
         self._get_mapfig_layout(one_colorbar)
 
         self.fig, self.axes = plt.subplots(
@@ -168,6 +205,9 @@ class ResultsMaps:
             figsize=self.layout["figsize"],
             subplot_kw={"projection": ccrs.PlateCarree()},
         )
+
+        # Store image objects for each subplot
+        images = {}
 
         for i, ax in enumerate(self.axes.ravel()):
             try:
@@ -190,7 +230,11 @@ class ResultsMaps:
                 this_subplot,
                 vrange,
                 one_colorbar,
+                key_plot,
             )
+
+            # Store the image object
+            images[this_subplot] = im
 
         _mapfig_finishup(
             self.fig,
@@ -200,18 +244,65 @@ class ResultsMaps:
             self.layout,
             one_colorbar,
         )
+
+        if key_plot is not None:
+            # Make all non-key plot colorbars match
+            self._update_non_key_colorbars(subplot_title_list, key_plot, images)
+
         if fig_path is None:
             self.fig.show()
         else:
             plt.savefig(fig_path, dpi=150)
             plt.close()
 
-    def _map_subplot(self, ax, case_name, vrange, one_colorbar):
+    def _update_non_key_colorbars(self, subplot_title_list, key_plot, images):
+        """
+        Make all non-key plot colorbars match
+        """
+        # Find the most extreme absolute value across all non-key plots
+        max_abs_val = 0
+        for this_subplot in subplot_title_list:
+            if this_subplot == key_plot:
+                continue
+            da_vals = self[this_subplot].values
+            max_abs_val = max(max_abs_val, np.nanmax(np.abs(da_vals)))
+
+        # Update all non-key plot color limits
+        for i, this_subplot in enumerate(subplot_title_list):
+            if this_subplot == key_plot:
+                continue
+            # Update the image object's color limits
+            if this_subplot in images:
+                images[this_subplot].set_clim(-max_abs_val, max_abs_val)
+                # Update the colorbar if it exists
+                if (
+                    hasattr(images[this_subplot], "colorbar")
+                    and images[this_subplot].colorbar is not None
+                ):
+                    images[this_subplot].colorbar.update_normal(images[this_subplot])
+
+    def _map_subplot(self, ax, case_name, vrange, one_colorbar, key_case):
         """
         Plot a map in a subplot
         """
+        title = case_name
+        cmap = self.cmap
 
         da = self[case_name].copy()
+
+        # Get difference from key case
+        if key_case is not None and case_name != key_case:
+            title += " (diff. from key case)"
+            cmap = DEFAULT_CMAP_DIV
+            da_key_case = self[key_case]
+            lats_match = check_grid_match(da["lat"], da_key_case["lat"])
+            lons_match = check_grid_match(da["lon"], da_key_case["lon"])
+            if not (lats_match and lons_match):
+                print(
+                    f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
+                )
+                da_key_case = da_key_case.interp_like(da, method="nearest")
+            da -= da_key_case
 
         if self.cut_off_antarctica:
             da = _cut_off_antarctica(da)
@@ -229,11 +320,11 @@ class ResultsMaps:
             vmin=vrange[0],
             vmax=vrange[1],
             add_colorbar=not one_colorbar,
-            cmap=self.cmap,
+            cmap=cmap,
             cbar_kwargs=cbar_kwargs,
         )
         ax.coastlines(linewidth=0.5)
-        plt.title(case_name)
+        plt.title(title)
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlabel("")

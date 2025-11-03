@@ -86,6 +86,7 @@ compute_notebooks:
             start_year: 1961
             end_year: 1965
             externals_path: ../../externals
+            key_case: None
             # This is default True, but that's only really useful during development (running the notebook manually)
             verbose: False
 
