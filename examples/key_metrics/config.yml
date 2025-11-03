@@ -43,11 +43,17 @@ computation_config:
 global_params:
   case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232'
   base_case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228'
+  case_nickname: 'BLT1850_232'
+  base_case_nickname: 'BLT1850_228'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0021-01-01'
+  climo_start_year: 11
+  climo_end_year: 21
   base_start_date: '0001-01-01'
   base_end_date: '0045-01-01'
+  base_climo_start_year: 36
+  base_climo_end_year: 45
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
@@ -136,10 +142,14 @@ compute_notebooks:
           none:
             adf_root: ../../examples/key_metrics/ADF_output/
             key_plots: ["Surface_Wind_Stress_ANN_LatLon_Vector_Mean.png", "PRECT_ANN_LatLon_Mean.png", "PS_DJF_SHPolar_Mean.png", "TaylorDiag_ANN_Special_Mean.png"]
+            compare_obs: False
         external_tool:
           tool_name: 'ADF'
-          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP']
-          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map"]
+          vars: ['SST', 'TS', 'SWCF', 'LWCF', 'PRECT', 'TAUX', 'TAUY',  'TGCLDLWP', 'U', 'PSL', 'LANDFRAC', 'TREFHT', 'RELHUM', 'T']
+          plotting_scripts: ["global_latlon_map", "global_latlon_vect_map", "cam_taylor_diagram"]
+          diag_basic_info:
+            # Eventually a higher-level setting for obs_data_loc, some central obs directory, TBD
+            obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
           analysis_scripts: ["amwg_table"]
           diag_cvdp_info:
             cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
@@ -233,6 +243,7 @@ compute_notebooks:
                         'Amazonia','Central Africa','Indonesia',
                         'Brazil','Sahel','Southern Africa','India']
           defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
+          regions_file: ../../externals/LDF/lib/regions_lnd.yaml
 #    ocn:
 #      ocean_surface:
 #        parameter_groups:
