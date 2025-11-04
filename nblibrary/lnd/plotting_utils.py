@@ -70,7 +70,7 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _mapfig_finishup(fig, im, da, suptitle, layout, one_colorbar):
+def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
     """
     Finish up a figure with map subplots
     """
@@ -227,23 +227,23 @@ class ResultsMaps:
                 vrange = self.vrange
 
             im = self._map_subplot(
-                ax,
-                this_subplot,
-                vrange,
-                one_colorbar,
-                key_plot,
+                ax=ax,
+                case_name=this_subplot,
+                vrange=vrange,
+                one_colorbar=one_colorbar,
+                key_case=key_plot,
             )
 
             # Store the image object
             images[this_subplot] = im
 
         _mapfig_finishup(
-            self.fig,
-            im,
-            self[this_subplot],
-            suptitle,
-            self.layout,
-            one_colorbar,
+            fig=self.fig,
+            im=im,
+            da=self[this_subplot],
+            suptitle=suptitle,
+            layout=self.layout,
+            one_colorbar=one_colorbar,
         )
 
         if key_plot is not None:
@@ -282,7 +282,7 @@ class ResultsMaps:
                 ):
                     images[this_subplot].colorbar.update_normal(images[this_subplot])
 
-    def _map_subplot(self, ax, case_name, vrange, one_colorbar, key_case):
+    def _map_subplot(self, *, ax, case_name, vrange, one_colorbar, key_case):
         """
         Plot a map in a subplot
         """
