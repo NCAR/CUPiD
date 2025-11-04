@@ -24,6 +24,20 @@ def call_ncrcat(cmd):
     return subprocess.run(cmd, shell=False)
 
 
+def fix_permissions(path):
+    """Fix file permissions and group to 'cesm'."""
+    for root, dirs, files in os.walk(path):
+        for d in dirs:  # fix dirs
+            dpath = os.path.join(root, d)
+            os.chmod(dpath, 0o755)  # rwx for owner, rx for group/others
+            os.chown(dpath, -1, "cesm")  # change group only
+
+        for f in files:  # fix files
+            fpath = os.path.join(root, f)
+            os.chmod(fpath, 0o666)  # rw for all
+            os.chown(fpath, -1, "cesm")  # change group only
+
+
 def create_time_series(
     component,
     diag_var_list,
@@ -325,6 +339,11 @@ def create_time_series(
                 + hist_files
                 + ["-o", ts_outfil_str]
             )
+
+            # TODO: probably would be better to do at dir level...
+            # Could go up a level but may run into other file owners--
+            # which could be addressed with try/except but may be messy
+            fix_permissions(ts_outfil_str)
 
             # Add to command list for use in multi-processing pool:
             list_of_commands.append(cmd)
