@@ -271,7 +271,7 @@ class ResultsMaps:
             max_abs_val = max(max_abs_val, np.nanmax(np.abs(da_vals)))
 
         # Update all non-key plot color limits
-        for i, this_subplot in enumerate(subplot_title_list):
+        for this_subplot in subplot_title_list:
             if this_subplot == key_plot:
                 continue
             # Update the image object's color limits
@@ -304,34 +304,13 @@ class ResultsMaps:
 
         # Get difference from key case
         if key_case is not None and case_name != key_case:
-            da_name = f"Diff. from key case in: {da.name}"
-            title += " (diff. from key case)"
-            if self.symmetric_0:
-                cmap = DEFAULT_CMAP_DIV_DIFFOFDIFF
-            else:
-                cmap = DEFAULT_CMAP_DIV
-            da_key_case = self[key_case]
-            lats_match = check_grid_match(da["lat"], da_key_case["lat"])
-            lons_match = check_grid_match(da["lon"], da_key_case["lon"])
-            if not (lats_match and lons_match):
-                print(
-                    f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
-                )
-                da_key_case = da_key_case.interp_like(da, method="nearest")
-            if key_diff_abs_error:
-                da_attrs = da.attrs
-                da = abs(da) - abs(da_key_case)
-                da.attrs = da_attrs
-                assert "from key case" in da_name
-                da_name = da_name.replace(
-                    "from key case",
-                    "from key case in abs. error",
-                )
-                assert "from key case" in title
-                title = title.replace("from key case", "from key case in abs. error")
-            else:
-                da -= da_key_case
-            da.name = da_name
+            title, cmap, da = self._get_diff_from_key_case(
+                case_name=case_name,
+                key_case=key_case,
+                key_diff_abs_error=key_diff_abs_error,
+                da=da,
+                title=title,
+            )
 
         if self.cut_off_antarctica:
             da = _cut_off_antarctica(da)
@@ -360,3 +339,42 @@ class ResultsMaps:
         ax.set_ylabel("")
 
         return im
+
+    def _get_diff_from_key_case(
+        self,
+        *,
+        case_name,
+        key_case,
+        key_diff_abs_error,
+        da,
+        title,
+    ):
+        da_name = f"Diff. from key case in: {da.name}"
+        title += " (diff. from key case)"
+        if self.symmetric_0:
+            cmap = DEFAULT_CMAP_DIV_DIFFOFDIFF
+        else:
+            cmap = DEFAULT_CMAP_DIV
+        da_key_case = self[key_case]
+        lats_match = check_grid_match(da["lat"], da_key_case["lat"])
+        lons_match = check_grid_match(da["lon"], da_key_case["lon"])
+        if not (lats_match and lons_match):
+            print(
+                f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
+            )
+            da_key_case = da_key_case.interp_like(da, method="nearest")
+        if key_diff_abs_error:
+            da_attrs = da.attrs
+            da = abs(da) - abs(da_key_case)
+            da.attrs = da_attrs
+            assert "from key case" in da_name
+            da_name = da_name.replace(
+                "from key case",
+                "from key case in abs. error",
+            )
+            assert "from key case" in title
+            title = title.replace("from key case", "from key case in abs. error")
+        else:
+            da -= da_key_case
+        da.name = da_name
+        return title, cmap, da
