@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 DEFAULT_CMAP_SEQ = "viridis"
 DEFAULT_CMAP_DIV = "coolwarm"
-DEFAULT_CMAP_DIV_DIFFOFABSDIFF = "PiYG_r"
+DEFAULT_CMAP_DIV_DIFFOFDIFF = "PiYG_r"
 
 
 def check_grid_match(grid0, grid1, tol=0):
@@ -190,6 +190,7 @@ class ResultsMaps:
         one_colorbar: bool = False,
         fig_path: str = None,
         key_plot: str = None,
+        key_diff_abs_error: bool = False,
     ):
         """
         Fill out figure with all subplots, colorbar, etc.
@@ -232,6 +233,7 @@ class ResultsMaps:
                 vrange=vrange,
                 one_colorbar=one_colorbar,
                 key_case=key_plot,
+                key_diff_abs_error=key_diff_abs_error,
             )
 
             # Store the image object
@@ -282,7 +284,16 @@ class ResultsMaps:
                 ):
                     images[this_subplot].colorbar.update_normal(images[this_subplot])
 
-    def _map_subplot(self, *, ax, case_name, vrange, one_colorbar, key_case):
+    def _map_subplot(
+        self,
+        *,
+        ax,
+        case_name,
+        vrange,
+        one_colorbar,
+        key_case,
+        key_diff_abs_error,
+    ):
         """
         Plot a map in a subplot
         """
@@ -293,10 +304,10 @@ class ResultsMaps:
 
         # Get difference from key case
         if key_case is not None and case_name != key_case:
-            da.name = f"Diff. from key case in: {da.name}"
+            da_name = f"Diff. from key case in: {da.name}"
             title += " (diff. from key case)"
             if self.symmetric_0:
-                cmap = DEFAULT_CMAP_DIV_DIFFOFABSDIFF
+                cmap = DEFAULT_CMAP_DIV_DIFFOFDIFF
             else:
                 cmap = DEFAULT_CMAP_DIV
             da_key_case = self[key_case]
@@ -307,7 +318,20 @@ class ResultsMaps:
                     f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
                 )
                 da_key_case = da_key_case.interp_like(da, method="nearest")
-            da -= da_key_case
+            if key_diff_abs_error:
+                da_attrs = da.attrs
+                da = abs(da) - abs(da_key_case)
+                da.attrs = da_attrs
+                assert "from key case" in da_name
+                da_name = da_name.replace(
+                    "from key case",
+                    "from key case in abs. error",
+                )
+                assert "from key case" in title
+                title = title.replace("from key case", "from key case in abs. error")
+            else:
+                da -= da_key_case
+            da.name = da_name
 
         if self.cut_off_antarctica:
             da = _cut_off_antarctica(da)

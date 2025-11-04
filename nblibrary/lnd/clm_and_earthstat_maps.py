@@ -212,6 +212,7 @@ def clm_and_earthstat_maps_1crop(
             one_colorbar=one_colorbar,
             fig_path=fig_path_diff_earthstat_key,
             key_plot=key_case_input,
+            key_diff_abs_error=(key_case_input is not None),
         )
 
     timer.end(crop, verbose)
