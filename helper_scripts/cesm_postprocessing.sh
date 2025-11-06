@@ -103,6 +103,12 @@ fi
 #       by setting $PYTHONPATH; since this is conda-based we
 #       want an empty PYTHONPATH environment variable
 unset PYTHONPATH
+
+FOUND=TRUE; conda activate ${CUPID_INFRASTRUCTURE_ENV} 2>/dev/null || FOUND=FALSE
+mamba env create -f environments/cupid-infrastructure.yml
+conda activate ${CUPID_INFRASTRUCTURE_ENV}
+mamba env create -f environments/cupid-analysis.yml
+
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file

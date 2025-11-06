@@ -20,7 +20,7 @@ dependencies:
   - netcdf4
   - numpy
   - pip
-  - python==3.11.4
+  - python
   - uxarray
   - xarray=2025.6.1
   - xesmf
