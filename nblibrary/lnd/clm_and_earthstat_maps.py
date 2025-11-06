@@ -11,7 +11,7 @@ from bokeh_html_utils import sanitize_filename
 from caselist import CaseList
 from earthstat import EarthStat
 from plotting_utils import get_difference_map
-from plotting_utils import ResultsMaps
+from results_maps import ResultsMaps
 
 externals_path = os.path.join(
     os.path.dirname(__file__),
