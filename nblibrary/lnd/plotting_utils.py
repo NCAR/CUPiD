@@ -139,11 +139,11 @@ def get_key_diff(key_diff_abs_error, da, da_key_case):
     if key_diff_abs_error:
         # Difference in absolute error: |da| - |da_key|
         da_attrs = da.attrs
-        da = abs(da) - abs(da_key_case)
+        da = get_difference_map(abs(da_key_case), abs(da))
         da.attrs = da_attrs
     else:
         # Simple difference: da - da_key
-        da -= da_key_case
+        da = get_difference_map(da_key_case, da)
     return da
 
 
