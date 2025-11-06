@@ -262,6 +262,9 @@ class ResultsMaps:
         Default is None.
     cut_off_antarctica : bool, optional
         If True, exclude Antarctica from plots. Default is True.
+    incl_yrs_range: list, optional
+        First and last years requested for plots in this figure. Individual subplots might only have
+        a subset of these, or even none.
 
     Notes
     -----
@@ -280,10 +283,12 @@ class ResultsMaps:
         symmetric_0=False,
         vrange=None,
         cut_off_antarctica=True,
+        incl_yrs_range=None,
     ):
         """Initialize ResultsMaps with specified colorbar and display options."""
         self.result_dict = {}
         self.cut_off_antarctica = cut_off_antarctica
+        self.incl_yrs_range = incl_yrs_range
 
         # Default color map is assumed to be sequential. This applies to all subplots if
         # ResultsMaps.plot(..., key_plot=None). Otherwise, applies only to the key plot;
@@ -434,6 +439,7 @@ class ResultsMaps:
         fig_path: str = None,
         key_plot: str = None,
         key_diff_abs_error: bool = False,
+        case_incl_yr_dict: dict = None,
     ):
         """
         Create a multi-panel map figure with all stored DataArrays.
@@ -478,6 +484,11 @@ class ResultsMaps:
         # Calculate layout parameters
         self._get_mapfig_layout(one_colorbar)
 
+        # TODO: Remove this once all map figures have been updated with new key case behavior
+        key_plot_done = key_plot is not None and "DONE" in key_plot
+        if key_plot_done:
+            key_plot = key_plot.replace("DONE", "")
+
         # Create figure with map projection for all subplots
         self.fig, self.axes = plt.subplots(
             nrows=self.layout["nrows"],
@@ -493,6 +504,7 @@ class ResultsMaps:
         for i, ax in enumerate(self.axes.ravel()):
             try:
                 this_subplot = subplot_title_list[i]
+                case_incl_yr = case_incl_yr_dict[this_subplot]
             except IndexError:
                 # Hide empty subplot positions
                 ax.set_visible(False)
@@ -515,7 +527,9 @@ class ResultsMaps:
                 vrange=vrange,
                 one_colorbar=one_colorbar,
                 key_case=key_plot,
+                key_plot_done=key_plot_done,
                 key_diff_abs_error=key_diff_abs_error,
+                case_incl_yr=case_incl_yr,
             )
 
             # Store the image object for potential colorbar updates
@@ -595,7 +609,9 @@ class ResultsMaps:
         vrange,
         one_colorbar,
         key_case,
+        key_plot_done,
         key_diff_abs_error,
+        case_incl_yr,
     ):
         """
         Create a single map subplot.
@@ -645,7 +661,14 @@ class ResultsMaps:
                 key_diff_abs_error=key_diff_abs_error,
                 da=da,
                 title=title,
+                key_plot_done=key_plot_done,
             )
+
+        # Note subplots with missing data or years
+        if np.all(np.isnan(da.values)):
+            title += " (no data)"
+        elif case_incl_yr != self.incl_yrs_range:
+            title += f" (only {case_incl_yr[0]}-{case_incl_yr[1]})"
 
         # Remove Antarctica if requested
         if self.cut_off_antarctica:
@@ -691,6 +714,7 @@ class ResultsMaps:
         key_diff_abs_error,
         da,
         title,
+        key_plot_done,
     ):
         """
         Calculate difference from a reference case.
@@ -727,6 +751,9 @@ class ResultsMaps:
         - The colormap is changed to a diverging scheme for difference plots.
         - If symmetric_0 is True, a special diff-of-diff colormap is used.
         """
+
+        # TODO handle where this case and key case don't have same years included
+
         # Update data name and title to indicate this is a difference
         da_name = f"Diff. from key case in: {da.name}"
         title += " (diff. from key case)"
@@ -737,27 +764,33 @@ class ResultsMaps:
         else:
             cmap = DEFAULT_CMAP_DIV
 
-        # Get reference case data
-        da_key_case = self[key_case]
-
-        # Check if grids match
-        lats_match = check_grid_match(da["lat"], da_key_case["lat"])
-        lons_match = check_grid_match(da["lon"], da_key_case["lon"])
-
-        # Interpolate reference case to current grid if needed
-        if not (lats_match and lons_match):
-            print(
-                f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
-            )
-            da_key_case = da_key_case.interp_like(da, method="nearest")
-
         # Calculate difference (absolute error or simple difference)
+        if not key_plot_done:
+            # Get reference case data
+            da_key_case = self[key_case]
+
+            # Check if grids match
+            lats_match = check_grid_match(da["lat"], da_key_case["lat"])
+            lons_match = check_grid_match(da["lon"], da_key_case["lon"])
+
+            # Interpolate reference case to current grid if needed
+            if not (lats_match and lons_match):
+                print(
+                    f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
+                )
+                da_key_case = da_key_case.interp_like(da, method="nearest")
+
+            if key_diff_abs_error:
+                # Difference in absolute error: |da| - |da_key|
+                da_attrs = da.attrs
+                da = abs(da) - abs(da_key_case)
+                da.attrs = da_attrs
+            else:
+                # Simple difference: da - da_key
+                da -= da_key_case
+
+        # Update name and title to reflect absolute error difference
         if key_diff_abs_error:
-            # Difference in absolute error: |da| - |da_key|
-            da_attrs = da.attrs
-            da = abs(da) - abs(da_key_case)
-            da.attrs = da_attrs
-            # Update name and title to reflect absolute error difference
             assert "from key case" in da_name
             da_name = da_name.replace(
                 "from key case",
@@ -765,9 +798,6 @@ class ResultsMaps:
             )
             assert "from key case" in title
             title = title.replace("from key case", "from key case in abs. error")
-        else:
-            # Simple difference: da - da_key
-            da -= da_key_case
 
         da.name = da_name
         return title, cmap, da
