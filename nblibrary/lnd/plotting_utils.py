@@ -224,6 +224,19 @@ def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
         fig.subplots_adjust(top=0.96)
 
 
+def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
+    lats_match = check_grid_match(da["lat"], da_key_case["lat"])
+    lons_match = check_grid_match(da["lon"], da_key_case["lon"])
+
+    # Interpolate reference case to current grid if needed
+    if not (lats_match and lons_match):
+        print(
+            f"Nearest-neighbor interpolating {key_case_name} to match {case_name} grid",
+        )
+        da_key_case = da_key_case.interp_like(da, method="nearest")
+    return da_key_case
+
+
 class ResultsMaps:
     """
     Container for managing multiple map DataArrays with consistent visualization.
@@ -770,15 +783,12 @@ class ResultsMaps:
             da_key_case = self[key_case]
 
             # Check if grids match
-            lats_match = check_grid_match(da["lat"], da_key_case["lat"])
-            lons_match = check_grid_match(da["lon"], da_key_case["lon"])
-
-            # Interpolate reference case to current grid if needed
-            if not (lats_match and lons_match):
-                print(
-                    f"Nearest-neighbor interpolating {key_case} to match {case_name} grid",
-                )
-                da_key_case = da_key_case.interp_like(da, method="nearest")
+            da_key_case = self.interp_key_case_grid(
+                case_name,
+                key_case,
+                da,
+                da_key_case,
+            )
 
             if key_diff_abs_error:
                 # Difference in absolute error: |da| - |da_key|
