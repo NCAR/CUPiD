@@ -249,6 +249,113 @@ def get_key_diff(key_diff_abs_error, da, da_key_case):
     return da
 
 
+def get_yr_range(ds):
+    if "time" not in ds.dims or ds.sizes["time"] == 0:
+        return [None, None]
+    first_year = ds["time"].values[0].year
+    last_year = ds["time"].values[-1].year
+    return [first_year, last_year]
+
+
+def _get_range_overlap(list0, list1):
+    if list0 == [None, None]:
+        return None
+    x = range(list0[0], list0[1] + 1)
+    y = range(list1[0], list1[1] + 1)
+    xs = set(x)
+    intsxn = list(xs.intersection(y))
+    if len(intsxn) == 0:
+        return None
+    return [intsxn[0], intsxn[-1]]
+
+
+def get_mean_map(
+    case,
+    key_case,
+    key_diff_abs_error,
+    time_slice_in,
+    *args,
+    special_mean=None,
+    **kwargs,
+):
+    calc_diff_from_key_case = key_case is not None and case.name != key_case.name
+
+    # Restrict time slice to overlap of this case and key case, if needed
+    if not calc_diff_from_key_case:
+        time_slice = time_slice_in
+    else:
+        case_yr_range = get_yr_range(case.cft_ds.sel(time=time_slice_in))
+        key_case_yr_range = get_yr_range(key_case.cft_ds.sel(time=time_slice_in))
+        if key_case_yr_range == [None, None]:
+            raise NotImplementedError(
+                f"key case '{key_case.name}' has no years in {time_slice_in}",
+            )
+        intsxn_yr_range = _get_range_overlap(case_yr_range, key_case_yr_range)
+        if intsxn_yr_range is None:
+            time_slice = slice(
+                f"{key_case_yr_range[0]}-01-01",
+                f"{key_case_yr_range[1]}-12-31",
+            )
+        else:
+            time_slice = slice(
+                f"{intsxn_yr_range[0]}-01-01",
+                f"{intsxn_yr_range[1]}-12-31",
+            )
+
+    # Get this case's map
+    # pylint: disable=no-else-raise
+    if special_mean is None:
+        raise NotImplementedError("Do this")
+        # TODO: Get map_case
+        # if calc_diff_from_key_case:
+        # TODO: Get map_key_case
+    else:
+        n_timesteps, map_case, case_first_yr, case_last_yr = special_mean(
+            case.cft_ds,
+            time_slice,
+            *args,
+            **kwargs,
+        )
+        if calc_diff_from_key_case:
+            _, map_key_case, _, _ = special_mean(
+                key_case.cft_ds,
+                time_slice,
+                *args,
+                **kwargs,
+            )
+
+    # Get map_clm as difference between case and key_case, if doing so.
+    # Otherwise just use map_case.
+    if calc_diff_from_key_case:
+        # Interpolate key case map to this case's grid, if needed
+        map_key_case = interp_key_case_grid(
+            case.name,
+            key_case.name,
+            map_case,
+            map_key_case,
+        )
+
+        # Get difference map between this case and key case
+        map_clm = get_key_diff(key_diff_abs_error, map_case, map_key_case)
+    else:
+        map_clm = map_case
+    return n_timesteps, map_clm, case_first_yr, case_last_yr
+
+
+def get_key_case(opts, key_case_value, case_list):
+    key_case = None
+    if key_case_value is not None:
+        for c, case_legend in enumerate(opts["case_legend_list"]):
+            if case_legend == key_case_value:
+                key_case = case_list[c]
+                break
+        if key_case is None:
+            raise RuntimeError(
+                f"Case '{key_case_value}' not found in opts['case_legend_list']",
+            )
+    return key_case
+
+
 class ResultsMaps:
     """
     Container for managing multiple map DataArrays with consistent visualization.
