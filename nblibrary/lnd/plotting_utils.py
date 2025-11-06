@@ -237,6 +237,18 @@ def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
     return da_key_case
 
 
+def get_key_diff(key_diff_abs_error, da, da_key_case):
+    if key_diff_abs_error:
+        # Difference in absolute error: |da| - |da_key|
+        da_attrs = da.attrs
+        da = abs(da) - abs(da_key_case)
+        da.attrs = da_attrs
+    else:
+        # Simple difference: da - da_key
+        da -= da_key_case
+    return da
+
+
 class ResultsMaps:
     """
     Container for managing multiple map DataArrays with consistent visualization.
@@ -782,7 +794,7 @@ class ResultsMaps:
             # Get reference case data
             da_key_case = self[key_case]
 
-            # Check if grids match
+            # Interpolate key case to match grid, if needed
             da_key_case = self.interp_key_case_grid(
                 case_name,
                 key_case,
@@ -790,14 +802,7 @@ class ResultsMaps:
                 da_key_case,
             )
 
-            if key_diff_abs_error:
-                # Difference in absolute error: |da| - |da_key|
-                da_attrs = da.attrs
-                da = abs(da) - abs(da_key_case)
-                da.attrs = da_attrs
-            else:
-                # Simple difference: da - da_key
-                da -= da_key_case
+            da = get_key_diff(key_diff_abs_error, da, da_key_case)
 
         # Update name and title to reflect absolute error difference
         if key_diff_abs_error:
