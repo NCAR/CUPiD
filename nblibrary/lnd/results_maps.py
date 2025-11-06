@@ -392,7 +392,10 @@ class ResultsMaps:
         for i, ax in enumerate(self.axes.ravel()):
             try:
                 this_subplot = subplot_title_list[i]
-                case_incl_yr = case_incl_yr_dict[this_subplot]
+                if case_incl_yr_dict is not None:
+                    case_incl_yr = case_incl_yr_dict[this_subplot]
+                else:
+                    case_incl_yr = None
             except IndexError:
                 # Hide empty subplot positions
                 ax.set_visible(False)
@@ -555,7 +558,7 @@ class ResultsMaps:
         # Note subplots with missing data or years
         if np.all(np.isnan(da.values)):
             title += " (no data)"
-        elif case_incl_yr != self.incl_yrs_range:
+        elif case_incl_yr is not None and case_incl_yr != self.incl_yrs_range:
             title += f" (only {case_incl_yr[0]}-{case_incl_yr[1]})"
 
         # Remove Antarctica if requested
