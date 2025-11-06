@@ -10,6 +10,16 @@ class InclYrsRangesDict(dict):
         super().__init__()
         self._all_years = [start_year, end_year]
 
+    def plot_items(self):
+        # You can compute or retrieve the "extra" however you like
+        for k, v in super().items():
+            yr_range_str = self.get_yr_range_str(k)
+            first_time_slice = f"{v[0]}-01-01"
+            last_time_slice = f"{v[1]}-12-31"
+            time_slice = slice(first_time_slice, last_time_slice)
+
+            yield (v, yr_range_str, time_slice)
+
     def add(self, key):
         if key.lower() == "all":
             value = self._all_years
