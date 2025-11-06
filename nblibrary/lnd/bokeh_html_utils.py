@@ -19,6 +19,8 @@ from bokeh.models import Select
 from bokeh.plotting import output_file
 from bokeh.plotting import save
 
+# pylint: disable=import-error
+
 try:
     from bokeh.io import show, output_notebook
 
@@ -247,6 +249,56 @@ def create_static_html(
         )
         radio_groups.append(radio_group)
 
+    # Build JavaScript callback
+    callback = _build_js(
+        radio_specs,
+        image_max_height,
+        figure_paths,
+        image_div,
+        dropdowns,
+        radio_groups,
+    )
+
+    # Attach callback to all controls
+    for dropdown in dropdowns:
+        dropdown.js_on_change("value", callback)
+    for radio_group in radio_groups:
+        radio_group.js_on_change("active", callback)
+
+    # Create layout with controls in a row and image below
+    all_widgets = dropdowns + radio_groups
+    if all_widgets:
+        radio_group_row = row(*radio_groups)
+        dropdown_row = row(*dropdowns)
+        layout = column(radio_group_row, dropdown_row, image_div)
+    else:
+        layout = column(image_div)
+
+    # Check if in Jupyter notebook
+    if JUPYTER_AVAILABLE and show_in_notebook:
+        output_notebook(hide_banner=True)
+        show(layout)
+    else:
+        # Set output file and save
+        output_file(output_filename, title="Figure Viewer")
+        save(layout)
+
+        print(f"\nStatic HTML file created: {output_filename}")
+        print("You can open this file directly in any web browser!")
+        print(
+            f"Note: Keep the {output_dir}/ folder in the same "
+            "directory as the HTML file.",
+        )
+
+
+def _build_js(
+    radio_specs,
+    image_max_height,
+    figure_paths,
+    image_div,
+    dropdowns,
+    radio_groups,
+):
     # Build JavaScript code to create option-to-index mappings for radio buttons
     radio_mappings_js = []
     for spec in radio_specs:
@@ -298,34 +350,4 @@ def create_static_html(
 
     # JavaScript callback to update displayed figure
     callback = CustomJS(args=callback_args, code=js_code)
-
-    # Attach callback to all controls
-    for dropdown in dropdowns:
-        dropdown.js_on_change("value", callback)
-    for radio_group in radio_groups:
-        radio_group.js_on_change("active", callback)
-
-    # Create layout with controls in a row and image below
-    all_widgets = dropdowns + radio_groups
-    if all_widgets:
-        radio_group_row = row(*radio_groups)
-        dropdown_row = row(*dropdowns)
-        layout = column(radio_group_row, dropdown_row, image_div)
-    else:
-        layout = column(image_div)
-
-    # Check if in Jupyter notebook
-    if JUPYTER_AVAILABLE and show_in_notebook:
-        output_notebook(hide_banner=True)
-        show(layout)
-    else:
-        # Set output file and save
-        output_file(output_filename, title="Figure Viewer")
-        save(layout)
-
-        print(f"\nStatic HTML file created: {output_filename}")
-        print("You can open this file directly in any web browser!")
-        print(
-            f"Note: Keep the {output_dir}/ folder in the same "
-            "directory as the HTML file.",
-        )
+    return callback
