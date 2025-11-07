@@ -69,8 +69,8 @@ def _get_clm_map(cft_ds, which, utils):
 
 
 def _get_obsdiff_map(
-    *,
     cft_ds,
+    *,
     which,
     earthstat_data,
     utils,
@@ -186,14 +186,14 @@ def clm_and_earthstat_maps_1crop(
         case_legend = case_legend_list[c]
         # Get CLM map
         results_clm[case_legend] = _get_clm_map(
-            case.cft_ds.sel(crop=crop),
+            case.cft_ds,
             which,
             utils,
         )
 
         # Get observed map
         map_obsdiff = _get_obsdiff_map(
-            cft_ds=case.cft_ds.sel(crop=crop),
+            case.cft_ds,
             which=which,
             earthstat_data=earthstat_data,
             utils=utils,
