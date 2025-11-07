@@ -11,7 +11,6 @@ class InclYrsRangesDict(dict):
         self._all_years = [start_year, end_year]
 
     def plot_items(self):
-        # You can compute or retrieve the "extra" however you like
         for k, v in super().items():
             yr_range_str = self.get_yr_range_str(k)
             first_time_slice = f"{v[0]}-01-01"
