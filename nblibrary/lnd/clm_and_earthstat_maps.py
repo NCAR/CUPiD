@@ -20,7 +20,7 @@ externals_path = os.path.join(
 )
 sys.path.append(externals_path)
 from ctsm_postprocessing.timing import Timing  # noqa: E402
-from ctsm_postprocessing.crops.caselist import CaseList  # noqa: E402
+from ctsm_postprocessing.crops.crop_case_list import CropCaseList  # noqa: E402
 
 
 def _get_clm_map(cft_ds, which, utils):
@@ -249,7 +249,7 @@ def clm_and_earthstat_maps_1crop(
 def clm_and_earthstat_maps(
     *,
     which: str,
-    case_list: CaseList,
+    case_list: CropCaseList,
     earthstat_data: EarthStat,
     utils: ModuleType,
     opts: dict,
