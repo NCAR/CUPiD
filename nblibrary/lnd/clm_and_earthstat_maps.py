@@ -269,7 +269,7 @@ def clm_and_earthstat_maps(
     for crop in crops_to_include:
         clm_and_earthstat_maps_1crop(
             which=which,
-            case_list=case_list,
+            case_list=case_list.sel(crop=crop),
             case_legend_list=opts["case_legend_list"],
             earthstat_data=earthstat_data,
             utils=utils,
