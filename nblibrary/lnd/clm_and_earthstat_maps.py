@@ -8,7 +8,6 @@ import sys
 from types import ModuleType
 
 from bokeh_html_utils import sanitize_filename
-from caselist import CaseList
 from earthstat import EarthStat
 from plotting_utils import get_difference_map
 from results_maps import ResultsMaps
@@ -21,6 +20,7 @@ externals_path = os.path.join(
 )
 sys.path.append(externals_path)
 from ctsm_postprocessing.timing import Timing  # noqa: E402
+from ctsm_postprocessing.crops.caselist import CaseList  # noqa: E402
 
 
 def _get_clm_map(cft_ds, which, utils):
