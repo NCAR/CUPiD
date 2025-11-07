@@ -79,7 +79,7 @@ def check_grid_match(grid0, grid1, tol=0):
     return match, max_abs_diff
 
 
-def get_difference_map(da0, da1):
+def get_difference_map(da0, da1, *, name=None, units=None):
     """
     Calculate the difference between two maps (da1 - da0).
 
@@ -119,6 +119,13 @@ def get_difference_map(da0, da1):
         raise RuntimeError(
             f"Size mismatch between da1 ({da1.sizes}) and map_diff ({da_diff.sizes})",
         )
+
+    # Save metadata, if supplied
+    if name is not None:
+        da_diff.name = name
+    if units is not None:
+        da_diff.attrs["units"] = units
+
     return da_diff
 
 

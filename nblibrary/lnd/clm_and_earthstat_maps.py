@@ -23,7 +23,7 @@ sys.path.append(externals_path)
 from ctsm_postprocessing.timing import Timing  # noqa: E402
 
 
-def _get_clm_map(which, utils, crop, case):
+def _get_clm_map(cft_ds, which, utils):
     """
     Get yield map from CLM
     """
@@ -47,7 +47,7 @@ def _get_clm_map(which, utils, crop, case):
         )
 
     # Extract the data
-    ds = case.cft_ds.sel(crop=crop).mean(dim="time")
+    ds = cft_ds.mean(dim="time")
     ds["result"] = ds["crop_" + which]
     if which == "prod":
         ds["result"] = ds["result"].where(ds["crop_area"] > 0)
@@ -56,12 +56,59 @@ def _get_clm_map(which, utils, crop, case):
     map_clm = utils.grid_one_variable(ds, "result")
     map_clm = utils.lon_pm2idl(map_clm)
 
+    # Mask (this extra step is only needed for area)
+    if which == "area":
+        map_clm = map_clm.where(map_clm > 0)
+
     # Finish up
     map_clm *= conversion_factor
     map_clm.name = name
     map_clm.attrs["units"] = units
 
     return map_clm
+
+
+def _get_obsdiff_map(
+    which,
+    earthstat_data,
+    utils,
+    crop,
+    map_clm,
+    case,
+):
+    # Get observed map
+    earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
+    map_obs = earthstat_ds.get_map(
+        which,
+        crop,
+    )
+    if map_obs is None:
+        return map_obs
+    map_obs = utils.lon_pm2idl(map_obs)
+
+    # Mask where neither CLM nor EarthStat have area (HarvestArea)
+    # 1. Fill all missing values with 0
+    map_clm_for_obsdiff = map_clm.fillna(0)
+    map_obs = map_obs.fillna(0)
+    # 2. Mask
+    map_clm_for_obsdiff, map_obs = _mask_where_neither_has_area(
+        utils=utils,
+        crop=crop,
+        case=case,
+        earthstat_ds=earthstat_ds,
+        map_clm=map_clm_for_obsdiff,
+        map_obs=map_obs,
+    )
+
+    # Get difference map
+    map_obsdiff = get_difference_map(
+        map_obs,
+        map_clm_for_obsdiff,
+        name=f"{map_clm_for_obsdiff.name} difference, CLM minus EarthStat",
+        units=map_clm_for_obsdiff.units,
+    )
+
+    return map_obsdiff
 
 
 def _mask_where_neither_has_area(
@@ -77,7 +124,7 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     which = "area"
-    area_clm = _get_clm_map(which, utils, crop, case)
+    area_clm = _get_clm_map(case.cft_ds.sel(crop=crop), which, utils)
     area_obs = earthstat_ds.get_map(
         which,
         crop,
@@ -137,45 +184,25 @@ def clm_and_earthstat_maps_1crop(
     for c, case in enumerate(case_list):
         case_legend = case_legend_list[c]
         # Get CLM map
-        results_clm[case_legend] = _get_clm_map(which, utils, crop, case)
-        if which == "area":
-            results_clm[case_legend] = results_clm[case_legend].where(
-                results_clm[case_legend] > 0,
-            )
+        results_clm[case_legend] = _get_clm_map(
+            case.cft_ds.sel(crop=crop),
+            which,
+            utils,
+        )
 
         # Get observed map
-        earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
-        map_obs = earthstat_ds.get_map(
+        map_obsdiff = _get_obsdiff_map(
             which,
+            earthstat_data,
+            utils,
             crop,
+            results_clm[case_legend],
+            case,
         )
-        if map_obs is None:
+        if map_obsdiff is None:
             continue
-        map_obs = utils.lon_pm2idl(map_obs)
 
-        # Mask where neither CLM nor EarthStat have area (HarvestArea)
-        # 1. Fill all missing values with 0
-        map_clm_for_diff = results_clm[case_legend].fillna(0)
-        map_obs = map_obs.fillna(0)
-        # 2. Mask
-        map_clm_for_diff, map_obs = _mask_where_neither_has_area(
-            utils=utils,
-            crop=crop,
-            case=case,
-            earthstat_ds=earthstat_ds,
-            map_clm=map_clm_for_diff,
-            map_obs=map_obs,
-        )
-
-        # Get difference map
-        results_diff[case_legend] = get_difference_map(
-            map_obs,
-            map_clm_for_diff,
-        )
-        results_diff[
-            case_legend
-        ].name = f"{map_clm_for_diff.name} difference, CLM minus EarthStat"
-        results_diff[case_legend].attrs["units"] = map_clm_for_diff.units
+        results_diff[case_legend] = map_obsdiff
 
         # Get plot suptitles
         if suptitle_clm is None:
