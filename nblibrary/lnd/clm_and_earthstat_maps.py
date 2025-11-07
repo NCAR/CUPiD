@@ -69,15 +69,16 @@ def _get_clm_map(cft_ds, which, utils):
 
 
 def _get_obsdiff_map(
+    *,
+    cft_ds,
     which,
     earthstat_data,
     utils,
     crop,
     map_clm,
-    case,
 ):
     # Get observed map
-    earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
+    earthstat_ds = earthstat_data[cft_ds.attrs["resolution"]]
     map_obs = earthstat_ds.get_map(
         which,
         crop,
@@ -94,7 +95,7 @@ def _get_obsdiff_map(
     map_clm_for_obsdiff, map_obs = _mask_where_neither_has_area(
         utils=utils,
         crop=crop,
-        case=case,
+        cft_ds=cft_ds,
         earthstat_ds=earthstat_ds,
         map_clm=map_clm_for_obsdiff,
         map_obs=map_obs,
@@ -115,7 +116,7 @@ def _mask_where_neither_has_area(
     *,
     utils,
     crop,
-    case,
+    cft_ds,
     earthstat_ds,
     map_clm,
     map_obs,
@@ -124,7 +125,7 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     which = "area"
-    area_clm = _get_clm_map(case.cft_ds.sel(crop=crop), which, utils)
+    area_clm = _get_clm_map(cft_ds, which, utils)
     area_obs = earthstat_ds.get_map(
         which,
         crop,
@@ -192,12 +193,12 @@ def clm_and_earthstat_maps_1crop(
 
         # Get observed map
         map_obsdiff = _get_obsdiff_map(
-            which,
-            earthstat_data,
-            utils,
-            crop,
-            results_clm[case_legend],
-            case,
+            cft_ds=case.cft_ds.sel(crop=crop),
+            which=which,
+            earthstat_data=earthstat_data,
+            utils=utils,
+            crop=crop,
+            map_clm=results_clm[case_legend],
         )
         if map_obsdiff is None:
             continue
