@@ -155,27 +155,27 @@ def clm_and_earthstat_maps_1crop(
 
         # Mask where neither CLM nor EarthStat have area (HarvestArea)
         # 1. Fill all missing values with 0
-        results_clm[case_legend] = results_clm[case_legend].fillna(0)
+        map_clm_for_diff = results_clm[case_legend].fillna(0)
         map_obs = map_obs.fillna(0)
         # 2. Mask
-        results_clm[case_legend], map_obs = _mask_where_neither_has_area(
+        map_clm_for_diff, map_obs = _mask_where_neither_has_area(
             utils=utils,
             crop=crop,
             case=case,
             earthstat_ds=earthstat_ds,
-            map_clm=results_clm[case_legend],
+            map_clm=map_clm_for_diff,
             map_obs=map_obs,
         )
 
         # Get difference map
         results_diff[case_legend] = get_difference_map(
             map_obs,
-            results_clm[case_legend],
+            map_clm_for_diff,
         )
         results_diff[
             case_legend
-        ].name = f"{results_clm[case_legend].name} difference, CLM minus EarthStat"
-        results_diff[case_legend].attrs["units"] = results_clm[case_legend].units
+        ].name = f"{map_clm_for_diff.name} difference, CLM minus EarthStat"
+        results_diff[case_legend].attrs["units"] = map_clm_for_diff.units
 
         # Get plot suptitles
         if suptitle_clm is None:
