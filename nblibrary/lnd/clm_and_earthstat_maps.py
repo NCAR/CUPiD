@@ -12,6 +12,8 @@ from earthstat import EarthStat
 from plotting_utils import get_difference_map
 from results_maps import ResultsMaps
 
+# from plotting_utils import get_key_case
+
 externals_path = os.path.join(
     os.path.dirname(__file__),
     os.pardir,
@@ -182,65 +184,70 @@ def clm_and_earthstat_maps_1crop(
     # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
     suptitle_clm = None
     suptitle_diff = None
-    for c, case in enumerate(case_list):
-        case_legend = case_legend_list[c]
-        # Get CLM map
-        results_clm[case_legend] = _get_clm_map(
-            case.cft_ds,
-            which,
-            utils,
-        )
+    for key_case_key, key_case_value in key_case_dict.items():
+        # Get key case, if needed
+        # key_case = get_key_case(case_legend_list, key_case_value, case_list)
+        for c, case in enumerate(case_list):
+            case_legend = case_legend_list[c]
+            # Get CLM map
+            results_clm[case_legend] = _get_clm_map(
+                case.cft_ds,
+                which,
+                utils,
+            )
 
-        # Get observed map
-        map_obsdiff = _get_obsdiff_map(
-            case.cft_ds,
-            which=which,
-            earthstat_data=earthstat_data,
-            utils=utils,
-            crop=crop,
-            map_clm=results_clm[case_legend],
-        )
-        if map_obsdiff is None:
-            continue
+            # Get observed map
+            map_obsdiff = _get_obsdiff_map(
+                case.cft_ds,
+                which=which,
+                earthstat_data=earthstat_data,
+                utils=utils,
+                crop=crop,
+                map_clm=results_clm[case_legend],
+            )
+            if map_obsdiff is None:
+                continue
 
-        results_diff[case_legend] = map_obsdiff
+            results_diff[case_legend] = map_obsdiff
 
-        # Get plot suptitles
-        if suptitle_clm is None:
-            suptitle_clm = f"{results_clm[case_legend].name}: {crop}"
-        if suptitle_diff is None:
-            suptitle_diff = f"{results_diff[case_legend].name}: {crop}"
-
-    for key_case, key_case_input in key_case_dict.items():
+            # Get plot suptitles
+            if suptitle_clm is None:
+                suptitle_clm = f"{results_clm[case_legend].name}: {crop}"
+            if suptitle_diff is None:
+                suptitle_diff = f"{results_diff[case_legend].name}: {crop}"
 
         # Update figure paths with keycase, if needed
         fig_path_clm_key = _get_figpath_with_keycase(
             fig_path_clm,
-            key_case,
+            key_case_key,
             key_case_dict,
         )
         fig_path_diff_earthstat_key = _get_figpath_with_keycase(
             fig_path_diff_earthstat,
-            key_case,
+            key_case_key,
             key_case_dict,
         )
 
         # Plot
-        one_colorbar = key_case_input is None
+        if key_case_value is None:
+            key_plot = None
+        else:
+            key_plot = key_case_value  # + "DONE"
+        one_colorbar = key_case_value is None
         results_clm.plot(
             subplot_title_list=case_legend_list,
             suptitle=suptitle_clm,
             one_colorbar=one_colorbar,
             fig_path=fig_path_clm_key,
-            key_plot=key_case_input,
+            key_plot=key_plot,
         )
         results_diff.plot(
             subplot_title_list=case_legend_list,
             suptitle=suptitle_diff,
             one_colorbar=one_colorbar,
             fig_path=fig_path_diff_earthstat_key,
-            key_plot=key_case_input,
-            key_diff_abs_error=(key_case_input is not None),
+            key_plot=key_plot,
+            key_diff_abs_error=(key_case_value is not None),
         )
 
     timer.end(crop, verbose)

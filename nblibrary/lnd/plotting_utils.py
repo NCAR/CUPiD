@@ -254,15 +254,15 @@ def get_mean_map(
     return n_timesteps, map_clm, case_first_yr, case_last_yr
 
 
-def get_key_case(opts, key_case_value, case_list):
+def get_key_case(case_legend_list, key_case_value, case_list):
     key_case = None
     if key_case_value is not None:
-        for c, case_legend in enumerate(opts["case_legend_list"]):
+        for c, case_legend in enumerate(case_legend_list):
             if case_legend == key_case_value:
                 key_case = case_list[c]
                 break
         if key_case is None:
             raise RuntimeError(
-                f"Case '{key_case_value}' not found in opts['case_legend_list']",
+                f"Case '{key_case_value}' not found in case_legend_list",
             )
     return key_case
