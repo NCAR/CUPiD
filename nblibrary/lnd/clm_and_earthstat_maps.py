@@ -68,6 +68,9 @@ def _get_clm_map(cft_ds, stat_input, utils):
     map_clm.name = name
     map_clm.attrs["units"] = units
 
+    # Clean up intermediate dataset
+    del ds
+
     return map_clm
 
 
@@ -112,6 +115,11 @@ def _get_obsdiff_map(
         units=map_clm_for_obsdiff.units,
     )
 
+    # Clean up intermediate variables
+    del map_clm_for_obsdiff
+    del map_obs
+    del earthstat_ds
+
     return map_obsdiff
 
 
@@ -137,7 +145,14 @@ def _mask_where_neither_has_area(
 
     mask = (area_clm > 0) | (area_obs > 0)
 
-    return map_clm.where(mask), map_obs.where(mask)
+    result = map_clm.where(mask), map_obs.where(mask)
+
+    # Clean up intermediate variables
+    del area_clm
+    del area_obs
+    del mask
+
+    return result
 
 
 def _get_figpath_with_keycase(fig_path, key_case, key_case_dict):
@@ -225,6 +240,8 @@ def clm_and_earthstat_maps_1crop(
                     # Difference map iterations need to "remember" CLM value; this is why we have
                     # the assumption above that the first member of clm_or_obsdiff_list is "None".
                     results_clm[case_legend] = map_clm
+                    # Clean up intermediate reference
+                    del map_clm
                 else:
                     map_obsdiff = _get_obsdiff_map(
                         case.cft_ds,
@@ -237,6 +254,8 @@ def clm_and_earthstat_maps_1crop(
                     if map_obsdiff is None:
                         continue
                     results[case_legend] = map_obsdiff
+                    # Clean up intermediate reference
+                    del map_obsdiff
 
                 # Get plot suptitle
                 if suptitle is None:
@@ -264,6 +283,12 @@ def clm_and_earthstat_maps_1crop(
                 key_plot=key_plot,
                 key_diff_abs_error=key_diff_abs_error,
             )
+
+        # Clean up results object after plotting
+        del results
+
+    # Clean up results_clm after all obs_inputs are processed
+    del results_clm
 
     result = f"{crop.capitalize()} {stat}"
     print(result)
