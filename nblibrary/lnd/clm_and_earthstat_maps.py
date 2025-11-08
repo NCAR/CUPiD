@@ -265,7 +265,7 @@ def clm_and_earthstat_maps_1crop(
                 key_diff_abs_error=key_diff_abs_error,
             )
 
-    result = f"    {crop.capitalize()} done"
+    result = f"{crop.capitalize()} {stat}"
     print(result)
     return result
 
