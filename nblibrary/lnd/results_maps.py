@@ -6,9 +6,10 @@ from __future__ import annotations
 import warnings
 
 import cartopy.crs as ccrs
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import xarray as xr
+from matplotlib.figure import Figure
 from plotting_utils import get_key_diff
 from plotting_utils import interp_key_case_grid
 
@@ -16,6 +17,8 @@ from plotting_utils import interp_key_case_grid
 DEFAULT_CMAP_SEQ = "viridis"
 DEFAULT_CMAP_DIV = "coolwarm"
 DEFAULT_CMAP_DIV_DIFFOFDIFF = "PiYG_r"
+
+DEFAULT_MPL_BACKEND = matplotlib.rcParams["backend"]
 
 
 def _cut_off_antarctica(da, antarctica_border=-60):
@@ -369,6 +372,14 @@ class ResultsMaps:
             warnings.warn("Ignoring one_colorbar=True because key_plot is not None")
             one_colorbar = False
 
+        if fig_path is not None:
+            # Ensure we're using a non-interactive backend for thread-safe plotting in Dask workers
+            matplotlib.use("AGG")
+        else:
+            # Maybe unnecessary, but just in case matplotlib.use("AGG") above messes with things
+            # in subsequent calls
+            matplotlib.use(DEFAULT_MPL_BACKEND)
+
         # Calculate layout parameters
         self._get_mapfig_layout(one_colorbar)
 
@@ -378,10 +389,12 @@ class ResultsMaps:
             key_plot = key_plot.replace("DONE", "")
 
         # Create figure with map projection for all subplots
-        self.fig, self.axes = plt.subplots(
+        # Use Figure directly instead of plt.subplots() to avoid pyplot's figure manager
+        # in Dask parallel contexts
+        self.fig = Figure(figsize=self.layout["figsize"])
+        self.axes = self.fig.subplots(
             nrows=self.layout["nrows"],
             ncols=self.layout["ncols"],
-            figsize=self.layout["figsize"],
             subplot_kw={"projection": ccrs.PlateCarree()},
         )
 
@@ -445,8 +458,21 @@ class ResultsMaps:
         if fig_path is None:
             self.fig.show()
         else:
-            plt.savefig(fig_path, dpi=150)
-            plt.close()
+            self.fig.savefig(fig_path, dpi=150)
+            self._figure_cleanup()
+
+    def _figure_cleanup(self):
+        """
+        Clean up to release memory (important in parallel execution)
+        """
+        # Clear all axes to release references to data
+        for ax in self.axes.ravel():
+            ax.clear()
+        # Clear the figure
+        self.fig.clear()
+        # Delete references
+        del self.axes
+        del self.fig
 
     def _update_non_key_colorbars(self, subplot_title_list, key_plot, images):
         """
@@ -570,9 +596,6 @@ class ResultsMaps:
         if self.cut_off_antarctica:
             da = _cut_off_antarctica(da)
 
-        # Set current axes for plotting
-        plt.sca(ax)
-
         # Configure colorbar based on one_colorbar setting
         if one_colorbar:
             cbar_kwargs = None
@@ -594,7 +617,7 @@ class ResultsMaps:
         ax.coastlines(linewidth=0.5)
 
         # Set title and remove axis labels/ticks for cleaner appearance
-        plt.title(title)
+        ax.set_title(title)  # Instead of plt.title, for parallelism
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlabel("")

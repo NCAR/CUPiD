@@ -175,25 +175,19 @@ def clm_and_earthstat_maps_1crop(
     earthstat_data,
     utils,
     verbose,
-    timer,
     crop,
     key_case_dict,
     clm_or_obsdiff_list,
+    img_dir,
 ):
     """
     For a crop, make two figures:
     1. With subplots showing mean CLM map for each case
     2. With subplots showing difference between mean CLM and EarthStat maps for each case
     """
-    timer.start()
-    if verbose:
-        print(crop)
 
     # Parse top-level options
     stat, stat_input = stat_strings
-    # Where figure files will be saved
-    img_dir = os.path.join("Global_crop_yield_compare_obs", "maps_yieldprodarea")
-    os.makedirs(img_dir, exist_ok=True)
 
     # Some code below assumes that None (i.e., pure CLM results) is the first in this list
     assert clm_or_obsdiff_list[0] == "None"
@@ -271,7 +265,9 @@ def clm_and_earthstat_maps_1crop(
                 key_diff_abs_error=key_diff_abs_error,
             )
 
-    timer.end(crop, verbose)
+    result = f"    {crop.capitalize()} done"
+    print(result)
+    return result
 
 
 def clm_and_earthstat_maps(
@@ -285,6 +281,7 @@ def clm_and_earthstat_maps(
     fig_path_diff_earthstat: str = None,
     key_case_dict: dict = None,
     clm_or_obsdiff_list: list = None,
+    img_dir: str = None,
 ):
     """
     For each crop, make two figures:
@@ -303,10 +300,10 @@ def clm_and_earthstat_maps(
             earthstat_data=earthstat_data,
             utils=utils,
             verbose=verbose,
-            timer=timer,
             crop=crop,
             key_case_dict=key_case_dict,
             clm_or_obsdiff_list=clm_or_obsdiff_list,
+            img_dir=img_dir,
         )
 
     timer.end_all("Maps", verbose)
