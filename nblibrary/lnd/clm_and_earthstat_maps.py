@@ -21,37 +21,38 @@ externals_path = os.path.join(
     "externals",
 )
 sys.path.append(externals_path)
+# pylint: disable=import-error
 from ctsm_postprocessing.timing import Timing  # noqa: E402
 from ctsm_postprocessing.crops.crop_case_list import CropCaseList  # noqa: E402
 
 
-def _get_clm_map(cft_ds, which, utils):
+def _get_clm_map(cft_ds, stat_input, utils):
     """
     Get yield map from CLM
     """
 
     # Define some things based on what map we want
-    if which == "yield":
+    if stat_input == "yield":
         units = "tons / ha"
         conversion_factor = 1e-6 * 1e4  # Convert g/m2 to t/ha
         name = "Yield"
-    elif which == "prod":
+    elif stat_input == "prod":
         units = "Mt"
         conversion_factor = 1e-6 * 1e-6  # Convert g to Mt
         name = "Production"
-    elif which == "area":
+    elif stat_input == "area":
         units = "Mha"
         conversion_factor = 1e-4 * 1e-6  # Convert m2 to Mha
         name = "Area"
     else:
         raise NotImplementedError(
-            f"_get_clm_map() doesn't work for which='{which}'",
+            f"_get_clm_map() doesn't work for stat_input='{stat_input}'",
         )
 
     # Extract the data
     ds = cft_ds.mean(dim="time")
-    ds["result"] = ds["crop_" + which]
-    if which == "prod":
+    ds["result"] = ds["crop_" + stat_input]
+    if stat_input == "prod":
         ds["result"] = ds["result"].where(ds["crop_area"] > 0)
 
     # Grid the data
@@ -59,7 +60,7 @@ def _get_clm_map(cft_ds, which, utils):
     map_clm = utils.lon_pm2idl(map_clm)
 
     # Mask (this extra step is only needed for area)
-    if which == "area":
+    if stat_input == "area":
         map_clm = map_clm.where(map_clm > 0)
 
     # Finish up
@@ -73,7 +74,7 @@ def _get_clm_map(cft_ds, which, utils):
 def _get_obsdiff_map(
     cft_ds,
     *,
-    which,
+    stat_input,
     earthstat_data,
     utils,
     crop,
@@ -82,7 +83,7 @@ def _get_obsdiff_map(
     # Get observed map
     earthstat_ds = earthstat_data[cft_ds.attrs["resolution"]]
     map_obs = earthstat_ds.get_map(
-        which,
+        stat_input,
         crop,
     )
     if map_obs is None:
@@ -126,10 +127,10 @@ def _mask_where_neither_has_area(
     """
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
-    which = "area"
-    area_clm = _get_clm_map(cft_ds, which, utils)
+    stat_input = "area"
+    area_clm = _get_clm_map(cft_ds, stat_input, utils)
     area_obs = earthstat_ds.get_map(
-        which,
+        stat_input,
         crop,
     )
     area_obs = utils.lon_pm2idl(area_obs)
@@ -152,9 +153,23 @@ def _get_figpath_with_keycase(fig_path, key_case, key_case_dict):
     return fig_path
 
 
+def _get_fig_path(img_dir, crop, clm_or_obsdiff, stat):
+    """
+    Get filenames to which figures will be saved. Members of join_list
+    must first be any dropdown menu members and then any radio button
+    group members, in the orders given in dropdown_specs and radio_specs,
+    respectively.
+    """
+    join_list = [crop, clm_or_obsdiff, stat]
+    fig_basename = sanitize_filename("_".join(join_list))
+    fig_basename += ".png"
+    fig_path = os.path.join(img_dir, fig_basename)
+    return fig_path
+
+
 def clm_and_earthstat_maps_1crop(
     *,
-    which,
+    stat_strings,
     case_list,
     case_legend_list,
     earthstat_data,
@@ -162,9 +177,8 @@ def clm_and_earthstat_maps_1crop(
     verbose,
     timer,
     crop,
-    fig_path_clm,
-    fig_path_diff_earthstat,
     key_case_dict,
+    clm_or_obsdiff_list,
 ):
     """
     For a crop, make two figures:
@@ -175,87 +189,94 @@ def clm_and_earthstat_maps_1crop(
     if verbose:
         print(crop)
 
-    # Set up for maps of CLM
+    # Parse top-level options
+    stat, stat_input = stat_strings
+    # Where figure files will be saved
+    img_dir = os.path.join("Global_crop_yield_compare_obs", "maps_yieldprodarea")
+    os.makedirs(img_dir, exist_ok=True)
+
+    # Some code below assumes that None (i.e., pure CLM results) is the first in this list
+    assert clm_or_obsdiff_list[0] == "None"
     results_clm = ResultsMaps()
 
-    # Set up for maps of CLM minus EarthStat
-    results_diff = ResultsMaps(symmetric_0=True)
+    for obs_input in clm_or_obsdiff_list:
+        if verbose:
+            print(f"    {obs_input}")
 
-    # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
-    suptitle_clm = None
-    suptitle_diff = None
-    for key_case_key, key_case_value in key_case_dict.items():
-        # Get key case, if needed
-        # key_case = get_key_case(case_legend_list, key_case_value, case_list)
-        for c, case in enumerate(case_list):
-            case_legend = case_legend_list[c]
-            # Get CLM map
-            results_clm[case_legend] = _get_clm_map(
-                case.cft_ds,
-                which,
-                utils,
-            )
-
-            # Get observed map
-            map_obsdiff = _get_obsdiff_map(
-                case.cft_ds,
-                which=which,
-                earthstat_data=earthstat_data,
-                utils=utils,
-                crop=crop,
-                map_clm=results_clm[case_legend],
-            )
-            if map_obsdiff is None:
-                continue
-
-            results_diff[case_legend] = map_obsdiff
-
-            # Get plot suptitles
-            if suptitle_clm is None:
-                suptitle_clm = f"{results_clm[case_legend].name}: {crop}"
-            if suptitle_diff is None:
-                suptitle_diff = f"{results_diff[case_legend].name}: {crop}"
-
-        # Update figure paths with keycase, if needed
-        fig_path_clm_key = _get_figpath_with_keycase(
-            fig_path_clm,
-            key_case_key,
-            key_case_dict,
-        )
-        fig_path_diff_earthstat_key = _get_figpath_with_keycase(
-            fig_path_diff_earthstat,
-            key_case_key,
-            key_case_dict,
-        )
-
-        # Plot
-        if key_case_value is None:
-            key_plot = None
+        # Parse obs_input-level options
+        fig_path = _get_fig_path(img_dir, crop, obs_input, stat)
+        if obs_input == "None":
+            symmetric_0 = False
         else:
-            key_plot = key_case_value  # + "DONE"
-        one_colorbar = key_case_value is None
-        results_clm.plot(
-            subplot_title_list=case_legend_list,
-            suptitle=suptitle_clm,
-            one_colorbar=one_colorbar,
-            fig_path=fig_path_clm_key,
-            key_plot=key_plot,
-        )
-        results_diff.plot(
-            subplot_title_list=case_legend_list,
-            suptitle=suptitle_diff,
-            one_colorbar=one_colorbar,
-            fig_path=fig_path_diff_earthstat_key,
-            key_plot=key_plot,
-            key_diff_abs_error=(key_case_value is not None),
-        )
+            symmetric_0 = True
+
+        # Initialize things ahead of results generation
+        results = ResultsMaps(symmetric_0=symmetric_0)
+
+        # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
+        suptitle = None
+        for key_case_key, key_case_value in key_case_dict.items():
+            # Get key case, if needed
+            # key_case = get_key_case(case_legend_list, key_case_value, case_list)
+            for c, case in enumerate(case_list):
+                case_legend = case_legend_list[c]
+
+                if obs_input == "None":
+                    map_clm = _get_clm_map(
+                        case.cft_ds,
+                        stat_input,
+                        utils,
+                    )
+                    results[case_legend] = map_clm
+                    # Difference map iterations need to "remember" CLM value; this is why we have
+                    # the assumption above that the first member of clm_or_obsdiff_list is "None".
+                    results_clm[case_legend] = map_clm
+                else:
+                    map_obsdiff = _get_obsdiff_map(
+                        case.cft_ds,
+                        stat_input=stat_input,
+                        earthstat_data=earthstat_data,
+                        utils=utils,
+                        crop=crop,
+                        map_clm=results_clm[case_legend],
+                    )
+                    if map_obsdiff is None:
+                        continue
+                    results[case_legend] = map_obsdiff
+
+                # Get plot suptitle
+                if suptitle is None:
+                    suptitle = f"{results[case_legend].name}: {crop}"
+
+            # Update figure path with keycase, if needed
+            fig_path_key = _get_figpath_with_keycase(
+                fig_path,
+                key_case_key,
+                key_case_dict,
+            )
+
+            # Plot
+            if key_case_value is None:
+                key_plot = None
+            else:
+                key_plot = key_case_value  # + "DONE"
+            one_colorbar = key_case_value is None
+            key_diff_abs_error = ((key_case_value is not None),)
+            results.plot(
+                subplot_title_list=case_legend_list,
+                suptitle=suptitle,
+                one_colorbar=one_colorbar,
+                fig_path=fig_path_key,
+                key_plot=key_plot,
+                key_diff_abs_error=key_diff_abs_error,
+            )
 
     timer.end(crop, verbose)
 
 
 def clm_and_earthstat_maps(
     *,
-    which: str,
+    stat_strings: tuple,
     case_list: CropCaseList,
     earthstat_data: EarthStat,
     utils: ModuleType,
@@ -263,6 +284,7 @@ def clm_and_earthstat_maps(
     fig_path_clm: str = None,
     fig_path_diff_earthstat: str = None,
     key_case_dict: dict = None,
+    clm_or_obsdiff_list: list = None,
 ):
     """
     For each crop, make two figures:
@@ -275,7 +297,7 @@ def clm_and_earthstat_maps(
     timer = Timing()
     for crop in crops_to_include:
         clm_and_earthstat_maps_1crop(
-            which=which,
+            stat_strings=stat_strings,
             case_list=case_list.sel(crop=crop),
             case_legend_list=opts["case_legend_list"],
             earthstat_data=earthstat_data,
@@ -283,9 +305,8 @@ def clm_and_earthstat_maps(
             verbose=verbose,
             timer=timer,
             crop=crop,
-            fig_path_clm=fig_path_clm,
-            fig_path_diff_earthstat=fig_path_diff_earthstat,
             key_case_dict=key_case_dict,
+            clm_or_obsdiff_list=clm_or_obsdiff_list,
         )
 
     timer.end_all("Maps", verbose)

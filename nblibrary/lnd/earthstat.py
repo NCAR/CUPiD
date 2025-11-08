@@ -78,7 +78,7 @@ class EarthStatDataset(xr.Dataset):
         # Save some extra stuff
         self.crops = crops
 
-    def get_data(self, which, crop):
+    def get_data(self, stat_input, crop):
         """
         Get data from EarthStat
         """
@@ -87,21 +87,21 @@ class EarthStatDataset(xr.Dataset):
         earthstat_crop_idx = self.crops.index(crop)
 
         # Define some things based on what map we want
-        if which == "yield":
+        if stat_input == "yield":
             which_var = "Yield"
             converting = ["tonnes/ha", "tonnes/ha"]
             conversion_factor = 1  # Already tons/ha
-        elif which == "prod":
+        elif stat_input == "prod":
             which_var = "Production"
             converting = ["tonnes", "Mt"]
             conversion_factor = 1e-6  # Convert tons to Mt
-        elif which == "area":
+        elif stat_input == "area":
             which_var = "HarvestArea"
             converting = ["ha", "Mha"]
             conversion_factor = 1e-6  # Convert ha to Mha
         else:
             raise NotImplementedError(
-                f"_get_earthstat_map() doesn't work for which='{which}'",
+                f"_get_earthstat_map() doesn't work for stat_input='{stat_input}'",
             )
 
         data_obs = self[which_var].isel(crop=earthstat_crop_idx)
@@ -112,12 +112,12 @@ class EarthStatDataset(xr.Dataset):
         data_obs.attrs["units"] = converting[1]
         return data_obs
 
-    def get_map(self, which, crop):
+    def get_map(self, stat_input, crop):
         """
         Get map from EarthStat for comparing with CLM output
         """
         # Actually get the map
-        data_obs = self.get_data(which, crop)
+        data_obs = self.get_data(stat_input, crop)
         map_obs = data_obs.mean(dim="time")
 
         return map_obs
