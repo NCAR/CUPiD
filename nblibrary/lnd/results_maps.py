@@ -476,7 +476,12 @@ class ResultsMaps:
             if this_subplot == key_plot:
                 continue
             da_vals = self[this_subplot].values
-            max_abs_val = max(max_abs_val, np.nanmax(np.abs(da_vals)))
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    "All-NaN slice encountered",
+                )
+                max_abs_val = max(max_abs_val, np.nanmax(np.abs(da_vals)))
 
         # Update all non-key plot color limits to use symmetric range
         for this_subplot in subplot_title_list:
