@@ -179,37 +179,28 @@ def get_mean_map(
     case,
     key_case,
     key_diff_abs_error,
-    time_slice_in,
     *args,
+    time_slice=None,
     special_mean=None,
     **kwargs,
 ):
+    """
+    Note that time_slice is allowed to be unspecified, but this is NOT recommended as it can result
+    in the case mean and key case mean being taken over different years. It is only provided to
+    test for differences during development.
+    """
     calc_diff_from_key_case = key_case is not None and case.name != key_case.name
 
-    # Restrict time slice to overlap of this case and key case, if needed
-    if not calc_diff_from_key_case:
-        time_slice = time_slice_in
-    else:
-        case_yr_range = get_yr_range(case.cft_ds.sel(time=time_slice_in))
-        key_case_yr_range = get_yr_range(key_case.cft_ds.sel(time=time_slice_in))
-        if key_case_yr_range == [None, None]:
-            raise NotImplementedError(
-                f"key case '{key_case.name}' has no years in {time_slice_in}",
-            )
-        intsxn_yr_range = _get_range_overlap(case_yr_range, key_case_yr_range)
-        if intsxn_yr_range is None:
-            time_slice = slice(
-                f"{key_case_yr_range[0]}-01-01",
-                f"{key_case_yr_range[1]}-12-31",
-            )
-        else:
-            time_slice = slice(
-                f"{intsxn_yr_range[0]}-01-01",
-                f"{intsxn_yr_range[1]}-12-31",
-            )
-
     # Get this case's map
-    case_cft_ds = case.cft_ds.sel(time=time_slice)
+    case_cft_ds = case.cft_ds
+    if time_slice is not None:
+        time_slice = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice,
+            calc_diff_from_key_case,
+        )
+        case_cft_ds = case_cft_ds.sel(time=time_slice)
     n_timesteps = case_cft_ds.sizes["time"]
     if n_timesteps == 0:
         case_first_yr = None
@@ -231,8 +222,11 @@ def get_mean_map(
         )
 
         if calc_diff_from_key_case:
+            key_case_cft_ds = key_case.cft_ds
+            if time_slice is not None:
+                key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
             map_key_case = special_mean(
-                key_case.cft_ds.sel(time=time_slice),
+                key_case_cft_ds,
                 *args,
                 **kwargs,
             )
@@ -253,6 +247,39 @@ def get_mean_map(
     else:
         map_clm = map_case
     return n_timesteps, map_clm, case_first_yr, case_last_yr
+
+
+def _get_intsxn_time_slice_if_needed(
+    case,
+    key_case,
+    time_slice_in,
+    calc_diff_from_key_case,
+):
+    if time_slice_in is None:
+        return None
+
+    if not calc_diff_from_key_case:
+        time_slice = time_slice_in
+    else:
+        case_yr_range = get_yr_range(case.cft_ds.sel(time=time_slice_in))
+        key_case_yr_range = get_yr_range(key_case.cft_ds.sel(time=time_slice_in))
+        if key_case_yr_range == [None, None]:
+            raise NotImplementedError(
+                f"key case '{key_case.name}' has no years in {time_slice_in}",
+            )
+        intsxn_yr_range = _get_range_overlap(case_yr_range, key_case_yr_range)
+        if intsxn_yr_range is None:
+            time_slice = slice(
+                f"{key_case_yr_range[0]}-01-01",
+                f"{key_case_yr_range[1]}-12-31",
+            )
+        else:
+            time_slice = slice(
+                f"{intsxn_yr_range[0]}-01-01",
+                f"{intsxn_yr_range[1]}-12-31",
+            )
+
+    return time_slice
 
 
 def get_key_case(case_legend_list, key_case_value, case_list):
