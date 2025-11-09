@@ -143,14 +143,15 @@ def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
 
 
 def get_key_diff(key_diff_abs_error, da, da_key_case):
+    da_attrs = da.attrs
+    # TODO: Check for units match between da and da_key_case?
     if key_diff_abs_error:
         # Difference in absolute error: |da| - |da_key|
-        da_attrs = da.attrs
         da = get_difference_map(abs(da_key_case), abs(da))
-        da.attrs = da_attrs
     else:
         # Simple difference: da - da_key
         da = get_difference_map(da_key_case, da)
+    da.attrs = da_attrs
     return da
 
 
