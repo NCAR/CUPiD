@@ -416,13 +416,20 @@ class ResultsMaps:
 
             # Determine color range for this subplot
             # Use per-plot color range (or entire plot color range) if any is provided
+            msg = f"'{suptitle}': {one_colorbar} {key_plot}: "
             if any(v is None for v in self.plot_vranges.values()):
                 if self.plot_vranges[this_subplot]:
+                    warnings.warn(msg + "a", UserWarning)
                     vrange = self.plot_vranges[this_subplot]
                 else:
+                    warnings.warn(msg + "b", UserWarning)
                     vrange = [None, None]
             else:
+                warnings.warn(msg + "c", UserWarning)
                 vrange = self.vrange
+                raise RuntimeError(
+                    "Is this just never reached? It should be self.vrange()!!",
+                )
 
             # Create the map subplot
             im = self._map_subplot(

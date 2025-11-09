@@ -8,6 +8,8 @@ import sys
 
 from bokeh_html_utils import sanitize_filename
 from plotting_utils import get_difference_map
+from plotting_utils import get_key_case
+from plotting_utils import get_mean_map
 from results_maps import ResultsMaps
 
 externals_path = os.path.join(
@@ -107,7 +109,7 @@ def _get_obsdiff_map(
         map_obs,
         map_clm_for_obsdiff,
         name=f"{map_clm_for_obsdiff.name} difference, CLM minus EarthStat",
-        units=map_clm_for_obsdiff.units,
+        units=map_clm_for_obsdiff.attrs["units"],
     )
 
     # Clean up intermediate variables
@@ -187,6 +189,7 @@ def clm_and_earthstat_maps_1crop(
     key_case_dict,
     clm_or_obsdiff_list,
     img_dir,
+    opts,
 ):
     """
     For a crop, make two figures:
@@ -196,6 +199,11 @@ def clm_and_earthstat_maps_1crop(
 
     # Parse top-level options
     stat, stat_input = stat_strings
+
+    # TODO: Delete this once these maps use the year periods dict
+    first_time = f"{opts['start_year']}-01-01"
+    last_time = f"{opts['end_year']}-12-31"
+    time_slice = slice(first_time, last_time)
 
     # Some code below assumes that None (i.e., pure CLM results) is the first in this list
     assert clm_or_obsdiff_list[0] == "None"
@@ -214,43 +222,53 @@ def clm_and_earthstat_maps_1crop(
 
         # Initialize things ahead of results generation
         results = ResultsMaps(symmetric_0=symmetric_0)
+        da_name = stat
+        if obs_input != "None":
+            da_name += f" difference, CLM minus {obs_input}:"
+        suptitle = da_name + f": {crop}"
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
-        suptitle = None
         for key_case_key, key_case_value in key_case_dict.items():
+
+            # Get keycase-level options and initialize ResultsMaps
+            key_diff_abs_error = obs_input != "None" and key_case_value is not None
+
             # Get key case, if needed
-            # key_case = get_key_case(case_legend_list, key_case_value, case_list)
+            key_case = get_key_case(case_legend_list, key_case_value, case_list)
             for c, case in enumerate(case_list):
                 case_legend = case_legend_list[c]
 
                 if obs_input == "None":
-                    map_clm = _get_clm_map(
-                        case.cft_ds,
-                        stat_input,
-                    )
-                    results[case_legend] = map_clm
-                    # Difference map iterations need to "remember" CLM value; this is why we have
-                    # the assumption above that the first member of clm_or_obsdiff_list is "None".
-                    results_clm[case_legend] = map_clm
-                    # Clean up intermediate reference
-                    del map_clm
+                    get_mean_fn = _get_clm_map
+                    get_mean_fn_args = [stat_input]
+                    get_mean_fn_kwargs = {}
                 else:
-                    map_obsdiff = _get_obsdiff_map(
-                        case.cft_ds,
-                        stat_input=stat_input,
-                        earthstat_data=earthstat_data,
-                        crop=crop,
-                        map_clm=results_clm[case_legend],
-                    )
-                    if map_obsdiff is None:
-                        continue
-                    results[case_legend] = map_obsdiff
-                    # Clean up intermediate reference
-                    del map_obsdiff
+                    get_mean_fn = _get_obsdiff_map
+                    get_mean_fn_args = []
+                    get_mean_fn_kwargs = {
+                        "stat_input": stat_input,
+                        "earthstat_data": earthstat_data,
+                        "crop": crop,
+                        "map_clm": results_clm[case_legend],
+                    }
 
-                # Get plot suptitle
-                if suptitle is None:
-                    suptitle = f"{results[case_legend].name}: {crop}"
+                (_, map_clm, _, _) = get_mean_map(
+                    case,
+                    key_case,
+                    key_diff_abs_error,
+                    time_slice,
+                    *get_mean_fn_args,
+                    special_mean=get_mean_fn,
+                    **get_mean_fn_kwargs,
+                )
+
+                results[case_legend] = map_clm
+                results[case_legend].name = da_name
+                # Difference map iterations need to "remember" CLM value; this is why we have
+                # the assumption above that the first member of clm_or_obsdiff_list is "None".
+                results_clm[case_legend] = map_clm
+                # Clean up intermediate reference
+                del map_clm
 
             # Update figure path with keycase, if needed
             fig_path_key = _get_figpath_with_keycase(
@@ -263,9 +281,8 @@ def clm_and_earthstat_maps_1crop(
             if key_case_value is None:
                 key_plot = None
             else:
-                key_plot = key_case_value  # + "DONE"
+                key_plot = key_case_value + "DONE"
             one_colorbar = key_case_value is None
-            key_diff_abs_error = ((key_case_value is not None),)
             results.plot(
                 subplot_title_list=case_legend_list,
                 suptitle=suptitle,
