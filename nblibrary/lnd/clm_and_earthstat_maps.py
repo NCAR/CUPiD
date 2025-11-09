@@ -1,18 +1,14 @@
 """
-clm_and_earthstat_maps() function intended for (re)use in Global_crop_yield_compare_obs.ipynb
+clm_and_earthstat_maps_1crop() function intended for (re)use in Global_crop_yield_compare_obs.ipynb
 """
 from __future__ import annotations
 
 import os
 import sys
-from types import ModuleType
 
 from bokeh_html_utils import sanitize_filename
-from earthstat import EarthStat
 from plotting_utils import get_difference_map
 from results_maps import ResultsMaps
-
-# from plotting_utils import get_key_case
 
 externals_path = os.path.join(
     os.path.dirname(__file__),
@@ -21,12 +17,13 @@ externals_path = os.path.join(
     "externals",
 )
 sys.path.append(externals_path)
-# pylint: disable=import-error
-from ctsm_postprocessing.timing import Timing  # noqa: E402
-from ctsm_postprocessing.crops.crop_case_list import CropCaseList  # noqa: E402
+# pylint: disable=wrong-import-position,import-error
+from ctsm_postprocessing import (  # noqa: E402
+    utils,
+)
 
 
-def _get_clm_map(cft_ds, stat_input, utils):
+def _get_clm_map(cft_ds, stat_input):
     """
     Get yield map from CLM
     """
@@ -79,7 +76,6 @@ def _get_obsdiff_map(
     *,
     stat_input,
     earthstat_data,
-    utils,
     crop,
     map_clm,
 ):
@@ -99,7 +95,6 @@ def _get_obsdiff_map(
     map_obs = map_obs.fillna(0)
     # 2. Mask
     map_clm_for_obsdiff, map_obs = _mask_where_neither_has_area(
-        utils=utils,
         crop=crop,
         cft_ds=cft_ds,
         earthstat_ds=earthstat_ds,
@@ -125,7 +120,6 @@ def _get_obsdiff_map(
 
 def _mask_where_neither_has_area(
     *,
-    utils,
     crop,
     cft_ds,
     earthstat_ds,
@@ -136,7 +130,7 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     stat_input = "area"
-    area_clm = _get_clm_map(cft_ds, stat_input, utils)
+    area_clm = _get_clm_map(cft_ds, stat_input)
     area_obs = earthstat_ds.get_map(
         stat_input,
         crop,
@@ -188,7 +182,6 @@ def clm_and_earthstat_maps_1crop(
     case_list,
     case_legend_list,
     earthstat_data,
-    utils,
     verbose,
     crop,
     key_case_dict,
@@ -234,7 +227,6 @@ def clm_and_earthstat_maps_1crop(
                     map_clm = _get_clm_map(
                         case.cft_ds,
                         stat_input,
-                        utils,
                     )
                     results[case_legend] = map_clm
                     # Difference map iterations need to "remember" CLM value; this is why we have
@@ -247,7 +239,6 @@ def clm_and_earthstat_maps_1crop(
                         case.cft_ds,
                         stat_input=stat_input,
                         earthstat_data=earthstat_data,
-                        utils=utils,
                         crop=crop,
                         map_clm=results_clm[case_legend],
                     )
@@ -293,42 +284,3 @@ def clm_and_earthstat_maps_1crop(
     result = f"{crop.capitalize()} {stat}"
     print(result)
     return result
-
-
-def clm_and_earthstat_maps(
-    *,
-    stat_strings: tuple,
-    case_list: CropCaseList,
-    earthstat_data: EarthStat,
-    utils: ModuleType,
-    opts: dict,
-    fig_path_clm: str = None,
-    fig_path_diff_earthstat: str = None,
-    key_case_dict: dict = None,
-    clm_or_obsdiff_list: list = None,
-    img_dir: str = None,
-):
-    """
-    For each crop, make two figures:
-    1. With subplots showing mean CLM map for each case
-    2. With subplots showing difference between mean CLM and EarthStat maps for each case
-    """
-    crops_to_include = opts["crops_to_include"]
-    verbose = opts["verbose"]
-
-    timer = Timing()
-    for crop in crops_to_include:
-        clm_and_earthstat_maps_1crop(
-            stat_strings=stat_strings,
-            case_list=case_list.sel(crop=crop),
-            case_legend_list=opts["case_legend_list"],
-            earthstat_data=earthstat_data,
-            utils=utils,
-            verbose=verbose,
-            crop=crop,
-            key_case_dict=key_case_dict,
-            clm_or_obsdiff_list=clm_or_obsdiff_list,
-            img_dir=img_dir,
-        )
-
-    timer.end_all("Maps", verbose)
