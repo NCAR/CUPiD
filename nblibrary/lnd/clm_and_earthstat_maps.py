@@ -223,6 +223,7 @@ def clm_and_earthstat_maps_1crop(
             for c, case in enumerate(case_list):
                 case_legend = case_legend_list[c]
 
+                key_diff_abs_error = key_case_value is not None and obs_input != "None"
                 if obs_input == "None":
                     map_clm = _get_clm_map(
                         case.cft_ds,
@@ -265,7 +266,6 @@ def clm_and_earthstat_maps_1crop(
             else:
                 key_plot = key_case_value  # + "DONE"
             one_colorbar = key_case_value is None
-            key_diff_abs_error = ((key_case_value is not None),)
             results.plot(
                 subplot_title_list=case_legend_list,
                 suptitle=suptitle,
