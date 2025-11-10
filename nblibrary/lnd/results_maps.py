@@ -3,8 +3,6 @@ Container class for managing multiple map DataArrays with consistent visualizati
 """
 from __future__ import annotations
 
-import warnings
-
 import cartopy.crs as ccrs
 import matplotlib
 import numpy as np
@@ -19,6 +17,8 @@ DEFAULT_CMAP_DIV = "coolwarm"
 DEFAULT_CMAP_DIV_DIFFOFDIFF = "PiYG_r"
 
 DEFAULT_MPL_BACKEND = matplotlib.rcParams["backend"]
+
+DEFAULT_NO_VRANGE = (None, None)
 
 
 def _cut_off_antarctica(da, antarctica_border=-60):
@@ -115,6 +115,24 @@ def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
         fig.subplots_adjust(top=0.96)
 
 
+def _check_vrange_is_2elem_tuple(vrange):
+    msg = "ResultsMaps.vrange must be a two-element tuple"
+    assert isinstance(vrange, tuple) and len(vrange) == 2, msg
+
+
+def _check_vrange_ok_for_key_plot(vrange):
+    msg = (
+        "If you want to show differences from a key plot (key_plot is not falsy), plot() will"
+        " also include the key plot itself with a sequential colorbar. Because of how colorbar"
+        " handling is implemented, it is not possible to also request a default colorbar range"
+        " unless vmin (first value in vrange tuple) is 0. In that case vrange would be applied to"
+        " key plot and (-vmax, vmax) would be applied to other plots."
+    )
+    vmin, vmax = vrange
+    if vrange != DEFAULT_NO_VRANGE and not (vmin == 0 and vmax is not None):
+        raise NotImplementedError(msg)
+
+
 class ResultsMaps:
     """
     Container for managing multiple map DataArrays with consistent visualization.
@@ -148,9 +166,9 @@ class ResultsMaps:
     symmetric_0 : bool, optional
         If True, use a diverging colormap with symmetric range around zero.
         Default is False.
-    vrange : list of float, optional
-        Explicit [vmin, vmax] for colorbar. If None, calculated automatically.
-        Default is None.
+    vrange : tuple of float, optional
+        Explicit (vmin, vmax) for colorbar. Values will be passed to DataArray.plot(), but they may
+        be overridden later depending on other settings. Default is (None, None).
     cut_off_antarctica : bool, optional
         If True, exclude Antarctica from plots. Default is True.
     incl_yrs_range: list, optional
@@ -172,38 +190,38 @@ class ResultsMaps:
         self,
         *,
         symmetric_0=False,
-        vrange=None,
+        vrange=DEFAULT_NO_VRANGE,
         cut_off_antarctica=True,
         incl_yrs_range=None,
     ):
         """Initialize ResultsMaps with specified colorbar and display options."""
-        self.result_dict = {}
+
+        # Save inputs
+        self.symmetric_0 = symmetric_0
+        self.vrange = vrange
         self.cut_off_antarctica = cut_off_antarctica
         self.incl_yrs_range = incl_yrs_range
 
-        # Default color map is assumed to be sequential. This applies to all subplots if
-        # ResultsMaps.plot(..., key_plot=None). Otherwise, applies only to the key plot;
-        # other plots will get diverging colormap DEFAULT_CMAP_DIV.
-        self.cmap = DEFAULT_CMAP_SEQ
+        # Initialize dictionary of results. This will contain xarray DataArrays as values, with keys
+        # corresponding to subplot titles.
+        self.result_dict = {}
+
+        # Colormap to be applied to all subplots if ResultsMaps.plot(..., key_plot=None). If
+        # symmetric_0, use diverging colormap; otherwise use sequential. Not that this will be
+        # overridden if key plot is given, in which case it will get the sequential colormap, and
+        # others will get the diverging colormap.
+        self.cmap = DEFAULT_CMAP_DIV if self.symmetric_0 else DEFAULT_CMAP_SEQ
 
         # Empty figure layout stuff
         self.layout = {}
         self.axes = None
         self.fig = None
 
-        # If vrange isn't provided, it will be calculated automatically
-        self._vrange = vrange
-        self.symmetric_0 = symmetric_0
-        if not self._vrange:
-            # Initialize with extreme values for tracking min/max
-            self.vmin = np.inf
-            self.vmax = -np.inf
-            if self.symmetric_0:
-                # Use diverging colormap for symmetric ranges
-                self.cmap = DEFAULT_CMAP_DIV
-
-        # Per-plot vranges will override self._vrange if any is ever provided
+        # Per-plot vranges will override self.vrange if any is ever provided.
         self.plot_vranges = {}
+
+        # Checks
+        _check_vrange_is_2elem_tuple(self.vrange)
 
     def __getitem__(self, key):
         """
@@ -225,9 +243,6 @@ class ResultsMaps:
         """
         Enable dictionary-style assignment to result_dict.
 
-        When a DataArray is added, the class automatically updates the global
-        min/max values for colorbar scaling (unless an explicit vrange was provided).
-
         Parameters
         ----------
         key : str
@@ -235,14 +250,7 @@ class ResultsMaps:
         value : xr.DataArray
             Map data to store.
         """
-        # Update global min/max if automatic ranging is enabled
-        if not self._vrange:
-            self.vmin = min(self.vmin, np.nanmin(value.values))
-            self.vmax = max(self.vmax, np.nanmax(value.values))
-
-        # Store the DataArray and initialize its custom vrange to None
         self.result_dict[key] = value
-        self.plot_vranges[key] = None
 
     def __len__(self):
         """
@@ -292,35 +300,6 @@ class ResultsMaps:
         width = 15
         self.layout["figsize"] = (width, height)
 
-    def vrange(self):
-        """
-        Calculate and return the colorbar value range.
-
-        Returns
-        -------
-        list of float
-            [vmin, vmax] for colorbar limits.
-
-        Notes
-        -----
-        If an explicit vrange was provided at initialization, that is returned.
-        Otherwise, the range is calculated from the min/max values of all
-        DataArrays. If symmetric_0=True, the range is made symmetric around zero.
-        """
-        # Return explicit range if provided
-        if self._vrange:
-            return self._vrange
-
-        vmin = self.vmin
-        vmax = self.vmax
-
-        # Set upper and lower to same absolute value, centered on zero
-        if self.symmetric_0:
-            vmax = max(abs(vmin), abs(vmax))
-            vmin = -vmax
-
-        return [vmin, vmax]
-
     def plot(
         self,
         *,
@@ -367,10 +346,12 @@ class ResultsMaps:
           spatial resolutions.
         - Empty subplot positions (when number of cases is odd) are hidden.
         """
-        # Disable one_colorbar if key_plot is specified (incompatible options)
-        if one_colorbar and key_plot is not None:
-            warnings.warn("Ignoring one_colorbar=True because key_plot is not None")
-            one_colorbar = False
+
+        msg = (
+            "It doesn't make sense to request a key plot (key_plot is not falsy) when there's only"
+            " one plot (subplot_title_list has only one member)."
+        )
+        assert not (key_plot and len(subplot_title_list) == 1), msg
 
         if fig_path is not None:
             # Ensure we're using a non-interactive backend for thread-safe plotting in Dask workers
@@ -414,21 +395,10 @@ class ResultsMaps:
                 ax.set_visible(False)
                 continue
 
-            # Determine color range for this subplot
-            # Use per-plot color range (or entire plot color range) if any is provided
-            if any(v is None for v in self.plot_vranges.values()):
-                if self.plot_vranges[this_subplot]:
-                    vrange = self.plot_vranges[this_subplot]
-                else:
-                    vrange = [None, None]
-            else:
-                vrange = self.vrange
-
             # Create the map subplot
             im = self._map_subplot(
                 ax=ax,
                 case_name=this_subplot,
-                vrange=vrange,
                 one_colorbar=one_colorbar,
                 key_case=key_plot,
                 key_plot_done=key_plot_done,
@@ -439,20 +409,19 @@ class ResultsMaps:
             # Store the image object for potential colorbar updates
             images[this_subplot] = im
 
+        # Update colorbars?
+        self._finish_colorbar_ranges(subplot_title_list, one_colorbar, key_plot, images)
+
         # Add title and colorbar to complete the figure
+        last_subplot = subplot_title_list[-1]  # Any; doesn't matter
         _mapfig_finishup(
             fig=self.fig,
-            im=im,
-            da=self[this_subplot],
+            im=images[last_subplot],
+            da=self[last_subplot],
             suptitle=suptitle,
             layout=self.layout,
             one_colorbar=one_colorbar,
         )
-
-        # Synchronize colorbars for difference plots when using key_plot
-        if key_plot is not None:
-            # Make all non-key plot colorbars match
-            self._update_non_key_colorbars(subplot_title_list, key_plot, images)
 
         # Save or display the figure
         if fig_path is None:
@@ -460,6 +429,122 @@ class ResultsMaps:
         else:
             self.fig.savefig(fig_path, dpi=150)
             self._figure_cleanup()
+
+    def _finish_colorbar_ranges(
+        self,
+        subplot_title_list,
+        one_colorbar,
+        key_plot,
+        images,
+    ):
+
+        _check_vrange_is_2elem_tuple(self.vrange)
+
+        msg = (
+            "If you want all plots to share a colorbar (one_colorbar=True), why did you ask for"
+            " some of them to have special colorbar limits (plot_vranges isn't empty)?"
+        )
+        assert not (one_colorbar and self.plot_vranges), msg
+
+        msg = (
+            "If you want to show differences from a key plot (key_plot is not falsy), plot() will"
+            " also include the key plot itself with a sequential colorbar, meaning that it's not"
+            " possible as you requested to have all plots share a colorbar (one_colorbar is True)."
+        )
+        assert not (key_plot and one_colorbar), msg
+
+        msg = (
+            "Because of how plot colorbar handling is implemented, it is not possible to apply"
+            " special colorbar limits as you requested (plot_vranges isn't empty) while also"
+            " providing a key plot (key_plot is not falsy)."
+        )
+        if key_plot and self.plot_vranges:
+            raise NotImplementedError(msg)
+
+        if key_plot:
+            _check_vrange_ok_for_key_plot(self.vrange)
+
+        # TODO: Check that vmax >= vmin
+
+        if self.plot_vranges:
+            # If any plot has a special colorbar range provided, apply it.
+            for this_subplot, vrange in self.plot_vranges.items():
+                vmin, vmax = vrange
+                im = images[this_subplot]
+                self._update_image_colorbar_range(vmin, vmax, im)
+        elif one_colorbar:
+            if self.vrange == DEFAULT_NO_VRANGE:
+                self._get_and_set_shared_colorbar_range(
+                    subplot_title_list,
+                    key_plot,
+                    images,
+                )
+            else:
+                # Apply the explicit vrange to all subplots
+                vmin, vmax = self.vrange
+                for this_subplot in subplot_title_list:
+                    im = images[this_subplot]
+                    self._update_image_colorbar_range(vmin, vmax, im)
+        elif key_plot:
+            if self.vrange != (None, None):
+                for this_subplot in subplot_title_list:
+                    vmin, vmax = self.vrange
+                    if this_subplot != key_plot:
+                        vmin = -vmax  # pylint: disable=invalid-unary-operand-type
+                    im = images[this_subplot]
+                    self._update_image_colorbar_range(vmin, vmax, im)
+            else:
+                # Will skip key plot
+                self._get_and_set_shared_colorbar_range(
+                    subplot_title_list,
+                    key_plot,
+                    images,
+                )
+
+    def _get_and_set_shared_colorbar_range(self, subplot_title_list, key_plot, images):
+        # Get
+        vrange = self._get_shared_colorbar_range(subplot_title_list, key_plot)
+        # Apply
+        self._set_shared_colorbar_range(subplot_title_list, key_plot, images, vrange)
+
+    def _get_shared_colorbar_range(self, subplot_title_list, key_plot):
+        """
+        Get minimum and maximum values seen across all subplots, skipping the key plot if any.
+        """
+        vmin = np.inf
+        vmax = -np.inf
+        for this_subplot in subplot_title_list:
+            if key_plot is not None and this_subplot == key_plot:
+                continue
+            da_vals = self[this_subplot].values
+            vmin = min(vmin, np.nanmin(da_vals))
+            vmax = max(vmax, np.nanmax(da_vals))
+
+        if np.isinf(vmin) or np.isinf(vmax):
+            raise RuntimeError("Failed to find vmin and/or vmax")
+
+        return vmin, vmax
+
+    def _set_shared_colorbar_range(self, subplot_title_list, key_plot, images, vrange):
+        """
+        Apply minimum and maximum colorbar values to all plots, skipping the key plot if any.
+        """
+        vmin, vmax = vrange
+        if self.symmetric_0 or key_plot:
+            vmax = max(abs(vmin), abs(vmax))
+            vmin = -vmax
+        for this_subplot in subplot_title_list:
+            if this_subplot == key_plot:
+                continue
+            im = images[this_subplot]
+            self._update_image_colorbar_range(vmin, vmax, im)
+
+    def _update_image_colorbar_range(self, vmin, vmax, im):
+        im.set_clim(vmin, vmax)
+
+        # Update the colorbar, if it exists
+        if hasattr(im, "colorbar") and im.colorbar is not None:
+            im.colorbar.update_normal(im)
 
     def _figure_cleanup(self):
         """
@@ -474,61 +559,11 @@ class ResultsMaps:
         del self.axes
         del self.fig
 
-    def _update_non_key_colorbars(self, subplot_title_list, key_plot, images):
-        """
-        Synchronize colorbar ranges for all difference plots.
-
-        When comparing multiple cases to a reference, this method ensures all
-        difference plots use the same symmetric colorbar range, making visual
-        comparison easier.
-
-        Parameters
-        ----------
-        subplot_title_list : list of str
-            List of all subplot case names.
-        key_plot : str
-            Name of the reference case (excluded from updates).
-        images : dict
-            Dictionary mapping case names to their image objects.
-
-        Notes
-        -----
-        The method finds the maximum absolute value across all difference plots
-        and applies a symmetric range [-max, +max] to all of them.
-        """
-        # Find the most extreme absolute value across all non-key plots
-        max_abs_val = 0
-        for this_subplot in subplot_title_list:
-            if this_subplot == key_plot:
-                continue
-            da_vals = self[this_subplot].values
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore",
-                    "All-NaN slice encountered",
-                )
-                max_abs_val = max(max_abs_val, np.nanmax(np.abs(da_vals)))
-
-        # Update all non-key plot color limits to use symmetric range
-        for this_subplot in subplot_title_list:
-            if this_subplot == key_plot:
-                continue
-            # Update the image object's color limits
-            if this_subplot in images:
-                images[this_subplot].set_clim(-max_abs_val, max_abs_val)
-                # Update the colorbar if it exists
-                if (
-                    hasattr(images[this_subplot], "colorbar")
-                    and images[this_subplot].colorbar is not None
-                ):
-                    images[this_subplot].colorbar.update_normal(images[this_subplot])
-
     def _map_subplot(
         self,
         *,
         ax,
         case_name,
-        vrange,
         one_colorbar,
         key_case,
         key_plot_done,
@@ -548,8 +583,6 @@ class ResultsMaps:
             The axes object to plot on.
         case_name : str
             Name of the case to plot.
-        vrange : list of float
-            [vmin, vmax] for colorbar limits.
         one_colorbar : bool
             If True, don't add individual colorbar to this subplot.
         key_case : str or None
@@ -606,8 +639,6 @@ class ResultsMaps:
         im = da.plot(
             ax=ax,
             transform=ccrs.PlateCarree(),
-            vmin=vrange[0],
-            vmax=vrange[1],
             add_colorbar=not one_colorbar,
             cmap=cmap,
             cbar_kwargs=cbar_kwargs,
