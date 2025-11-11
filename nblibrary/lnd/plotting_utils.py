@@ -179,9 +179,9 @@ def get_mean_map(
     case,
     key_case,
     key_diff_abs_error,
+    this_fn,
     *args,
     time_slice=None,
-    special_mean=None,
     **kwargs,
 ):
     """
@@ -208,28 +208,22 @@ def get_mean_map(
     else:
         case_first_yr = case_cft_ds["time"].values[0].year
         case_last_yr = case_cft_ds["time"].values[-1].year
-    # pylint: disable=no-else-raise
-    if special_mean is None:
-        raise NotImplementedError("Do this")
-        # TODO: Get map_case
-        # if calc_diff_from_key_case:
-        # TODO: Get map_key_case
-    else:
-        map_case = special_mean(
-            case_cft_ds,
+
+    map_case = this_fn(
+        case_cft_ds,
+        *args,
+        **kwargs,
+    )
+
+    if calc_diff_from_key_case:
+        key_case_cft_ds = key_case.cft_ds
+        if time_slice is not None:
+            key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
+        map_key_case = this_fn(
+            key_case_cft_ds,
             *args,
             **kwargs,
         )
-
-        if calc_diff_from_key_case:
-            key_case_cft_ds = key_case.cft_ds
-            if time_slice is not None:
-                key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
-            map_key_case = special_mean(
-                key_case_cft_ds,
-                *args,
-                **kwargs,
-            )
 
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.
