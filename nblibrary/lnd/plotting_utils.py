@@ -21,6 +21,7 @@ from __future__ import annotations
 import warnings
 
 import numpy as np
+from dict_slice_str_indexed import DictSliceStrIndexed
 
 
 def check_grid_match(grid0, grid1, tol=0):
@@ -181,6 +182,7 @@ def get_mean_map(
     key_diff_abs_error,
     this_fn,
     *args,
+    map_keycase_dict_io,
     time_slice=None,
     **kwargs,
 ):
@@ -190,6 +192,11 @@ def get_mean_map(
     test for differences during development.
     """
     calc_diff_from_key_case = key_case is not None and case.name != key_case.name
+
+    if not map_keycase_dict_io:
+        map_keycase_dict_io = DictSliceStrIndexed()
+    else:
+        assert isinstance(map_keycase_dict_io, DictSliceStrIndexed)
 
     # Get this case's map
     case_cft_ds = case.cft_ds
@@ -215,32 +222,38 @@ def get_mean_map(
         **kwargs,
     )
 
-    if calc_diff_from_key_case:
-        key_case_cft_ds = key_case.cft_ds
-        if time_slice is not None:
-            key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
-        map_key_case = this_fn(
-            key_case_cft_ds,
-            *args,
-            **kwargs,
-        )
-
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.
     if calc_diff_from_key_case:
-        # Interpolate key case map to this case's grid, if needed
-        map_key_case = interp_key_case_grid(
-            case.name,
-            key_case.name,
-            map_case,
-            map_key_case,
-        )
+        key = (time_slice, case.cft_ds.attrs["resolution"])
+        if key in map_keycase_dict_io.keys():
+            map_key_case = map_keycase_dict_io[*key]  # fmt: skip
+        else:
+            key_case_cft_ds = key_case.cft_ds
+            if time_slice is not None:
+                key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
+            map_key_case = this_fn(
+                key_case_cft_ds,
+                *args,
+                **kwargs,
+            )
+
+            # Interpolate key case map to this case's grid, if needed
+            map_key_case = interp_key_case_grid(
+                case.name,
+                key_case.name,
+                map_case,
+                map_key_case,
+            )
+
+            # Save for later cases that will use the same key case map
+            map_keycase_dict_io[*key] = map_key_case  # fmt: skip
 
         # Get difference map between this case and key case
         map_clm = get_key_diff(key_diff_abs_error, map_case, map_key_case)
     else:
         map_clm = map_case
-    return n_timesteps, map_clm, case_first_yr, case_last_yr
+    return n_timesteps, map_clm, case_first_yr, case_last_yr, map_keycase_dict_io
 
 
 def _get_intsxn_time_slice_if_needed(
