@@ -8,6 +8,8 @@ import sys
 
 from bokeh_html_utils import sanitize_filename
 from plotting_utils import get_difference_map
+from plotting_utils import get_key_case
+from plotting_utils import get_mean_map
 from results_maps import ResultsMaps
 
 externals_path = os.path.join(
@@ -197,10 +199,6 @@ def clm_and_earthstat_maps_1crop(
     # Parse top-level options
     stat, stat_input = stat_strings
 
-    # Some code below assumes that None (i.e., pure CLM results) is the first in this list
-    assert clm_or_obsdiff_list[0] == "None"
-    results_clm = ResultsMaps()
-
     for obs_input in clm_or_obsdiff_list:
         if verbose:
             print(f"    {obs_input}")
@@ -218,36 +216,56 @@ def clm_and_earthstat_maps_1crop(
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         suptitle = None
         for key_case_key, key_case_value in key_case_dict.items():
+
             # Get key case, if needed
-            # key_case = get_key_case(case_legend_list, key_case_value, case_list)
+            key_case = get_key_case(case_legend_list, key_case_value, case_list)
+
+            map_keycase_dict_io = None
             for c, case in enumerate(case_list):
                 case_legend = case_legend_list[c]
 
                 key_diff_abs_error = key_case_value is not None and obs_input != "None"
                 if obs_input == "None":
-                    map_clm = _get_clm_map(
-                        case.cft_ds,
-                        stat_input,
-                    )
-                    results[case_legend] = map_clm
-                    # Difference map iterations need to "remember" CLM value; this is why we have
-                    # the assumption above that the first member of clm_or_obsdiff_list is "None".
-                    results_clm[case_legend] = map_clm
-                    # Clean up intermediate reference
-                    del map_clm
+                    special_mean = _get_clm_map
+                    special_mean_args = [stat_input]
+                    special_mean_kwargs = {}
                 else:
-                    map_obsdiff = _get_obsdiff_map(
-                        case.cft_ds,
-                        stat_input=stat_input,
-                        earthstat_data=earthstat_data,
-                        crop=crop,
-                        map_clm=results_clm[case_legend],
+                    map_clm = _get_clm_map(case.cft_ds, stat_input)
+                    special_mean = _get_obsdiff_map
+                    special_mean_args = []
+                    special_mean_kwargs = {
+                        "stat_input": stat_input,
+                        "earthstat_data": earthstat_data,
+                        "crop": crop,
+                        "map_clm": map_clm,
+                    }
+
+                (
+                    _,
+                    map_clm,
+                    _,
+                    _,
+                    map_keycase_dict_io,
+                ) = get_mean_map(
+                    case,
+                    key_case,
+                    key_diff_abs_error,
+                    special_mean,
+                    *special_mean_args,
+                    map_keycase_dict_io=map_keycase_dict_io,
+                    **special_mean_kwargs,
+                )
+
+                if obs_input != "None" and map_clm is None:
+                    raise RuntimeError(
+                        "This was a continue condition before using get_mean_map; how to handle?",
                     )
-                    if map_obsdiff is None:
-                        continue
-                    results[case_legend] = map_obsdiff
-                    # Clean up intermediate reference
-                    del map_obsdiff
+
+                # Save to ResultsMaps
+                results[case_legend] = map_clm
+
+                # Clean up intermediate reference
+                del map_clm
 
                 # Get plot suptitle
                 if suptitle is None:
@@ -264,7 +282,7 @@ def clm_and_earthstat_maps_1crop(
             if key_case_value is None:
                 key_plot = None
             else:
-                key_plot = key_case_value  # + "DONE"
+                key_plot = key_case_value + "DONE"
             one_colorbar = key_case_value is None
             results.plot(
                 subplot_title_list=case_legend_list,
@@ -277,9 +295,6 @@ def clm_and_earthstat_maps_1crop(
 
         # Clean up results object after plotting
         del results
-
-    # Clean up results_clm after all obs_inputs are processed
-    del results_clm
 
     result = f"{crop.capitalize()} {stat}"
     print(result)

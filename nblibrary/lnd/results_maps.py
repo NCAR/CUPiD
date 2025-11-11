@@ -716,6 +716,7 @@ class ResultsMaps:
 
         # Calculate difference (absolute error or simple difference)
         if not key_plot_done:
+            raise RuntimeError("This shouldn't be reached anymore")
             # Get reference case data
             da_key_case = self[key_case]
 

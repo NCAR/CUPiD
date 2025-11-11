@@ -176,6 +176,9 @@ def _get_range_overlap(list0, list1):
     return [intsxn[0], intsxn[-1]]
 
 
+NO_SLICE = slice(0, 0)
+
+
 def get_mean_map(
     case,
     key_case,
@@ -183,7 +186,7 @@ def get_mean_map(
     this_fn,
     *args,
     map_keycase_dict_io,
-    time_slice=None,
+    time_slice=NO_SLICE,
     **kwargs,
 ):
     """
@@ -200,7 +203,7 @@ def get_mean_map(
 
     # Get this case's map
     case_cft_ds = case.cft_ds
-    if time_slice is not None:
+    if time_slice != NO_SLICE:
         time_slice = _get_intsxn_time_slice_if_needed(
             case,
             key_case,
@@ -230,7 +233,7 @@ def get_mean_map(
             map_key_case = map_keycase_dict_io[*key]  # fmt: skip
         else:
             key_case_cft_ds = key_case.cft_ds
-            if time_slice is not None:
+            if time_slice != NO_SLICE:
                 key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
             map_key_case = this_fn(
                 key_case_cft_ds,
