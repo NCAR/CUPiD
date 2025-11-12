@@ -28,4 +28,5 @@ dependencies:
   - zarr
   - pip:
     - -e ../externals/mom6-tools
+    - -e ../cupid_utils
     - git+https://github.com/rubisco-sfa/ILAMB.git
