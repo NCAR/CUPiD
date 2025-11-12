@@ -25,7 +25,7 @@ from ctsm_postprocessing import (  # noqa: E402
 )
 
 
-def _get_clm_map(cft_ds, stat_input):
+def _get_clm_map(case, stat_input):
     """
     Get yield map from CLM
     """
@@ -49,7 +49,7 @@ def _get_clm_map(cft_ds, stat_input):
         )
 
     # Extract the data
-    ds = cft_ds.mean(dim="time")
+    ds = case.cft_ds.mean(dim="time")
     ds["result"] = ds["crop_" + stat_input]
     if stat_input == "prod":
         ds["result"] = ds["result"].where(ds["crop_area"] > 0)
@@ -74,15 +74,17 @@ def _get_clm_map(cft_ds, stat_input):
 
 
 def _get_obsdiff_map(
-    cft_ds,
+    case,
     *,
     stat_input,
     earthstat_data,
     crop,
-    map_clm,
 ):
+    # Get CLM map
+    map_clm = _get_clm_map(case, stat_input)
+
     # Get observed map
-    earthstat_ds = earthstat_data[cft_ds.attrs["resolution"]]
+    earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
     map_obs = earthstat_ds.get_map(
         stat_input,
         crop,
@@ -98,7 +100,7 @@ def _get_obsdiff_map(
     # 2. Mask
     map_clm_for_obsdiff, map_obs = _mask_where_neither_has_area(
         crop=crop,
-        cft_ds=cft_ds,
+        case=case,
         earthstat_ds=earthstat_ds,
         map_clm=map_clm_for_obsdiff,
         map_obs=map_obs,
@@ -123,7 +125,7 @@ def _get_obsdiff_map(
 def _mask_where_neither_has_area(
     *,
     crop,
-    cft_ds,
+    case,
     earthstat_ds,
     map_clm,
     map_obs,
@@ -132,7 +134,7 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     stat_input = "area"
-    area_clm = _get_clm_map(cft_ds, stat_input)
+    area_clm = _get_clm_map(case, stat_input)
     area_obs = earthstat_ds.get_map(
         stat_input,
         crop,
@@ -230,14 +232,12 @@ def clm_and_earthstat_maps_1crop(
                     special_mean_args = [stat_input]
                     special_mean_kwargs = {}
                 else:
-                    map_clm = _get_clm_map(case.cft_ds, stat_input)
                     special_mean = _get_obsdiff_map
                     special_mean_args = []
                     special_mean_kwargs = {
                         "stat_input": stat_input,
                         "earthstat_data": earthstat_data,
                         "crop": crop,
-                        "map_clm": map_clm,
                     }
 
                 (

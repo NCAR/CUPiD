@@ -202,7 +202,6 @@ def get_mean_map(
         assert isinstance(map_keycase_dict_io, DictSliceStrIndexed)
 
     # Get this case's map
-    case_cft_ds = case.cft_ds
     if time_slice != NO_SLICE:
         time_slice = _get_intsxn_time_slice_if_needed(
             case,
@@ -210,17 +209,17 @@ def get_mean_map(
             time_slice,
             calc_diff_from_key_case,
         )
-        case_cft_ds = case_cft_ds.sel(time=time_slice)
-    n_timesteps = case_cft_ds.sizes["time"]
+        case = case.sel(time=time_slice)
+    n_timesteps = case.cft_ds.sizes["time"]
     if n_timesteps == 0:
         case_first_yr = None
         case_last_yr = None
     else:
-        case_first_yr = case_cft_ds["time"].values[0].year
-        case_last_yr = case_cft_ds["time"].values[-1].year
+        case_first_yr = case.cft_ds["time"].values[0].year
+        case_last_yr = case.cft_ds["time"].values[-1].year
 
     map_case = this_fn(
-        case_cft_ds,
+        case,
         *args,
         **kwargs,
     )
@@ -232,11 +231,10 @@ def get_mean_map(
         if key in map_keycase_dict_io.keys():
             map_key_case = map_keycase_dict_io[*key]  # fmt: skip
         else:
-            key_case_cft_ds = key_case.cft_ds
             if time_slice != NO_SLICE:
-                key_case_cft_ds = key_case_cft_ds.sel(time=time_slice)
+                key_case = key_case.sel(time=time_slice)
             map_key_case = this_fn(
-                key_case_cft_ds,
+                key_case,
                 *args,
                 **kwargs,
             )
