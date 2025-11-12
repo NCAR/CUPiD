@@ -3,6 +3,8 @@ Container class for managing multiple map DataArrays with consistent visualizati
 """
 from __future__ import annotations
 
+import warnings
+
 import cartopy.crs as ccrs
 import matplotlib
 import numpy as np
@@ -509,8 +511,14 @@ class ResultsMaps:
             if key_plot is not None and this_subplot == key_plot:
                 continue
             da_vals = self[this_subplot].values
-            vmin = min(vmin, np.nanmin(da_vals))
-            vmax = max(vmax, np.nanmax(da_vals))
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message="All-NaN slice encountered",
+                    category=RuntimeWarning,
+                )
+                vmin = min(vmin, np.nanmin(da_vals))
+                vmax = max(vmax, np.nanmax(da_vals))
 
         if np.isinf(vmin) or np.isinf(vmax):
             raise RuntimeError("Failed to find vmin and/or vmax")
