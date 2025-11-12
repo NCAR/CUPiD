@@ -20,7 +20,7 @@ dependencies:
   - netcdf4
   - numpy
   - pip
-  - python==3.11.4
+  - python
   - uxarray
   - xarray=2025.6.1
   - xesmf
@@ -28,4 +28,5 @@ dependencies:
   - zarr
   - pip:
     - -e ../externals/mom6-tools
+    - -e ../cupid_utils
     - git+https://github.com/rubisco-sfa/ILAMB.git
