@@ -80,7 +80,7 @@
 
   <entry id="CUPID_STOP_N">
     <type>integer</type>
-    <default_value>1</default_value>
+    <default_value>100</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
     <desc>Provides a numerical count for $CUPID_STOP_OPTION.</desc>
