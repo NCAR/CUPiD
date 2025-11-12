@@ -1,6 +1,9 @@
 name: cupid-infrastructure
+channels:
+  - conda-forge
+  - nodefaults
 dependencies:
-    - python=3.11.4
+    - python
     - black
     - click
     - dask
@@ -15,7 +18,7 @@ dependencies:
     - papermill
     - pre-commit
     - pip
-    - ploomber=0.22.3
+    - ploomber
     - pyyaml
     - xarray
     - pip:

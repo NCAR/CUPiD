@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["cupid_utils"]
+
+
+[project]
+name = "cupid_utils"
+version = "0.0.0"
+authors = [
+  { name="Teagan King", email="tking@ucar.edu" },
+  { name="Michael Levy", email="mlevy@ucar.edu" },
+]
+description = "Python helper functions for CUPiD"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]
+dependencies = [
+    "cartopy",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "pyogrio",
+    "pyyaml",
+    "xarray",
+]
+
+[project.urls]
+repository = "https://github.com/NCAR/CUPiD"
+documentation = "https://ncar.github.io/CUPiD"
