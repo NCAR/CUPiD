@@ -103,6 +103,7 @@ fi
 #       by setting $PYTHONPATH; since this is conda-based we
 #       want an empty PYTHONPATH environment variable
 unset PYTHONPATH
+
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
