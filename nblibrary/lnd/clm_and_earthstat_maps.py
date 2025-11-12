@@ -166,14 +166,14 @@ def _get_figpath_with_keycase(fig_path, key_case, key_case_dict):
     return fig_path
 
 
-def _get_fig_path(img_dir, crop, clm_or_obsdiff, stat):
+def _get_fig_path(img_dir, crop, clm_or_obsdiff, stat, yr_range_str):
     """
     Get filenames to which figures will be saved. Members of join_list
     must first be any dropdown menu members and then any radio button
     group members, in the orders given in dropdown_specs and radio_specs,
     respectively.
     """
-    join_list = [crop, clm_or_obsdiff, stat]
+    join_list = [crop, clm_or_obsdiff, yr_range_str, stat]
     fig_basename = sanitize_filename("_".join(join_list))
     fig_basename += ".png"
     fig_path = os.path.join(img_dir, fig_basename)
@@ -191,6 +191,7 @@ def clm_and_earthstat_maps_1crop(
     key_case_dict,
     clm_or_obsdiff_list,
     img_dir,
+    incl_yrs_plot_items,
 ):
     """
     For a crop, make two figures:
@@ -200,20 +201,24 @@ def clm_and_earthstat_maps_1crop(
 
     # Parse top-level options
     stat, stat_input = stat_strings
+    incl_yrs_range_input, yr_range_str, time_slice = incl_yrs_plot_items
 
     for obs_input in clm_or_obsdiff_list:
         if verbose:
             print(f"    {obs_input}")
 
         # Parse obs_input-level options
-        fig_path = _get_fig_path(img_dir, crop, obs_input, stat)
+        fig_path = _get_fig_path(img_dir, crop, obs_input, stat, yr_range_str)
         if obs_input == "None":
             symmetric_0 = False
         else:
             symmetric_0 = True
 
         # Initialize things ahead of results generation
-        results = ResultsMaps(symmetric_0=symmetric_0)
+        results = ResultsMaps(
+            symmetric_0=symmetric_0,
+            incl_yrs_range=incl_yrs_range_input,
+        )
 
         # Get maps and colorbar min/max (the latter should cover total range across ALL cases)
         suptitle = None
@@ -222,6 +227,7 @@ def clm_and_earthstat_maps_1crop(
             # Get key case, if needed
             key_case = get_key_case(case_legend_list, key_case_value, case_list)
 
+            case_incl_yr_dict = {}
             map_keycase_dict_io = None
             for c, case in enumerate(case_list):
                 case_legend = case_legend_list[c]
@@ -241,10 +247,10 @@ def clm_and_earthstat_maps_1crop(
                     }
 
                 (
-                    _,
+                    n_timesteps,
                     map_clm,
-                    _,
-                    _,
+                    case_first_yr,
+                    case_last_yr,
                     map_keycase_dict_io,
                 ) = get_mean_map(
                     case,
@@ -253,6 +259,7 @@ def clm_and_earthstat_maps_1crop(
                     special_mean,
                     *special_mean_args,
                     map_keycase_dict_io=map_keycase_dict_io,
+                    time_slice=time_slice,
                     **special_mean_kwargs,
                 )
 
@@ -269,7 +276,13 @@ def clm_and_earthstat_maps_1crop(
 
                 # Get plot suptitle
                 if suptitle is None:
-                    suptitle = f"{results[case_legend].name}: {crop}"
+                    suptitle = f"{results[case_legend].name}: {crop} [{yr_range_str}]"
+
+                # Save info about included years
+                if n_timesteps == 0:
+                    case_incl_yr_dict[case_legend] = None
+                else:
+                    case_incl_yr_dict[case_legend] = [case_first_yr, case_last_yr]
 
             # Update figure path with keycase, if needed
             fig_path_key = _get_figpath_with_keycase(
@@ -287,11 +300,12 @@ def clm_and_earthstat_maps_1crop(
                 fig_path=fig_path_key,
                 key_plot=key_case_value,
                 key_diff_abs_error=key_diff_abs_error,
+                case_incl_yr_dict=case_incl_yr_dict,
             )
 
         # Clean up results object after plotting
         del results
 
-    result = f"{crop.capitalize()} {stat}"
+    result = f"{crop.capitalize()} {stat} {yr_range_str}"
     print(result)
     return result
