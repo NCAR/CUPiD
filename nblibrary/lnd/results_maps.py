@@ -8,8 +8,6 @@ import matplotlib
 import numpy as np
 import xarray as xr
 from matplotlib.figure import Figure
-from plotting_utils import get_key_diff
-from plotting_utils import interp_key_case_grid
 
 # Default colormaps for different plot types
 DEFAULT_CMAP_SEQ = "viridis"
@@ -364,11 +362,6 @@ class ResultsMaps:
         # Calculate layout parameters
         self._get_mapfig_layout(one_colorbar)
 
-        # TODO: Remove this once all map figures have been updated with new key case behavior
-        key_plot_done = key_plot is not None and "DONE" in key_plot
-        if key_plot_done:
-            key_plot = key_plot.replace("DONE", "")
-
         # Create figure with map projection for all subplots
         # Use Figure directly instead of plt.subplots() to avoid pyplot's figure manager
         # in Dask parallel contexts
@@ -401,7 +394,6 @@ class ResultsMaps:
                 case_name=this_subplot,
                 one_colorbar=one_colorbar,
                 key_case=key_plot,
-                key_plot_done=key_plot_done,
                 key_diff_abs_error=key_diff_abs_error,
                 case_incl_yr=case_incl_yr,
             )
@@ -566,7 +558,6 @@ class ResultsMaps:
         case_name,
         one_colorbar,
         key_case,
-        key_plot_done,
         key_diff_abs_error,
         case_incl_yr,
     ):
@@ -610,13 +601,10 @@ class ResultsMaps:
 
         # Calculate difference from key case if applicable
         if key_case is not None and case_name != key_case:
-            title, cmap, da = self._get_diff_from_key_case(
-                case_name=case_name,
-                key_case=key_case,
+            title, cmap, da = self._plotting_diff_from_key_case(
                 key_diff_abs_error=key_diff_abs_error,
                 da=da,
                 title=title,
-                key_plot_done=key_plot_done,
             )
 
         # Note subplots with missing data or years
@@ -656,31 +644,20 @@ class ResultsMaps:
 
         return im
 
-    def _get_diff_from_key_case(
+    def _plotting_diff_from_key_case(
         self,
         *,
-        case_name,
-        key_case,
         key_diff_abs_error,
         da,
         title,
-        key_plot_done,
     ):
         """
-        Calculate difference from a reference case.
-
-        This internal method computes the difference between the current case
-        and a reference case, handling grid mismatches through interpolation
-        and supporting both simple differences and differences in absolute error.
+        Update plot inputs for showing difference from reference ("key") case.
 
         Parameters
         ----------
-        case_name : str
-            Name of the current case.
-        key_case : str
-            Name of the reference case.
         key_diff_abs_error : bool
-            If True, calculate |da| - |da_key| instead of da - da_key.
+            Whether the difference being plotted is absolute error.
         da : xr.DataArray
             DataArray for the current case.
         title : str
@@ -693,7 +670,7 @@ class ResultsMaps:
         cmap : str
             Colormap name appropriate for difference plots.
         da : xr.DataArray
-            DataArray containing the difference values.
+            DataArray with updated name.
 
         Notes
         -----
@@ -713,22 +690,6 @@ class ResultsMaps:
             cmap = DEFAULT_CMAP_DIV_DIFFOFDIFF
         else:
             cmap = DEFAULT_CMAP_DIV
-
-        # Calculate difference (absolute error or simple difference)
-        if not key_plot_done:
-            raise RuntimeError("This shouldn't be reached anymore")
-            # Get reference case data
-            da_key_case = self[key_case]
-
-            # Interpolate key case to match grid, if needed
-            da_key_case = interp_key_case_grid(
-                case_name,
-                key_case,
-                da,
-                da_key_case,
-            )
-
-            da = get_key_diff(key_diff_abs_error, da, da_key_case)
 
         # Update name and title to reflect absolute error difference
         if key_diff_abs_error:

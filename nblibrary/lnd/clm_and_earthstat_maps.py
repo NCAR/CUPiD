@@ -279,17 +279,13 @@ def clm_and_earthstat_maps_1crop(
             )
 
             # Plot
-            if key_case_value is None:
-                key_plot = None
-            else:
-                key_plot = key_case_value + "DONE"
             one_colorbar = key_case_value is None
             results.plot(
                 subplot_title_list=case_legend_list,
                 suptitle=suptitle,
                 one_colorbar=one_colorbar,
                 fig_path=fig_path_key,
-                key_plot=key_plot,
+                key_plot=key_case_value,
                 key_diff_abs_error=key_diff_abs_error,
             )
 
