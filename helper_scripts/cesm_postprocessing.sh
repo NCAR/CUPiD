@@ -6,17 +6,6 @@
 # and then update this to python as well (and take a CIME Case object as
 # an argument)
 
-# Function to add some number of years to a string that
-# is formatted as YYYY-MM-DD and print out the updated
-# string in the same format
-add_years() {
-  IFS='-' read -r YEAR MM DD <<< "$1"
-  YEAR=$((10#$YEAR))  # Force base-10
-  MM=$((10#$MM))
-  DD=$((10#$DD))
-  NEW_YEAR=`printf '%04d' "$((YEAR + $2))"`-`printf '%02d' "${MM}"`-`printf '%02d' "${DD}"`
-  echo ${NEW_YEAR}
-}
 
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
@@ -31,11 +20,12 @@ CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
 CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
-CUPID_NYEARS=`./xmlquery --value CUPID_NYEARS`
-CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
+CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
+CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
+CALENDAR=`./xmlquery --value CALENDAR`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
-CUPID_BASE_NYEARS=`./xmlquery --value CUPID_BASE_NYEARS`
-CUPID_BASE_ENDDATE=`add_years ${CUPID_BASE_STARTDATE} ${CUPID_BASE_NYEARS}`
+CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
+CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -50,6 +40,29 @@ CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
+
+# Note: on derecho, the cesmdev module creates a python conflict
+#       by setting $PYTHONPATH; since this is conda-based we
+#       want an empty PYTHONPATH environment variable
+unset PYTHONPATH
+# cupid-analysis env required for end date calculation
+conda activate ${CUPID_ANALYSIS_ENV}
+
+# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
+# calendar name needs to be changed for cftime standards
+CFTIME_CALENDAR=$CALENDAR
+CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
+CFTIME_CALENDAR="${CFTIME_CALENDAR/NO_LEAP/noleap}"
+CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_STARTDATE} \
+  --stop-option ${CUPID_STOP_OPTION} \
+  --stop-n ${CUPID_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
+CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_BASE_STARTDATE} \
+  --stop-option ${CUPID_BASE_STOP_OPTION} \
+  --stop-n ${CUPID_BASE_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
 
 # Note if CUPID_ROOT is not tools/CUPiD
 # (but don't complain if user adds a trailing "/")
@@ -99,10 +112,6 @@ if [ "${CUPID_RUN_ALL}" == "TRUE" ]; then
 fi
 
 # Use cupid-infrastructure environment for running these scripts
-# Note: on derecho, the cesmdev module creates a python conflict
-#       by setting $PYTHONPATH; since this is conda-based we
-#       want an empty PYTHONPATH environment variable
-unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file

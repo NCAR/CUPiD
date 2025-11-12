@@ -1,6 +1,7 @@
 """
 This module provides functions for reading YAML files and working with intake catalogs.
 """
+
 from __future__ import annotations
 
 import intake
