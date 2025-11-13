@@ -251,6 +251,7 @@ def generate_cupid_config(
         my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
             "parameter_groups"
         ]["none"] = {}
+        my_dict["book_toc"]["root"] = "infrastructure/summary_tables"
         if cupid_run_adf:
             my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
                 "parameter_groups"
