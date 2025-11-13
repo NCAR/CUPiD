@@ -119,14 +119,9 @@ compute_notebooks:
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
-      summary_tables:
+      index:
         parameter_groups:
-          none:
-            adf_root: ../../examples/key_metrics/ADF_output/
-            ldf_root: ../../examples/key_metrics/LDF_output/
-            ilamb_root: ../../examples/key_metrics/ILAMB_output/
-            ilamb_vars_highlight: ["Gross Primary Productivity","Runoff","Snow Water Equivalent","Surface Relative Humidity","Precipitation"]
-
+          none: {}
     atm:
       Global_PSL_NMSE_compare_obs_lens:
         parameter_groups:
