@@ -107,9 +107,13 @@ compute_notebooks:
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
-      index:
+      summary_tables:
         parameter_groups:
-          none: {}
+          none:
+            adf_root: ../../examples/key_metrics/ADF_output/
+            ilamb_root: ../../examples/key_metrics/ILAMB_output/
+            ilamb_vars_highlight: ["Gross Primary Productivity","Runoff","Snow Water Equivalent","Surface Relative Humidity","Precipitation"]
+
 
     atm:
       link_to_ADF:
@@ -177,7 +181,7 @@ book_toc:
 
   # All filenames are notebook filename without the .ipynb, similar to above
 
-  root: infrastructure/index # root is the notebook that will be the homepage for the book
+  root: infrastructure/summary_tables # root is the notebook that will be the homepage for the book
   parts:
 
     # Parts group notebooks into different sections in the Jupyter book
