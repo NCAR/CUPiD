@@ -246,6 +246,33 @@ def generate_cupid_config(
                 cupid_base_start_year,
             ]
 
+    if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
+        my_dict["compute_notebooks"]["infrastructure"].pop("index", None)
+        my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+            "parameter_groups"
+        ]["none"] = {}
+        if cupid_run_adf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["adf_root"] = "../../examples/key_metrics/ADF_output/"
+        if cupid_run_ldf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ldf_root"] = "../../examples/key_metrics/LDF_output/"
+        if cupid_run_ilamb:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_root"] = "../../examples/key_metrics/ILAMB_output/"
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_vars_highlight"] = [
+                "Gross Primary Productivity",
+                "Runoff",
+                "Snow Water Equivalent",
+                "Surface Relative Humidity",
+                "Precipitation",
+            ]
+
     if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
             "adf_root"
