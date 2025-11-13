@@ -123,16 +123,35 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
 
 
 def _plot_earthstat(which, earthstat_data, crop, ax, target_time):
+    target_units = {
+        "prod": "Mt",
+        "area": "Mha",
+    }
     if which == "yield":
-        earthstat_prod = earthstat_data.get_data(EARTHSTAT_RES_TO_PLOT, "prod", crop)
-        earthstat_area = earthstat_data.get_data(EARTHSTAT_RES_TO_PLOT, "area", crop)
+        earthstat_prod = earthstat_data.get_data(
+            EARTHSTAT_RES_TO_PLOT,
+            "prod",
+            crop,
+            target_units["prod"],
+        )
+        earthstat_area = earthstat_data.get_data(
+            EARTHSTAT_RES_TO_PLOT,
+            "area",
+            crop,
+            target_units["area"],
+        )
         if earthstat_prod is None or earthstat_area is None:
             return
         earthstat_var = earthstat_prod.sum(dim=["lat", "lon"]) / earthstat_area.sum(
             dim=["lat", "lon"],
         )
     else:
-        earthstat_var = earthstat_data.get_data(EARTHSTAT_RES_TO_PLOT, which, crop)
+        earthstat_var = earthstat_data.get_data(
+            EARTHSTAT_RES_TO_PLOT,
+            which,
+            crop,
+            target_units[which],
+        )
         if earthstat_var is None:
             return
         earthstat_var = earthstat_var.sum(dim=["lat", "lon"])

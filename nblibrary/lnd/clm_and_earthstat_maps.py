@@ -24,6 +24,12 @@ from ctsm_postprocessing import (  # noqa: E402
     utils,
 )
 
+TARGET_UNITS = {
+    "prod": "Mt",
+    "area": "Mha",
+    "yield": "tonnes/ha",
+}
+
 
 def _get_clm_map(case, stat_input):
     """
@@ -88,6 +94,7 @@ def _get_obsdiff_map(
         case.cft_ds.attrs["resolution"],
         stat_input,
         crop,
+        TARGET_UNITS[stat_input],
     )
     if map_obs is None:
         return map_obs
@@ -138,6 +145,7 @@ def _mask_where_neither_has_area(
         case.cft_ds.attrs["resolution"],
         stat_input,
         crop,
+        TARGET_UNITS[stat_input],
     )
     area_obs = utils.lon_pm2idl(area_obs)
 

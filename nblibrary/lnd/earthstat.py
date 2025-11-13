@@ -8,9 +8,9 @@ import os
 import xarray as xr
 
 # TODO:
-# 1. Eliminate EarthStatDataset class. Move its methods into EarthStat class.
-# 2. Allows: Delete __slots__ thing and warning suppression about that
-# 3. EarthStat.get_data(): Add required "target units" attribute and fail if not handled
+# 1. [DONE 5c529da] Eliminate EarthStatDataset class. Move its methods into EarthStat class.
+# 2. [DONE 5c529da] Allows: Delete __slots__ thing and warning suppression about that
+# 3. EarthStat.get_data(): Add required "target units" attribute; fail if not handled
 # 4. Add custom EarthStat.__repr__ method to just show (xr.Dataset(resolution, time range))
 # 5. "First, check whether this crop is even in EarthStat. Return early if not." does not do this??
 # CHECK B4B RESULTS
@@ -154,7 +154,7 @@ class EarthStat:
             self[res] = ds
         print("Done.")
 
-    def get_data(self, res, stat_input, crop):
+    def get_data(self, res, stat_input, crop, target_unit):
         """
         Get data from EarthStat
         """
@@ -184,16 +184,20 @@ class EarthStat:
         units_in = data_obs.attrs["units"]
         if units_in != converting[0]:
             raise RuntimeError(f"Expected {converting[0]}, got {units_in}")
+        if target_unit != converting[1]:
+            raise NotImplementedError(
+                f"EarthStat.get_data() can't handle target_unit '{target_unit}'",
+            )
         data_obs *= conversion_factor
         data_obs.attrs["units"] = converting[1]
         return data_obs
 
-    def get_map(self, res, stat_input, crop):
+    def get_map(self, res, stat_input, crop, target_unit):
         """
         Get map from EarthStat for comparing with CLM output
         """
         # Actually get the map
-        data_obs = self.get_data(res, stat_input, crop)
+        data_obs = self.get_data(res, stat_input, crop, target_unit)
         map_obs = data_obs.mean(dim="time")
 
         return map_obs
