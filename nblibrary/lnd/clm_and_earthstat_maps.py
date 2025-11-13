@@ -84,8 +84,8 @@ def _get_obsdiff_map(
     map_clm = _get_clm_map(case, stat_input)
 
     # Get observed map
-    earthstat_ds = earthstat_data[case.cft_ds.attrs["resolution"]]
-    map_obs = earthstat_ds.get_map(
+    map_obs = earthstat_data.get_map(
+        case.cft_ds.attrs["resolution"],
         stat_input,
         crop,
     )
@@ -101,7 +101,7 @@ def _get_obsdiff_map(
     map_clm_for_obsdiff, map_obs = _mask_where_neither_has_area(
         crop=crop,
         case=case,
-        earthstat_ds=earthstat_ds,
+        earthstat_data=earthstat_data,
         map_clm=map_clm_for_obsdiff,
         map_obs=map_obs,
     )
@@ -117,7 +117,6 @@ def _get_obsdiff_map(
     # Clean up intermediate variables
     del map_clm_for_obsdiff
     del map_obs
-    del earthstat_ds
 
     return map_obsdiff
 
@@ -126,7 +125,7 @@ def _mask_where_neither_has_area(
     *,
     crop,
     case,
-    earthstat_ds,
+    earthstat_data,
     map_clm,
     map_obs,
 ):
@@ -135,7 +134,8 @@ def _mask_where_neither_has_area(
     """
     stat_input = "area"
     area_clm = _get_clm_map(case, stat_input)
-    area_obs = earthstat_ds.get_map(
+    area_obs = earthstat_data.get_map(
+        case.cft_ds.attrs["resolution"],
         stat_input,
         crop,
     )
@@ -204,8 +204,6 @@ def clm_and_earthstat_maps_1crop(
     incl_yrs_range_input, yr_range_str, time_slice = incl_yrs_plot_items
 
     for obs_input in clm_or_obsdiff_list:
-        if verbose:
-            print(f"    {obs_input}")
 
         # Parse obs_input-level options
         fig_path = _get_fig_path(img_dir, crop, obs_input, stat, yr_range_str)

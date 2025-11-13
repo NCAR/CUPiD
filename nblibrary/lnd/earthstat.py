@@ -7,6 +7,16 @@ import os
 
 import xarray as xr
 
+# TODO:
+# 1. Eliminate EarthStatDataset class. Move its methods into EarthStat class.
+# 2. Allows: Delete __slots__ thing and warning suppression about that
+# 3. EarthStat.get_data(): Add required "target units" attribute and fail if not handled
+# 4. Add custom EarthStat.__repr__ method to just show (xr.Dataset(resolution, time range))
+# 5. "First, check whether this crop is even in EarthStat. Return early if not." does not do this??
+# CHECK B4B RESULTS
+# 6. EarthStat.get_map() and get_data() need to include time_slice option instead of getting mean of all time
+# 7. EarthStat.get_map() needs to area-weight mean yield
+
 
 def align_time(da_to_align, target_time):
     """
@@ -53,74 +63,6 @@ def check_dim_alignment(earthstat_ds, clm_ds):
             raise RuntimeError(f"Misalignment in {dim}")
 
     return earthstat_ds
-
-
-class EarthStatDataset(xr.Dataset):
-    """
-    An xarray Dataset with some extra functionality
-    """
-
-    # pylint: disable=too-many-ancestors
-
-    # Custom attributes we want to add on top of what xr.Dataset has
-    __slots__ = ["crops"]
-
-    def __init__(self, ds_in, crops):
-
-        # Initialize as a normal Dataset
-        data_vars = {}
-        for key, value in ds_in.variables.items():
-            if key in ds_in.coords:
-                continue
-            data_vars[key] = value
-        super().__init__(data_vars=data_vars, coords=ds_in.coords, attrs=ds_in.attrs)
-
-        # Save some extra stuff
-        self.crops = crops
-
-    def get_data(self, stat_input, crop):
-        """
-        Get data from EarthStat
-        """
-
-        # First, check whether this crop is even in EarthStat. Return early if not.
-        earthstat_crop_idx = self.crops.index(crop)
-
-        # Define some things based on what map we want
-        if stat_input == "yield":
-            which_var = "Yield"
-            converting = ["tonnes/ha", "tonnes/ha"]
-            conversion_factor = 1  # Already tons/ha
-        elif stat_input == "prod":
-            which_var = "Production"
-            converting = ["tonnes", "Mt"]
-            conversion_factor = 1e-6  # Convert tons to Mt
-        elif stat_input == "area":
-            which_var = "HarvestArea"
-            converting = ["ha", "Mha"]
-            conversion_factor = 1e-6  # Convert ha to Mha
-        else:
-            raise NotImplementedError(
-                f"_get_earthstat_map() doesn't work for stat_input='{stat_input}'",
-            )
-
-        data_obs = self[which_var].isel(crop=earthstat_crop_idx)
-        units_in = data_obs.attrs["units"]
-        if units_in != converting[0]:
-            raise RuntimeError(f"Expected {converting[0]}, got {units_in}")
-        data_obs *= conversion_factor
-        data_obs.attrs["units"] = converting[1]
-        return data_obs
-
-    def get_map(self, stat_input, crop):
-        """
-        Get map from EarthStat for comparing with CLM output
-        """
-        # Actually get the map
-        data_obs = self.get_data(stat_input, crop)
-        map_obs = data_obs.mean(dim="time")
-
-        return map_obs
 
 
 class EarthStat:
@@ -209,8 +151,49 @@ class EarthStat:
             end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
 
-            # Save as EarthStatDataset, which has more functionality
-            esd = EarthStatDataset(ds, self.crops)
-
-            self[res] = esd
+            self[res] = ds
         print("Done.")
+
+    def get_data(self, res, stat_input, crop):
+        """
+        Get data from EarthStat
+        """
+
+        # First, check whether this crop is even in EarthStat. Return early if not.
+        earthstat_crop_idx = self.crops.index(crop)
+
+        # Define some things based on what map we want
+        if stat_input == "yield":
+            which_var = "Yield"
+            converting = ["tonnes/ha", "tonnes/ha"]
+            conversion_factor = 1  # Already tons/ha
+        elif stat_input == "prod":
+            which_var = "Production"
+            converting = ["tonnes", "Mt"]
+            conversion_factor = 1e-6  # Convert tons to Mt
+        elif stat_input == "area":
+            which_var = "HarvestArea"
+            converting = ["ha", "Mha"]
+            conversion_factor = 1e-6  # Convert ha to Mha
+        else:
+            raise NotImplementedError(
+                f"_get_earthstat_map() doesn't work for stat_input='{stat_input}'",
+            )
+
+        data_obs = self[res][which_var].isel(crop=earthstat_crop_idx)
+        units_in = data_obs.attrs["units"]
+        if units_in != converting[0]:
+            raise RuntimeError(f"Expected {converting[0]}, got {units_in}")
+        data_obs *= conversion_factor
+        data_obs.attrs["units"] = converting[1]
+        return data_obs
+
+    def get_map(self, res, stat_input, crop):
+        """
+        Get map from EarthStat for comparing with CLM output
+        """
+        # Actually get the map
+        data_obs = self.get_data(res, stat_input, crop)
+        map_obs = data_obs.mean(dim="time")
+
+        return map_obs
