@@ -21,6 +21,7 @@ from __future__ import annotations
 import warnings
 
 import numpy as np
+import xarray as xr
 from dict_slice_str_indexed import DictSliceStrIndexed
 
 
@@ -218,15 +219,18 @@ def get_mean_map(
         case_first_yr = case.cft_ds["time"].values[0].year
         case_last_yr = case.cft_ds["time"].values[-1].year
 
-    map_case = this_fn(
-        case,
-        *args,
-        **kwargs,
-    )
+    if n_timesteps == 0:
+        map_case = xr.full_like(case.cft_ds["area"], fill_value=np.nan)
+    else:
+        map_case = this_fn(
+            case,
+            *args,
+            **kwargs,
+        )
 
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.
-    if calc_diff_from_key_case:
+    if calc_diff_from_key_case and n_timesteps > 0:
         key = (time_slice, case.cft_ds.attrs["resolution"])
         if key in map_keycase_dict_io.keys():
             map_key_case = map_keycase_dict_io[*key]  # fmt: skip
