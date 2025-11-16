@@ -165,16 +165,61 @@ def get_yr_range(ds):
     return [first_year, last_year]
 
 
-def _get_range_overlap(list0, list1):
-    if list0 == [None, None]:
+def _get_range_overlap(*ranges):
+    """
+    Find the overlap between an arbitrary number of year ranges.
+
+    This function calculates the intersection of multiple year ranges, returning
+    the overlapping period if one exists.
+
+    Parameters
+    ----------
+    *ranges : list or tuple
+        Variable number of ranges, each as [start, end] or (start, end) where
+        both start and end are inclusive. A range of [None, None] indicates
+        no valid range.
+
+    Returns
+    -------
+    list or None
+        [start, end] of the overlapping range (inclusive), or None if:
+        - No ranges are provided
+        - Any range is [None, None]
+        - No overlap exists between the ranges
+
+    Raises
+    ------
+    ValueError
+        If any range doesn't have exactly two elements, or if end < start.
+    """
+    if len(ranges) == 0:
         return None
-    x = range(list0[0], list0[1] + 1)
-    y = range(list1[0], list1[1] + 1)
-    xs = set(x)
-    intsxn = list(xs.intersection(y))
-    if len(intsxn) == 0:
+
+    # Check for [None, None] in any range and validate range format
+    for i, r in enumerate(ranges):
+        # Check that range has exactly two elements
+        if len(r) != 2:
+            raise ValueError(
+                f"Range at position {i} has {len(r)} elements, expected 2: {r}",
+            )
+
+        # Check for [None, None]
+        if r == [None, None] or r == (None, None):
+            return None
+
+        # Validate that end >= start
+        if r[1] < r[0]:
+            raise ValueError(f"Range at position {i} has end < start: [{r[0]}, {r[1]}]")
+
+    # Find the maximum start and minimum end
+    result_start = max(r[0] for r in ranges)
+    result_end = min(r[1] for r in ranges)
+
+    # No overlap if start > end
+    if result_start > result_end:
         return None
-    return [intsxn[0], intsxn[-1]]
+
+    return [result_start, result_end]
 
 
 NO_SLICE = slice(0, 0)

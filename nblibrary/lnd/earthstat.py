@@ -7,14 +7,6 @@ import os
 
 import xarray as xr
 
-# TODO:
-# 1. [DONE 5c529da] Eliminate EarthStatDataset class. Move its methods into EarthStat class.
-# 2. [DONE 5c529da] Allows: Delete __slots__ thing and warning suppression about that
-# 3. [DONE 0ea98a5] EarthStat.get_data(): Add required "target units" attribute; fail if not handled
-# ✅ CHECK B4B RESULTS
-# 4. EarthStat.get_map() needs to area-weight mean yield
-# 5. EarthStat.get_map() needs to include time_slice option instead of getting mean of all time
-
 
 def align_time(da_to_align, target_time):
     """

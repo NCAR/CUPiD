@@ -6,6 +6,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add parent directory to path to import plotting_utils
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -78,3 +80,119 @@ class TestGetRangeOverlap:  # pylint: disable=too-many-public-methods
         """Test that ranges where start == end are valid (single year)."""
         result = _get_range_overlap([2005, 2005], [2000, 2010])
         assert result == [2005, 2005]
+
+    def test_three_ranges_with_overlap(self):
+        """Test with three overlapping ranges."""
+        result = _get_range_overlap([2000, 2010], [2005, 2015], [2008, 2012])
+        assert result == [2008, 2010]
+
+    def test_no_arguments(self):
+        """Test with no arguments."""
+        result = _get_range_overlap()
+        assert result is None
+
+    def test_three_ranges_no_overlap(self):
+        """Test three ranges where not all overlap."""
+        result = _get_range_overlap([2000, 2010], [2005, 2015], [2020, 2025])
+        assert result is None
+
+    def test_multiple_ranges_with_overlap(self):
+        """Test with more than three overlapping ranges."""
+        result = _get_range_overlap(
+            [2000, 2020],
+            [2005, 2018],
+            [2008, 2015],
+            [2010, 2025],
+            [2009, 2014],
+        )
+        assert result == [2010, 2014]
+
+    def test_single_range(self):
+        """Test with a single range (should return the range itself)."""
+        result = _get_range_overlap([2000, 2010])
+        assert result == [2000, 2010]
+
+    def test_none_none_range_middle(self):
+        """Test with [None, None] in the middle of multiple ranges."""
+        result = _get_range_overlap([2000, 2010], [None, None], [2005, 2015])
+        assert result is None
+
+    def test_mixed_list_and_tuple(self):
+        """Test mixing lists and tuples."""
+        result = _get_range_overlap([2000, 2010], (2005, 2015), [2008, 2012])
+        assert result == [2008, 2010]
+
+    def test_reversed_order_ranges(self):
+        """Test that order of ranges doesn't matter."""
+        result1 = _get_range_overlap([2000, 2010], [2005, 2015], [2008, 2012])
+        result2 = _get_range_overlap([2008, 2012], [2000, 2010], [2005, 2015])
+        result3 = _get_range_overlap([2005, 2015], [2008, 2012], [2000, 2010])
+        assert result1 == result2 == result3 == [2008, 2010]
+
+    def test_many_ranges(self):
+        """Test with many ranges to ensure scalability."""
+        ranges = [[2000 + i, 2020 - i] for i in range(10)]
+        result = _get_range_overlap(*ranges)
+        assert result == [2009, 2011]
+
+    def test_backward_compatibility_two_args(self):
+        """
+        Test that the function maintains backward compatibility
+        with original two-argument usage.
+        """
+        # This mimics the original function's usage pattern
+        list0 = [2000, 2010]
+        list1 = [2005, 2015]
+        result = _get_range_overlap(list0, list1)
+        assert result == [2005, 2010]
+
+        # Test the [None, None] case from original
+        list0 = [None, None]
+        list1 = [2005, 2015]
+        result = _get_range_overlap(list0, list1)
+        assert result is None
+
+    def test_invalid_range_too_few_elements(self):
+        """Test that ranges with fewer than 2 elements raise ValueError."""
+        with pytest.raises(ValueError, match="has 1 elements, expected 2"):
+            _get_range_overlap([2000])
+
+    def test_invalid_range_too_many_elements(self):
+        """Test that ranges with more than 2 elements raise ValueError."""
+        with pytest.raises(ValueError, match="has 3 elements, expected 2"):
+            _get_range_overlap([2000, 2010, 2020])
+
+    def test_invalid_range_empty(self):
+        """Test that empty ranges raise ValueError."""
+        with pytest.raises(ValueError, match="has 0 elements, expected 2"):
+            _get_range_overlap([])
+
+    def test_invalid_range_end_before_start(self):
+        """Test that ranges where end < start raise ValueError."""
+        with pytest.raises(ValueError, match="has end < start"):
+            _get_range_overlap([2010, 2000])
+
+    def test_invalid_range_in_multiple_ranges(self):
+        """Test that invalid range is caught even when mixed with valid ones."""
+        with pytest.raises(ValueError, match="has end < start"):
+            _get_range_overlap([2000, 2010], [2015, 2005], [2008, 2012])
+
+    def test_none_none_range_second(self):
+        """Test with [None, None] as second argument."""
+        result = _get_range_overlap([2000, 2010], [None, None])
+        assert result is None
+
+    def test_tuple_none_none(self):
+        """Test that (None, None) is handled like [None, None]."""
+        result = _get_range_overlap((None, None), [2000, 2010])
+        assert result is None
+
+    def test_negative_years(self):
+        """Test with negative year values (e.g., BCE dates)."""
+        result = _get_range_overlap([-100, 100], [-50, 50])
+        assert result == [-50, 50]
+
+    def test_invalid_range_position_reported(self):
+        """Test that the position of the invalid range is reported."""
+        with pytest.raises(ValueError, match="Range at position 1"):
+            _get_range_overlap([2000, 2010], [2015, 2005])
