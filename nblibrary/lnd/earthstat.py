@@ -10,12 +10,10 @@ import xarray as xr
 # TODO:
 # 1. [DONE 5c529da] Eliminate EarthStatDataset class. Move its methods into EarthStat class.
 # 2. [DONE 5c529da] Allows: Delete __slots__ thing and warning suppression about that
-# 3. EarthStat.get_data(): Add required "target units" attribute; fail if not handled
-# 4. Add custom EarthStat.__repr__ method to just show (xr.Dataset(resolution, time range))
-# 5. "First, check whether this crop is even in EarthStat. Return early if not." does not do this??
-# CHECK B4B RESULTS
-# 6. EarthStat.get_map() and get_data() need to include time_slice option instead of getting mean of all time
-# 7. EarthStat.get_map() needs to area-weight mean yield
+# 3. [DONE 0ea98a5] EarthStat.get_data(): Add required "target units" attribute; fail if not handled
+# ✅ CHECK B4B RESULTS
+# 4. EarthStat.get_map() needs to area-weight mean yield
+# 5. EarthStat.get_map() needs to include time_slice option instead of getting mean of all time
 
 
 def align_time(da_to_align, target_time):
@@ -198,6 +196,12 @@ class EarthStat:
         """
         # Actually get the map
         data_obs = self.get_data(res, stat_input, crop, target_unit)
+
+        # Area-weight mean yield
+        if stat_input == "yield":
+            # Target unit of weight doesn't actually matter but is needed for get_data() call
+            data_obs = data_obs.weighted(self.get_data(res, "area", crop, "Mha"))
+
         map_obs = data_obs.mean(dim="time")
 
         return map_obs
