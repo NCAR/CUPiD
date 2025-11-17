@@ -24,7 +24,7 @@ import numpy as np
 import xarray as xr
 from dict_slice_str_indexed import DictSliceStrIndexed
 
-NO_INTSXN_TIME_SLICE = slice("9999-01-01", "9999-12-31")
+NO_INTSXN_TIME_SLICE = None
 
 
 def check_grid_match(grid0, grid1, tol=0):
@@ -246,30 +246,32 @@ def get_mean_map(
     else:
         assert isinstance(map_keycase_dict_io, DictSliceStrIndexed)
 
-    # Get this case's map
-    time_slice = _get_intsxn_time_slice_of_cases(
-        case,
-        key_case,
-        time_slice,
-        calc_diff_from_key_case,
-    )
-    case = case.sel(time=time_slice)
-    n_timesteps = case.cft_ds.sizes["time"]
-    if n_timesteps == 0:
-        case_first_yr = None
-        case_last_yr = None
-    else:
-        case_first_yr = case.cft_ds["time"].values[0].year
-        case_last_yr = case.cft_ds["time"].values[-1].year
+    if time_slice is not None:
+        time_slice = _get_intsxn_time_slice_of_cases(
+            case,
+            key_case,
+            time_slice,
+            calc_diff_from_key_case,
+        )
 
+    # Get this case's map
+    if time_slice is None:
+        n_timesteps = 0
+    else:
+        case = case.sel(time=time_slice)
+        n_timesteps = case.cft_ds.sizes["time"]
     if n_timesteps == 0:
         map_case = xr.full_like(case.cft_ds["area"], fill_value=np.nan)
+        case_first_yr = None
+        case_last_yr = None
     else:
         map_case = this_fn(
             case,
             *args,
             **kwargs,
         )
+        case_first_yr = case.cft_ds["time"].values[0].year
+        case_last_yr = case.cft_ds["time"].values[-1].year
 
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.

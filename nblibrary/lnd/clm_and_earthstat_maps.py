@@ -8,6 +8,7 @@ import sys
 
 from bokeh_html_utils import sanitize_filename
 from plotting_utils import get_difference_map
+from plotting_utils import get_instxn_time_slice_of_ds
 from plotting_utils import get_key_case
 from plotting_utils import get_mean_map
 from results_maps import ResultsMaps
@@ -86,6 +87,7 @@ def _get_obsdiff_map(
     earthstat_data,
     crop,
 ):
+
     # Get CLM map
     map_clm = _get_clm_map(case, stat_input)
 
@@ -238,6 +240,28 @@ def clm_and_earthstat_maps_1crop(
             for c, case in enumerate(case_list):
                 case_legend = case_legend_list[c]
 
+                # Get overlap of CLM and EarthStat years
+                ds_to_overlap = [case.cft_ds]
+                if obs_input != "None":
+                    ds_to_overlap.append(
+                        earthstat_data[case.cft_ds.attrs["resolution"]],
+                    )
+                if key_case is not None:
+                    ds_to_overlap.append(key_case.cft_ds)
+                time_slice_thiscase = get_instxn_time_slice_of_ds(
+                    time_slice,
+                    *ds_to_overlap,
+                )
+                earthstat_data_intsxn = None
+                key_case_intsxn = None
+                if time_slice_thiscase is not None:
+                    case = case.sel(time=time_slice_thiscase)
+                    earthstat_data_intsxn = earthstat_data.sel(time=time_slice_thiscase)
+                    if key_case is None:
+                        key_case_intsxn = key_case
+                    else:
+                        key_case_intsxn = key_case.sel(time=time_slice_thiscase)
+
                 key_diff_abs_error = key_case_value is not None and obs_input != "None"
                 if obs_input == "None":
                     special_mean = _get_clm_map
@@ -248,7 +272,7 @@ def clm_and_earthstat_maps_1crop(
                     special_mean_args = []
                     special_mean_kwargs = {
                         "stat_input": stat_input,
-                        "earthstat_data": earthstat_data,
+                        "earthstat_data": earthstat_data_intsxn,
                         "crop": crop,
                     }
 
@@ -260,12 +284,12 @@ def clm_and_earthstat_maps_1crop(
                     map_keycase_dict_io,
                 ) = get_mean_map(
                     case,
-                    key_case,
+                    key_case_intsxn,
                     key_diff_abs_error,
                     special_mean,
                     *special_mean_args,
                     map_keycase_dict_io=map_keycase_dict_io,
-                    time_slice=time_slice,
+                    time_slice=time_slice_thiscase,
                     **special_mean_kwargs,
                 )
 

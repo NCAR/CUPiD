@@ -89,6 +89,12 @@ class EarthStat:
             f"Dict with Datasets for the following resolutions: {','.join(self._data.keys())}",
         )
 
+    def keys(self):
+        """
+        Return keys of the _data dict
+        """
+        return self._data.keys()
+
     def _get_crop_list(self, earthstat_dir, crops_to_include):
         """
         Get the list of crops in EarthStat
@@ -197,3 +203,59 @@ class EarthStat:
         map_obs = data_obs.mean(dim="time")
 
         return map_obs
+
+    @classmethod
+    def _create_empty(cls):
+        """
+        Create an empty EarthStat object without going through the normal initialization (i.e.,
+        import). Used internally by sel() and isel() for creating copies.
+        """
+        # Create instance without calling __init__
+        instance = cls.__new__(cls)
+        # Initialize _data as empty dict
+        instance._data = {}
+        return instance
+
+    def _copy_other_attributes(self, dest_earthstat):
+        """
+        Copy all CropCaseList attributes from self to destination EarthStat object, except
+        for _data dict.
+        """
+        for attr in [a for a in dir(self) if not a.startswith("__")]:
+            if attr == "_data":
+                continue
+            # Skip callable attributes (methods) - they should be inherited from the class
+            if callable(getattr(self, attr)):
+                continue
+            setattr(dest_earthstat, attr, getattr(self, attr))
+        return dest_earthstat
+
+    def sel(self, *args, **kwargs):
+        """
+        Makes a copy of this EarthStat object, applying Dataset.sel() with the given arguments.
+        """
+        new_earthstat = self._create_empty()
+
+        # .sel() each Dataset in dict
+        for res in list(self.keys()):
+            new_earthstat[res] = self[res].sel(*args, **kwargs)
+
+        # Copy over other attributes
+        new_earthstat = self._copy_other_attributes(new_earthstat)
+
+        return new_earthstat
+
+    def isel(self, *args, **kwargs):
+        """
+        Makes a copy of this EarthStat object, applying Dataset.isel() with the given arguments.
+        """
+        new_earthstat = self._create_empty()
+
+        # .sel() each Dataset in dict
+        for res in list(self.keys()):
+            new_earthstat[res] = self[res].isel(*args, **kwargs)
+
+        # Copy over other attributes
+        new_earthstat = self._copy_other_attributes(new_earthstat)
+
+        return new_earthstat
