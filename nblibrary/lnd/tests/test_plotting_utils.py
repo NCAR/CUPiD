@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from unittest.mock import Mock
 
+import cftime
 import pytest
+import xarray as xr
 
 # Add parent directory to path to import plotting_utils
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -15,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # pylint: disable=wrong-import-position
 from plotting_utils import (  # noqa: E402
     _get_range_overlap,
+    _get_intsxn_time_slice_if_needed,
 )
 
 
@@ -196,3 +200,234 @@ class TestGetRangeOverlap:  # pylint: disable=too-many-public-methods
         """Test that the position of the invalid range is reported."""
         with pytest.raises(ValueError, match="Range at position 1"):
             _get_range_overlap([2000, 2010], [2015, 2005])
+
+
+class TestGetIntsxnTimeSliceIfNeeded:
+    """Tests for the _get_intsxn_time_slice_if_needed function."""
+
+    def _create_mock_case(self, name, start_year, end_year):
+        """Helper to create a mock case object with time dimension."""
+        case = Mock()
+        case.name = name
+
+        # Create time coordinate
+        if start_year is not None and end_year is not None:
+            # Create cftime.DatetimeNoLeap objects for each year
+            times = [
+                cftime.DatetimeNoLeap(year, 1, 1)
+                for year in range(start_year, end_year + 1)
+            ]
+            ds = xr.Dataset(
+                coords={"time": times},
+            )
+        else:
+            # Empty dataset with no time
+            ds = xr.Dataset(coords={"time": []})
+
+        case.cft_ds = ds
+        return case
+
+    def test_none_time_slice_returns_none(self):
+        """Test that None time_slice_in returns None."""
+        case = self._create_mock_case("case1", 2000, 2010)
+        key_case = self._create_mock_case("key_case", 2000, 2010)
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            None,
+            calc_diff_from_key_case=True,
+        )
+
+        assert result is None
+
+    def test_no_diff_returns_input_slice(self):
+        """Test that when calc_diff_from_key_case is False, input slice is returned."""
+        case = self._create_mock_case("case1", 2000, 2010)
+        key_case = self._create_mock_case("key_case", 2000, 2010)
+        time_slice_in = slice("2005-01-01", "2008-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=False,
+        )
+
+        assert result == time_slice_in
+
+    def test_overlapping_ranges(self):
+        """Test with overlapping year ranges between case and key_case."""
+        case = self._create_mock_case("case1", 2000, 2015)
+        key_case = self._create_mock_case("key_case", 2005, 2020)
+        time_slice_in = slice("2000-01-01", "2020-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return the intersection: 2005-2015
+        assert result == slice("2005-01-01", "2015-12-31")
+
+    def test_identical_ranges(self):
+        """Test with identical year ranges."""
+        case = self._create_mock_case("case1", 2000, 2010)
+        key_case = self._create_mock_case("key_case", 2000, 2010)
+        time_slice_in = slice("2000-01-01", "2010-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        assert result == slice("2000-01-01", "2010-12-31")
+
+    def test_no_overlap_uses_key_case_range(self):
+        """Test that when ranges don't overlap, key_case range is used."""
+        case = self._create_mock_case("case1", 2000, 2005)
+        key_case = self._create_mock_case("key_case", 2010, 2015)
+        time_slice_in = slice("2000-01-01", "2015-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return key_case range when no overlap
+        assert result == slice("2010-01-01", "2015-12-31")
+
+    def test_case_subset_of_key_case(self):
+        """Test when case range is completely within key_case range."""
+        case = self._create_mock_case("case1", 2005, 2010)
+        key_case = self._create_mock_case("key_case", 2000, 2015)
+        time_slice_in = slice("2000-01-01", "2015-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return case range (the intersection)
+        assert result == slice("2005-01-01", "2010-12-31")
+
+    def test_key_case_subset_of_case(self):
+        """Test when key_case range is completely within case range."""
+        case = self._create_mock_case("case1", 2000, 2015)
+        key_case = self._create_mock_case("key_case", 2005, 2010)
+        time_slice_in = slice("2000-01-01", "2015-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return key_case range (the intersection)
+        assert result == slice("2005-01-01", "2010-12-31")
+
+    def test_key_case_empty_raises_error(self):
+        """Test that empty key_case raises NotImplementedError."""
+        case = self._create_mock_case("case1", 2000, 2010)
+        key_case = self._create_mock_case("key_case", None, None)
+        time_slice_in = slice("2000-01-01", "2010-12-31")
+
+        with pytest.raises(
+            NotImplementedError,
+            match="key case 'key_case' has no years in",
+        ):
+            _get_intsxn_time_slice_if_needed(
+                case,
+                key_case,
+                time_slice_in,
+                calc_diff_from_key_case=True,
+            )
+
+    def test_partial_overlap_at_start(self):
+        """Test partial overlap at the start of ranges."""
+        case = self._create_mock_case("case1", 1995, 2005)
+        key_case = self._create_mock_case("key_case", 2000, 2010)
+        time_slice_in = slice("1995-01-01", "2010-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return the intersection: 2000-2005
+        assert result == slice("2000-01-01", "2005-12-31")
+
+    def test_partial_overlap_at_end(self):
+        """Test partial overlap at the end of ranges."""
+        case = self._create_mock_case("case1", 2005, 2015)
+        key_case = self._create_mock_case("key_case", 2000, 2010)
+        time_slice_in = slice("2000-01-01", "2015-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return the intersection: 2005-2010
+        assert result == slice("2005-01-01", "2010-12-31")
+
+    def test_single_year_overlap(self):
+        """Test when ranges overlap by only one year."""
+        case = self._create_mock_case("case1", 2000, 2005)
+        key_case = self._create_mock_case("key_case", 2005, 2010)
+        time_slice_in = slice("2000-01-01", "2010-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return single year intersection
+        assert result == slice("2005-01-01", "2005-12-31")
+
+    def test_time_slice_narrower_than_data(self):
+        """Test when time_slice_in is narrower than available data."""
+        case = self._create_mock_case("case1", 2000, 2020)
+        key_case = self._create_mock_case("key_case", 2000, 2020)
+        time_slice_in = slice("2005-01-01", "2010-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return the intersection within the slice
+        assert result == slice("2005-01-01", "2010-12-31")
+
+    def test_case_empty_within_slice(self):
+        """Test when case has no data within the time slice."""
+        case = self._create_mock_case("case1", 2000, 2005)
+        key_case = self._create_mock_case("key_case", 2010, 2015)
+        time_slice_in = slice("2010-01-01", "2015-12-31")
+
+        result = _get_intsxn_time_slice_if_needed(
+            case,
+            key_case,
+            time_slice_in,
+            calc_diff_from_key_case=True,
+        )
+
+        # Should return key_case range when case has no overlap
+        assert result == slice("2010-01-01", "2015-12-31")
