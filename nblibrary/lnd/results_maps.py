@@ -640,8 +640,17 @@ class ResultsMaps:
             cbar_kwargs=cbar_kwargs,
         )
 
-        # Add coastlines for geographic reference
-        ax.coastlines(linewidth=0.5)
+        # Hide map and colorbar if all data is NaN
+        if np.all(np.isnan(da.values)):
+            im.set_visible(False)
+            ax.set_frame_on(False)
+            if hasattr(im, "colorbar") and im.colorbar is not None:
+                im.colorbar.ax.set_visible(False)
+
+        # Otherwise, add coastlines
+        else:
+            # Add coastlines for geographic reference
+            ax.coastlines(linewidth=0.5)
 
         # Set title and remove axis labels/ticks for cleaner appearance
         ax.set_title(title)  # Instead of plt.title, for parallelism
