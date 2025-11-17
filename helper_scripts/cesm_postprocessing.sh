@@ -116,7 +116,19 @@ fi
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
+if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
+  if [ "${CUPID_RUN_ADF}" != "TRUE" ]; then
+    echo "ERROR: CUPID_RUN_CVDP=TRUE but CUPID_RUN_ADF=${CUPID_RUN_ADF}. CVDP is run by"
+    echo "the ADF, so those flags which will result in the CVDP not being run."
+    echo "Either set CUPID_RUN_ADF=TRUE or CUPID_RUN_CVDP=FALSE"
+    exit 1
+  fi
+  CVDP_OPT="--run-cvdp"
+else
+  CVDP_OPT=""
+fi
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
+   ${CVDP_OPT} \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
@@ -132,13 +144,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
-  if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
-    CVDP_OPT="--run-cvdp"
-  else
-    CVDP_OPT=""
-  fi
   ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
-     ${CVDP_OPT} \
      --cupid-config-loc . \
      --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
      --out-file adf_config.yml

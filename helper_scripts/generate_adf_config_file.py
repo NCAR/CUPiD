@@ -21,12 +21,10 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="an adf config file to use as a base",
 )
 @click.option("--out-file", required=True, help="the output file to save")
-@click.option("--run-cvdp", is_flag=True, help="Run CVDP diagnostics")
 def generate_adf_config(
     cupid_config_loc,
     adf_template,
     out_file,
-    run_cvdp=False,
 ):
     """Use cupid config file (YAML) from cupid_config_loc and adf_template (YAML)
     to produce out_file by modifying adf_template with data from cupid config file.
@@ -237,10 +235,7 @@ def generate_adf_config(
                     .items()
                 ):
                     if key not in cvdp_args:
-                        if key == "cvdp_run":
-                            cvdp_args[key] = run_cvdp
-                        else:
-                            cvdp_args[key] = val
+                        cvdp_args[key] = val
     if diag_var_list:
         a_dict["diag_var_list"] = diag_var_list
     if analysis_scripts:
