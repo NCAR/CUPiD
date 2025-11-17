@@ -152,7 +152,7 @@ compute_notebooks:
             obs_data_loc: /glade/campaign/cgd/amp/amwg/ADF_obs
           analysis_scripts: ["amwg_table"]
           diag_cvdp_info:
-            cvdp_run: False # a bunch of warnings of convert being deprecated in IMv7 will be printed if turned on - will be fixed with CVDP update
+            cvdp_run: False
             cvdp_tar: False
           regridded_output: False
           base_regridded_output: False

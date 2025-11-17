@@ -35,6 +35,7 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_CVDP=`./xmlquery --value CUPID_RUN_CVDP`
 CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
 CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
@@ -131,7 +132,13 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
+  if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
+    CVDP_OPT="--run-cvdp"
+  else
+    CVDP_OPT=""
+  fi
   ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
+     ${CVDP_OPT} \
      --cupid-config-loc . \
      --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
      --out-file adf_config.yml
