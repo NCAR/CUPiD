@@ -274,10 +274,15 @@ def generate_cupid_config(
                 "Precipitation",
             ]
 
-    if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
-        my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
+    if "ADF" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(adf_output_root, "ADF_output")
+
+    if "CVDP" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["CVDP"]["parameter_groups"]["none"][
+            "cvdp_loc"
+        ] = os.path.join(adf_output_root, "CVDP_output")
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
@@ -289,6 +294,13 @@ def generate_cupid_config(
         my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
             "parameter_groups"
         ]["none"]["base_climo_nyears"] = base_climo_nyears
+
+    # Regional Ocean Open Boundary Conditions needs access to ocean input directory
+    # The ocean input directory is (hackily) accessible through the case root directory
+    if "Regional_Ocean_OBC" in my_dict["compute_notebooks"].get("ocn", {}):
+        my_dict["compute_notebooks"]["ocn"]["Regional_Ocean_OBC"]["parameter_groups"][
+            "none"
+        ]["case_root"] = case_root
 
     # replace with environment variable
     my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)

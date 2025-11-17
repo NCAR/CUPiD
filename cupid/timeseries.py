@@ -1,6 +1,7 @@
 """
 Timeseries generation tool adapted from ADF for general CUPiD use.
 """
+
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
@@ -240,7 +241,7 @@ def create_time_series(
                     )
                     continue
                 if (
-                    var in derive_vars.keys()
+                    var in derive_vars
                 ):  # TODO: dictionary implementation needs to be fixed with yaml file
                     constit_list = derive_vars[var]
                     for constit in constit_list:

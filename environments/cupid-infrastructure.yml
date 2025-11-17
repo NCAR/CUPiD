@@ -1,9 +1,9 @@
 name: cupid-infrastructure
 channels:
     - conda-forge
-    - defaults
+    - nodefaults
 dependencies:
-    - python=3.11.4
+    - python
     - black
     - click
     - dask
@@ -12,12 +12,13 @@ dependencies:
     - intake-esm
     - jinja2
     - jupyter-book
+    - nb_conda_kernels
     - nco
     - pandas
     - papermill
     - pre-commit
     - pip
-    - ploomber=0.22.3
+    - ploomber
     - pyyaml
     - xarray
     - pip:
