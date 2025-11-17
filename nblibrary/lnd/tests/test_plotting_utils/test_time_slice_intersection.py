@@ -1,5 +1,5 @@
 """
-Tests for plotting_utils module.
+Tests for time slice intersection in the plotting_utils module.
 """
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ import cftime
 import pytest
 import xarray as xr
 
-# Add parent directory to path to import plotting_utils
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add parent directories to path to import plotting_utils
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 # noqa: E402
 # pylint: disable=wrong-import-position
