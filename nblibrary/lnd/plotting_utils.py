@@ -24,6 +24,8 @@ import numpy as np
 import xarray as xr
 from dict_slice_str_indexed import DictSliceStrIndexed
 
+NO_INTSXN_TIME_SLICE = slice("9999-01-01", "9999-12-31")
+
 
 def check_grid_match(grid0, grid1, tol=0):
     """
@@ -222,9 +224,6 @@ def _get_range_overlap(*ranges):
     return [result_start, result_end]
 
 
-NO_SLICE = slice(0, 0)
-
-
 def get_mean_map(
     case,
     key_case,
@@ -232,7 +231,7 @@ def get_mean_map(
     this_fn,
     *args,
     map_keycase_dict_io,
-    time_slice=NO_SLICE,
+    time_slice,
     **kwargs,
 ):
     """
@@ -248,14 +247,13 @@ def get_mean_map(
         assert isinstance(map_keycase_dict_io, DictSliceStrIndexed)
 
     # Get this case's map
-    if time_slice != NO_SLICE:
-        time_slice = _get_intsxn_time_slice_if_needed(
-            case,
-            key_case,
-            time_slice,
-            calc_diff_from_key_case,
-        )
-        case = case.sel(time=time_slice)
+    time_slice = _get_intsxn_time_slice_of_cases(
+        case,
+        key_case,
+        time_slice,
+        calc_diff_from_key_case,
+    )
+    case = case.sel(time=time_slice)
     n_timesteps = case.cft_ds.sizes["time"]
     if n_timesteps == 0:
         case_first_yr = None
@@ -280,8 +278,7 @@ def get_mean_map(
         if key in map_keycase_dict_io.keys():
             map_key_case = map_keycase_dict_io[*key]  # fmt: skip
         else:
-            if time_slice != NO_SLICE:
-                key_case = key_case.sel(time=time_slice)
+            key_case = key_case.sel(time=time_slice)
             map_key_case = this_fn(
                 key_case,
                 *args,
@@ -306,35 +303,43 @@ def get_mean_map(
     return n_timesteps, map_clm, case_first_yr, case_last_yr, map_keycase_dict_io
 
 
-def _get_intsxn_time_slice_if_needed(
+def _get_intsxn_time_slice_of_cases(
     case,
     key_case,
     time_slice_in,
     calc_diff_from_key_case,
 ):
-    if time_slice_in is None:
-        return None
+    """
+    Given a case, key case, and time slice, return the time slice that is the intersection among
+    all three.
+    """
 
     if not calc_diff_from_key_case:
         time_slice = time_slice_in
     else:
-        case_yr_range = get_yr_range(case.cft_ds.sel(time=time_slice_in))
-        key_case_yr_range = get_yr_range(key_case.cft_ds.sel(time=time_slice_in))
-        if key_case_yr_range == [None, None]:
-            raise NotImplementedError(
-                f"key case '{key_case.name}' has no years in {time_slice_in}",
-            )
-        intsxn_yr_range = _get_range_overlap(case_yr_range, key_case_yr_range)
-        if intsxn_yr_range is None:
-            time_slice = slice(
-                f"{key_case_yr_range[0]}-01-01",
-                f"{key_case_yr_range[1]}-12-31",
-            )
-        else:
-            time_slice = slice(
-                f"{intsxn_yr_range[0]}-01-01",
-                f"{intsxn_yr_range[1]}-12-31",
-            )
+        time_slice = get_instxn_time_slice_of_ds(
+            time_slice_in,
+            case.cft_ds,
+            key_case.cft_ds,
+        )
+
+    return time_slice
+
+
+def get_instxn_time_slice_of_ds(time_slice_in, *args):
+    """
+    Given a time slice and an arbitrary number of Datasets, return the time slice that is the
+    intersection among all.
+    """
+    args = [ds.sel(time=time_slice_in) for ds in args]
+    intsxn_yr_range = _get_range_overlap(*[get_yr_range(ds) for ds in args])
+    if intsxn_yr_range is None:
+        return NO_INTSXN_TIME_SLICE
+
+    time_slice = slice(
+        f"{intsxn_yr_range[0]}-01-01",
+        f"{intsxn_yr_range[1]}-12-31",
+    )
 
     return time_slice
 
