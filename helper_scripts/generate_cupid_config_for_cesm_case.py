@@ -168,9 +168,7 @@ def generate_cupid_config(
         my_dict = yaml.safe_load(f)
 
     my_dict["data_sources"]["nb_path_root"] = os.path.join(
-        cesm_root,
-        "tools",
-        "CUPiD",
+        cupid_root,
         "nblibrary",
     )
     my_dict["global_params"]["case_name"] = case
