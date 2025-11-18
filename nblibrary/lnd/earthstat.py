@@ -4,6 +4,7 @@ Classes to handle importing and working with EarthStat data
 from __future__ import annotations
 
 import os
+import warnings
 
 import xarray as xr
 
@@ -135,14 +136,18 @@ class EarthStat:
         Import EarthStat maps corresponding to simulated CLM resolutions
         """
         for res in sim_resolutions:
-            # For now, can only import f09 EarthStat. Will skip maps comparing EarthStat to output
-            # from other resolutions.
-            if res != "f09":
+            # Skip (but warn) if EarthStat file not found.
+            earthstat_file = os.path.join(earthstat_dir, res + ".nc")
+            print(earthstat_file)
+            if not os.path.exists(earthstat_file):
+                warnings.warn(
+                    f"No EarthStat maps available for resolution {res}; this will cause problems",
+                )
                 continue
-            print(f"Importing EarthStat yield maps for resolution {res}...")
 
             # Open file
-            ds = xr.open_dataset(os.path.join(earthstat_dir, res + ".nc"))
+            print(f"Importing EarthStat yield maps for resolution {res}...")
+            ds = xr.open_dataset(earthstat_file)
             start_year = opts["start_year"]
             end_year = opts["end_year"]
             ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
