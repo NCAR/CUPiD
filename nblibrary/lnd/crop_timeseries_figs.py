@@ -9,6 +9,29 @@ from matplotlib import pyplot as plt
 EARTHSTAT_RES_TO_PLOT = "f09"
 
 
+def get_line_plot_kwargs(opts, c):
+    """
+    Given options and a case index, return a dict to be used as kwargs for plot()
+    """
+    plot_kwargs = {}
+
+    # Change line style for one line that overlaps another for some crops
+    # TODO: Optionally define linestyle for each case in config.yml
+    if "clm6_crop_032_nomaxlaitrig" in opts["case_name_list"] and opts[
+        "case_name_list"
+    ][c].endswith("clm6_crop_032_nmlt_phaseparams"):
+        linestyle = "--"
+    else:
+        linestyle = "-"
+    plot_kwargs["linestyle"] = linestyle
+
+    # Change line color, if requested
+    if opts["line_colors"] is not None:
+        plot_kwargs["color"] = opts["line_colors"][c]
+
+    return plot_kwargs
+
+
 def setup_fig(opts):
     fig_opts = {}
     n_crops_to_include = len(opts["crops_to_include"])
@@ -35,19 +58,11 @@ def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area):
         crop_data_ts.name = var_details["da_name"]
         crop_data_ts.attrs["units"] = var_details["ctsm_units"]
 
-        # Change line style for one line that overlaps another for some crops
-        # TODO: Optionally define linestyle for each case in config.yml
-        if "clm6_crop_032_nomaxlaitrig" in opts["case_name_list"] and opts[
-            "case_name_list"
-        ][c].endswith("clm6_crop_032_nmlt_phaseparams"):
-            linestyle = "--"
-        else:
-            linestyle = "-"
-
         # Plot
+        plot_kwargs = get_line_plot_kwargs(opts, c)
         if use_earthstat_area:
             crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
-        crop_data_ts.plot(linestyle=linestyle)
+        crop_data_ts.plot(**plot_kwargs)
 
 
 def _get_clm_yield(crop, case, use_earthstat_area):
