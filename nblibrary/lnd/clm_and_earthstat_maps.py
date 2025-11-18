@@ -7,6 +7,7 @@ import os
 import sys
 
 from bokeh_html_utils import sanitize_filename
+from parallelizable_plot_loop import get_figpath_with_keycase
 from plotting_utils import get_difference_map
 from plotting_utils import get_instxn_time_slice_of_ds
 from plotting_utils import get_key_case
@@ -163,19 +164,6 @@ def _mask_where_neither_has_area(
     return result
 
 
-def _get_figpath_with_keycase(fig_path, key_case, key_case_dict):
-    if len(key_case_dict) == 1:
-        return fig_path
-    dirname = os.path.dirname(fig_path)
-    basename = os.path.basename(fig_path)
-    root, ext = os.path.splitext(basename)
-    root += "_" + key_case
-    root = sanitize_filename(root)
-    basename = root + ext
-    fig_path = os.path.join(dirname, basename)
-    return fig_path
-
-
 def _get_fig_path(img_dir, crop, clm_or_obsdiff, stat, yr_range_str):
     """
     Get filenames to which figures will be saved. Members of join_list
@@ -315,7 +303,7 @@ def clm_and_earthstat_maps_1crop(
                     case_incl_yr_dict[case_legend] = [case_first_yr, case_last_yr]
 
             # Update figure path with keycase, if needed
-            fig_path_key = _get_figpath_with_keycase(
+            fig_path_key = get_figpath_with_keycase(
                 fig_path,
                 key_case_key,
                 key_case_dict,
