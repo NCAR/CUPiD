@@ -127,7 +127,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-  --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
    --cupid-run-adf ${CUPID_RUN_ADF} \
    --cupid-run-ldf ${CUPID_RUN_LDF} \
    --cupid-run-ilamb ${CUPID_RUN_ILAMB}
