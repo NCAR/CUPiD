@@ -507,10 +507,13 @@ class ResultsMaps:
         """
         vmin = np.inf
         vmax = -np.inf
+        any_subplot_has_data = False
         for this_subplot in subplot_title_list:
             if key_plot is not None and this_subplot == key_plot:
                 continue
             da_vals = self[this_subplot].values
+            if not any_subplot_has_data and np.any(~np.isnan(da_vals)):
+                any_subplot_has_data = True
             with warnings.catch_warnings():
                 warnings.filterwarnings(
                     "ignore",
@@ -520,7 +523,7 @@ class ResultsMaps:
                 vmin = min(vmin, np.nanmin(da_vals))
                 vmax = max(vmax, np.nanmax(da_vals))
 
-        if np.isinf(vmin) or np.isinf(vmax):
+        if any_subplot_has_data and (np.isinf(vmin) or np.isinf(vmax)):
             raise RuntimeError("Failed to find vmin and/or vmax")
 
         return vmin, vmax

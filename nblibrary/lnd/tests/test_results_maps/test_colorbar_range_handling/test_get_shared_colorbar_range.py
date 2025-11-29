@@ -110,8 +110,8 @@ class TestGetSharedColorbarRange:
         assert vmin == 1.0
         assert vmax == 5.0
 
-    def test_all_nan_raises_error(self):
-        """Test that all NaN values raises RuntimeError."""
+    def test_all_nan_raises_no_error(self):
+        """Test that all NaN values does not raise RuntimeError."""
         rm = ResultsMaps()
 
         # Create data with only NaN values
@@ -122,8 +122,11 @@ class TestGetSharedColorbarRange:
             dims=["lat", "lon"],
         )
 
-        with pytest.raises(RuntimeError, match="Failed to find vmin and/or vmax"):
-            rm._get_shared_colorbar_range(["nan_case"], key_plot=None)
+        vmin, vmax = rm._get_shared_colorbar_range(["nan_case"], key_plot=None)
+
+        # Should keep the original values
+        assert vmin == np.inf
+        assert vmax == -np.inf
 
     def test_negative_values(self):
         """Test with all negative values."""
