@@ -607,6 +607,11 @@ class ResultsMaps:
         # Create a copy to avoid modifying the original data
         da = self[case_name].copy()
 
+        # By this point, we expect a DataArray with latitude and longitude dimensions. To be
+        # maximally accepting, just check that it's 2-d.
+        msg = f"Expected DataArray with 2 dimensions, got {da.ndim}: {da.dims}"
+        assert da.ndim == 2, msg
+
         # Calculate difference from key case if applicable
         if key_case is not None and case_name != key_case:
             title, cmap, da = self._plotting_diff_from_key_case(
