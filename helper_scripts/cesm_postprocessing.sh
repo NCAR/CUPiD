@@ -132,7 +132,7 @@ fi
 
 # 3. Generate ILAMB config file
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
+  ${CUPID_ROOT}/helper_scripts/generate_ilamb_config_files.py \
      --cupid-config-loc . \
      --run-type ${CUPID_RUN_TYPE} \
      --cupid-root ${CUPID_ROOT}
@@ -153,7 +153,7 @@ fi
 
 # 5. Remapping of timeseries files
 if [ "${CUPID_REMAP}" == "TRUE" ]; then
-   ${SRCROOT}/tools/CUPiD/cupid/run_remapping.py ${CUPID_FLAG_STRING}
+   ${CUPID_ROOT}/cupid/run_remapping.py ${CUPID_FLAG_STRING}
 fi
 
 # 6. Run ADF
