@@ -183,8 +183,8 @@ compute_notebooks:
           region_list: ["Global", "N Hemisphere Land","Polar",
                         "Canadian Arctic",'Russian Arctic','Greenland',
                         'Northwest Canada','Northern Europe','Western Siberia',
-                        'Western US','Eastern US','Europe',
-                        'Amazonia','Central Africa','Indonesia',
+                        'Western US','Eastern US','CONUS','Europe',
+                        'Amazonia','Central Africa','Indonesia','S America',
                         'Brazil','Sahel','Southern Africa','India']
           defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
 
