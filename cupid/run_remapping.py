@@ -140,12 +140,13 @@ def run_remapping(
                         ),
                     ]
             else:
+                ts_root = global_params.get("ts_dir", global_params["CESM_output_dir"])
                 if isinstance(timeseries_params["case_name"], list):
                     ts_output_dirs = []
                     for cname in timeseries_params["case_name"]:
                         ts_output_dirs.append(
                             os.path.join(
-                                    global_params["CESM_output_dir"],
+                                    ts_root,
                                     cname,
                                     f"{component}", "proc", "tseries",
                             ),
@@ -153,7 +154,7 @@ def run_remapping(
                 else:
                     ts_output_dirs = [
                         os.path.join(
-                                global_params["CESM_output_dir"],
+                                ts_root,
                                 timeseries_params["case_name"],
                                 f"{component}", "proc", "tseries",
                         ),
