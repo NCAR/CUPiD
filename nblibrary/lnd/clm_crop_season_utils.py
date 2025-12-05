@@ -56,3 +56,28 @@ def cft_ds_overwintering(cft_ds):
     cft_ds["overwinter_area_crop"].attrs["units"] = "m2"
 
     return cft_ds
+
+
+def cft_ds_gslen(cft_ds):
+    """
+    Calculate growing season length for each crop, combining its constituent CFTs
+    """
+    # Get original DataArray and units
+    da = cft_ds["GSLEN_PERHARV"]
+    units = da.attrs["units"]
+
+    # Mask to just valid harvests
+    cft_ds["gslen_perharv_cft"] = da.where(cft_ds["VALID_HARVEST"])
+    cft_ds["gslen_perharv_cft"].attrs["units"] = units
+
+    # Combine CFTs to crops
+    cft_ds = combine_cft_to_crop.combine_cft_to_crop(
+        cft_ds,
+        "gslen_perharv_cft",
+        "gslen_perharv_crop",
+        method="mean",
+        weights="cft_harv_area",
+    )
+    cft_ds["gslen_perharv_crop"].attrs["units"] = units
+
+    return cft_ds
