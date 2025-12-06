@@ -1,7 +1,7 @@
 name: cupid-infrastructure
 channels:
-  - conda-forge
-  - nodefaults
+    - conda-forge
+    - nodefaults
 dependencies:
     - python
     - black
