@@ -224,7 +224,7 @@ def create_time_series(
 
         # Check if time series directory exists, and if not, then create it:
         # Use pathlib to create parent directories, if necessary.
-        Path(ts_dir[case_idx]).mkdir(parents=True, exist_ok=True)
+        Path(ts_dir[case_idx]).mkdir(parents=True, exist_ok=True, mode=0o755)
 
         # INPUT NAME TEMPLATE: $CASE.$scomp.[$type.][$string.]$date[$ending]
         first_file_split = str(hist_files[0]).split(".")
@@ -341,9 +341,6 @@ def create_time_series(
                 + ["-o", ts_outfil_str]
             )
 
-            # TODO: probably would be better to do at dir level...
-            # Could go up a level but may run into other file owners--
-            # which could be addressed with try/except but may be messy
             fix_permissions(ts_outfil_str)
 
             # Add to command list for use in multi-processing pool:
