@@ -25,20 +25,20 @@ def call_ncrcat(cmd):
     return subprocess.run(cmd, shell=False)
 
 
-def fix_permissions(filepath):
+def fix_permissions(filepath, file_mode=0o666, dir_mode=0o775, file_gid=1017, dir_gid=1017):
     """Fix file permissions and group to 'cesm'."""
     # filepath = glob.glob(filepath) # because ncrcat pid temporary file...
-    os.chmod(filepath, 0o666)  # rw for all
-    os.chown(filepath, -1, 1017)  # change group to 'cesm' gid 1017
+    os.chmod(filepath, file_mode)  # rw for all
+    os.chown(filepath, -1, file_gid)  # change group to 'cesm' gid 1017
     dirpath = ""
     for segment in filepath.split("/")[:-1]:
         dirpath = dirpath + "/" + segment
     os.chmod(
         dirpath,
-        0o775,
+        dir_mode,
     )  # This does change the tseries directory permission multiple times
     #    if multiple files in that directory, so efficiency could certainly be improved
-    os.chown(dirpath, -1, 1017)  # change group to 'cesm' gid 1017
+    os.chown(dirpath, -1, dir_gid)  # change group to 'cesm' gid 1017
 
 
 def create_time_series(
@@ -57,6 +57,10 @@ def create_time_series(
     num_procs,
     serial,
     logger,
+    file_mode,
+    dir_mode,
+    file_gid,
+    dir_gid
 ):
     """
     Generate time series versions of the history file data. Called by ``cupid-timeseries``.
@@ -372,7 +376,7 @@ def create_time_series(
     # Notify user that script has ended:
 
     for file_i in list_of_files:
-        fix_permissions(file_i)
+        fix_permissions(file_i, file_mode, dir_mode, file_gid, dir_gid)
 
     logger.info(
         f"  ... {component} time series file generation has finished successfully.",

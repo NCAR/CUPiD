@@ -110,6 +110,10 @@ def run_timeseries(
 
     # general timeseries arguments for all components
     num_procs = timeseries_params["num_procs"]
+    file_mode = timeseries_params["file_mode"]
+    dir_mode = timeseries_params["dir_mode"]
+    file_gid = timeseries_params["file_gid"]
+    dir_gid = timeseries_params["dir_gid"]
 
     for component, comp_bool in component_options.items():
         if comp_bool:
@@ -203,6 +207,10 @@ def run_timeseries(
                 num_procs,
                 serial,
                 logger,
+                file_mode,
+                dir_mode,
+                file_gid,
+                dir_gid
             )
             # fmt: on
             # pylint: enable=line-too-long

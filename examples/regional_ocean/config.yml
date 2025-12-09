@@ -58,6 +58,10 @@ timeseries:
   ts_done: [False]
   overwrite_ts: [False]
   case_name: ['CROCODILE_tutorial_nwa12_MARBL']
+  file_mode: 0o666
+  dir_mode: 0o775
+  file_gid: 1017
+  dir_gid: 1017
 
   ocn:
     vars: ['vo', 'uo', 'thetao', 'so']

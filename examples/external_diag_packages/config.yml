@@ -64,6 +64,10 @@ timeseries:
   ts_done: [False, False]
   overwrite_ts: [False, False]
   case_name: ['b.e23_alpha17f.BLT1850.ne30_t232.092', 'b.e30_beta02.BLT1850.ne30_t232.104']
+  file_mode: 0o666
+  dir_mode: 0o775
+  file_gid: 1017
+  dir_gid: 1017
 
   atm:
     vars: ['PSL']
