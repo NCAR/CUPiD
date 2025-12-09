@@ -119,7 +119,6 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
-   --adf-output-root ${PWD} \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
@@ -128,6 +127,9 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --adf-output-root ${PWD} \
+   --ldf-output-root ${PWD} \
+   --ilamb-output-root ${PWD} \
    --cupid-run-adf ${CUPID_RUN_ADF} \
    --cupid-run-ldf ${CUPID_RUN_LDF} \
    --cupid-run-ilamb ${CUPID_RUN_ILAMB}

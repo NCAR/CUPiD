@@ -118,9 +118,9 @@ compute_notebooks:
       summary_tables:
         parameter_groups:
           none:
-            adf_root: ../../examples/key_metrics/ADF_output/
-            ldf_root: ../../examples/key_metrics/LDF_output/
-            ilamb_root: ../../examples/key_metrics/ILAMB_output/
+            adf_root: ../../examples/external_diag_packages/ADF_output/
+            ldf_root: ../../examples/external_diag_packages/LDF_output/
+            ilamb_root: ../../examples/external_diag_packages/ILAMB_output/
             ilamb_vars_highlight: ["Gross Primary Productivity","Runoff","Snow Water Equivalent","Surface Relative Humidity","Precipitation"]
 
     atm:
