@@ -227,22 +227,22 @@ compute_notebooks:
                         "RegionalClimo_Amazonia_RegionalClimo_Mean.png"]
         external_tool:
           tool_name: 'LDF'
-          vars: ['TSA','PREC','ELAI','FSDS','FLDS','ASA','RNET',
+          vars: ['TSA','TV','PREC','ELAI','FSDS','FLDS','QBOT','ASA','RNET',
                  'FSH','ET','FCTR','FGEV','FCEV','QRUNOFF_TO_COUPLER',
-                 'SNOWDP','GPP','NPP','NEE','NBP',
-                 'BTRANMN','TOTVEGC','TOTECOSYSC','TOTSOMC_1m',
-                 'ALTMAX','FAREA_BURNED','DSTFLXT','MEG_isoprene']
+                 'SNOWDP','GPP','NPP','NEE','NBP','NPP_NUPTAKE','BTRANMN',
+                 'TOTECOSYSC','TOTSOMC_1m','ALTMAX','TWS','SOILWATER_10CM',
+                 'GRAINC_TO_FOOD','FAREA_BURNED']
           plotting_scripts:  ["global_latlon_map","polar_map",
                               "global_mean_timeseries_lnd", "regional_climatology",
                               "regional_timeseries"]
           analysis_scripts: ["lmwg_table"]
           base_regridded_output: False
-          region_list: ["Global", "N Hemisphere Land","Polar",
-                        "Canadian Arctic",'Russian Arctic','Greenland',
-                        'Northwest Canada','Northern Europe','Western Siberia',
-                        'Western US','Eastern US','Europe',
-                        'Amazonia','Central Africa','Indonesia',
-                        'Brazil','Sahel','Southern Africa','India']
+          region_list: ["Global","N Hemisphere Land","S Hemisphere Land","Polar",
+                        "Alaskan Arctic","Canadian Arctic",'Russian Arctic','Greenland',
+                        "Alaska",'Northwest Canada','Central Canada','Eastern Canda','Northern Europe','Western Siberia','Eastern Siberia',
+                        'Western US','Central US','Eastern US','CONUS','Europe','Mediterranean','Central America',
+                        'Amazonia','Central Africa','Indonesia','S America',
+                        'Brazil','Sahel','Southern Africa','India','Indochina','Australia']
           defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
           regions_file: ../../externals/LDF/lib/regions_lnd.yaml
 #    ocn:
