@@ -58,10 +58,10 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     intv = 5
     # add vectors
     Q = ax.quiver(
-        TLON.values[::intv, ::intv],
-        TLAT.values[::intv, ::intv],
-        uvel_rot1.values[::intv, ::intv],
-        vvel_rot1.values[::intv, ::intv],
+        TLON[::intv, ::intv],
+        TLAT[::intv, ::intv],
+        uvel_rot1[::intv, ::intv],
+        vvel_rot1[::intv, ::intv],
         color="black",
         scale=1.0,
         transform=ccrs.PlateCarree(),
@@ -106,10 +106,10 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     intv = 5
     # add vectors
     Q = ax.quiver(
-        TLON.values[::intv, ::intv],
-        TLAT.values[::intv, ::intv],
-        uvel_rot2.values[::intv, ::intv],
-        vvel_rot2.values[::intv, ::intv],
+        TLON[::intv, ::intv],
+        TLAT[::intv, ::intv],
+        uvel_rot2[::intv, ::intv],
+        vvel_rot2[::intv, ::intv],
         color="black",
         scale=1.0,
         transform=ccrs.PlateCarree(),
@@ -154,10 +154,10 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     intv = 5
     # add vectors
     Q = ax.quiver(
-        TLON.values[::intv, ::intv],
-        TLAT.values[::intv, ::intv],
-        uvel_diff.values[::intv, ::intv],
-        vvel_diff.values[::intv, ::intv],
+        TLON[::intv, ::intv],
+        TLAT[::intv, ::intv],
+        uvel_diff[::intv, ::intv],
+        vvel_diff[::intv, ::intv],
         color="black",
         scale=1.0,
         transform=ccrs.PlateCarree(),

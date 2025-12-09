@@ -64,18 +64,18 @@ def plot_diff(
     field_std = field_diff.std()
 
     this = ax.pcolormesh(
-        TLON,
-        TLAT,
-        field1_tmp,
+        TLON.values,
+        TLAT.values,
+        field1_tmp.values,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     if aice > 0:
         plt.contour(
-            ds_obs.lon,
-            ds_obs.lat,
-            ifrac_obs,
+            ds_obs.lon.values,
+            ds_obs.lat.values,
+            ifrac_obs.values,
             levels=[0.15],
             colors="magenta",
             transform=ccrs.PlateCarree(),
@@ -96,18 +96,18 @@ def plot_diff(
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON,
-        TLAT,
-        field2_tmp,
+        TLON.values,
+        TLAT.values,
+        field2_tmp.values,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     if aice > 0:
         plt.contour(
-            ds_obs.lon,
-            ds_obs.lat,
-            ifrac_obs,
+            ds_obs.lon.values,
+            ds_obs.lat.values,
+            ifrac_obs.values,
             levels=[0.15],
             colors="magenta",
             transform=ccrs.PlateCarree(),
@@ -128,8 +128,8 @@ def plot_diff(
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     this = ax.pcolormesh(
-        TLON,
-        TLAT,
+        TLON.values,
+        TLAT.values,
         field_diff,
         cmap="seismic",
         vmax=field_std * 2.0,
