@@ -70,6 +70,8 @@ def plot_loop(
     crop_dict: dict,
     incl_yrs_ranges_dict: dict,
     key_case_dict: dict,
+    get_mean_fn_args: list = None,
+    get_mean_fn_kwargs: dict = None,
     custom_dropdown_items: list = None,
     custom_radio_items: list = None,
     vrange: tuple = DEFAULT_NO_VRANGE,
@@ -83,6 +85,8 @@ def plot_loop(
 
     Args:
         get_mean_fn: Function to compute mean values for a case
+        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
+        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
         key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
         results_da_name: Name for the results DataArray
         img_dir: Directory path where images will be saved
@@ -107,6 +111,10 @@ def plot_loop(
         custom_dropdown_items = []
     if custom_radio_items is None:
         custom_radio_items = []
+    if get_mean_fn_args is None:
+        get_mean_fn_args = []
+    if get_mean_fn_kwargs is None:
+        get_mean_fn_kwargs = {}
 
     # For Dask parallel execution
     parallel = bool(dask_client)
@@ -135,6 +143,8 @@ def plot_loop(
 
                 kwargs = {
                     "get_mean_fn": get_mean_fn,
+                    "get_mean_fn_args": get_mean_fn_args,
+                    "get_mean_fn_kwargs": get_mean_fn_kwargs,
                     "key_diff_abs_error": key_diff_abs_error,
                     "results_da_name": results_da_name,
                     "fig_path": fig_path,
@@ -188,6 +198,8 @@ def plot_loop(
 def _one_figure(
     *,
     get_mean_fn: callable,
+    get_mean_fn_args: list,
+    get_mean_fn_kwargs: dict,
     key_diff_abs_error: bool,
     results_da_name: str,
     fig_path: str,
@@ -213,6 +225,8 @@ def _one_figure(
 
     Args:
         get_mean_fn: Function to compute mean values for a case
+        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
+        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
         key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
         results_da_name: Name for the results DataArray
         fig_path: File path where figure will be saved
@@ -247,6 +261,8 @@ def _one_figure(
     for c, case in enumerate(case_list_thiscrop):
         results, case_incl_yr_dict, suptitle = _one_case(
             get_mean_fn=get_mean_fn,
+            get_mean_fn_args=get_mean_fn_args,
+            get_mean_fn_kwargs=get_mean_fn_kwargs,
             key_diff_abs_error=key_diff_abs_error,
             results_da_name=results_da_name,
             opts=opts,
@@ -278,6 +294,8 @@ def _one_figure(
 def _one_case(
     *,
     get_mean_fn: callable,
+    get_mean_fn_args: list,
+    get_mean_fn_kwargs: dict,
     key_diff_abs_error: bool,
     results_da_name: str,
     opts: dict,
@@ -303,6 +321,8 @@ def _one_case(
 
     Args:
         get_mean_fn: Function to compute mean values for a case
+        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
+        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
         key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
         results_da_name: Name for the results DataArray
         opts: Dictionary of options including 'case_legend_list'
@@ -333,8 +353,10 @@ def _one_case(
         key_case,
         key_diff_abs_error,
         get_mean_fn,
+        *get_mean_fn_args,
         map_keycase_dict_io=map_keycase_dict_io,
         time_slice=time_slice,
+        **get_mean_fn_kwargs,
     )
 
     # Save time info
