@@ -25,18 +25,20 @@ def call_ncrcat(cmd):
     return subprocess.run(cmd, shell=False)
 
 
-def fix_permissions(path):
+def fix_permissions(filepath):
     """Fix file permissions and group to 'cesm'."""
-    for root, dirs, files in os.walk(path):
-        for d in dirs:  # fix dirs
-            dpath = os.path.join(root, d)
-            os.chmod(dpath, 0o755)  # rwx for owner, rx for group/others
-            os.chown(dpath, -1, "cesm")  # change group only
-
-        for f in files:  # fix files
-            fpath = os.path.join(root, f)
-            os.chmod(fpath, 0o666)  # rw for all
-            os.chown(fpath, -1, "cesm")  # change group only
+    # filepath = glob.glob(filepath) # because ncrcat pid temporary file...
+    os.chmod(filepath, 0o666)  # rw for all
+    os.chown(filepath, -1, 1017)  # change group to 'cesm' gid 1017
+    dirpath = ""
+    for segment in filepath.split("/")[:-1]:
+        dirpath = dirpath + "/" + segment
+    os.chmod(
+        dirpath,
+        0o775,
+    )  # This does change the tseries directory permission multiple times
+    #    if multiple files in that directory, so efficiency could certainly be improved
+    os.chown(dirpath, -1, 1017)  # change group to 'cesm' gid 1017
 
 
 def create_time_series(
@@ -104,6 +106,7 @@ def create_time_series(
     logger.info(f"\n  Generating {component} time series files...")
 
     # Loop over cases:
+    list_of_files = []
     for case_idx, case_name in enumerate(case_names):
         # Check if particular case should be processed:
         if ts_done[case_idx]:
@@ -341,7 +344,7 @@ def create_time_series(
                 + ["-o", ts_outfil_str]
             )
 
-            fix_permissions(ts_outfil_str)
+            list_of_files.append(ts_outfil_str)
 
             # Add to command list for use in multi-processing pool:
             list_of_commands.append(cmd)
@@ -367,6 +370,10 @@ def create_time_series(
     # End cases loop
 
     # Notify user that script has ended:
+
+    for file_i in list_of_files:
+        fix_permissions(file_i)
+
     logger.info(
         f"  ... {component} time series file generation has finished successfully.",
     )
