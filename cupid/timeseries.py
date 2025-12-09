@@ -25,7 +25,13 @@ def call_ncrcat(cmd):
     return subprocess.run(cmd, shell=False)
 
 
-def fix_permissions(filepath, file_mode=0o666, dir_mode=0o775, file_gid=1017, dir_gid=1017):
+def fix_permissions(
+    filepath,
+    file_mode=0o666,
+    dir_mode=0o775,
+    file_gid=1017,
+    dir_gid=1017,
+):
     """Fix file permissions and group to 'cesm'."""
     # filepath = glob.glob(filepath) # because ncrcat pid temporary file...
     os.chmod(filepath, file_mode)  # rw for all
@@ -60,7 +66,7 @@ def create_time_series(
     file_mode,
     dir_mode,
     file_gid,
-    dir_gid
+    dir_gid,
 ):
     """
     Generate time series versions of the history file data. Called by ``cupid-timeseries``.

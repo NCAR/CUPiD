@@ -210,7 +210,7 @@ def run_timeseries(
                 file_mode,
                 dir_mode,
                 file_gid,
-                dir_gid
+                dir_gid,
             )
             # fmt: on
             # pylint: enable=line-too-long
