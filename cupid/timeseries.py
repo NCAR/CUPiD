@@ -27,24 +27,30 @@ def call_ncrcat(cmd):
 
 def fix_permissions(
     filepath,
-    file_mode=0o666,
-    dir_mode=0o775,
-    file_gid=1017,
-    dir_gid=1017,
+    file_mode,
+    dir_mode,
+    file_gid,
+    dir_gid,
 ):
-    """Fix file permissions and group to 'cesm'."""
-    # filepath = glob.glob(filepath) # because ncrcat pid temporary file...
-    os.chmod(filepath, file_mode)  # rw for all
-    os.chown(filepath, -1, file_gid)  # change group to 'cesm' gid 1017
+    """Fix file and directory permissions and groups"""
+    os.chmod(
+        filepath,
+        file_mode,
+    )  # change permissions to group specified in config file, eg rw for all
+    os.chown(
+        filepath,
+        -1,
+        file_gid,
+    )  # change group to group specified in config file, eg, 'cesm' gid 1017
     dirpath = ""
     for segment in filepath.split("/")[:-1]:
         dirpath = dirpath + "/" + segment
     os.chmod(
         dirpath,
         dir_mode,
-    )  # This does change the tseries directory permission multiple times
-    #    if multiple files in that directory, so efficiency could certainly be improved
-    os.chown(dirpath, -1, dir_gid)  # change group to 'cesm' gid 1017
+    )  # This changes the tseries directory permission multiple times
+    #    if multiple files are in same directory, so efficiency could certainly be improved
+    os.chown(dirpath, -1, dir_gid)
 
 
 def create_time_series(
@@ -237,7 +243,7 @@ def create_time_series(
 
         # Check if time series directory exists, and if not, then create it:
         # Use pathlib to create parent directories, if necessary.
-        Path(ts_dir[case_idx]).mkdir(parents=True, exist_ok=True, mode=0o755)
+        Path(ts_dir[case_idx]).mkdir(parents=True, exist_ok=True)
 
         # INPUT NAME TEMPLATE: $CASE.$scomp.[$type.][$string.]$date[$ending]
         first_file_split = str(hist_files[0]).split(".")
