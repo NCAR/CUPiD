@@ -3,11 +3,24 @@ For making timeseries figures of CLM crop outputs
 """
 from __future__ import annotations
 
+import os
+import warnings
+
+import bokeh_html_utils
 import xarray as xr
 from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
+
+# Dictionary whose keys will be used as dropdown menu options and whose values
+# will be used for the use_earthstat_area arg in crop_timeseries_figs(). At the
+# moment this could work as radio buttons, but I'd like to eventually add a few
+# more observational data sources.
+AREA_SOURCE_DICT = {
+    "CLM": False,
+    "EarthStat": True,
+}
 
 
 def get_line_plot_kwargs(opts, c):
@@ -248,7 +261,8 @@ def _get_var_details(which, fao_data_world):
     return var_details
 
 
-def main(
+def _one_fig(
+    do_detrend,
     which,
     earthstat_data,
     case_list,
@@ -258,12 +272,6 @@ def main(
     use_earthstat_area=False,
     fig_file=None,
 ):
-    """
-    For making timeseries figures of CLM crop outputs
-    """
-    do_detrend = "_detrend" in which
-    if do_detrend:
-        which = which.replace("_detrend", "")
 
     # Get figure layout info
     fig_opts, fig, axes = setup_fig(opts)
@@ -326,3 +334,74 @@ def main(
         plt.savefig(fig_file, dpi=150)
         plt.savefig(fig_file.replace("png", "pdf"))
         plt.close()
+
+
+def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
+    """
+    For making timeseries figures of CLM crop outputs
+    """
+
+    # Make sure output dir exists
+    os.makedirs(img_dir, exist_ok=True)
+
+    for stat, stat_input in stat_dict.items():
+
+        # Handle request for detrending via stat_input
+        do_detrend = "_detrend" in stat_input
+        if do_detrend:
+            stat_input = stat_input.replace("_detrend", "")
+
+        for area_source, use_earthstat_area in AREA_SOURCE_DICT.items():
+            # Get filename to which figure will be saved. Members of join_list
+            # must first be any dropdown menu members and then any radio button
+            # group members, in the orders given in dropdown_specs and radio_specs,
+            # respectively.
+            join_list = [area_source, stat]
+            fig_basename = bokeh_html_utils.sanitize_filename("_".join(join_list))
+            fig_basename += ".png"
+            fig_path = os.path.join(img_dir, fig_basename)
+
+            with warnings.catch_warnings():
+                # This suppresses some very annoying warnings when
+                # use_earthstat_area=True. I'd like to eventually resolve this
+                # properly, which will probably requiring compute()ing some of
+                # the metadata variables in the cft_ds Datasets.
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Sending large graph.*",
+                    category=UserWarning,
+                )
+                _one_fig(
+                    do_detrend,
+                    stat_input,
+                    earthstat_data,
+                    case_list,
+                    fao_dict[stat_input],
+                    opts,
+                    use_earthstat_area=use_earthstat_area,
+                    fig_file=fig_path,
+                )
+
+    # Build dropdown specs
+    dropdown_specs = [
+        {
+            "title": "Area source",
+            "options": list(AREA_SOURCE_DICT.keys()),
+        },
+    ]
+
+    # Build radio specs
+    radio_specs = [
+        {
+            "title": "Statistic",
+            "options": list(stat_dict.keys()),
+        },
+    ]
+
+    # Display in notebook
+    bokeh_html_utils.create_static_html(
+        dropdown_specs=dropdown_specs,
+        radio_specs=radio_specs,
+        output_dir=img_dir,
+        show_in_notebook=True,
+    )
