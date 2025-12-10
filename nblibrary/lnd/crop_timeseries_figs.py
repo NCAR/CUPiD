@@ -3,6 +3,7 @@ For making timeseries figures of CLM crop outputs
 """
 from __future__ import annotations
 
+import xarray as xr
 from earthstat import align_time
 from matplotlib import pyplot as plt
 
@@ -48,10 +49,37 @@ def setup_fig(opts):
     return fig_opts, fig, axes
 
 
-def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area):
+def _detrend(data):
+    """
+    Detrend using a 5-year rolling mean, after Müller et al. (2017; doi:10.5194/gmd-10-1403-2017)
+    """
+    window_width = 5  # years
+
+    # xarray DataArray
+    if isinstance(data, xr.DataArray):
+        if "earthstat_time_coord" in data.dims:
+            smoothed = data.rolling(
+                earthstat_time_coord=window_width,
+                center=True,
+            ).mean()
+        else:
+            smoothed = data.rolling(time=window_width, center=True).mean()
+    # Other (hopefully it's a pandas object)
+    else:
+        smoothed = data.rolling(window_width, center=True).mean()
+
+    return data - smoothed
+
+
+def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area, do_detrend):
     for c, case in enumerate(case_list):
 
         crop_data_ts = var_details["function"](crop, case, use_earthstat_area)
+        if use_earthstat_area:
+            crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
+
+        if do_detrend:
+            crop_data_ts = _detrend(crop_data_ts)
 
         # Plot data
         crop_data_ts *= var_details["conversion_factor"]
@@ -60,8 +88,6 @@ def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area):
 
         # Plot
         plot_kwargs = get_line_plot_kwargs(opts, c)
-        if use_earthstat_area:
-            crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
         crop_data_ts.plot(**plot_kwargs)
 
 
@@ -114,7 +140,7 @@ def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
     fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
 
 
-def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
+def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_detrend):
     faostat_units = fao_yield_world["Unit"].iloc[0]
     if faostat_units != ctsm_units:
         raise RuntimeError(
@@ -136,6 +162,8 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
 
     time_slice = slice(f"{start}-01-01", f"{end}-12-31")
     ydata = fao_yield_world_thiscrop.query(f"(Year >= {start}) & (Year <= {end})")
+    if do_detrend:
+        ydata["Value"] = _detrend(ydata["Value"])
     ydata = ydata["Value"].values
     ax.plot(
         time_da.sel(time=time_slice),
@@ -144,7 +172,7 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units):
     )
 
 
-def _plot_earthstat(which, earthstat_data, crop, ax, target_time):
+def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_detrend):
     target_units = {
         "prod": "Mt",
         "area": "Mha",
@@ -180,6 +208,9 @@ def _plot_earthstat(which, earthstat_data, crop, ax, target_time):
 
     # Align EarthStat data with CLM time axis
     earthstat_var = align_time(earthstat_var, target_time)
+
+    if do_detrend:
+        earthstat_var = _detrend(earthstat_var)
 
     ax.plot(
         earthstat_var["time"],
@@ -230,6 +261,9 @@ def main(
     """
     For making timeseries figures of CLM crop outputs
     """
+    do_detrend = "_detrend" in which
+    if do_detrend:
+        which = which.replace("_detrend", "")
 
     # Get figure layout info
     fig_opts, fig, axes = setup_fig(opts)
@@ -252,7 +286,14 @@ def main(
         plt.sca(ax)
 
         # Plot case data
-        _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area)
+        _plot_clm_cases(
+            case_list,
+            opts,
+            var_details,
+            crop,
+            use_earthstat_area,
+            do_detrend,
+        )
 
         # Plot FAOSTAT data
         _plot_faostat(
@@ -261,10 +302,18 @@ def main(
             ax,
             case_list[0].cft_ds["time"],
             var_details["ctsm_units"],
+            do_detrend,
         )
 
         # Plot EarthStat data
-        _plot_earthstat(which, earthstat_data, crop, ax, case_list[0].cft_ds["time"])
+        _plot_earthstat(
+            which,
+            earthstat_data,
+            crop,
+            ax,
+            case_list[0].cft_ds["time"],
+            do_detrend,
+        )
 
         # Finish plot
         ax.set_title(crop)
@@ -275,4 +324,5 @@ def main(
         plt.show()
     else:
         plt.savefig(fig_file, dpi=150)
+        plt.savefig(fig_file.replace("png", "pdf"))
         plt.close()
