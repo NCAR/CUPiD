@@ -283,7 +283,10 @@ def _one_fig(
     # TODO: Increase robustness of unit conversion: Check that it really is, e.g., g/m2 to start
     # with.
     var_details = _get_var_details(which, fao_data_world)
-    fig_opts["title"] = "Global " + var_details["da_name"].lower()
+    fig_opts["title"] = "Global "
+    if do_detrend:
+        fig_opts["title"] += "detrended "
+    fig_opts["title"] += var_details["da_name"].lower()
 
     # Modify figure options
     if use_earthstat_area:
@@ -326,6 +329,8 @@ def _one_fig(
         # Finish plot
         ax.set_title(crop)
         plt.xlabel("")
+        if do_detrend:
+            plt.ylabel(ax.get_ylabel() + " (detrended)")
 
     finish_fig(opts, fig_opts, fig)
     if fig_file is None:
