@@ -62,6 +62,15 @@ def setup_fig(opts):
     return fig_opts, fig, axes
 
 
+def _norm(data):
+    """
+    Normalize timeseries by dividing by its mean
+    """
+    if isinstance(data, xr.DataArray):
+        return data / data.mean().values
+    return data / data.mean()
+
+
 def _detrend(data):
     """
     Detrend using a 5-year rolling mean, after Müller et al. (2017; doi:10.5194/gmd-10-1403-2017)
@@ -84,20 +93,37 @@ def _detrend(data):
     return data - smoothed
 
 
-def _plot_clm_cases(case_list, opts, var_details, crop, use_earthstat_area, do_detrend):
+def _normdetrend(data):
+    return _detrend(_norm(data))
+
+
+def _plot_clm_cases(
+    case_list,
+    opts,
+    var_details,
+    crop,
+    use_earthstat_area,
+    do_normdetrend,
+):
     for c, case in enumerate(case_list):
 
         crop_data_ts = var_details["function"](crop, case, use_earthstat_area)
         if use_earthstat_area:
             crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
 
-        if do_detrend:
-            crop_data_ts = _detrend(crop_data_ts)
+        # Apply conversion factor
+        crop_data_ts *= var_details["conversion_factor"]
+
+        # Normalize/detrend, if doing so
+        if do_normdetrend:
+            crop_data_ts = _normdetrend(crop_data_ts)
 
         # Plot data
-        crop_data_ts *= var_details["conversion_factor"]
         crop_data_ts.name = var_details["da_name"]
-        crop_data_ts.attrs["units"] = var_details["ctsm_units"]
+        if do_normdetrend:
+            crop_data_ts.attrs["units"] = "unitless"
+        else:
+            crop_data_ts.attrs["units"] = var_details["ctsm_units"]
 
         # Plot
         plot_kwargs = get_line_plot_kwargs(opts, c)
@@ -153,7 +179,7 @@ def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
     fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
 
 
-def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_detrend):
+def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_normdetrend):
     faostat_units = fao_yield_world["Unit"].iloc[0]
     if faostat_units != ctsm_units:
         raise RuntimeError(
@@ -175,8 +201,8 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_detrend):
 
     time_slice = slice(f"{start}-01-01", f"{end}-12-31")
     ydata = fao_yield_world_thiscrop.query(f"(Year >= {start}) & (Year <= {end})")
-    if do_detrend:
-        ydata["Value"] = _detrend(ydata["Value"])
+    if do_normdetrend:
+        ydata["Value"] = _normdetrend(ydata["Value"])
     ydata = ydata["Value"].values
     ax.plot(
         time_da.sel(time=time_slice),
@@ -185,7 +211,7 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_detrend):
     )
 
 
-def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_detrend):
+def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_normdetrend):
     target_units = {
         "prod": "Mt",
         "area": "Mha",
@@ -222,8 +248,8 @@ def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_detrend):
     # Align EarthStat data with CLM time axis
     earthstat_var = align_time(earthstat_var, target_time)
 
-    if do_detrend:
-        earthstat_var = _detrend(earthstat_var)
+    if do_normdetrend:
+        earthstat_var = _normdetrend(earthstat_var)
 
     ax.plot(
         earthstat_var["time"],
@@ -262,7 +288,7 @@ def _get_var_details(which, fao_data_world):
 
 
 def _one_fig(
-    do_detrend,
+    do_normdetrend,
     which,
     earthstat_data,
     case_list,
@@ -283,10 +309,9 @@ def _one_fig(
     # TODO: Increase robustness of unit conversion: Check that it really is, e.g., g/m2 to start
     # with.
     var_details = _get_var_details(which, fao_data_world)
-    fig_opts["title"] = "Global "
-    if do_detrend:
-        fig_opts["title"] += "detrended "
-    fig_opts["title"] += var_details["da_name"].lower()
+    fig_opts["title"] = "Global " + var_details["da_name"].lower()
+    if do_normdetrend:
+        fig_opts["title"] += " (normalized, detrended)"
 
     # Modify figure options
     if use_earthstat_area:
@@ -303,7 +328,7 @@ def _one_fig(
             var_details,
             crop,
             use_earthstat_area,
-            do_detrend,
+            do_normdetrend,
         )
 
         # Plot FAOSTAT data
@@ -313,7 +338,7 @@ def _one_fig(
             ax,
             case_list[0].cft_ds["time"],
             var_details["ctsm_units"],
-            do_detrend,
+            do_normdetrend,
         )
 
         # Plot EarthStat data
@@ -323,14 +348,12 @@ def _one_fig(
             crop,
             ax,
             case_list[0].cft_ds["time"],
-            do_detrend,
+            do_normdetrend,
         )
 
         # Finish plot
         ax.set_title(crop)
         plt.xlabel("")
-        if do_detrend:
-            plt.ylabel(ax.get_ylabel() + " (detrended)")
 
     finish_fig(opts, fig_opts, fig)
     if fig_file is None:
@@ -352,9 +375,10 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
     for stat, stat_input in stat_dict.items():
 
         # Handle request for detrending via stat_input
-        do_detrend = "_detrend" in stat_input
-        if do_detrend:
-            stat_input = stat_input.replace("_detrend", "")
+        suffix = "_normdetrend"
+        do_normdetrend = suffix in stat_input
+        if do_normdetrend:
+            stat_input = stat_input.replace(suffix, "")
 
         for area_source, use_earthstat_area in AREA_SOURCE_DICT.items():
             # Get filename to which figure will be saved. Members of join_list
@@ -377,7 +401,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     category=UserWarning,
                 )
                 _one_fig(
-                    do_detrend,
+                    do_normdetrend,
                     stat_input,
                     earthstat_data,
                     case_list,
