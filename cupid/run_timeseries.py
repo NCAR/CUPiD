@@ -28,6 +28,7 @@ from __future__ import annotations
 import os
 
 import click
+import shutil
 
 try:
     import timeseries
@@ -112,8 +113,22 @@ def run_timeseries(
     num_procs = timeseries_params["num_procs"]
     file_mode = timeseries_params["file_mode"]
     dir_mode = timeseries_params["dir_mode"]
-    file_gid = timeseries_params["file_gid"]
-    dir_gid = timeseries_params["dir_gid"]
+    file_group = timeseries_params["file_group"]
+    dir_group = timeseries_params["dir_group"]
+
+    # Get GID from group name
+    file_gid = shutil._get_gid(file_group)
+    if file_gid is None:
+        file_gid = 1017
+        # Or raise an exception because file_group is not defined on this machine
+    dir_gid = shutil._get_gid(dir_group)
+    if dir_gid is None:
+        dir_gid = 1017
+        # Or raise an exception because dir_group is not defined on this machine
+
+    # Make file and dir modes octal
+    fmode = int(str(file_mode), base=8)
+    dmode = int(str(dir_mode), base=8)
 
     for component, comp_bool in component_options.items():
         if comp_bool:
@@ -207,8 +222,8 @@ def run_timeseries(
                 num_procs,
                 serial,
                 logger,
-                file_mode,
-                dir_mode,
+                fmode,
+                dmode,
                 file_gid,
                 dir_gid,
             )
