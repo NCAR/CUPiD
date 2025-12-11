@@ -7,6 +7,10 @@ dpseas = {"DJF": 90, "MAM": 92, "JJA": 92, "SON": 91}
 
 def seasonal_climatology_weighted(dat):
     """Calculate seasonal and annual average climatologies"""
+
+    # avoid rolling mean crashing if using dask
+    # dat = dat.chunk({'time':-1})
+
     days_in_month = dat.time.dt.days_in_month
 
     num = (dat * days_in_month).rolling(time=3, center=True, min_periods=3).sum()
