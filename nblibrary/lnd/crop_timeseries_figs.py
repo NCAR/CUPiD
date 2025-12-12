@@ -14,6 +14,8 @@ from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
+LINECOLOR_FAOSTAT = "black"
+LINECOLOR_EARTHSTAT = "0.5"  # gray
 
 # When printing a Pandas DataFrame, don't wrap it
 pd.set_option("display.max_colwidth", None)
@@ -219,7 +221,7 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_normdetrend
     ax.plot(
         time_da.sel(time=time_slice),
         ydata,
-        "-k",
+        LINECOLOR_FAOSTAT,
     )
 
 
@@ -266,7 +268,7 @@ def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_normdetrend
     ax.plot(
         earthstat_var["time"],
         earthstat_var.values,
-        "0.5",  # gray
+        LINECOLOR_EARTHSTAT,
     )
 
 
