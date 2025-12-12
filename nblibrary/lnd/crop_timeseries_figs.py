@@ -14,8 +14,7 @@ from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
-LINECOLOR_FAOSTAT = "0.5"  # gray
-LINECOLOR_EARTHSTAT = "black"
+OBS_DUMMY_LINECOLOR = "obs not in dict"
 
 # When printing a Pandas DataFrame, don't wrap it
 pd.set_option("display.max_colwidth", None)
@@ -176,7 +175,25 @@ def _get_clm_area(crop, case, use_earthstat_area):
 def get_legend_labels(opts, incl_obs=True):
     labels = opts["case_legend_list"].copy()
     if incl_obs:
-        labels += ["FAOSTAT", f"EarthStat {EARTHSTAT_RES_TO_PLOT}"]
+        obs_timeseries_linecolors = opts["obs_timeseries_linecolors"].copy()
+
+        # Add FAOSTAT?
+        line_color = obs_timeseries_linecolors.pop("faostat", OBS_DUMMY_LINECOLOR)
+        if line_color != OBS_DUMMY_LINECOLOR:
+            labels += ["FAOSTAT"]
+
+        # Add EarthStat?
+        line_color = obs_timeseries_linecolors.pop("earthstat", OBS_DUMMY_LINECOLOR)
+        if line_color != OBS_DUMMY_LINECOLOR:
+            labels += ["EarthStat"]
+
+        # Ensure no unrecognized obs datasets were requested. obs_to_include.pop() calls above
+        # should have removed any processed obs datasets.
+        if obs_timeseries_linecolors:
+            raise ValueError(
+                "Unexpected key(s) in opts['obs_timeseries_linecolors']: "
+                + str(obs_timeseries_linecolors.keys()),
+            )
     return labels
 
 
@@ -193,7 +210,15 @@ def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
     fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
 
 
-def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_normdetrend):
+def _plot_faostat(
+    fao_yield_world,
+    crop,
+    ax,
+    time_da,
+    ctsm_units,
+    do_normdetrend,
+    line_color,
+):
     faostat_units = fao_yield_world["Unit"].iloc[0]
     if faostat_units != ctsm_units:
         raise RuntimeError(
@@ -221,11 +246,19 @@ def _plot_faostat(fao_yield_world, crop, ax, time_da, ctsm_units, do_normdetrend
     ax.plot(
         time_da.sel(time=time_slice),
         ydata,
-        LINECOLOR_FAOSTAT,
+        line_color,
     )
 
 
-def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_normdetrend):
+def _plot_earthstat(
+    which,
+    earthstat_data,
+    crop,
+    ax,
+    target_time,
+    do_normdetrend,
+    line_color,
+):
     target_units = {
         "prod": "Mt",
         "area": "Mha",
@@ -268,7 +301,7 @@ def _plot_earthstat(which, earthstat_data, crop, ax, target_time, do_normdetrend
     ax.plot(
         earthstat_var["time"],
         earthstat_var.values,
-        LINECOLOR_EARTHSTAT,
+        line_color,
     )
 
 
@@ -335,6 +368,7 @@ def _one_fig(
     for i, crop in enumerate(opts["crops_to_include"]):
         ax = axes.ravel()[i]
         plt.sca(ax)
+        obs_timeseries_linecolors = opts["obs_timeseries_linecolors"].copy()
 
         # Plot case data
         _plot_clm_cases(
@@ -347,28 +381,42 @@ def _one_fig(
         )
 
         # Plot FAOSTAT data
-        _plot_faostat(
-            fao_data_world,
-            crop,
-            ax,
-            case_list[0].cft_ds["time"],
-            var_details["ctsm_units"],
-            do_normdetrend,
-        )
+        line_color = obs_timeseries_linecolors.pop("faostat", OBS_DUMMY_LINECOLOR)
+        if line_color != OBS_DUMMY_LINECOLOR:
+            _plot_faostat(
+                fao_data_world,
+                crop,
+                ax,
+                case_list[0].cft_ds["time"],
+                var_details["ctsm_units"],
+                do_normdetrend,
+                line_color,
+            )
 
         # Plot EarthStat data
-        _plot_earthstat(
-            which,
-            earthstat_data,
-            crop,
-            ax,
-            case_list[0].cft_ds["time"],
-            do_normdetrend,
-        )
+        line_color = obs_timeseries_linecolors.pop("earthstat", OBS_DUMMY_LINECOLOR)
+        if line_color != OBS_DUMMY_LINECOLOR:
+            _plot_earthstat(
+                which,
+                earthstat_data,
+                crop,
+                ax,
+                case_list[0].cft_ds["time"],
+                do_normdetrend,
+                line_color,
+            )
 
         # Finish plot
         ax.set_title(crop)
         plt.xlabel("")
+
+        # Ensure no unrecognized obs datasets were requested. obs_to_include.pop() calls above
+        # should have removed any processed obs datasets.
+        if obs_timeseries_linecolors:
+            raise ValueError(
+                "Unexpected key(s) in opts['obs_timeseries_linecolors']: "
+                + str(obs_timeseries_linecolors.keys()),
+            )
 
         # Get standard deviation
         std_dict[crop] = []
