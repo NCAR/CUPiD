@@ -60,7 +60,6 @@ def compute_var_g_ann(filepath, case, var):
        var = variable name
     """
     filename = filepath + case + "/" + case + "." + var + ".nc"
-    print({filename})
     ds = xr.open_dataset(filename)
 
     ds.mean(["lat", "time"])
