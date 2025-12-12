@@ -45,7 +45,7 @@ global_params: # TODO: a lot of these params may be irrelevant/misleading for th
   base_case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228'
   case_nickname: 'BLT1850_232'
   base_case_nickname: 'BLT1850_228'
-  CESM_output_dir: /glade/campaign/cgd/amp/amwg/ts/
+  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_date: '0001-01-01'
   end_date: '0021-01-01'
   climo_start_year: 11
@@ -66,7 +66,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
   case_name: ['b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232', 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228']
 
   atm:
-    vars: ['PSL']
+    vars: ['RESTOM','TS']
     derive_vars: []
     hist_str: 'cam.h0a'
     start_years: [1,1]
@@ -76,7 +76,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
 
 
   lnd:
-    vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
+    vars: []
     derive_vars: []
     hist_str: 'clm2.h0a'
     start_years: [1,1]
@@ -92,7 +92,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     level: 'lev'
 
   ice:
-    vars: ['aice','hi','hs']
+    vars: ['ICEFRAC']
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
