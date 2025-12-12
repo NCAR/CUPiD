@@ -119,7 +119,7 @@ def run_timeseries(
     file_gid = os.shutil._get_gid(file_group)
     if file_gid is None:
         file_gid = -1
-        f"{file_group} is not a valid group on this machine"
+        print(f"{file_group} is not a valid group on this machine")
         # Or raise an exception because file_group is not defined on this machine
     dir_gid = os.shutil._get_gid(dir_group)
     if dir_gid is None:
