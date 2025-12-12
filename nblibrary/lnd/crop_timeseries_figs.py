@@ -7,11 +7,18 @@ import os
 import warnings
 
 import bokeh_html_utils
+import numpy as np
+import pandas as pd
 import xarray as xr
 from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
+
+# When printing a Pandas DataFrame, don't wrap it
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.width", None)
+pd.set_option("display.expand_frame_repr", False)
 
 # Dictionary whose keys will be used as dropdown menu options and whose values
 # will be used for the use_earthstat_area arg in crop_timeseries_figs(). At the
@@ -164,11 +171,16 @@ def _get_clm_area(crop, case, use_earthstat_area):
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
-def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
-    plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
+def get_legend_labels(opts, incl_obs=True):
     labels = opts["case_legend_list"].copy()
     if incl_obs:
         labels += ["FAOSTAT", f"EarthStat {EARTHSTAT_RES_TO_PLOT}"]
+    return labels
+
+
+def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
+    plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
+    labels = get_legend_labels(opts, incl_obs)
     fig.legend(
         labels=labels,
         loc="upper center",
@@ -317,6 +329,7 @@ def _one_fig(
     if use_earthstat_area:
         fig_opts["title"] += " (if CLM used EarthStat areas)"
 
+    std_dict = {}
     for i, crop in enumerate(opts["crops_to_include"]):
         ax = axes.ravel()[i]
         plt.sca(ax)
@@ -355,6 +368,11 @@ def _one_fig(
         ax.set_title(crop)
         plt.xlabel("")
 
+        # Get standard deviation
+        std_dict[crop] = []
+        for line in ax.lines:
+            std_dict[crop].append(np.nanstd(line.get_ydata()))
+
     finish_fig(opts, fig_opts, fig)
     if fig_file is None:
         plt.show()
@@ -362,6 +380,8 @@ def _one_fig(
         plt.savefig(fig_file, dpi=150)
         plt.savefig(fig_file.replace("png", "pdf"))
         plt.close()
+
+    return std_dict
 
 
 def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
@@ -400,7 +420,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     message="Sending large graph.*",
                     category=UserWarning,
                 )
-                _one_fig(
+                std_dict = _one_fig(
                     do_normdetrend,
                     stat_input,
                     earthstat_data,
@@ -410,6 +430,20 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     use_earthstat_area=use_earthstat_area,
                     fig_file=fig_path,
                 )
+
+            # Print standard deviation table
+            if do_normdetrend:
+                legend_labels = get_legend_labels(opts)
+                index_colname = "legend_labels"
+                std_table_dict = {index_colname: legend_labels}
+                for crop in opts["crops_to_include"]:
+                    std_table_dict[crop] = [np.round(x, 3) for x in std_dict[crop]]
+                df = pd.DataFrame(std_table_dict)
+                df = df.set_index(index_colname)
+                df.index.name = None
+                print(f"Standard deviation (CLM runs assuming {area_source} areas)")
+                print(df)
+                print("\n")
 
     # Build dropdown specs
     dropdown_specs = [
