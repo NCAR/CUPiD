@@ -28,7 +28,6 @@ from __future__ import annotations
 import os
 
 import click
-import shutil
 
 try:
     import timeseries
@@ -117,13 +116,15 @@ def run_timeseries(
     dir_group = timeseries_params["dir_group"]
 
     # Get GID from group name
-    file_gid = shutil._get_gid(file_group)
+    file_gid = os.shutil._get_gid(file_group)
     if file_gid is None:
-        file_gid = 1017
+        file_gid = -1
+        f"{file_group} is not a valid group on this machine"
         # Or raise an exception because file_group is not defined on this machine
-    dir_gid = shutil._get_gid(dir_group)
+    dir_gid = os.shutil._get_gid(dir_group)
     if dir_gid is None:
-        dir_gid = 1017
+        print(f"{dir_group} is not a valid group on this machine")
+        dir_gid = -1
         # Or raise an exception because dir_group is not defined on this machine
 
     # Make file and dir modes octal
