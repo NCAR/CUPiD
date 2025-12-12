@@ -14,8 +14,8 @@ from earthstat import align_time
 from matplotlib import pyplot as plt
 
 EARTHSTAT_RES_TO_PLOT = "f09"
-LINECOLOR_FAOSTAT = "black"
-LINECOLOR_EARTHSTAT = "0.5"  # gray
+LINECOLOR_FAOSTAT = "0.5"  # gray
+LINECOLOR_EARTHSTAT = "black"
 
 # When printing a Pandas DataFrame, don't wrap it
 pd.set_option("display.max_colwidth", None)
