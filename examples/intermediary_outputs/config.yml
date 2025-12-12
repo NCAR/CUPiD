@@ -129,11 +129,19 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    atm: # TODO: decide what 'component' should be
-      Global_TS_ICEFRAC_RESTOM_tseries:
+    atm:
+      Global_TS_RESTOM_tseries:
         parameter_groups:
           none:
-            {}
+            vars:
+              {'TS':'Global',
+               'RESTOM':'Global'}
+    ice:
+      Lab_Sea_ICEFRAC_tseries:
+        parameter_groups:
+          none:
+            vars:
+              {'ICEFRAC': 'Lab Sea'}
 
 ########### JUPYTER BOOK CONFIG ###########
 
