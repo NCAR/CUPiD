@@ -104,6 +104,7 @@ def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
         # Create axes for the colorbar
         cbar_ax = fig.add_axes(rect=layout["cbar_ax_rect"])
         # Add horizontal colorbar with units label
+        assert "units" in da.attrs, "Results map missing units attribute"
         fig.colorbar(
             im,
             cax=cbar_ax,

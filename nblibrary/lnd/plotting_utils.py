@@ -25,6 +25,7 @@ import xarray as xr
 from dict_slice_str_indexed import DictSliceStrIndexed
 
 NO_INTSXN_TIME_SLICE = None
+RESULT_MAP_NO_UNITS_MSG = "Results map from this_fn() is missing units attribute"
 
 
 def check_grid_match(grid0, grid1, tol=0):
@@ -270,6 +271,7 @@ def get_mean_map(
             *args,
             **kwargs,
         )
+        assert "units" in map_case.attrs, RESULT_MAP_NO_UNITS_MSG
         case_first_yr = case.cft_ds["time"].values[0].year
         case_last_yr = case.cft_ds["time"].values[-1].year
 
@@ -286,6 +288,7 @@ def get_mean_map(
                 *args,
                 **kwargs,
             )
+            assert "units" in map_key_case.attrs, RESULT_MAP_NO_UNITS_MSG
 
             # Interpolate key case map to this case's grid, if needed
             map_key_case = interp_key_case_grid(
