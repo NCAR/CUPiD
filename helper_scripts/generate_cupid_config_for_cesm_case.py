@@ -55,6 +55,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
+@click.option("--run-cvdp", is_flag=True, help="Run CVDP diagnostics")
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -68,6 +69,7 @@ def generate_cupid_config(
     cupid_base_startdate,
     cupid_base_enddate,
     adf_output_root,
+    run_cvdp=False,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -168,9 +170,7 @@ def generate_cupid_config(
         my_dict = yaml.safe_load(f)
 
     my_dict["data_sources"]["nb_path_root"] = os.path.join(
-        cesm_root,
-        "tools",
-        "CUPiD",
+        cupid_root,
         "nblibrary",
     )
     my_dict["global_params"]["case_name"] = case
@@ -219,6 +219,13 @@ def generate_cupid_config(
         my_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(adf_output_root, "ADF_output")
+        if "diag_cvdp_info" in my_dict["compute_notebooks"]["atm"]["ADF"].get(
+            "external_tool",
+            {},
+        ):
+            my_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
+                "diag_cvdp_info"
+            ]["cvdp_run"] = run_cvdp
     if "link_to_CVDP" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["link_to_CVDP"]["parameter_groups"]["none"][
             "cvdp_loc"
