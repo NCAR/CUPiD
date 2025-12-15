@@ -186,7 +186,7 @@ compute_notebooks:
           base_regridded_output: False
           region_list: ["Global","N Hemisphere Land","S Hemisphere Land","Polar",
                         "Alaskan Arctic","Canadian Arctic",'Russian Arctic','Greenland',
-                        "Alaska",'Northwest Canada','Central Canada','Eastern Canda','Northern Europe','Western Siberia','Eastern Siberia',
+                        "Alaska",'Northwest Canada','Central Canada','Eastern Canada','Northern Europe','Western Siberia','Eastern Siberia',
                         'Western US','Central US','Eastern US','CONUS','Europe','Mediterranean','Central America',
                         'Amazonia','Central Africa','Indonesia','S America',
                         'Brazil','Sahel','Southern Africa','India','Indochina','Australia']
