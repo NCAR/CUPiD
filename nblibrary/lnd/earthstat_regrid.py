@@ -57,6 +57,9 @@ def regrid_to_clm(
 ):
     """Regrid an observational dataset to a CLM target grid using conservative regridding"""
 
+    # Deep copy ds_in as it's needed for correctness
+    ds_in = deepcopy(ds_in)
+
     # Sense checks
     assert (area_in is None) == (area_out is None)
     if area_in is not None:
@@ -67,8 +70,11 @@ def regrid_to_clm(
         mask_var = var
     mask_in = ds_in[mask_var]
 
-    # Extract data
+    # Extract data and save things we'll need later
     da_in = ds_in[var]
+    var_attrs = ds_in[var].attrs
+    var_sum_before = ds_in[var].sum() if "conservative" in method else None
+
     if area_in is not None:
         # da_in /= area_in
         da_in_temp = da_in / area_in
@@ -76,8 +82,8 @@ def regrid_to_clm(
         del da_in_temp
     data_filled = da_in.fillna(0.0)
 
-    # Clean up da_in as we no longer need it
-    del da_in
+    # Clean up things we no longer need
+    del da_in, ds_in
 
     # xesmf might look for a "mask" variable:
     # https://coecms-training.github.io/parallel/case-studies/regridding.html
@@ -132,15 +138,14 @@ def regrid_to_clm(
     if "conservative" in method:
 
         # Compute sums once and store to avoid recreating arrays
-        sum_before = ds_in[var].sum()
-        sum_after = da_out.sum()
+        var_sum_after = da_out.sum()
 
         # Print error in global sum introduced by regridding
-        before = sum_before.values
-        after = sum_after.values
+        before = var_sum_before.values
+        after = var_sum_after.values
         pct_diff = (after - before) / before * 100
-        if "units" in ds_in[var].attrs:
-            units = ds_in[var].attrs["units"]
+        if "units" in var_attrs:
+            units = var_attrs["units"]
         else:
             units = "unknown units"
         print(f"{INDENT}{var} ({units}):")
@@ -149,18 +154,19 @@ def regrid_to_clm(
 
         # Adjust so global sum matches what we had before regridding
         print(f"{2*INDENT}Adjusting to match.")
-        da_out = da_out * sum_before / sum_after
+        da_out = da_out * var_sum_before / var_sum_after
 
         # Clean up intermediate sum variables
-        del sum_before, sum_after
+        del var_sum_after
 
         after = da_out.sum().values
         diff = after - before
         pct_diff = diff / before * 100
         print(f"{2*INDENT}Global diff final: {diff:.2e} ({pct_diff:.1f}%)")
+    del var_sum_before
 
     # Recover attributes
-    da_out.attrs = ds_in[var].attrs
+    da_out.attrs = var_attrs
 
     # Destroy regridder to avoid memory leak
     # https://github.com/JiaweiZhuang/xESMF/issues/53#issuecomment-2114209348

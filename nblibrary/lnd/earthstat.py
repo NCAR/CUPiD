@@ -3,10 +3,8 @@ Classes to handle importing and working with EarthStat data
 """
 from __future__ import annotations
 
-import gc
 import os
 import warnings
-from copy import deepcopy
 
 import numpy as np
 import xarray as xr
@@ -212,10 +210,8 @@ class EarthStat:
                             raise ValueError(f"Undefined interp method for var {var}")
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", message=".*large graph.*")
-                        # Keep deepcopy for ds_in as it's needed for correctness
-                        ds_in_copy = deepcopy(earthstat_in_ds)
                         earthstat_out_da = regrid_to_clm(
-                            ds_in=ds_in_copy,
+                            ds_in=earthstat_in_ds,
                             var=var,
                             ds_target=clm_out_ds,
                             method=method,
@@ -223,9 +219,6 @@ class EarthStat:
                             area_out=clm_out_landarea,
                             mask_var="LandMask",
                         )
-                        # Clean up the deep copy immediately
-                        del ds_in_copy
-                        gc.collect()
                     if i == 0:
                         self[res] = xr.Dataset(data_vars={var: earthstat_out_da})
                     else:
