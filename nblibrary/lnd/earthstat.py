@@ -1,6 +1,7 @@
 """
 Classes to handle importing and working with EarthStat data
 """
+
 from __future__ import annotations
 
 import os
@@ -159,85 +160,101 @@ class EarthStat:
         # If any resolutions weren't read, we'll need to interpolate to get them
         missing_res = [k for k in sim_resolutions.keys() if k not in self.keys()]
         if missing_res:
-            # Get base resolution to do regridding from
-            if REFERENCE_EARTHSTAT_RES not in self.keys():
-                self._import_one_resolution(
-                    earthstat_dir,
-                    opts,
-                    REFERENCE_EARTHSTAT_RES,
-                )
-            # If no resolutions were read, we have a problem
-            if not self.keys():
-                raise FileNotFoundError("No EarthStat files read")
-            # If REFERENCE_EARTHSTAT_RES not available, fall back to the finest resolution we have.
-            if REFERENCE_EARTHSTAT_RES in self.keys():
-                earthstat_in_ds = self[REFERENCE_EARTHSTAT_RES]
-                earthstat_in_res = REFERENCE_EARTHSTAT_RES
-            else:
-                n_finest = -np.inf
-                for res, ds in self.items():
-                    n = ds["lat"].size
-                    if n > n_finest:
-                        earthstat_in_ds = ds
-                        earthstat_in_res = res
-                        n_finest = n
-
-            if earthstat_in_res in sim_resolutions:
-                clm_in_ds = sim_resolutions[earthstat_in_res]
-            else:
-                clm_in_file = os.path.join(
-                    earthstat_dir,
-                    f"{earthstat_in_res}_clm_regrid_ds.nc",
-                )
-                clm_in_ds = xr.open_dataset(clm_in_file)
-            clm_in_landarea = get_clm_landarea(clm_in_ds)
-
-            for res in missing_res:
-                print(f"Interpolating EarthStat data from {earthstat_in_res} to {res}")
-                clm_out_ds = sim_resolutions[res]
-                clm_out_landarea = get_clm_landarea(clm_out_ds)
-
-                # Interpolate
-                for i, var in enumerate(NEEDED_VARS):
-                    match var:
-                        case "HarvestArea" | "Production":
-                            method = "conservative"
-                        case "Yield" | "LandMask":
-                            # Yield: Calculated later, as Production/HarvestArea.
-                            # LandMask: Used only as a source for interpolation.
-                            continue
-                        case _:
-                            raise ValueError(f"Undefined interp method for var {var}")
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings("ignore", message=".*large graph.*")
-                        earthstat_out_da = regrid_to_clm(
-                            ds_in=earthstat_in_ds,
-                            var=var,
-                            ds_target=clm_out_ds,
-                            method=method,
-                            area_in=clm_in_landarea,
-                            area_out=clm_out_landarea,
-                            mask_var="LandMask",
-                        )
-                    if i == 0:
-                        self[res] = xr.Dataset(data_vars={var: earthstat_out_da})
-                    else:
-                        self[res][var] = earthstat_out_da
-
-                    # Clean up the output DataArray reference
-                    del earthstat_out_da
-
-                # Calculate yield
-                self[res]["Yield"] = self[res]["Production"] / self[res]["HarvestArea"]
-                with warnings.catch_warnings():
-                    warnings.filterwarnings("ignore", message=".*large graph.*")
-                    self[res]["Yield"].load()
-                self[res]["Yield"].attrs["long_name"] = "crop yield"
-                prod_units = self[res]["Production"].attrs["units"]
-                area_units = self[res]["HarvestArea"].attrs["units"]
-                self[res]["Yield"].attrs["units"] = f"{prod_units}/{area_units}"
+            self._get_all_missing(earthstat_dir, sim_resolutions, opts, missing_res)
 
         print("Done.")
+
+    def _get_all_missing(self, earthstat_dir, sim_resolutions, opts, missing_res):
+        """Interpolate EarthStat data to all missing resolutions"""
+        # Get base resolution to do regridding from
+        if REFERENCE_EARTHSTAT_RES not in self.keys():
+            self._import_one_resolution(
+                earthstat_dir,
+                opts,
+                REFERENCE_EARTHSTAT_RES,
+            )
+        # If no resolutions were read, we have a problem
+        if not self.keys():
+            raise FileNotFoundError("No EarthStat files read")
+        # If REFERENCE_EARTHSTAT_RES not available, fall back to the finest resolution we have.
+        if REFERENCE_EARTHSTAT_RES in self.keys():
+            earthstat_in_ds = self[REFERENCE_EARTHSTAT_RES]
+            earthstat_in_res = REFERENCE_EARTHSTAT_RES
+        else:
+            n_finest = -np.inf
+            for res, ds in self.items():
+                n = ds["lat"].size
+                if n > n_finest:
+                    earthstat_in_ds = ds
+                    earthstat_in_res = res
+                    n_finest = n
+
+        if earthstat_in_res in sim_resolutions:
+            clm_in_ds = sim_resolutions[earthstat_in_res]
+        else:
+            clm_in_file = os.path.join(
+                earthstat_dir,
+                f"{earthstat_in_res}_clm_regrid_ds.nc",
+            )
+            clm_in_ds = xr.open_dataset(clm_in_file)
+        clm_in_landarea = get_clm_landarea(clm_in_ds)
+
+        for res in missing_res:
+            self._get_one_missing(
+                sim_resolutions=sim_resolutions,
+                earthstat_in_ds=earthstat_in_ds,
+                earthstat_in_res=earthstat_in_res,
+                res=res,
+                clm_in_landarea=clm_in_landarea,
+            )
+
+    def _get_one_missing(
+        self, *, sim_resolutions, earthstat_in_ds, earthstat_in_res, res, clm_in_landarea
+    ):
+        """Interpolate EarthStat data to one missing resolution"""
+        print(f"Interpolating EarthStat data from {earthstat_in_res} to {res}")
+        clm_out_ds = sim_resolutions[res]
+        clm_out_landarea = get_clm_landarea(clm_out_ds)
+
+        # Interpolate
+        for i, var in enumerate(NEEDED_VARS):
+            match var:
+                case "HarvestArea" | "Production":
+                    method = "conservative"
+                case "Yield" | "LandMask":
+                    # Yield: Calculated later, as Production/HarvestArea.
+                    # LandMask: Used only as a source for interpolation.
+                    continue
+                case _:
+                    raise ValueError(f"Undefined interp method for var {var}")
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", message=".*large graph.*")
+                earthstat_out_da = regrid_to_clm(
+                    ds_in=earthstat_in_ds,
+                    var=var,
+                    ds_target=clm_out_ds,
+                    method=method,
+                    area_in=clm_in_landarea,
+                    area_out=clm_out_landarea,
+                    mask_var="LandMask",
+                )
+            if i == 0:
+                self[res] = xr.Dataset(data_vars={var: earthstat_out_da})
+            else:
+                self[res][var] = earthstat_out_da
+
+            # Clean up the output DataArray reference
+            del earthstat_out_da
+
+        # Calculate yield
+        self[res]["Yield"] = self[res]["Production"] / self[res]["HarvestArea"]
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message=".*large graph.*")
+            self[res]["Yield"].load()
+        self[res]["Yield"].attrs["long_name"] = "crop yield"
+        prod_units = self[res]["Production"].attrs["units"]
+        area_units = self[res]["HarvestArea"].attrs["units"]
+        self[res]["Yield"].attrs["units"] = f"{prod_units}/{area_units}"
 
     def _import_one_resolution(self, earthstat_dir, opts, res):
         earthstat_file = os.path.join(earthstat_dir, res + ".nc")
