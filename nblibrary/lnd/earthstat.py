@@ -14,6 +14,9 @@ import xesmf as xe
 # The resolution which will be used as the basis for regridding, if available
 REFERENCE_EARTHSTAT_RES = "f09"
 
+# The variables we actually use anywhere
+NEEDED_VARS = ["HarvestArea", "Production", "Yield", "LandMask"]
+
 # One level's worth of indentation for messages
 INDENT = "    "
 
@@ -174,6 +177,13 @@ def _regrid_to_clm(
     # Recover attributes
     da_out.attrs = ds_in[var].attrs
 
+    # Destroy regridder to avoid memory leak?
+    # https://github.com/JiaweiZhuang/xESMF/issues/53#issuecomment-2114209348
+    # Doesn't seem to help much, if at all. Maybe a couple hundred MB.
+    regridder.grid_in.destroy()
+    regridder.grid_out.destroy()
+    del regridder
+
     return da_out
 
 
@@ -311,10 +321,14 @@ class EarthStat:
                 clm_out_landarea = get_clm_landarea(clm_out_ds)
 
                 # Interpolate
-                for i, var in enumerate(["HarvestArea", "Production"]):
+                for i, var in enumerate(NEEDED_VARS):
                     match var:
                         case "HarvestArea" | "Production":
                             method = "conservative"
+                        case "Yield" | "LandMask":
+                            # Yield: Calculated later, as Production/HarvestArea.
+                            # LandMask: Used only as a source for interpolation.
+                            continue
                         case _:
                             raise ValueError(f"Undefined interp method for var {var}")
                     with warnings.catch_warnings():
@@ -356,6 +370,12 @@ class EarthStat:
         print(f"Importing EarthStat yield maps for resolution {res}...")
         print(earthstat_file)
         ds = xr.open_dataset(earthstat_file)
+
+        # Drop variables we don't need
+        vars_to_drop = [v for v in ds if v not in NEEDED_VARS]
+        ds = ds.drop_vars(vars_to_drop)
+
+        # Drop years we don't need
         start_year = opts["start_year"]
         end_year = opts["end_year"]
         ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
