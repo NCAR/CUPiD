@@ -3,6 +3,7 @@ Classes to handle importing and working with EarthStat data
 """
 from __future__ import annotations
 
+import gc
 import os
 import warnings
 from copy import deepcopy
@@ -211,19 +212,27 @@ class EarthStat:
                             raise ValueError(f"Undefined interp method for var {var}")
                     with warnings.catch_warnings():
                         warnings.filterwarnings("ignore", message=".*large graph.*")
+                        # Keep deepcopy for ds_in as it's needed for correctness
+                        ds_in_copy = deepcopy(earthstat_in_ds)
                         earthstat_out_da = regrid_to_clm(
-                            ds_in=deepcopy(earthstat_in_ds),
+                            ds_in=ds_in_copy,
                             var=var,
-                            ds_target=deepcopy(clm_out_ds),
+                            ds_target=clm_out_ds,
                             method=method,
-                            area_in=deepcopy(clm_in_landarea),
-                            area_out=deepcopy(clm_out_landarea),
+                            area_in=clm_in_landarea,
+                            area_out=clm_out_landarea,
                             mask_var="LandMask",
                         )
+                        # Clean up the deep copy immediately
+                        del ds_in_copy
+                        gc.collect()
                     if i == 0:
                         self[res] = xr.Dataset(data_vars={var: earthstat_out_da})
                     else:
                         self[res][var] = earthstat_out_da
+
+                    # Clean up the output DataArray reference
+                    del earthstat_out_da
 
                 # Calculate yield
                 self[res]["Yield"] = self[res]["Production"] / self[res]["HarvestArea"]
