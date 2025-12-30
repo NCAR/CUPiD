@@ -7,11 +7,76 @@ import gc
 import warnings
 from copy import deepcopy
 
+import numpy as np
 import xarray as xr
 import xesmf as xe
 
 # One level's worth of indentation for messages
 INDENT = "    "
+
+# Earth radius in km
+EARTH_RADIUS_KM = 6371.0
+
+
+def _calculate_gridcell_area(da):
+    """
+    Calculate gridcell area from lat/lon coordinates using spherical geometry.
+
+    This computes the true gridcell area based on Earth's spherical geometry,
+    which doesn't depend on whether there's land in the cell or not.
+
+    Parameters
+    ----------
+    ds : xarray.DataArray or xarray.Dataset
+        Containing 'lat' and 'lon' coordinates
+
+    Returns
+    -------
+    xarray.DataArray
+        Calculated gridcell areas in km^2
+    """
+    if isinstance(da, xr.Dataset):
+        da = da["area"]
+
+    # Get lat/lon coordinates, as well as area variable if any
+    lat = da["lat"]
+    lon = da["lon"]
+
+    # Calculate grid spacing
+    dlat = abs(float(lat[1] - lat[0])) if len(lat) > 1 else 1.0
+    dlon = abs(float(lon[1] - lon[0])) if len(lon) > 1 else 1.0
+
+    # Special handling needed if original units not km2
+    if "units" in da.attrs:
+        units_in = da.attrs["units"]
+        assert units_in == "km^2", f"Handle area units of {units_in}"
+
+    # Calculate area for each gridcell
+    # Area = R^2 * dlon_radians * (sin(lat_upper) - sin(lat_lower))
+    lat_rad = np.deg2rad(lat)
+    dlon_rad = np.deg2rad(dlon)
+    dlat_rad = np.deg2rad(dlat)
+
+    lat_upper = lat_rad + dlat_rad / 2
+    lat_lower = lat_rad - dlat_rad / 2
+
+    area_calculated = (
+        EARTH_RADIUS_KM**2 * dlon_rad * (np.sin(lat_upper) - np.sin(lat_lower))
+    )
+
+    # Broadcast to 2D if needed (for lat x lon grids)
+    if "lon" in da.dims:
+        area_calculated = area_calculated * xr.ones_like(da["lon"])
+
+    # Save original attributes
+    area_calculated.attrs = da.attrs
+
+    # There should be no NaN cells
+    assert (
+        not area_calculated.isnull().any()
+    ), "_calculate_gridcell_area() should produce no NaN"
+
+    return area_calculated
 
 
 def _get_regridder_and_mask(da_in, mask_in, ds_target, method):
@@ -57,13 +122,19 @@ def regrid_to_clm(
 ):
     """Regrid an observational dataset to a CLM target grid using conservative regridding"""
 
-    # Deep copy ds_in as it's needed for correctness
+    # Deep copy ds_in so it doesn't get modified
     ds_in = deepcopy(ds_in)
 
     # Sense checks
     assert (area_in is None) == (area_out is None)
+
+    # We don't want NaNs introduced to the output, so first let's make sure there are no NaNs in
+    # our area variables. This should be gridcell area, but CLM saves NaN where there is no land
+    # area. Fortunately, we can just replace the area variables, because we can compute gridcell
+    # area a priori from the list of gridcell centers.
     if area_in is not None:
-        area_out = area_out * area_in.sum() / area_out.sum()
+        area_in = _calculate_gridcell_area(area_in)
+        area_out = _calculate_gridcell_area(area_out)
 
     # Get mask of input data
     if mask_var is None:
@@ -74,6 +145,7 @@ def regrid_to_clm(
     da_in = ds_in[var]
     var_attrs = ds_in[var].attrs
     var_sum_before = ds_in[var].sum() if "conservative" in method else None
+    # has_nan_before = da_in.isnull().any()
 
     if area_in is not None:
         # da_in /= area_in
@@ -85,22 +157,11 @@ def regrid_to_clm(
     # Clean up things we no longer need
     del da_in, ds_in
 
-    # xesmf might look for a "mask" variable:
-    # https://coecms-training.github.io/parallel/case-studies/regridding.html
-    # Create a deep copy to avoid modifying the input ds_target
-    ds_target_copy = None
-    if "landmask" in ds_target:
-        ds_target_copy = deepcopy(ds_target)
-        ds_target_copy["mask"] = ds_target_copy["landmask"].fillna(0)
-        ds_target_for_regrid = ds_target_copy
-    else:
-        ds_target_for_regrid = ds_target
-
     # Create and apply regridder
     regridder, mask_regridded = _get_regridder_and_mask(
         data_filled,
         mask_in,
-        ds_target_for_regrid,
+        ds_target,
         method,
     )
     da_out = regridder(data_filled)
@@ -111,11 +172,6 @@ def regrid_to_clm(
     # Clean up mask_regridded immediately after use
     del mask_regridded
 
-    # Clean up ds_target copy if we made one
-    if ds_target_copy is not None:
-        del ds_target_copy
-        del ds_target_for_regrid
-
     # Force garbage collection after regridding
     gc.collect()
 
@@ -125,14 +181,17 @@ def regrid_to_clm(
     # # Normalize to account for partial coverage
     # da_out = da_out / mask_regridded
 
-    # apply landmask from CLM target grid
-    da_out = da_out * ds_target["landmask"]
+    # NO; EarthStat data have no NaNs
+    # # apply landmask from CLM target grid
+    # da_out = da_out * ds_target["landmask"]
 
     if area_out is not None:
         da_out *= area_out
 
     # Force computation to avoid keeping lazy references
     da_out = da_out.compute()
+
+    assert not da_out.isnull().any()
 
     # If we chose a conservative method, assume we want the global sums to match before and after.
     if "conservative" in method:
@@ -143,7 +202,8 @@ def regrid_to_clm(
         # Print error in global sum introduced by regridding
         before = var_sum_before.values
         after = var_sum_after.values
-        pct_diff = (after - before) / before * 100
+        diff = after - before
+        pct_diff = diff / before * 100
         if "units" in var_attrs:
             units = var_attrs["units"]
         else:
@@ -151,6 +211,7 @@ def regrid_to_clm(
         print(f"{INDENT}{var} ({units}):")
         print(f"{2*INDENT}Global sum before: {before:.2e}")
         print(f"{2*INDENT}Global sum  after: {after:.2e} ({pct_diff:.1f}% diff)")
+        print(f"{2*INDENT}Global diff after: {diff:.2e} ({pct_diff:.1f}%)")
 
         # Adjust so global sum matches what we had before regridding
         print(f"{2*INDENT}Adjusting to match.")
