@@ -1,7 +1,6 @@
 """
 Classes to handle importing and working with EarthStat data
 """
-
 from __future__ import annotations
 
 import os
@@ -209,7 +208,13 @@ class EarthStat:
             )
 
     def _get_one_missing(
-        self, *, sim_resolutions, earthstat_in_ds, earthstat_in_res, res, clm_in_landarea
+        self,
+        *,
+        sim_resolutions,
+        earthstat_in_ds,
+        earthstat_in_res,
+        res,
+        clm_in_landarea,
     ):
         """Interpolate EarthStat data to one missing resolution"""
         print(f"Interpolating EarthStat data from {earthstat_in_res} to {res}")
@@ -247,7 +252,15 @@ class EarthStat:
             del earthstat_out_da
 
         # Calculate yield
-        self[res]["Yield"] = self[res]["Production"] / self[res]["HarvestArea"]
+        assert (
+            np.nanmax(
+                self[res]["Production"].where(self[res]["HarvestArea"] == 0).values,
+            )
+            == 0
+        )
+        self[res]["Yield"] = (
+            self[res]["Production"] / self[res]["HarvestArea"]
+        ).fillna(0)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*large graph.*")
             self[res]["Yield"].load()

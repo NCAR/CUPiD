@@ -238,4 +238,6 @@ def regrid_to_clm(
     # Force garbage collection to ensure cleanup
     gc.collect()
 
+    assert not da_out.isnull().any()
+
     return da_out
