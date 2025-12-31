@@ -526,6 +526,9 @@ class ResultsMaps:
 
         if any_subplot_has_data and (np.isinf(vmin) or np.isinf(vmax)):
             raise RuntimeError("Failed to find vmin and/or vmax")
+        if not any_subplot_has_data:
+            vmin = -1.0
+            vmax = 1.0
 
         return vmin, vmax
 
@@ -544,6 +547,12 @@ class ResultsMaps:
             self._update_image_colorbar_range(vmin, vmax, im)
 
     def _update_image_colorbar_range(self, vmin, vmax, im):
+        # Sense checks
+        assert vmin <= vmax, f"vmin ({vmin}) > vmax ({vmax})"
+        assert not np.isinf(vmin) and not np.isinf(
+            vmax,
+        ), f"Infinite vmin ({vmin}) / vmax ({vmax})"
+
         im.set_clim(vmin, vmax)
 
         # Update the colorbar, if it exists
