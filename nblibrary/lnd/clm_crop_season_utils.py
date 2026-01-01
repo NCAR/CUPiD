@@ -67,7 +67,7 @@ def cft_ds_gslen(cft_ds):
     units = da.attrs["units"]
 
     # Mask to just valid harvests
-    cft_ds["gslen_perharv_cft"] = da.where(cft_ds["VALID_HARVEST"])
+    cft_ds["gslen_perharv_cft"] = da.where(cft_ds["USABLE_HARVEST"])
     cft_ds["gslen_perharv_cft"].attrs["units"] = units
 
     # Combine CFTs to crops

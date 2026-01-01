@@ -34,6 +34,10 @@ BELOWGROUND_COMPARTMENTS = [
     c for c in BIOMASS_COMPARTMENTS if c not in ABOVEGROUND_COMPARTMENTS
 ]
 
+# Needed only for the temporary kludge that is _fill_missing_gc2f_units
+GC2F = "GRAINC_TO_FOOD"
+GC2F_UNITS_SOURCE_VAR = "GRAINC_TO_FOOD_PERHARV"
+
 
 def _get_case_max_lai(case: CropCase) -> CropCase:
     if "MAX_TLAI_PERHARV" not in case.cft_ds:
@@ -81,23 +85,52 @@ def _get_case_max_lai(case: CropCase) -> CropCase:
     return case
 
 
+def _fill_missing_gc2f_units(case, var_list, e):
+    """
+    It's okay for units to be missing from GRAINC_TO_FOOD variables, as long as there's a _PERHARV
+    version we can take the units from.
+
+    TODO: Delete before merging CUPiD notebook? This was a temporary hack necessary before CropCase
+    import was fixed to add units.
+    """
+    any_gc2f = any(GC2F in v for v in var_list)
+    if (
+        any_gc2f
+        and GC2F_UNITS_SOURCE_VAR in case.cft_ds
+        and "units" in case.cft_ds[GC2F_UNITS_SOURCE_VAR].attrs
+    ):
+        units = case.cft_ds[GC2F_UNITS_SOURCE_VAR].attrs["units"]
+        print(f"{e}; assuming {units} based on {GC2F_UNITS_SOURCE_VAR}")
+        for v in var_list:
+            if GC2F in v:
+                case.cft_ds[v].attrs["units"] = units
+                case.cft_ds[v].attrs["units_source"] = GC2F_UNITS_SOURCE_VAR
+        assert all("units" in case.cft_ds[v].attrs for v in var_list), e
+    else:
+        raise e
+    return case
+
+
 def _get_das_to_combine(case, var_list):
-    # Get units
     # Every variable should have a unit attribute
-    msg = f"Not every variable in list has units: {var_list}"
-    assert all("units" in case.cft_ds[v].attrs for v in var_list), msg
-    # Should be the same for all variables
+    msg = f"{case.name}: Not every variable in list has units: {var_list}"
+    try:
+        assert all("units" in case.cft_ds[v].attrs for v in var_list), msg
+    except AssertionError as e:
+        case = _fill_missing_gc2f_units(case, var_list, e)
+
+    # Units should be the same for all variables
     unit_set = {case.cft_ds[v].attrs["units"] for v in var_list}
     msg = f"Multiple units ({unit_set}) found in these variables: {var_list}"
     assert len(unit_set) == 1, msg
     units = case.cft_ds[var_list[0]].attrs["units"]
 
-    # Collect DataArrays to sum, masking invalid values
+    # Collect DataArrays to combine
     da = case.cft_ds[var_list].to_array()
 
     # Mask negative values, which indicates either (a) no harvest occurred or (b) harvest occurred
     # before that phase transition
-    da = da.where(da < 0)
+    da = da.where(da >= 0)
 
     return units, da
 
@@ -126,8 +159,11 @@ def _get_case_abovebelowground_biomass(case: CropCase) -> CropCase:
             # Get variables to sum and their units
             units, da = _get_das_to_combine(case, var_list)
 
+            # Mask where there was no harvest
+            da = da.where(case.cft_ds["HARVEST_REASON_PERHARV"] > 0)
+
             # Sum them
-            da = da.sum("variable")
+            da = da.sum(dim="variable", keep_attrs=True)
             var = f"{a_or_b}groundc_at_{phase_transition.lower()}"
             case.cft_ds[var] = da.mean(dim="mxharvests", keep_attrs=True)
             case.cft_ds[var].attrs["units"] = units
@@ -161,7 +197,7 @@ def _check_nonsense_neg_at_valid_harv(case, var_list_list):
     Only do this check if the phase transition list is what we expect, the case had all the
     biomass pool variables, and the case has our "valid harvest" variable.
     """
-    valid_harvest_var = "VALID_HARVEST"
+    valid_harvest_var = "USABLE_HARVEST"
     do_check = (
         set(PHASE_TRANSITIONS) == {"EMERGENCE", "ANTHESIS", "MATURITY"}
         and len(var_list_list) == len(PHASE_TRANSITIONS)
@@ -228,9 +264,30 @@ def _get_negative_at_valid_harvest(
 
 
 def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
-    # TODO: Will need to add GRAINC_TO_SEED_VIABLE_PERHARV
+    # Get grain product variables
+    maturity_level = "USABLE"
     product_list = ["FOOD", "SEED"]
-    var_list = [f"GRAINC_TO_{p}_VIABLE_PERHARV" for p in product_list]
+    missing_products = []
+    var_list = []
+    missing_vars = []
+    for product in product_list:
+        var = f"GRAINC_TO_{product}_{maturity_level}_PERHARV"
+        if var in case.cft_ds:
+            var_list.append(var)
+        else:
+            missing_products.append(product)
+            missing_vars.append(var)
+
+    # If no grain products present, return.
+    if len(missing_products) == len(product_list):
+        print(f"{case.name}: No grain C product variables found: {missing_vars}")
+        return case
+    # If only some grain products are present, warn about missing ones
+    if missing_products:
+        present_products = [p for p in product_list if p not in missing_products]
+        print(
+            f"{case.name}: Missing grain C outputs for {missing_products}; including only {present_products}",
+        )
 
     if not all(v in case.cft_ds for v in var_list):
         return case
@@ -238,9 +295,17 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
     # Get variables to sum and their units
     units, da = _get_das_to_combine(case, var_list)
 
-    # Get grain C at maturity.
-    assert np.any(da < 0), f"Unexpected negative value(s) in variables {var_list}"
-    case.cft_ds[var] = da.mean(dim="mxharvests", keep_attrs=True)
+    # Mask not-mature-enough harvests
+    mask_var = f"{maturity_level}_HARVEST"
+    da = da.where(mask_var)
+
+    # Get grain C at maturity for each CFT
+    assert not np.any(da < 0), f"Unexpected negative value(s) in variables {var_list}"
+    var = "grainc_at_maturity"
+    case.cft_ds[var] = da.mean(dim="mxharvests", keep_attrs=True).sum(
+        dim="variable",
+        keep_attrs=True,
+    )
 
     # Combine CFTs to crops
     var_crop = var + "_crop"
@@ -251,15 +316,14 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
         method="mean",
         weights="cft_harv_area",
     )
-    case.cft_ds[var_crop].attrs["units"] = case.cft_ds[var_in].attrs["units"]
-    assert np.any(case.cft_ds[var_crop] > 0)
+    case.cft_ds[var_crop].attrs["units"] = units
     return case
 
 
 def _get_case_crop_biomass_vars(case: CropCase) -> CropCase:
     case = _get_case_max_lai(case)
     case = _get_case_abovebelowground_biomass(case)
-    # case = _get_case_grainc_at_maturity(case)
+    case = _get_case_grainc_at_maturity(case)
 
     return case
 
