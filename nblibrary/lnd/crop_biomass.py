@@ -271,7 +271,7 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
     output_var = "grainc_at_maturity"
 
     # Get grain product variables
-    maturity_level = "USABLE"
+    maturity_level = "MATURE"
     product_list = ["FOOD", "SEED"]
     missing_products = []
     var_list = []

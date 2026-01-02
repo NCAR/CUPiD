@@ -234,7 +234,7 @@ def fixture_mock_case_grainc():
     da_incl_0 = xr.DataArray(data=np.array([[1, 4, 7, 10], [3, 6, 9, 12]]), dims=dims)
     da_incl_1 = da_incl_0 * 10
 
-    maturity_level = "USABLE"
+    maturity_level = "MATURE"
     case.cft_ds = xr.Dataset(
         data_vars={
             "var0": da_excl_0,
@@ -261,17 +261,21 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
         """Test basic functionality"""
         case = mock_case_grainc
 
-        case, var = _get_case_grainc_at_maturity(case)
+        f = io.StringIO()
+        with redirect_stdout(f):
+            case, var = _get_case_grainc_at_maturity(case)
 
         result = case.cft_ds[var].values
         expected = np.array([22, 55, 88, 121])
         assert np.array_equal(result, expected)
         assert "units" in case.cft_ds[var].attrs
 
+        assert "Missing" not in f.getvalue()
+
     def test_ok_missing_seed(self, mock_case_grainc):
         """If one product is missing (here, SEED), calculate with what we do have"""
         case = mock_case_grainc
-        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_USABLE_PERHARV")
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_MATURE_PERHARV")
 
         f = io.StringIO()
         with redirect_stdout(f):
@@ -289,7 +293,7 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
     def test_ok_missing_food(self, mock_case_grainc):
         """If one product is missing (here, FOOD), calculate with what we do have"""
         case = mock_case_grainc
-        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_USABLE_PERHARV")
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_MATURE_PERHARV")
 
         f = io.StringIO()
         with redirect_stdout(f):
@@ -307,8 +311,8 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
     def test_skip_missing_both(self, mock_case_grainc):
         """If both products are missing, do not calculate"""
         case = mock_case_grainc
-        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_USABLE_PERHARV")
-        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_USABLE_PERHARV")
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_MATURE_PERHARV")
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_MATURE_PERHARV")
 
         f = io.StringIO()
         with redirect_stdout(f):
@@ -318,14 +322,14 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
 
         expected_msg = (
             "test_case: All grain C product variables missing:"
-            + " ['GRAINC_TO_FOOD_USABLE_PERHARV', 'GRAINC_TO_SEED_USABLE_PERHARV']"
+            + " ['GRAINC_TO_FOOD_MATURE_PERHARV', 'GRAINC_TO_SEED_MATURE_PERHARV']"
         )
         assert expected_msg in f.getvalue()
 
     def test_masking(self, mock_case_grainc):
         """Test masking functionality with all results expecting at least one contributor"""
         case = mock_case_grainc
-        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[0, 0] = -1
+        case.cft_ds["GRAINC_TO_SEED_MATURE_PERHARV"].values[0, 0] = -1
 
         case, var = _get_case_grainc_at_maturity(case)
 
@@ -336,10 +340,10 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
     def test_masking_all(self, mock_case_grainc):
         """Test masking functionality with one result expecting no contributors"""
         case = mock_case_grainc
-        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[0, 0] = -1
-        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[1, 0] = -1
-        case.cft_ds["GRAINC_TO_FOOD_USABLE_PERHARV"].values[0, 0] = -1
-        case.cft_ds["GRAINC_TO_FOOD_USABLE_PERHARV"].values[1, 0] = -1
+        case.cft_ds["GRAINC_TO_SEED_MATURE_PERHARV"].values[0, 0] = -1
+        case.cft_ds["GRAINC_TO_SEED_MATURE_PERHARV"].values[1, 0] = -1
+        case.cft_ds["GRAINC_TO_FOOD_MATURE_PERHARV"].values[0, 0] = -1
+        case.cft_ds["GRAINC_TO_FOOD_MATURE_PERHARV"].values[1, 0] = -1
 
         case, var = _get_case_grainc_at_maturity(case)
 
