@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from crop_biomass import (  # noqa: E402
     _fill_missing_gc2f_units,
     _get_das_to_combine,
+    _get_case_grainc_at_maturity,
     GC2F,
     GC2F_UNITS_SOURCE_VAR,
 )
@@ -215,3 +216,134 @@ class TestGetDasToCombine:  # pylint: disable=too-many-public-methods
         expected = da1 < 0
         msg = f"Unexpected nulls: Got {result.values}, expected {expected.values}"
         assert np.array_equal(result, expected), msg
+
+
+@pytest.fixture(name="mock_case_grainc", scope="function")
+def fixture_mock_case_grainc():
+    """Create a mock case object with grain C vars (fresh for each test)."""
+    case = create_mock_case("test_case")
+
+    # 1d vars that don't contribute to grainC sums
+    dims = ["pft"]
+    da_excl_0 = xr.DataArray(data=np.array([1, 2, 3, 4]), dims=dims)
+    da_excl_1 = da_excl_0 + 4
+
+    # Multi-dimensioned vars that do contribute to sums
+    dims = ["mxharvests", "pft"]
+    # mxmat mean: 2, 5, 8, 11
+    da_incl_0 = xr.DataArray(data=np.array([[1, 4, 7, 10], [3, 6, 9, 12]]), dims=dims)
+    da_incl_1 = da_incl_0 * 10
+
+    maturity_level = "USABLE"
+    case.cft_ds = xr.Dataset(
+        data_vars={
+            "var0": da_excl_0,
+            "var1": da_excl_1,
+            f"GRAINC_TO_SEED_{maturity_level}_PERHARV": da_incl_0,
+            f"GRAINC_TO_FOOD_{maturity_level}_PERHARV": da_incl_1,
+        },
+    )
+    attrs = {"units": "kg"}
+    for var in case.cft_ds:
+        case.cft_ds[var].attrs = attrs
+    case.cft_ds[f"{maturity_level}_HARVEST"] = xr.full_like(
+        case.cft_ds[f"GRAINC_TO_FOOD_{maturity_level}_PERHARV"],
+        fill_value=1,
+    )
+
+    return case
+
+
+class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
+    """Tests for the _get_case_grainc_at_maturity function."""
+
+    def test_basic(self, mock_case_grainc):
+        """Test basic functionality"""
+        case = mock_case_grainc
+
+        case, var = _get_case_grainc_at_maturity(case)
+
+        result = case.cft_ds[var].values
+        expected = np.array([22, 55, 88, 121])
+        assert np.array_equal(result, expected)
+        assert "units" in case.cft_ds[var].attrs
+
+    def test_ok_missing_seed(self, mock_case_grainc):
+        """If one product is missing (here, SEED), calculate with what we do have"""
+        case = mock_case_grainc
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_USABLE_PERHARV")
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            case, var = _get_case_grainc_at_maturity(case)
+
+        result = case.cft_ds[var].values
+        expected = np.array([20, 50, 80, 110])
+        assert np.array_equal(result, expected)
+
+        expected_msg = (
+            "test_case: Missing grain C outputs for ['SEED']; including only ['FOOD']"
+        )
+        assert expected_msg in f.getvalue()
+
+    def test_ok_missing_food(self, mock_case_grainc):
+        """If one product is missing (here, FOOD), calculate with what we do have"""
+        case = mock_case_grainc
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_USABLE_PERHARV")
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            case, var = _get_case_grainc_at_maturity(case)
+
+        result = case.cft_ds[var].values
+        expected = np.array([2, 5, 8, 11])
+        assert np.array_equal(result, expected)
+
+        expected_msg = (
+            "test_case: Missing grain C outputs for ['FOOD']; including only ['SEED']"
+        )
+        assert expected_msg in f.getvalue()
+
+    def test_skip_missing_both(self, mock_case_grainc):
+        """If both products are missing, do not calculate"""
+        case = mock_case_grainc
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_FOOD_USABLE_PERHARV")
+        case.cft_ds = case.cft_ds.drop_vars("GRAINC_TO_SEED_USABLE_PERHARV")
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            case, var = _get_case_grainc_at_maturity(case)
+
+        assert var not in case.cft_ds
+
+        expected_msg = (
+            "test_case: All grain C product variables missing:"
+            + " ['GRAINC_TO_FOOD_USABLE_PERHARV', 'GRAINC_TO_SEED_USABLE_PERHARV']"
+        )
+        assert expected_msg in f.getvalue()
+
+    def test_masking(self, mock_case_grainc):
+        """Test masking functionality with all results expecting at least one contributor"""
+        case = mock_case_grainc
+        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[0, 0] = -1
+
+        case, var = _get_case_grainc_at_maturity(case)
+
+        result = case.cft_ds[var].values
+        expected = np.array([23, 55, 88, 121])
+        assert np.array_equal(result, expected)
+
+    def test_masking_all(self, mock_case_grainc):
+        """Test masking functionality with one result expecting no contributors"""
+        case = mock_case_grainc
+        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[0, 0] = -1
+        case.cft_ds["GRAINC_TO_SEED_USABLE_PERHARV"].values[1, 0] = -1
+        case.cft_ds["GRAINC_TO_FOOD_USABLE_PERHARV"].values[0, 0] = -1
+        case.cft_ds["GRAINC_TO_FOOD_USABLE_PERHARV"].values[1, 0] = -1
+
+        case, var = _get_case_grainc_at_maturity(case)
+
+        result = case.cft_ds[var].values
+        # If everything is masked, it's taking xarray mean of NaNs, which should give 0
+        expected = np.array([0, 55, 88, 121])
+        assert np.array_equal(result, expected)

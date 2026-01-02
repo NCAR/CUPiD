@@ -267,6 +267,9 @@ def _get_negative_at_valid_harvest(
 
 
 def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
+    # The variable we'll be making
+    output_var = "grainc_at_maturity"
+
     # Get grain product variables
     maturity_level = "USABLE"
     product_list = ["FOOD", "SEED"]
@@ -283,8 +286,9 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
 
     # If no grain products present, return.
     if len(missing_products) == len(product_list):
-        print(f"{case.name}: No grain C product variables found: {missing_vars}")
-        return case
+        print(f"{case.name}: All grain C product variables missing: {missing_vars}")
+        return case, output_var
+
     # If only some grain products are present, warn about missing ones
     if missing_products:
         present_products = [p for p in product_list if p not in missing_products]
@@ -293,20 +297,29 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
         )
 
     # Get variables to sum and their units
-    units, da = _get_das_to_combine(case, var_list)
+    _, da = _get_das_to_combine(case, var_list)
 
     # Mask not-mature-enough harvests
     mask_var = f"{maturity_level}_HARVEST"
-    da = da.where(mask_var)
+    da = da.where(case.cft_ds[mask_var])
 
     # Get grain C at maturity for each CFT
     assert not np.any(da < 0), f"Unexpected negative value(s) in variables {var_list}"
-    var = "grainc_at_maturity"
-    case.cft_ds[var] = da.mean(dim="mxharvests", keep_attrs=True).sum(
+    case.cft_ds[output_var] = da.mean(dim="mxharvests", keep_attrs=True).sum(
         dim="variable",
         keep_attrs=True,
     )
 
+    assert "units" in case.cft_ds[output_var].attrs
+    return case, output_var
+
+
+def _get_case_crop_biomass_vars(case: CropCase) -> CropCase:
+    case = _get_case_max_lai(case)
+    case = _get_case_abovebelowground_biomass(case)
+
+    # Get grain C at maturity
+    case, var = _get_case_grainc_at_maturity(case)
     # Combine CFTs to crops
     var_crop = var + "_crop"
     case.cft_ds = combine_cft_to_crop(
@@ -316,14 +329,7 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
         method="mean",
         weights="cft_harv_area",
     )
-    case.cft_ds[var_crop].attrs["units"] = units
-    return case
-
-
-def _get_case_crop_biomass_vars(case: CropCase) -> CropCase:
-    case = _get_case_max_lai(case)
-    case = _get_case_abovebelowground_biomass(case)
-    case = _get_case_grainc_at_maturity(case)
+    case.cft_ds[var_crop].attrs["units"] = case.cft_ds[var].attrs["units"]
 
     return case
 
