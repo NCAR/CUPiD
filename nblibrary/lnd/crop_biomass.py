@@ -132,6 +132,9 @@ def _get_das_to_combine(case, var_list):
     # before that phase transition
     da = da.where(da >= 0)
 
+    # Save units
+    da.attrs["units"] = units
+
     return units, da
 
 

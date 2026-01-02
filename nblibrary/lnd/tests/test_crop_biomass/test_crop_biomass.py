@@ -143,12 +143,15 @@ class TestGetDasToCombine:  # pylint: disable=too-many-public-methods
         )
         var_list = list(case.cft_ds.keys())
 
-        case, result_da = _get_das_to_combine(case, var_list)
+        units, result_da = _get_das_to_combine(case, var_list)
 
         msg = "da0 doesn't match"
         assert np.array_equal(da0, result_da.isel(variable=0).values), msg
         msg = "da1 doesn't match"
         assert np.array_equal(da1, result_da.isel(variable=1).values), msg
+
+        assert "units" in result_da.attrs
+        assert result_da.attrs["units"] == units
 
     def test_err_units_missing(self, mock_case):
         """Test that error is thrown if units not found"""
@@ -184,7 +187,9 @@ class TestGetDasToCombine:  # pylint: disable=too-many-public-methods
         var_list = ["var0", "var1", var_missing_units]
 
         # Shouldn't error
-        _get_das_to_combine(case, var_list)
+        units, result_da = _get_das_to_combine(case, var_list)
+        assert "units" in result_da.attrs
+        assert result_da.attrs["units"] == units
 
     def test_masking(self):
         """Test masking of negative values"""
