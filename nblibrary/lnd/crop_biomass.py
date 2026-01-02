@@ -289,9 +289,6 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
             f"{case.name}: Missing grain C outputs for {missing_products}; including only {present_products}",
         )
 
-    if not all(v in case.cft_ds for v in var_list):
-        return case
-
     # Get variables to sum and their units
     units, da = _get_das_to_combine(case, var_list)
 
