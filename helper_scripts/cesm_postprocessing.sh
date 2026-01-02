@@ -119,7 +119,7 @@ conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
   if [ "${CUPID_RUN_ADF}" != "TRUE" ]; then
     echo "ERROR: CUPID_RUN_CVDP=TRUE but CUPID_RUN_ADF=${CUPID_RUN_ADF}. CVDP is run by"
-    echo "the ADF, so those flags which will result in the CVDP not being run."
+    echo "the ADF, so that combination of flags will result in CVDP not being run."
     echo "Either set CUPID_RUN_ADF=TRUE or CUPID_RUN_CVDP=FALSE"
     exit 1
   fi
