@@ -200,7 +200,7 @@ def _check_nonsense_neg_at_valid_harv(case, var_list_list):
     Only do this check if the phase transition list is what we expect, the case had all the
     biomass pool variables, and the case has our "valid harvest" variable.
     """
-    valid_harvest_var = "USABLE_HARVEST"
+    valid_harvest_var = "MARKETABLE_HARVEST"
     do_check = (
         set(PHASE_TRANSITIONS) == {"EMERGENCE", "ANTHESIS", "MATURITY"}
         and len(var_list_list) == len(PHASE_TRANSITIONS)
