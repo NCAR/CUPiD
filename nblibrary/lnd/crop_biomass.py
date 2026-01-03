@@ -43,6 +43,12 @@ def _get_case_max_lai(case: CropCase) -> CropCase:
     if "MAX_TLAI_PERHARV" not in case.cft_ds:
         return case
 
+    # Skip if Dataset already has both output variables
+    out_var = "max_tlai"
+    out_var_crop = out_var + "_crop"
+    if all(v in case.cft_ds for v in [out_var, out_var_crop]):
+        return case
+
     # List of variables to keep: Just what we need
     variables_to_keep = [
         "MAX_TLAI_PERHARV",
@@ -66,21 +72,19 @@ def _get_case_max_lai(case: CropCase) -> CropCase:
     assert not np.any(da < 0)
 
     # Combine CFTs to crops
-    var = "max_tlai"
-    var_crop = var + "_crop"
-    cft_ds[var] = da
+    cft_ds[out_var] = da
     cft_ds = combine_cft_to_crop(
         cft_ds,
-        var,
-        var_crop,
+        out_var,
+        out_var_crop,
         method="mean",
         weights="cft_harv_area",
     )
 
     # This should be changed to happen automatically elsewhere!
-    cft_ds[var_crop].attrs["units"] = "m2/m2"
+    cft_ds[out_var_crop].attrs["units"] = "m2/m2"
 
-    case.cft_ds[var_crop] = cft_ds[var_crop]
+    case.cft_ds[out_var_crop] = cft_ds[out_var_crop]
 
     return case
 
@@ -151,6 +155,13 @@ def _get_case_abovebelowground_biomass(case: CropCase) -> CropCase:
         var_list_list = []
 
         for phase_transition in PHASE_TRANSITIONS:
+
+            # Skip if Dataset already has both output variables
+            out_var = f"{a_or_b}groundc_at_{phase_transition.lower()}"
+            out_var_crop = out_var + "_crop"
+            if all(v in case.cft_ds for v in [out_var, out_var_crop]):
+                continue
+
             # Get variables to sum
             var_list = [
                 f"{c}C_AT_{phase_transition.upper()}_PERHARV" for c in compartment_list
@@ -167,20 +178,21 @@ def _get_case_abovebelowground_biomass(case: CropCase) -> CropCase:
 
             # Sum them
             da = da.sum(dim="variable", keep_attrs=True)
-            var = f"{a_or_b}groundc_at_{phase_transition.lower()}"
-            case.cft_ds[var] = da.mean(dim="mxharvests", keep_attrs=True)
-            case.cft_ds[var].attrs["units"] = units
+
+            case.cft_ds[out_var] = da.mean(dim="mxharvests", keep_attrs=True)
+            case.cft_ds[out_var].attrs["units"] = units
 
             # Combine CFTs to crops
-            var_crop = var + "_crop"
             case.cft_ds = combine_cft_to_crop(
                 case.cft_ds,
-                var,
-                var_crop,
+                out_var,
+                out_var_crop,
                 method="mean",
                 weights="cft_harv_area",
             )
-            case.cft_ds[var_crop].attrs["units"] = case.cft_ds[var].attrs["units"]
+            case.cft_ds[out_var_crop].attrs["units"] = case.cft_ds[out_var].attrs[
+                "units"
+            ]
 
         # Nonsense check: Expected (relative) number of negatives at each phase
         _check_nonsense_neg_at_valid_harv(case, var_list_list)
@@ -268,7 +280,11 @@ def _get_negative_at_valid_harvest(
 
 def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
     # The variable we'll be making
-    output_var = "grainc_at_maturity"
+    out_var = "grainc_at_maturity"
+
+    # Skip if Dataset already has output variable
+    if out_var in case.cft_ds:
+        return case, out_var
 
     # Get grain product variables
     maturity_level = "MATURE"
@@ -287,7 +303,7 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
     # If no grain products present, return.
     if len(missing_products) == len(product_list):
         print(f"{case.name}: All grain C product variables missing: {missing_vars}")
-        return case, output_var
+        return case, out_var
 
     # If only some grain products are present, warn about missing ones
     if missing_products:
@@ -305,13 +321,13 @@ def _get_case_grainc_at_maturity(case: CropCase) -> CropCase:
 
     # Get grain C at maturity for each CFT
     assert not np.any(da < 0), f"Unexpected negative value(s) in variables {var_list}"
-    case.cft_ds[output_var] = da.mean(dim="mxharvests", keep_attrs=True).sum(
+    case.cft_ds[out_var] = da.mean(dim="mxharvests", keep_attrs=True).sum(
         dim="variable",
         keep_attrs=True,
     )
 
-    assert "units" in case.cft_ds[output_var].attrs
-    return case, output_var
+    assert "units" in case.cft_ds[out_var].attrs
+    return case, out_var
 
 
 def _get_case_crop_biomass_vars(case: CropCase) -> CropCase:
@@ -320,16 +336,17 @@ def _get_case_crop_biomass_vars(case: CropCase) -> CropCase:
 
     # Get grain C at maturity
     case, var = _get_case_grainc_at_maturity(case)
-    # Combine CFTs to crops
+    # Combine CFTs to crops, if variable not already present
     var_crop = var + "_crop"
-    case.cft_ds = combine_cft_to_crop(
-        case.cft_ds,
-        var,
-        var_crop,
-        method="mean",
-        weights="cft_harv_area",
-    )
-    case.cft_ds[var_crop].attrs["units"] = case.cft_ds[var].attrs["units"]
+    if var_crop not in case.cft_ds:
+        case.cft_ds = combine_cft_to_crop(
+            case.cft_ds,
+            var,
+            var_crop,
+            method="mean",
+            weights="cft_harv_area",
+        )
+        case.cft_ds[var_crop].attrs["units"] = case.cft_ds[var].attrs["units"]
 
     return case
 

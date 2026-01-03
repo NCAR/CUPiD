@@ -326,6 +326,21 @@ class TestGetGrainCAtMaturity:  # pylint: disable=too-many-public-methods
         )
         assert expected_msg in f.getvalue()
 
+    def test_skip_already_done(self, mock_case_grainc):
+        """If output variable is already done, skip"""
+        case = mock_case_grainc
+
+        # Make fake variable for easy checking
+        expected_da = xr.DataArray(data=np.array([np.nan]))
+        expected_var_name = "grainc_at_maturity"
+        case.cft_ds[expected_var_name] = expected_da
+
+        case, var = _get_case_grainc_at_maturity(case)
+
+        assert var == expected_var_name
+        assert var in case.cft_ds
+        assert case.cft_ds[var].equals(expected_da)
+
     def test_masking(self, mock_case_grainc):
         """Test masking functionality with all results expecting at least one contributor"""
         case = mock_case_grainc
