@@ -11,6 +11,7 @@ from parallelizable_plot_loop import get_figpath_with_keycase
 from plotting_utils import get_difference_map
 from plotting_utils import get_instxn_time_slice_of_ds
 from plotting_utils import get_key_case
+from plotting_utils import get_maturity_level_from_stat
 from plotting_utils import get_mean_map
 from results_maps import ResultsMaps
 
@@ -38,6 +39,9 @@ def _get_clm_map(case, stat_input):
     Get yield map from CLM
     """
 
+    # Handle requested maturity level
+    stat_input, maturity = get_maturity_level_from_stat(stat_input)
+
     # Define some things based on what map we want
     if stat_input == "yield":
         units = "tons / ha"
@@ -58,7 +62,10 @@ def _get_clm_map(case, stat_input):
 
     # Extract the data
     ds = case.cft_ds.mean(dim="time")
-    ds["result"] = ds["crop_" + stat_input]
+    var = f"crop_{stat_input}"
+    if maturity is not None:
+        var += f"_{maturity}"
+    ds["result"] = ds[var]
     if stat_input == "prod":
         ds["result"] = ds["result"].where(ds["crop_area"] > 0)
 
@@ -93,6 +100,7 @@ def _get_obsdiff_map(
     map_clm = _get_clm_map(case, stat_input)
 
     # Get observed map
+    stat_input, _ = get_maturity_level_from_stat(stat_input)
     map_obs = earthstat_data.get_map(
         case.cft_ds.attrs["resolution"],
         stat_input,
@@ -171,7 +179,7 @@ def _get_fig_path(img_dir, crop, clm_or_obsdiff, stat, yr_range_str):
     group members, in the orders given in dropdown_specs and radio_specs,
     respectively.
     """
-    join_list = [crop, clm_or_obsdiff, yr_range_str, stat]
+    join_list = [stat, crop, clm_or_obsdiff, yr_range_str]
     fig_basename = sanitize_filename("_".join(join_list))
     fig_basename += ".png"
     fig_path = os.path.join(img_dir, fig_basename)
@@ -294,7 +302,11 @@ def clm_and_earthstat_maps_1crop(
 
                 # Get plot suptitle
                 if suptitle is None:
-                    suptitle = f"{results[case_legend].name}: {crop} [{yr_range_str}]"
+                    _, maturity = get_maturity_level_from_stat(stat_input)
+                    title_stat = results[case_legend].name
+                    if maturity is not None:
+                        title_stat += f" ({maturity})"
+                    suptitle = f"{title_stat}: {crop} [{yr_range_str}]"
 
                 # Save info about included years
                 if n_timesteps == 0:

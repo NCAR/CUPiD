@@ -12,6 +12,7 @@ import pandas as pd
 import xarray as xr
 from earthstat import align_time
 from matplotlib import pyplot as plt
+from plotting_utils import get_maturity_level_from_stat
 
 EARTHSTAT_RES_TO_PLOT = "f09"
 OBS_DUMMY_LINECOLOR = "obs not in dict"
@@ -112,10 +113,11 @@ def _plot_clm_cases(
     crop,
     use_earthstat_area,
     do_normdetrend,
+    maturity,
 ):
     for c, case in enumerate(case_list):
 
-        crop_data_ts = var_details["function"](crop, case, use_earthstat_area)
+        crop_data_ts = var_details["function"](crop, case, use_earthstat_area, maturity)
         if use_earthstat_area:
             crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
 
@@ -138,13 +140,13 @@ def _plot_clm_cases(
         crop_data_ts.plot(**plot_kwargs)
 
 
-def _get_clm_yield(crop, case, use_earthstat_area):
+def _get_clm_yield(crop, case, use_earthstat_area, maturity):
     if use_earthstat_area:
         this_area = "crop_area_es"
-        this_prod = "crop_prod_es"
+        this_prod = f"crop_prod_{maturity}_es"
     else:
         this_area = "crop_area"
-        this_prod = "crop_prod"
+        this_prod = f"crop_prod_{maturity}"
 
     da_prod = case.cft_ds[this_prod].sel(crop=crop)
     da_area = case.cft_ds[this_area].sel(crop=crop)
@@ -155,16 +157,16 @@ def _get_clm_yield(crop, case, use_earthstat_area):
     return crop_yield_ts
 
 
-def _get_clm_prod(crop, case, use_earthstat_area):
+def _get_clm_prod(crop, case, use_earthstat_area, maturity):
     if use_earthstat_area:
-        this_var = "crop_prod_es"
+        this_var = f"crop_prod_{maturity}_es"
     else:
-        this_var = "crop_prod"
+        this_var = f"crop_prod_{maturity}"
     da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
-def _get_clm_area(crop, case, use_earthstat_area):
+def _get_clm_area(crop, case, use_earthstat_area, *args):
     if use_earthstat_area:
         da = case.cft_ds["crop_area_es"].sel(crop=crop)
     else:
@@ -340,6 +342,7 @@ def _one_fig(
     earthstat_data,
     case_list,
     fao_data,
+    maturity,
     opts,
     *,
     use_earthstat_area=False,
@@ -356,7 +359,7 @@ def _one_fig(
     # TODO: Increase robustness of unit conversion: Check that it really is, e.g., g/m2 to start
     # with.
     var_details = _get_var_details(which, fao_data_world)
-    fig_opts["title"] = "Global " + var_details["da_name"].lower()
+    fig_opts["title"] = "Global " + var_details["da_name"].lower() + f" ({maturity})"
     if do_normdetrend:
         fig_opts["title"] += " (normalized, detrended)"
 
@@ -378,6 +381,7 @@ def _one_fig(
             crop,
             use_earthstat_area,
             do_normdetrend,
+            maturity,
         )
 
         # Plot FAOSTAT data
@@ -450,12 +454,15 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
         if do_normdetrend:
             stat_input = stat_input.replace(suffix, "")
 
+        # Handle requested maturity level
+        stat_input, maturity = get_maturity_level_from_stat(stat_input)
+
         for area_source, use_earthstat_area in AREA_SOURCE_DICT.items():
             # Get filename to which figure will be saved. Members of join_list
             # must first be any dropdown menu members and then any radio button
             # group members, in the orders given in dropdown_specs and radio_specs,
             # respectively.
-            join_list = [area_source, stat]
+            join_list = [stat, area_source]
             fig_basename = bokeh_html_utils.sanitize_filename("_".join(join_list))
             fig_basename += ".png"
             fig_path = os.path.join(img_dir, fig_basename)
@@ -476,6 +483,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     earthstat_data,
                     case_list,
                     fao_dict[stat_input],
+                    maturity,
                     opts,
                     use_earthstat_area=use_earthstat_area,
                     fig_file=fig_path,
@@ -491,12 +499,19 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                 df = pd.DataFrame(std_table_dict)
                 df = df.set_index(index_colname)
                 df.index.name = None
-                print(f"Standard deviation (CLM runs assuming {area_source} areas)")
+                header = f"Standard deviation (CLM runs assuming {area_source} areas)"
+                if maturity is not None:
+                    header = header.replace(")", f"; maturity '{maturity}')")
+                print(header)
                 print(df)
                 print("\n")
 
     # Build dropdown specs
     dropdown_specs = [
+        {
+            "title": "Statistic",
+            "options": list(stat_dict.keys()),
+        },
         {
             "title": "Area source",
             "options": list(AREA_SOURCE_DICT.keys()),
@@ -504,12 +519,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
     ]
 
     # Build radio specs
-    radio_specs = [
-        {
-            "title": "Statistic",
-            "options": list(stat_dict.keys()),
-        },
-    ]
+    radio_specs = []
 
     # Display in notebook
     bokeh_html_utils.create_static_html(

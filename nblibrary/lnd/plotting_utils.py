@@ -160,6 +160,16 @@ def get_key_diff(key_diff_abs_error, da, da_key_case):
     return da
 
 
+def get_maturity_level_from_stat(stat_input):
+    """
+    Separate maturity level from stat input string, if any
+    """
+    maturity = None
+    if "@" in stat_input:
+        stat_input, maturity = stat_input.split("@")
+    return stat_input, maturity
+
+
 def get_yr_range(ds):
     if "time" not in ds.dims or ds.sizes["time"] == 0:
         return [None, None]
