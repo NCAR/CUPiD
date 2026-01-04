@@ -252,7 +252,11 @@ def clm_and_earthstat_maps_1crop(
                 key_case_intsxn = None
                 if time_slice_thiscase is not None:
                     case = case.sel(time=time_slice_thiscase)
-                    earthstat_data_intsxn = earthstat_data.sel(time=time_slice_thiscase)
+                    earthstat_data_intsxn = None
+                    if earthstat_data is not None:
+                        earthstat_data_intsxn = earthstat_data.sel(
+                            time=time_slice_thiscase,
+                        )
                     if key_case is None:
                         key_case_intsxn = key_case
                     else:

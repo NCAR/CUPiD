@@ -118,6 +118,9 @@ def _plot_clm_cases(
     for c, case in enumerate(case_list):
 
         crop_data_ts = var_details["function"](crop, case, use_earthstat_area, maturity)
+        if crop_data_ts is None:
+            continue
+
         if use_earthstat_area:
             crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
 
@@ -148,6 +151,9 @@ def _get_clm_yield(crop, case, use_earthstat_area, maturity):
         this_area = "crop_area"
         this_prod = f"crop_prod_{maturity}"
 
+    if not all(var in case.cft_ds for var in [this_area, this_prod]):
+        return None
+
     da_prod = case.cft_ds[this_prod].sel(crop=crop)
     da_area = case.cft_ds[this_area].sel(crop=crop)
     crop_prod_ts = da_prod.sum(dim=[dim for dim in da_prod.dims if dim != "time"])
@@ -162,31 +168,40 @@ def _get_clm_prod(crop, case, use_earthstat_area, maturity):
         this_var = f"crop_prod_{maturity}_es"
     else:
         this_var = f"crop_prod_{maturity}"
+
+    if this_var not in case.cft_ds:
+        return None
+
     da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
 def _get_clm_area(crop, case, use_earthstat_area, *args):
     if use_earthstat_area:
-        da = case.cft_ds["crop_area_es"].sel(crop=crop)
+        this_var = "crop_area_es"
     else:
-        da = case.cft_ds["crop_area"].sel(crop=crop)
+        this_var = "crop_area"
+
+    if this_var not in case.cft_ds:
+        return None
+
+    da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
-def get_legend_labels(opts, incl_obs=True):
+def get_legend_labels(opts, *, incl_faostat=True, incl_earthstat=True):
     labels = opts["case_legend_list"].copy()
-    if incl_obs:
+    if incl_faostat or incl_earthstat:
         obs_timeseries_linecolors = opts["obs_timeseries_linecolors"].copy()
 
         # Add FAOSTAT?
         line_color = obs_timeseries_linecolors.pop("faostat", OBS_DUMMY_LINECOLOR)
-        if line_color != OBS_DUMMY_LINECOLOR:
+        if incl_faostat and line_color != OBS_DUMMY_LINECOLOR:
             labels += ["FAOSTAT"]
 
         # Add EarthStat?
         line_color = obs_timeseries_linecolors.pop("earthstat", OBS_DUMMY_LINECOLOR)
-        if line_color != OBS_DUMMY_LINECOLOR:
+        if incl_earthstat and line_color != OBS_DUMMY_LINECOLOR:
             labels += ["EarthStat"]
 
         # Ensure no unrecognized obs datasets were requested. obs_to_include.pop() calls above
@@ -199,17 +214,22 @@ def get_legend_labels(opts, incl_obs=True):
     return labels
 
 
-def finish_fig(opts, fig_opts, fig, *, incl_obs=True):
+def finish_fig(opts, fig_opts, fig, *, incl_faostat=True, incl_earthstat=True):
     plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
-    labels = get_legend_labels(opts, incl_obs)
+    legend_labels = get_legend_labels(
+        opts,
+        incl_faostat=incl_faostat,
+        incl_earthstat=incl_earthstat,
+    )
     fig.legend(
-        labels=labels,
+        labels=legend_labels,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.96),
         ncol=3,
         bbox_transform=fig.transFigure,
     )
     fig.suptitle(fig_opts["title"], fontsize="x-large", fontweight="bold")
+    return legend_labels
 
 
 def _plot_faostat(
@@ -390,7 +410,8 @@ def _one_fig(
 
         # Plot FAOSTAT data
         line_color = obs_timeseries_linecolors.pop("faostat", OBS_DUMMY_LINECOLOR)
-        if fao_data_world is not None and line_color != OBS_DUMMY_LINECOLOR:
+        incl_faostat = fao_data_world is not None
+        if incl_faostat and line_color != OBS_DUMMY_LINECOLOR:
             _plot_faostat(
                 fao_data_world,
                 crop,
@@ -403,7 +424,8 @@ def _one_fig(
 
         # Plot EarthStat data
         line_color = obs_timeseries_linecolors.pop("earthstat", OBS_DUMMY_LINECOLOR)
-        if line_color != OBS_DUMMY_LINECOLOR:
+        incl_earthstat = earthstat_data is not None
+        if incl_earthstat and line_color != OBS_DUMMY_LINECOLOR:
             _plot_earthstat(
                 which,
                 earthstat_data,
@@ -431,7 +453,13 @@ def _one_fig(
         for line in ax.lines:
             std_dict[crop].append(np.nanstd(line.get_ydata()))
 
-    finish_fig(opts, fig_opts, fig)
+    legend_labels = finish_fig(
+        opts,
+        fig_opts,
+        fig,
+        incl_faostat=incl_faostat,
+        incl_earthstat=incl_earthstat,
+    )
     if fig_file is None:
         plt.show()
     else:
@@ -439,7 +467,7 @@ def _one_fig(
         plt.savefig(fig_file.replace("png", "pdf"))
         plt.close()
 
-    return std_dict
+    return std_dict, legend_labels
 
 
 def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
@@ -449,6 +477,11 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
 
     # Make sure output dir exists
     os.makedirs(img_dir, exist_ok=True)
+
+    # Make a local copy of this, deleting EarthStat if not available
+    this_area_source_dict = AREA_SOURCE_DICT.copy()
+    if earthstat_data is None:
+        del this_area_source_dict["EarthStat"]
 
     for stat, stat_input in stat_dict.items():
 
@@ -466,7 +499,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
         if fao_dict is not None:
             fao_data = fao_dict[stat_input]
 
-        for area_source, use_earthstat_area in AREA_SOURCE_DICT.items():
+        for area_source, use_earthstat_area in this_area_source_dict.items():
             # Get filename to which figure will be saved. Members of join_list
             # must first be any dropdown menu members and then any radio button
             # group members, in the orders given in dropdown_specs and radio_specs,
@@ -486,7 +519,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     message="Sending large graph.*",
                     category=UserWarning,
                 )
-                std_dict = _one_fig(
+                std_dict, legend_labels = _one_fig(
                     do_normdetrend,
                     stat_input,
                     earthstat_data,
@@ -500,7 +533,6 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
 
             # Print standard deviation table
             if do_normdetrend:
-                legend_labels = get_legend_labels(opts)
                 index_colname = "legend_labels"
                 std_table_dict = {index_colname: legend_labels}
                 for crop in opts["crops_to_include"]:
@@ -523,7 +555,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
         },
         {
             "title": "Area source",
-            "options": list(AREA_SOURCE_DICT.keys()),
+            "options": list(this_area_source_dict.keys()),
         },
     ]
 

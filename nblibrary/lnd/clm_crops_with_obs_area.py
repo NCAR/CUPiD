@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 
 import earthstat
 import xarray as xr
@@ -33,17 +34,37 @@ def process_case(
     cft_ds: xr.Dataset,
     earthstat_data: earthstat.EarthStat,
     opts: dict,
+    case_name: str,
 ) -> xr.Dataset:
     """For a case's cft_ds, get versions of CLM stats as if planted with EarthStat area"""
 
     # Get EarthStat area
-    cft_ds = _get_earthstat_area(cft_ds, earthstat_data, opts)
+    try:
+        cft_ds = _get_earthstat_area(cft_ds, earthstat_data, opts)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        warnings.warn(
+            f"Couldn't get EarthStat areas for case {case_name}:\n{e}",
+            UserWarning,
+        )
+        return cft_ds
 
     # Calculate production as if planted with EarthStat area
-    cft_ds = _get_prod_as_if_earthstat(cft_ds)
+    try:
+        cft_ds = _get_prod_as_if_earthstat(cft_ds)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        warnings.warn(
+            f"Couldn't get EarthStat production for case {case_name}:\n{e}",
+            UserWarning,
+        )
 
     # Get failed/immature as if using EarthStat areas
-    cft_ds = _get_immfail_as_if_earthstat(cft_ds, opts)
+    try:
+        cft_ds = _get_immfail_as_if_earthstat(cft_ds, opts)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        warnings.warn(
+            f"Couldn't get failed/immature as if EarthStat for case {case_name}:\n{e}",
+            UserWarning,
+        )
 
     return cft_ds
 
@@ -146,6 +167,6 @@ def process_caselist(
     case: CropCase
 
     for case in case_list:
-        case.cft_ds = process_case(case.cft_ds, earthstat_data, opts)
+        case.cft_ds = process_case(case.cft_ds, earthstat_data, opts, case.name)
 
     return case_list
