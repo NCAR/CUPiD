@@ -319,15 +319,17 @@ def _get_var_details(which, fao_data_world):
         var_details["ctsm_units"] = "Mt"
         var_details["conversion_factor"] = 1e-6 * 1e-6  # Convert g to Mt
         var_details["function"] = _get_clm_prod
-        fao_data_world["Value"] = fao_data_world["Value"] * 1e-6
-        fao_data_world["Unit"] = "Mt"
+        if fao_data_world is not None:
+            fao_data_world["Value"] = fao_data_world["Value"] * 1e-6
+            fao_data_world["Unit"] = "Mt"
     elif which == "area":
         var_details["da_name"] = "Area"
         var_details["ctsm_units"] = "Mha"
         var_details["conversion_factor"] = 1e-4 * 1e-6  # Convert m2 to Mha
         var_details["function"] = _get_clm_area
-        fao_data_world["Value"] *= 1e-6
-        fao_data_world["Unit"] = "Mha"
+        if fao_data_world is not None:
+            fao_data_world["Value"] *= 1e-6
+            fao_data_world["Unit"] = "Mha"
     else:
         raise NotImplementedError(
             f"crop_timeseries_figs() not set up for which={which}",
@@ -353,7 +355,9 @@ def _one_fig(
     fig_opts, fig, axes = setup_fig(opts)
 
     # This .copy() prevents spooky side effects from operational persistence
-    fao_data_world = fao_data.copy().query("Area == 'World'")
+    fao_data_world = None
+    if fao_data is not None:
+        fao_data_world = fao_data.copy().query("Area == 'World'")
 
     # Set up for the variable we want
     # TODO: Increase robustness of unit conversion: Check that it really is, e.g., g/m2 to start
@@ -386,7 +390,7 @@ def _one_fig(
 
         # Plot FAOSTAT data
         line_color = obs_timeseries_linecolors.pop("faostat", OBS_DUMMY_LINECOLOR)
-        if line_color != OBS_DUMMY_LINECOLOR:
+        if fao_data_world is not None and line_color != OBS_DUMMY_LINECOLOR:
             _plot_faostat(
                 fao_data_world,
                 crop,
@@ -457,6 +461,11 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
         # Handle requested maturity level
         stat_input, maturity = get_maturity_level_from_stat(stat_input)
 
+        # Get FAO data, if available
+        fao_data = None
+        if fao_dict is not None:
+            fao_data = fao_dict[stat_input]
+
         for area_source, use_earthstat_area in AREA_SOURCE_DICT.items():
             # Get filename to which figure will be saved. Members of join_list
             # must first be any dropdown menu members and then any radio button
@@ -482,7 +491,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                     stat_input,
                     earthstat_data,
                     case_list,
-                    fao_dict[stat_input],
+                    fao_data,
                     maturity,
                     opts,
                     use_earthstat_area=use_earthstat_area,
