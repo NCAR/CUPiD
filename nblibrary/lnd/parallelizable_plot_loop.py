@@ -170,29 +170,36 @@ def plot_loop(
                     if parallel:
                         future = dask_client.submit(_one_figure, **kwargs)
                         futures.append(future)
+                        if len(futures) >= opts["max_parallel_jobs"]:
+                            wait_for_jobs_to_finish(dask_client, opts, futures)
+                            futures = []
                     else:
                         _one_figure(**kwargs)
 
     # Wait for all jobs to complete
     if parallel:
-        if opts["verbose"]:
-            print("Processing...")
-        n_futures = len(futures)
-        n_complete = 0
-        for completed_future in as_completed(futures):
-            result = completed_future.result()
-            n_complete += 1
-            if opts["verbose"]:
-                print(f"{n_complete}/{n_futures} done: {result}")
-            # Explicitly delete result to free memory
-            del result
-            # Cancel and delete the future itself
-            completed_future.cancel()
-            del completed_future
+        wait_for_jobs_to_finish(dask_client, opts, futures)
 
-        # Clean up distributed worker memory
-        del futures  # In case any futures didn't complete somehow
-        dask_client.run(lambda: __import__("gc").collect())
+
+def wait_for_jobs_to_finish(dask_client, opts, futures):
+    if opts["verbose"]:
+        print("Processing...")
+    n_futures = len(futures)
+    n_complete = 0
+    for completed_future in as_completed(futures):
+        result = completed_future.result()
+        n_complete += 1
+        if opts["verbose"]:
+            print(f"{n_complete}/{n_futures} done: {result}")
+        # Explicitly delete result to free memory
+        del result
+        # Cancel and delete the future itself
+        completed_future.cancel()
+        del completed_future
+
+    # Clean up distributed worker memory
+    del futures  # In case any futures didn't complete somehow
+    dask_client.run(lambda: __import__("gc").collect())
 
 
 def _one_figure(
