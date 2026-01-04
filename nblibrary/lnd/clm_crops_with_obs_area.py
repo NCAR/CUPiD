@@ -36,6 +36,56 @@ def process_case(
 ) -> xr.Dataset:
     """For a case's cft_ds, get versions of CLM stats as if planted with EarthStat area"""
 
+    # Get EarthStat area
+    cft_ds = _get_earthstat_area(cft_ds, earthstat_data, opts)
+
+    # Calculate production as if planted with EarthStat area
+    cft_ds = _get_prod_as_if_earthstat(cft_ds)
+
+    # Get failed/immature as if using EarthStat areas
+    cft_ds = _get_immfail_as_if_earthstat(cft_ds, opts)
+
+    return cft_ds
+
+
+def _get_immfail_as_if_earthstat(cft_ds: xr.Dataset, opts: dict) -> xr.Dataset:
+    crop_area_var = "crop_area_es"
+    if "gridcell" in cft_ds[crop_area_var].dims:
+        crop_area_es = (
+            cft_ds[crop_area_var].rename({"gridcell": "pft"}).set_index(pft="pft")
+        )
+    else:
+        crop_area_es = cft_ds[crop_area_var]
+    for imm_or_fail in opts["imm_fail_list"]:
+        frac_ds = cft_ds[f"crop_harv_area_{imm_or_fail}"] / cft_ds["crop_harv_area"]
+        cft_ds[f"crop_area_es_{imm_or_fail}"] = frac_ds * crop_area_es
+    return cft_ds
+
+
+def _get_prod_as_if_earthstat(cft_ds: xr.Dataset) -> xr.Dataset:
+    area_units = cft_ds["crop_area_es"].attrs["units"]
+    area_units_exp = "m2"
+    for m in MATURITY_LEVELS:
+        m = m.lower()
+        crop_yield_var = f"crop_yield_{m}"
+        yield_units = cft_ds[crop_yield_var].attrs["units"]
+        yield_units_exp = "g/m2"
+        if area_units != area_units_exp or yield_units != yield_units_exp:
+            raise NotImplementedError(
+                (
+                    f"Yield calculation assumes area in {area_units_exp}"
+                    f" (got {area_units}) and yield in {yield_units_exp} (got {yield_units})"
+                ),
+            )
+        crop_prod_es_var = f"crop_prod_{m}_es"
+        cft_ds[crop_prod_es_var] = cft_ds["crop_area_es"] * cft_ds[
+            crop_yield_var
+        ].rename({"pft": "gridcell"})
+        cft_ds[crop_prod_es_var].attrs["units"] = "g"
+    return cft_ds
+
+
+def _get_earthstat_area(cft_ds, earthstat_data, opts):
     for i, crop in enumerate(opts["crops_to_include"]):
         # Get EarthStat area
         crop_area_es = ungrid(
@@ -75,47 +125,14 @@ def process_case(
     # Before saving, check alignment of all dims
     crop_area_es_expanded = earthstat.check_dim_alignment(crop_area_es_expanded, cft_ds)
 
-    # Save to cft_ds, filling with NaN as necessary (e.g., if there are CLM years not in
-    # EarthStat).
-    cft_ds["crop_area_es"] = crop_area_es_expanded
-
-    # Calculate production as if planted with EarthStat area
-    area_units = cft_ds["crop_area_es"].attrs["units"]
-    area_units_exp = "m2"
-    for m in MATURITY_LEVELS:
-        m = m.lower()
-        crop_yield_var = f"crop_yield_{m}"
-        yield_units = cft_ds[crop_yield_var].attrs["units"]
-        yield_units_exp = "g/m2"
-        if area_units != area_units_exp or yield_units != yield_units_exp:
-            raise NotImplementedError(
-                (
-                    f"Yield calculation assumes area in {area_units_exp}"
-                    f" (got {area_units}) and yield in {yield_units_exp} (got {yield_units})"
-                ),
-            )
-        crop_prod_es_var = f"crop_prod_{m}_es"
-        cft_ds[crop_prod_es_var] = cft_ds["crop_area_es"] * cft_ds[
-            crop_yield_var
-        ].rename({"pft": "gridcell"})
-        cft_ds[crop_prod_es_var].attrs["units"] = "g"
-
     # Save EarthStat time axis to avoid plotting years with no EarthStat data
     earthstat_time = crop_area_es_expanded["time"]
     earthstat_time = earthstat_time.rename({"time": "earthstat_time_coord"})
     cft_ds["earthstat_time"] = earthstat_time
 
-    # Get failed/immature as if using EarthStat areas
-    crop_area_var = "crop_area_es"
-    if "gridcell" in cft_ds[crop_area_var].dims:
-        crop_area_es = (
-            cft_ds[crop_area_var].rename({"gridcell": "pft"}).set_index(pft="pft")
-        )
-    else:
-        crop_area_es = cft_ds[crop_area_var]
-    for imm_or_fail in opts["imm_fail_list"]:
-        frac_ds = cft_ds[f"crop_harv_area_{imm_or_fail}"] / cft_ds["crop_harv_area"]
-        cft_ds[f"crop_area_es_{imm_or_fail}"] = frac_ds * crop_area_es
+    # Save to cft_ds, filling with NaN as necessary (e.g., if there are CLM years not in
+    # EarthStat).
+    cft_ds["crop_area_es"] = crop_area_es_expanded
 
     return cft_ds
 
