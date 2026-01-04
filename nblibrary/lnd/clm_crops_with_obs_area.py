@@ -106,9 +106,13 @@ def process_case(
     cft_ds["earthstat_time"] = earthstat_time
 
     # Get failed/immature as if using EarthStat areas
-    crop_area_es = (
-        cft_ds["crop_area_es"].rename({"gridcell": "pft"}).set_index(pft="pft")
-    )
+    crop_area_var = "crop_area_es"
+    if "gridcell" in cft_ds[crop_area_var].dims:
+        crop_area_es = (
+            cft_ds[crop_area_var].rename({"gridcell": "pft"}).set_index(pft="pft")
+        )
+    else:
+        crop_area_es = cft_ds[crop_area_var]
     for imm_or_fail in opts["imm_fail_list"]:
         frac_ds = cft_ds[f"crop_harv_area_{imm_or_fail}"] / cft_ds["crop_harv_area"]
         cft_ds[f"crop_area_es_{imm_or_fail}"] = frac_ds * crop_area_es
