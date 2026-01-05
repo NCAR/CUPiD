@@ -303,11 +303,8 @@ def get_mean_map(
                 **kwargs,
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
-            if debug:
-                raise e
-            warnings.warn(
-                f"Skipping {this_fn.__name__} for case {case.name}; threw error:\n{e}",
-            )
+            skip_msg = f"Skipping {this_fn.__name__}() for {case.name} due to"
+            handle_exception(debug, e, skip_msg)
         if map_case is None:
             n_timesteps = 0
             case_first_yr = None
@@ -348,6 +345,19 @@ def get_mean_map(
     else:
         map_clm = map_case
     return n_timesteps, map_clm, case_first_yr, case_last_yr, map_keycase_dict_io
+
+
+def handle_exception(debug, e, skip_msg):
+    """
+    At various places, we want to handle errors by
+       (a) throwing the error if we're in debug mode; otherwise
+       (b) warning.
+    """
+    if debug:
+        raise e
+    warnings.warn(
+        f"{skip_msg} error:\n{e}",
+    )
 
 
 def _get_intsxn_time_slice_of_cases(

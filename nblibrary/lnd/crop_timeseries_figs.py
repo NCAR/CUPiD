@@ -14,6 +14,7 @@ from earthstat import align_time
 from matplotlib import pyplot as plt
 from plotting_utils import get_dummy_timeseries
 from plotting_utils import get_maturity_level_from_stat
+from plotting_utils import handle_exception
 
 EARTHSTAT_RES_TO_PLOT = "f09"
 OBS_DUMMY_LINECOLOR = "obs not in dict"
@@ -129,9 +130,8 @@ def _plot_clm_cases(
         try:
             crop_data_ts = this_fn(crop, case, use_earthstat_area, maturity)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            if opts["debug"]:
-                raise e
-            warnings.warn(skip_msg + f"{this_fn.__name__}() threw error:\n{e}")
+            skip_msg = f"Skipping {this_fn.__name__}() for {case.name} due to"
+            handle_exception(opts["debug"], e, skip_msg)
         if isinstance(crop_data_ts, list):
             print(skip_msg + f"required variable(s) missing: {crop_data_ts}")
             crop_data_ts = None
