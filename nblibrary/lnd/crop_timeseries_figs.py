@@ -117,19 +117,40 @@ def _plot_clm_cases(
 ):
     for c, case in enumerate(case_list):
 
-        crop_data_ts = var_details["function"](crop, case, use_earthstat_area, maturity)
+        # Get the data from this case.
+        this_fn = var_details["function"]
+        skip_msg = (
+            f'Skipping {crop} {var_details["da_name"]} for case {case.name} '
+            f'({opts["case_legend_list"][c]}) because '
+        )
+        # Define default value here so we only have one command under "try"
+        crop_data_ts = None
+        try:
+            crop_data_ts = this_fn(crop, case, use_earthstat_area, maturity)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            warnings.warn(skip_msg + f"{this_fn.__name__}() threw error:\n{e}")
+        if isinstance(crop_data_ts, list):
+            print(skip_msg + f"required variable(s) missing: {crop_data_ts}")
+            crop_data_ts = None
+
+        # If we don't have data for this case, make a dummy timeseries with all NaNs. This ensures
+        # that there is still a spot for this case in the legend, which makes it obvious in the
+        # figure that we didn't just forget to plot it. It also makes it easier to have the right
+        # colors in the legend for the lines that we did plot.
         if crop_data_ts is None:
-            continue
+            crop_data_ts = xr.full_like(case.cft_ds["time"], np.nan, dtype=np.float64)
 
-        if use_earthstat_area:
-            crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
+        # If we do have data for this case, do some extra processing.
+        else:
+            if use_earthstat_area:
+                crop_data_ts = crop_data_ts.sel(time=case.cft_ds["earthstat_time"])
 
-        # Apply conversion factor
-        crop_data_ts *= var_details["conversion_factor"]
+            # Apply conversion factor
+            crop_data_ts *= var_details["conversion_factor"]
 
-        # Normalize/detrend, if doing so
-        if do_normdetrend:
-            crop_data_ts = _normdetrend(crop_data_ts)
+            # Normalize/detrend, if doing so
+            if do_normdetrend:
+                crop_data_ts = _normdetrend(crop_data_ts)
 
         # Plot data
         crop_data_ts.name = var_details["da_name"]
@@ -151,8 +172,9 @@ def _get_clm_yield(crop, case, use_earthstat_area, maturity):
         this_area = "crop_area"
         this_prod = f"crop_prod_{maturity}"
 
-    if not all(var in case.cft_ds for var in [this_area, this_prod]):
-        return None
+    missing_vars = [var for var in [this_area, this_prod] if var not in case.cft_ds]
+    if missing_vars:
+        return missing_vars
 
     da_prod = case.cft_ds[this_prod].sel(crop=crop)
     da_area = case.cft_ds[this_area].sel(crop=crop)
@@ -170,7 +192,7 @@ def _get_clm_prod(crop, case, use_earthstat_area, maturity):
         this_var = f"crop_prod_{maturity}"
 
     if this_var not in case.cft_ds:
-        return None
+        return [this_var]
 
     da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
@@ -183,7 +205,7 @@ def _get_clm_area(crop, case, use_earthstat_area, *args):
         this_var = "crop_area"
 
     if this_var not in case.cft_ds:
-        return None
+        return [this_var]
 
     da = case.cft_ds[this_var].sel(crop=crop)
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
@@ -451,7 +473,12 @@ def _one_fig(
         # Get standard deviation
         std_dict[crop] = []
         for line in ax.lines:
-            std_dict[crop].append(np.nanstd(line.get_ydata()))
+            ydata = line.get_ydata()
+            if np.all(np.isnan(ydata)):
+                std = None
+            else:
+                std = np.nanstd(ydata)
+            std_dict[crop].append(std)
 
     legend_labels = finish_fig(
         opts,
@@ -536,7 +563,13 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
                 index_colname = "legend_labels"
                 std_table_dict = {index_colname: legend_labels}
                 for crop in opts["crops_to_include"]:
-                    std_table_dict[crop] = [np.round(x, 3) for x in std_dict[crop]]
+                    col_data = []
+                    for std in std_dict[crop]:
+                        if std is None:
+                            col_data.append("n.d.")  # "no data"
+                        else:
+                            col_data.append(np.round(std, 3))
+                    std_table_dict[crop] = col_data
                 df = pd.DataFrame(std_table_dict)
                 df = df.set_index(index_colname)
                 df.index.name = None
