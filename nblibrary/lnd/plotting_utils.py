@@ -18,6 +18,7 @@ Default Colormaps:
 """
 from __future__ import annotations
 
+import re
 import warnings
 
 import numpy as np
@@ -350,14 +351,23 @@ def get_mean_map(
 def handle_exception(debug, e, skip_msg):
     """
     At various places, we want to handle errors by
-       (a) throwing the error if we're in debug mode; otherwise
-       (b) warning.
+       (a) printing if it's just due to a missing xr.Dataset variable; if not,
+       (b) throwing the error if we're in debug mode; otherwise
+       (c) warning.
     """
-    if debug:
-        raise e
-    warnings.warn(
-        f"{skip_msg} error:\n{e}",
+    match = re.search(
+        r"No variable named '(.+)'\. Variables on the dataset include",
+        str(e),
     )
+    missing_var = match.group(1) if match else None
+    if missing_var:
+        print(f"{skip_msg} missing variable {missing_var}")
+    elif debug:
+        raise e
+    else:
+        warnings.warn(
+            f"{skip_msg} error:\n{e}",
+        )
 
 
 def _get_intsxn_time_slice_of_cases(
