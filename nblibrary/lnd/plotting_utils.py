@@ -261,6 +261,7 @@ def get_mean_map(
     *args,
     map_keycase_dict_io,
     time_slice,
+    debug,
     **kwargs,
 ):
     """
@@ -302,6 +303,8 @@ def get_mean_map(
                 **kwargs,
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
+            if debug:
+                raise e
             warnings.warn(
                 f"Skipping {this_fn.__name__} for case {case.name}; threw error:\n{e}",
             )

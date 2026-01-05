@@ -364,6 +364,7 @@ def _one_case(
         *get_mean_fn_args,
         map_keycase_dict_io=map_keycase_dict_io,
         time_slice=time_slice,
+        debug=opts["debug"],
         **get_mean_fn_kwargs,
     )
 

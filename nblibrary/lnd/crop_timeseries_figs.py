@@ -129,6 +129,8 @@ def _plot_clm_cases(
         try:
             crop_data_ts = this_fn(crop, case, use_earthstat_area, maturity)
         except Exception as e:  # pylint: disable=broad-exception-caught
+            if opts["debug"]:
+                raise e
             warnings.warn(skip_msg + f"{this_fn.__name__}() threw error:\n{e}")
         if isinstance(crop_data_ts, list):
             print(skip_msg + f"required variable(s) missing: {crop_data_ts}")

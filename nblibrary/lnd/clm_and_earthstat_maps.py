@@ -97,6 +97,7 @@ def _get_obsdiff_map(
     stat_input,
     earthstat_data,
     crop,
+    do_debug,
 ):
 
     # Get CLM map
@@ -125,6 +126,7 @@ def _get_obsdiff_map(
         earthstat_data=earthstat_data,
         map_clm=map_clm_for_obsdiff,
         map_obs=map_obs,
+        debug=do_debug,
     )
 
     # Get difference map
@@ -149,6 +151,7 @@ def _mask_where_neither_has_area(
     earthstat_data,
     map_clm,
     map_obs,
+    debug,
 ):
     """
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
@@ -170,6 +173,8 @@ def _mask_where_neither_has_area(
     try:
         area_clm = _get_clm_map(case, stat_input)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if debug:
+            raise e
         warnings.warn(f"Skipping CLM area mask for case {case.name}; threw error:\n{e}")
     if area_clm is not None:
         mask = mask | (area_clm > 0)
@@ -210,6 +215,7 @@ def clm_and_earthstat_maps_1crop(
     clm_or_obsdiff_list,
     img_dir,
     incl_yrs_plot_items,
+    debug,
 ):
     """
     For a crop, make two figures:
@@ -286,6 +292,7 @@ def clm_and_earthstat_maps_1crop(
                         "stat_input": stat_input,
                         "earthstat_data": earthstat_data_intsxn,
                         "crop": crop,
+                        "do_debug": debug,
                     }
 
                 try:
@@ -303,9 +310,12 @@ def clm_and_earthstat_maps_1crop(
                         *special_mean_args,
                         map_keycase_dict_io=map_keycase_dict_io,
                         time_slice=time_slice_thiscase,
+                        debug=debug,
                         **special_mean_kwargs,
                     )
                 except Exception as e:  # pylint: disable=broad-exception-caught
+                    if debug:
+                        raise e
                     warnings.warn(
                         f"Skipping {stat_input} for case {case.name}; threw error:\n{e}",
                     )

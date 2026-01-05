@@ -42,6 +42,8 @@ def process_case(
     try:
         cft_ds = _get_earthstat_area(cft_ds, earthstat_data, opts)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if opts["debug"]:
+            raise e
         warnings.warn(
             f"Couldn't get EarthStat areas for case {case_name}:\n{e}",
             UserWarning,
@@ -52,6 +54,8 @@ def process_case(
     try:
         cft_ds = _get_prod_as_if_earthstat(cft_ds)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if opts["debug"]:
+            raise e
         warnings.warn(
             f"Couldn't get EarthStat production for case {case_name}:\n{e}",
             UserWarning,
@@ -61,6 +65,8 @@ def process_case(
     try:
         cft_ds = _get_immfail_as_if_earthstat(cft_ds, opts)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if opts["debug"]:
+            raise e
         warnings.warn(
             f"Couldn't get failed/immature as if EarthStat for case {case_name}:\n{e}",
             UserWarning,
