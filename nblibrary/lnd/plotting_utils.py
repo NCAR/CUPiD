@@ -134,6 +134,11 @@ def get_difference_map(da0, da1, *, name=None, units=None):
     return da_diff
 
 
+def get_dummy_timeseries(ds: xr.Dataset) -> xr.DataArray:
+    """Given an xarray Dataset, return a dummy timeseries with all NaNs"""
+    return xr.full_like(ds["time"], np.nan, dtype=np.float64)
+
+
 def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
     lats_match = check_grid_match(da["lat"], da_key_case["lat"])
     lons_match = check_grid_match(da["lon"], da_key_case["lon"])

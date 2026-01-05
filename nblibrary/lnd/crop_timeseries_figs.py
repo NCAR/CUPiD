@@ -12,6 +12,7 @@ import pandas as pd
 import xarray as xr
 from earthstat import align_time
 from matplotlib import pyplot as plt
+from plotting_utils import get_dummy_timeseries
 from plotting_utils import get_maturity_level_from_stat
 
 EARTHSTAT_RES_TO_PLOT = "f09"
@@ -138,7 +139,7 @@ def _plot_clm_cases(
         # figure that we didn't just forget to plot it. It also makes it easier to have the right
         # colors in the legend for the lines that we did plot.
         if crop_data_ts is None:
-            crop_data_ts = xr.full_like(case.cft_ds["time"], np.nan, dtype=np.float64)
+            crop_data_ts = get_dummy_timeseries(case.cft_ds)
 
         # If we do have data for this case, do some extra processing.
         else:
