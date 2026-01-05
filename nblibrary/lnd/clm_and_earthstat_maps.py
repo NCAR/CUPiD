@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import os
 import sys
-import warnings
 
 from bokeh_html_utils import sanitize_filename
 from parallelizable_plot_loop import get_figpath_with_keycase
@@ -14,6 +13,7 @@ from plotting_utils import get_instxn_time_slice_of_ds
 from plotting_utils import get_key_case
 from plotting_utils import get_maturity_level_from_stat
 from plotting_utils import get_mean_map
+from plotting_utils import handle_exception
 from results_maps import ResultsMaps
 
 externals_path = os.path.join(
@@ -173,9 +173,8 @@ def _mask_where_neither_has_area(
     try:
         area_clm = _get_clm_map(case, stat_input)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        if debug:
-            raise e
-        warnings.warn(f"Skipping CLM area mask for case {case.name}; threw error:\n{e}")
+        skip_msg = f"Skipping CLM area mask for case {case.name} due to"
+        handle_exception(debug, e, skip_msg)
     if area_clm is not None:
         mask = mask | (area_clm > 0)
 
@@ -314,11 +313,8 @@ def clm_and_earthstat_maps_1crop(
                         **special_mean_kwargs,
                     )
                 except Exception as e:  # pylint: disable=broad-exception-caught
-                    if debug:
-                        raise e
-                    warnings.warn(
-                        f"Skipping {stat_input} for case {case.name}; threw error:\n{e}",
-                    )
+                    skip_msg = f"Skipping {stat_input} for case {case.name} due to"
+                    handle_exception(debug, e, skip_msg)
                     map_clm = None
 
                 # Save to ResultsMaps
