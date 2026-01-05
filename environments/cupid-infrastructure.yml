@@ -1,7 +1,7 @@
 name: cupid-infrastructure
 channels:
-  - conda-forge
-  - nodefaults
+    - conda-forge
+    - nodefaults
 dependencies:
     - python
     - black
@@ -11,7 +11,7 @@ dependencies:
     - intake
     - intake-esm
     - jinja2
-    - jupyter-book
+    - jupyter-book<2
     - nb_conda_kernels
     - nco
     - pandas
