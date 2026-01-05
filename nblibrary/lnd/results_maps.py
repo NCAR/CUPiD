@@ -512,6 +512,8 @@ class ResultsMaps:
         for this_subplot in subplot_title_list:
             if key_plot is not None and this_subplot == key_plot:
                 continue
+            if self[this_subplot] is None:
+                continue
             da_vals = self[this_subplot].values
             if not any_subplot_has_data and np.any(~np.isnan(da_vals)):
                 any_subplot_has_data = True
@@ -617,31 +619,37 @@ class ResultsMaps:
         title = case_name
         cmap = self.cmap
 
-        # Create a copy to avoid modifying the original data
-        da = self[case_name].copy()
-
-        # By this point, we expect a DataArray with latitude and longitude dimensions. To be
-        # maximally accepting, just check that it's 2-d.
-        msg = f"Expected DataArray with 2 dimensions, got {da.ndim}: {da.dims}"
-        assert da.ndim == 2, msg
-
-        # Calculate difference from key case if applicable
-        if key_case is not None and case_name != key_case:
-            title, cmap, da = self._plotting_diff_from_key_case(
-                key_diff_abs_error=key_diff_abs_error,
-                da=da,
-                title=title,
+        # If case's maps couldn't be made, make a dummy map with all NaN
+        if self[case_name] is None:
+            lon = np.arange(-180, 180, 1)
+            lat = np.arange(-90, 91, 1)
+            coords = {"lat": lat, "lon": lon}
+            da = xr.DataArray(
+                np.full((len(lat), len(lon)), np.nan),
+                coords=coords,
+                dims=coords.keys(),
             )
+        else:
 
-        # Note subplots with missing data or years
-        if np.all(np.isnan(da.values)):
-            title += " (no data)"
-        elif case_incl_yr is not None and case_incl_yr != self.incl_yrs_range:
-            title += f" (only {case_incl_yr[0]}-{case_incl_yr[1]})"
+            # Create a copy to avoid modifying the original data
+            da = self[case_name].copy()
 
-        # Remove Antarctica if requested
-        if self.cut_off_antarctica:
-            da = _cut_off_antarctica(da)
+            # By this point, we expect a DataArray with latitude and longitude dimensions. To be
+            # maximally accepting, just check that it's 2-d.
+            msg = f"Expected DataArray with 2 dimensions, got {da.ndim}: {da.dims}"
+            assert da.ndim == 2, msg
+
+            # Calculate difference from key case if applicable
+            if key_case is not None and case_name != key_case:
+                title, cmap, da = self._plotting_diff_from_key_case(
+                    key_diff_abs_error=key_diff_abs_error,
+                    da=da,
+                    title=title,
+                )
+
+            # Remove Antarctica if requested
+            if self.cut_off_antarctica:
+                da = _cut_off_antarctica(da)
 
         # Configure colorbar based on one_colorbar setting
         if one_colorbar:
@@ -671,6 +679,11 @@ class ResultsMaps:
             ax.coastlines(linewidth=0.5)
 
         # Set title and remove axis labels/ticks for cleaner appearance
+        # Note subplots with missing data or years
+        if np.all(np.isnan(da.values)):
+            title += " (no data)"
+        elif case_incl_yr is not None and case_incl_yr != self.incl_yrs_range:
+            title += f" (only {case_incl_yr[0]}-{case_incl_yr[1]})"
         ax.set_title(title)  # Instead of plt.title, for parallelism
         ax.set_xticks([])
         ax.set_yticks([])

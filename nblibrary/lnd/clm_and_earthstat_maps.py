@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import sys
+import warnings
 
 from bokeh_html_utils import sanitize_filename
 from parallelizable_plot_loop import get_figpath_with_keycase
@@ -60,11 +61,13 @@ def _get_clm_map(case, stat_input):
             f"_get_clm_map() doesn't work for stat_input='{stat_input}'",
         )
 
-    # Extract the data
-    ds = case.cft_ds.mean(dim="time")
+    # Do we have the variable we need?
     var = f"crop_{stat_input}"
     if maturity is not None:
         var += f"_{maturity}"
+
+    # Extract the data
+    ds = case.cft_ds.mean(dim="time")
     ds["result"] = ds[var]
     if stat_input == "prod":
         ds["result"] = ds["result"].where(ds["crop_area"] > 0)
@@ -151,7 +154,8 @@ def _mask_where_neither_has_area(
     Given maps from CLM and EarthStat, mask where neither has area (HarvestArea)
     """
     stat_input = "area"
-    area_clm = _get_clm_map(case, stat_input)
+
+    # Mask based on observed area
     area_obs = earthstat_data.get_map(
         case.cft_ds.attrs["resolution"],
         stat_input,
@@ -159,8 +163,16 @@ def _mask_where_neither_has_area(
         TARGET_UNITS[stat_input],
     )
     area_obs = utils.lon_pm2idl(area_obs)
+    mask = area_obs > 0
 
-    mask = (area_clm > 0) | (area_obs > 0)
+    # Mask based on CLM area, if possible
+    area_clm = None
+    try:
+        area_clm = _get_clm_map(case, stat_input)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        warnings.warn(f"Skipping CLM area mask for case {case.name}; threw error:\n{e}")
+    if area_clm is not None:
+        mask = mask | (area_clm > 0)
 
     result = map_clm.where(mask), map_obs.where(mask)
 
@@ -276,27 +288,28 @@ def clm_and_earthstat_maps_1crop(
                         "crop": crop,
                     }
 
-                (
-                    n_timesteps,
-                    map_clm,
-                    case_first_yr,
-                    case_last_yr,
-                    map_keycase_dict_io,
-                ) = get_mean_map(
-                    case,
-                    key_case_intsxn,
-                    key_diff_abs_error,
-                    special_mean,
-                    *special_mean_args,
-                    map_keycase_dict_io=map_keycase_dict_io,
-                    time_slice=time_slice_thiscase,
-                    **special_mean_kwargs,
-                )
-
-                if obs_input != "None" and map_clm is None:
-                    raise RuntimeError(
-                        "This was a continue condition before using get_mean_map; how to handle?",
+                try:
+                    (
+                        n_timesteps,
+                        map_clm,
+                        case_first_yr,
+                        case_last_yr,
+                        map_keycase_dict_io,
+                    ) = get_mean_map(
+                        case,
+                        key_case_intsxn,
+                        key_diff_abs_error,
+                        special_mean,
+                        *special_mean_args,
+                        map_keycase_dict_io=map_keycase_dict_io,
+                        time_slice=time_slice_thiscase,
+                        **special_mean_kwargs,
                     )
+                except Exception as e:  # pylint: disable=broad-exception-caught
+                    warnings.warn(
+                        f"Skipping {stat_input} for case {case.name}; threw error:\n{e}",
+                    )
+                    map_clm = None
 
                 # Save to ResultsMaps
                 results[case_legend] = map_clm

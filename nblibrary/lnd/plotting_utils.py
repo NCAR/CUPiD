@@ -281,9 +281,14 @@ def get_mean_map(
             *args,
             **kwargs,
         )
-        assert "units" in map_case.attrs, RESULT_MAP_NO_UNITS_MSG
-        case_first_yr = case.cft_ds["time"].values[0].year
-        case_last_yr = case.cft_ds["time"].values[-1].year
+        if map_case is None:
+            n_timesteps = 0
+            case_first_yr = None
+            case_last_yr = None
+        else:
+            assert "units" in map_case.attrs, RESULT_MAP_NO_UNITS_MSG
+            case_first_yr = case.cft_ds["time"].values[0].year
+            case_last_yr = case.cft_ds["time"].values[-1].year
 
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.
