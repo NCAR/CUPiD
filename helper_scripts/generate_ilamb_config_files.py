@@ -106,9 +106,9 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
 
     shift_str_case = ""
     shift_str_base_case = ""
-    if "BLT1850" in c_dict["global_params"]["case_name"]:
+    if "1850" in c_dict["global_params"]["case_name"]:
         shift_str_case = ", 50, 2000"
-    if "BLT1850" in c_dict["global_params"]["base_case_name"]:
+    if "1850" in c_dict["global_params"]["base_case_name"]:
         shift_str_base_case = ", 50, 2000"
     with open(os.path.join(cupid_config_loc, "model_setup.txt"), "w") as ms:
         ms.write(
@@ -124,6 +124,15 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
     print(
         f"WARNING: ILAMB requires regridded output to be in {base_case_output_dir}/lnd/hist/regrid/ directory.",
     )
+    print(
+        """This might be done with something like the following:
+          for FILE in hist/*;
+              do fname=$(basename '$FILE');
+              ncremap -t 1 -P clm --sgs_frc=landfrac --sgs_msk=landmask -m
+                  /glade/work/oleson/cesm2_3_alpha16b/cime/tools/mapping/gen_mapping_files/gen_ESMF_mapping_file/map_ne30pg3_TO_fv0.9x1.25_aave.231025.nc
+              '$FILE' 'hist/regrid/$fname';
+              done""",  # noqa: E501
+    )
     print("You can now run ILAMB with the following commands:")
     print("If running via the CESM workflow, this will be run automatically.")
     print(
@@ -137,7 +146,7 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
             f"WARNING: directory {os.path.join(cupid_config_loc, 'ILAMB_output/')} exists; this may cause issues with runnign ILAMB. It is recommended to remove this directory prior to running the following command.",  # noqa: E501
         )
     print(
-        f"ilamb-run --config {os.path.join(cupid_config_loc, f'ilamb_nohoff_final_CLM_{run_type}.cfg')} --build_dir {os.path.join(cupid_config_loc, 'ILAMB_output/')} --df_errs {os.path.join(cupid_config_loc, 'ilamb_aux', 'quantiles_Whittaker_cmip5v6.parquet')} --define_regions {os.path.join(cupid_config_loc, 'ilamb_aux', 'DATA/regions/LandRegions.nc')} {os.path.join(cupid_config_loc, 'ilamb_aux', 'DATA/regions/Whittaker.nc')} --regions global --model_setup {os.path.join(cupid_config_loc, 'model_setup.txt')} --filter .clm2.h0.",  # noqa: E501
+        f"ilamb-run --config {os.path.join(cupid_config_loc, f'ilamb_nohoff_final_CLM_{run_type}.cfg')} --build_dir {os.path.join(cupid_config_loc, 'ILAMB_output/')} --df_errs {os.path.join(cupid_config_loc, 'ilamb_aux', 'quantiles_Whittaker_cmip5v6.parquet')} --define_regions {os.path.join(cupid_config_loc, 'ilamb_aux', 'DATA/regions/LandRegions.nc')} {os.path.join(cupid_config_loc, 'ilamb_aux', 'DATA/regions/Whittaker.nc')} --regions global --model_setup {os.path.join(cupid_config_loc, 'model_setup.txt')} --filter .clm2.h0",  # noqa: E501
     )
     print("---------")
 
