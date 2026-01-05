@@ -10,6 +10,7 @@ import matplotlib
 import numpy as np
 import xarray as xr
 from matplotlib.figure import Figure
+from plotting_utils import get_dummy_map
 
 # Default colormaps for different plot types
 DEFAULT_CMAP_SEQ = "viridis"
@@ -621,14 +622,7 @@ class ResultsMaps:
 
         # If case's maps couldn't be made, make a dummy map with all NaN
         if self[case_name] is None:
-            lon = np.arange(-180, 180, 1)
-            lat = np.arange(-90, 91, 1)
-            coords = {"lat": lat, "lon": lon}
-            da = xr.DataArray(
-                np.full((len(lat), len(lon)), np.nan),
-                coords=coords,
-                dims=coords.keys(),
-            )
+            da = get_dummy_map()
         else:
 
             # Create a copy to avoid modifying the original data

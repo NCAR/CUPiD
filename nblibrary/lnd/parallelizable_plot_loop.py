@@ -13,6 +13,7 @@ import warnings
 from bokeh_html_utils import sanitize_filename
 from dask.distributed import as_completed
 from dask.distributed import Client
+from plotting_utils import get_dummy_map
 from plotting_utils import get_key_case
 from plotting_utils import get_mean_map
 from results_maps import DEFAULT_NO_VRANGE
@@ -373,6 +374,8 @@ def _one_case(
         case_incl_yr_dict[case_legend] = [case_first_yr, case_last_yr]
 
     # Save to ResultsMap
+    if map_clm is None:
+        map_clm = get_dummy_map()
     results[case_legend] = map_clm
     results[case_legend].name = results_da_name
 

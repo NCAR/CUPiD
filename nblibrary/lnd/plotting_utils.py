@@ -134,6 +134,19 @@ def get_difference_map(da0, da1, *, name=None, units=None):
     return da_diff
 
 
+def get_dummy_map():
+    """Return a dummy 1-degree global map (xarray DataArray) with all NaN"""
+    lon = np.arange(-180, 180, 1)
+    lat = np.arange(-90, 91, 1)
+    coords = {"lat": lat, "lon": lon}
+    da = xr.DataArray(
+        np.full((len(lat), len(lon)), np.nan),
+        coords=coords,
+        dims=coords.keys(),
+    )
+    return da
+
+
 def get_dummy_timeseries(ds: xr.Dataset) -> xr.DataArray:
     """Given an xarray Dataset, return a dummy timeseries with all NaNs"""
     return xr.full_like(ds["time"], np.nan, dtype=np.float64)
@@ -281,11 +294,17 @@ def get_mean_map(
         case_first_yr = None
         case_last_yr = None
     else:
-        map_case = this_fn(
-            case,
-            *args,
-            **kwargs,
-        )
+        map_case = None
+        try:
+            map_case = this_fn(
+                case,
+                *args,
+                **kwargs,
+            )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            warnings.warn(
+                f"Skipping {this_fn.__name__} for case {case.name}; threw error:\n{e}",
+            )
         if map_case is None:
             n_timesteps = 0
             case_first_yr = None
