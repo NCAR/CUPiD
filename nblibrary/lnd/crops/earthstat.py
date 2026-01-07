@@ -8,7 +8,8 @@ import warnings
 
 import numpy as np
 import xarray as xr
-from earthstat_regrid import regrid_to_clm
+
+from .earthstat_regrid import regrid_to_clm
 
 # The resolution which will be used as the basis for regridding, if available
 REFERENCE_EARTHSTAT_RES = "f09"

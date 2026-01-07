@@ -23,7 +23,8 @@ import warnings
 
 import numpy as np
 import xarray as xr
-from dict_slice_str_indexed import DictSliceStrIndexed
+
+from .dict_slice_str_indexed import DictSliceStrIndexed
 
 NO_INTSXN_TIME_SLICE = None
 RESULT_MAP_NO_UNITS_MSG = "Results map from this_fn() is missing units attribute"

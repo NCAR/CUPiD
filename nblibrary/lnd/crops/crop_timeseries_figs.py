@@ -6,15 +6,16 @@ from __future__ import annotations
 import os
 import warnings
 
-import bokeh_html_utils
 import numpy as np
 import pandas as pd
 import xarray as xr
-from earthstat import align_time
 from matplotlib import pyplot as plt
-from plotting_utils import get_dummy_timeseries
-from plotting_utils import get_maturity_level_from_stat
-from plotting_utils import handle_exception
+
+from .bokeh_html_utils import sanitize_filename, create_static_html
+from .earthstat import align_time
+from .plotting_utils import get_dummy_timeseries
+from .plotting_utils import get_maturity_level_from_stat
+from .plotting_utils import handle_exception
 
 EARTHSTAT_RES_TO_PLOT = "f09"
 OBS_DUMMY_LINECOLOR = "obs not in dict"
@@ -535,7 +536,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
             # group members, in the orders given in dropdown_specs and radio_specs,
             # respectively.
             join_list = [stat, area_source]
-            fig_basename = bokeh_html_utils.sanitize_filename("_".join(join_list))
+            fig_basename = sanitize_filename("_".join(join_list))
             fig_basename += ".png"
             fig_path = os.path.join(img_dir, fig_basename)
 
@@ -599,7 +600,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
     radio_specs = []
 
     # Display in notebook
-    bokeh_html_utils.create_static_html(
+    create_static_html(
         dropdown_specs=dropdown_specs,
         radio_specs=radio_specs,
         output_dir=img_dir,

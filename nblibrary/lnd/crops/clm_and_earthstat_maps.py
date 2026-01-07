@@ -6,18 +6,19 @@ from __future__ import annotations
 import os
 import sys
 
-from bokeh_html_utils import sanitize_filename
-from parallelizable_plot_loop import get_figpath_with_keycase
-from plotting_utils import get_difference_map
-from plotting_utils import get_instxn_time_slice_of_ds
-from plotting_utils import get_key_case
-from plotting_utils import get_maturity_level_from_stat
-from plotting_utils import get_mean_map
-from plotting_utils import handle_exception
-from results_maps import ResultsMaps
+from .bokeh_html_utils import sanitize_filename
+from .parallelizable_plot_loop import get_figpath_with_keycase
+from .plotting_utils import get_difference_map
+from .plotting_utils import get_instxn_time_slice_of_ds
+from .plotting_utils import get_key_case
+from .plotting_utils import get_maturity_level_from_stat
+from .plotting_utils import get_mean_map
+from .plotting_utils import handle_exception
+from .results_maps import ResultsMaps
 
 externals_path = os.path.join(
     os.path.dirname(__file__),
+    os.pardir,
     os.pardir,
     os.pardir,
     "externals",

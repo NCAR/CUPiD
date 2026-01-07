@@ -9,12 +9,14 @@ from __future__ import annotations
 import os
 import sys
 
-import earthstat
 import xarray as xr
-from plotting_utils import handle_exception
+
+from .earthstat import EarthStat, check_dim_alignment
+from .plotting_utils import handle_exception
 
 externals_path = os.path.join(
     os.path.dirname(__file__),
+    os.pardir,
     os.pardir,
     os.pardir,
     "externals",
@@ -32,7 +34,7 @@ from ctsm_postprocessing.utils import ungrid  # noqa: E402
 
 def process_case(
     cft_ds: xr.Dataset,
-    earthstat_data: earthstat.EarthStat,
+    earthstat_data: EarthStat,
     opts: dict,
     case_name: str,
 ) -> xr.Dataset:
@@ -140,7 +142,7 @@ def _get_earthstat_area(cft_ds, earthstat_data, opts):
         )
 
     # Before saving, check alignment of all dims
-    crop_area_es_expanded = earthstat.check_dim_alignment(crop_area_es_expanded, cft_ds)
+    crop_area_es_expanded = check_dim_alignment(crop_area_es_expanded, cft_ds)
 
     # Save EarthStat time axis to avoid plotting years with no EarthStat data
     earthstat_time = crop_area_es_expanded["time"]
@@ -156,7 +158,7 @@ def _get_earthstat_area(cft_ds, earthstat_data, opts):
 
 def process_caselist(
     case_list: CropCaseList,
-    earthstat_data: earthstat.EarthStat,
+    earthstat_data: EarthStat,
     opts: dict,
 ) -> CropCaseList:
     """For each case in case list, get versions of CLM stats as if planted with EarthStat area"""

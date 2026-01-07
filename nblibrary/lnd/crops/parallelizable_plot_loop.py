@@ -9,18 +9,19 @@ from __future__ import annotations
 import os
 import sys
 import warnings
-
-from bokeh_html_utils import sanitize_filename
 from dask.distributed import as_completed
 from dask.distributed import Client
-from plotting_utils import get_dummy_map
-from plotting_utils import get_key_case
-from plotting_utils import get_mean_map
-from results_maps import DEFAULT_NO_VRANGE
-from results_maps import ResultsMaps
+
+from .bokeh_html_utils import sanitize_filename
+from .plotting_utils import get_dummy_map
+from .plotting_utils import get_key_case
+from .plotting_utils import get_mean_map
+from .results_maps import DEFAULT_NO_VRANGE
+from .results_maps import ResultsMaps
 
 externals_path = os.path.join(
     os.path.dirname(__file__),
+    os.pardir,
     os.pardir,
     os.pardir,
     "externals",

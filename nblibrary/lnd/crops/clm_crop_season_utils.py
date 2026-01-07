@@ -10,6 +10,7 @@ externals_path = os.path.join(
     os.path.dirname(__file__),
     os.pardir,
     os.pardir,
+    os.pardir,
     "externals",
 )
 sys.path.append(externals_path)

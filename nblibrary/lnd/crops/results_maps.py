@@ -10,7 +10,8 @@ import matplotlib
 import numpy as np
 import xarray as xr
 from matplotlib.figure import Figure
-from plotting_utils import get_dummy_map
+
+from .plotting_utils import get_dummy_map
 
 # Default colormaps for different plot types
 DEFAULT_CMAP_SEQ = "viridis"
