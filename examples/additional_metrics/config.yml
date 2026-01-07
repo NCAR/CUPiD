@@ -60,7 +60,7 @@ timeseries:
   case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
   file_mode: 664
   dir_mode: 775
-  file group: cesm
+  file_group: cesm
   dir_group: cesm
 
   atm:

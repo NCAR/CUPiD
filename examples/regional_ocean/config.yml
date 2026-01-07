@@ -60,7 +60,7 @@ timeseries:
   case_name: ['CROCODILE_tutorial_nwa12_MARBL']
   file_mode: 664
   dir_mode: 775
-  file group: cesm
+  file_group: cesm
   dir_group: cesm
 
   ocn:
