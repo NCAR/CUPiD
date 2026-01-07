@@ -5,6 +5,7 @@ channels:
 dependencies:
   - cartopy
   - cftime
+  - cfunits
   - dask
   - distributed
   - geocat-comp
