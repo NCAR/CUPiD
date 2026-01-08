@@ -85,7 +85,7 @@ class EarthStat:
         self._data = {}
 
         # Import EarthStat crop list
-        self._get_crop_list(earthstat_dir, opts["crops_to_include"])
+        self._get_crop_list(earthstat_dir, opts["crops_to_plot"])
 
         # Import EarthStat maps
         self._import_all_resolutions(earthstat_dir, sim_resolutions, opts)
@@ -115,7 +115,7 @@ class EarthStat:
         """
         return self._data.items()
 
-    def _get_crop_list(self, earthstat_dir, crops_to_include):
+    def _get_crop_list(self, earthstat_dir, clm_crops_to_plot):
         """
         Get the list of crops in EarthStat
         """
@@ -146,7 +146,7 @@ class EarthStat:
             elif crop == "sugar cane":
                 self.crops[i] = "sugarcane"
         # Check that all CLM crops are in self.crops
-        for crop in crops_to_include:
+        for crop in clm_crops_to_plot:
             if crop not in self.crops:
                 print(f"WARNING: {crop} not found in self.crops")
 

@@ -11,7 +11,8 @@ import pandas as pd
 import xarray as xr
 from matplotlib import pyplot as plt
 
-from .bokeh_html_utils import sanitize_filename, create_static_html
+from .bokeh_html_utils import create_static_html
+from .bokeh_html_utils import sanitize_filename
 from .earthstat import align_time
 from .plotting_utils import get_dummy_timeseries
 from .plotting_utils import get_maturity_level_from_stat
@@ -60,16 +61,19 @@ def get_line_plot_kwargs(opts, c):
 
 def setup_fig(opts):
     fig_opts = {}
-    n_crops_to_include = len(opts["crops_to_include"])
-    if 5 <= n_crops_to_include <= 6:
-        nrows = 2
-        ncols = 3
-        height = 10.5
-        width = 15
-        fig_opts["hspace"] = 0.25
-        fig_opts["wspace"] = 0.35
-    else:
-        raise RuntimeError(f"Specify figure layout for Ncrops=={n_crops_to_include}")
+
+    # Things that probably need to be optimized based on number of crops
+    n_crops_to_plot = len(opts["crops_to_plot"])
+    ncols = 3
+    nrows = int(np.ceil(n_crops_to_plot / ncols))
+    height = 4.5 * nrows + 1.5
+    width = 15
+    fig_opts["hspace"] = 0.25
+    fig_opts["wspace"] = 0.35
+    if not 5 <= n_crops_to_plot <= 6:
+        warnings.warn(f"Figure layout only tested for 5-6 crops, not {n_crops_to_plot}")
+
+    # Set up figure
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(width, height))
     return fig_opts, fig, axes
 
@@ -418,7 +422,7 @@ def _one_fig(
         fig_opts["title"] += " (if CLM used EarthStat areas)"
 
     std_dict = {}
-    for i, crop in enumerate(opts["crops_to_include"]):
+    for i, crop in enumerate(opts["crops_to_plot"]):
         ax = axes.ravel()[i]
         plt.sca(ax)
         obs_timeseries_linecolors = opts["obs_timeseries_linecolors"].copy()
@@ -566,7 +570,7 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
             if do_normdetrend:
                 index_colname = "legend_labels"
                 std_table_dict = {index_colname: legend_labels}
-                for crop in opts["crops_to_include"]:
+                for crop in opts["crops_to_plot"]:
                     col_data = []
                     for std in std_dict[crop]:
                         if std is None:

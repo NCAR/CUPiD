@@ -11,7 +11,8 @@ import sys
 
 import xarray as xr
 
-from .earthstat import EarthStat, check_dim_alignment
+from .earthstat import check_dim_alignment
+from .earthstat import EarthStat
 from .plotting_utils import handle_exception
 
 externals_path = os.path.join(
@@ -105,7 +106,7 @@ def _get_prod_as_if_earthstat(cft_ds: xr.Dataset) -> xr.Dataset:
 
 
 def _get_earthstat_area(cft_ds, earthstat_data, opts):
-    for i, crop in enumerate(opts["crops_to_include"]):
+    for i, crop in enumerate(cft_ds["crop"].values):
         # Get EarthStat area
         crop_area_es = ungrid(
             gridded_data=earthstat_data.get_data(
@@ -131,7 +132,7 @@ def _get_earthstat_area(cft_ds, earthstat_data, opts):
     clm_units = cft_ds["crop_area"].attrs["units"]
     es_units = crop_area_es.attrs["units"]
     if clm_units == "m2" and es_units == "Mha":
-        crop_area_es_expanded *= 1e4 * 1e6
+        crop_area_es_expanded = crop_area_es_expanded * 1e4 * 1e6
         crop_area_es_expanded.attrs["units"] = "m2"
     else:
         raise NotImplementedError(
