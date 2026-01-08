@@ -56,19 +56,17 @@ def process_case(
         skip_msg = f"Couldn't get EarthStat production for case {case_name} due to"
         handle_exception(opts["debug"], e, skip_msg)
 
-    # Get failed/immature as if using EarthStat areas
+    # Get unmarketable/immature as if using EarthStat areas
     try:
-        cft_ds = _get_immfail_as_if_earthstat(cft_ds, opts)
+        cft_ds = _get_immunm_as_if_earthstat(cft_ds, opts)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        skip_msg = (
-            f"Couldn't get failed/immature as if EarthStat for case {case_name} due to"
-        )
+        skip_msg = f"Couldn't get unmarketable/immature as if EarthStat for case {case_name} due to"
         handle_exception(opts["debug"], e, skip_msg)
 
     return cft_ds
 
 
-def _get_immfail_as_if_earthstat(cft_ds: xr.Dataset, opts: dict) -> xr.Dataset:
+def _get_immunm_as_if_earthstat(cft_ds: xr.Dataset, opts: dict) -> xr.Dataset:
     crop_area_var = "crop_area_es"
     if "gridcell" in cft_ds[crop_area_var].dims:
         crop_area_es = (
@@ -76,9 +74,9 @@ def _get_immfail_as_if_earthstat(cft_ds: xr.Dataset, opts: dict) -> xr.Dataset:
         )
     else:
         crop_area_es = cft_ds[crop_area_var]
-    for imm_or_fail in opts["imm_fail_list"]:
-        frac_ds = cft_ds[f"crop_harv_area_{imm_or_fail}"] / cft_ds["crop_harv_area"]
-        cft_ds[f"crop_area_es_{imm_or_fail}"] = frac_ds * crop_area_es
+    for imm_or_unm in opts["imm_unm_list"]:
+        frac_ds = cft_ds[f"crop_harv_area_{imm_or_unm}"] / cft_ds["crop_harv_area"]
+        cft_ds[f"crop_area_es_{imm_or_unm}"] = frac_ds * crop_area_es
     return cft_ds
 
 
