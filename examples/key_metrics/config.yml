@@ -133,6 +133,51 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
+    combined_diagnostics:
+      link_to_MDTF:
+        parameter_groups:
+          none:
+            mdtf_root: ../../examples/key_metrics/MDTF_output/
+            key_plots: ["some_plots.png"]
+        external_tool:
+          tool_name: 'MDTF'
+          # Run the MDTF on the model cases
+          mdtf_run: false # TODO: this should already be on if link_to_MDTF is called
+
+          # The file that will be written by ADF to input to MDTF. Call this whatever you want.
+          mdtf_input_settings_filename : mdtf_input.json
+
+          ## MDTF code path, sets the location of the MDTF codebase and pre-compiled conda envs
+          #  CHANGE if you have any: your own MDTF code, installed conda envs and/or obs_data
+          # TODO: update these to use external
+          mdtf_codebase_path : /glade/campaign/cgd/amp/amwg/mdtf
+          mdtf_codebase_loc  : ${mdtf_codebase_path}/MDTF-diagnostics.v3.1.20230817.ADF
+          conda_root         : /glade/u/apps/opt/conda
+          conda_env_root     : ${mdtf_codebase_path}/miniconda2/envs.MDTFv3.1.20230412/
+          OBS_DATA_ROOT      : ${mdtf_codebase_path}/obs_data
+
+          # SET this to a writable dir. The ADF will place ts files here for the MDTF to read (adds the casename)
+          MODEL_DATA_ROOT     : ${diag_cam_climo.cam_ts_loc}/mdtf/inputdata/model
+
+          # Choose diagnostics (PODs). Full list of available PODs: https://github.com/NOAA-GFDL/MDTF-diagnostics
+          pod_list      :  [ "MJO_suite" ]
+
+          # Intermediate/output file settings
+          make_variab_tar: false     # tar up MDTF results
+          save_ps : false     # save postscript figures in addition to bitmaps
+          save_nc : false      # save netCDF files of processed data (recommend true when starting with new model data)
+          overwrite: true     # overwrite results in OUTPUT_DIR; otherwise results will be saved under a unique name
+
+          # Settings used in debugging:
+          verbose  : 3       # Log verbosity level.
+          test_mode: false   # Set to true for framework test. Data is fetched but PODs are not run.
+          dry_run  : false   # Framework test. No external commands are run and no remote data is copied. Implies test_mode.
+
+          # Settings that shouldn't change in ADF implementation for now
+          data_type           : single_run # single_run or multi_run (only works with single right now)
+          data_manager        : Local_File # Fetch data or it is local?
+          environment_manager : Conda      # Manage dependencies
+
     atm:
       Global_PSL_NMSE_compare_obs_lens:
         parameter_groups:
