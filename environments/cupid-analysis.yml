@@ -504,6 +504,6 @@ dependencies:
   - widgetsnbextension==4.0.15
   - xgcm==0.9.0
   - pip:
-      - -e ../cupid_utils  
+      - -e ../cupid_utils
       - -e ../externals/mom6-tools
       - git+https://github.com/rubisco-sfa/ILAMB.git
