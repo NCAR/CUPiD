@@ -59,4 +59,5 @@ dependencies:
   - zarr=3.1.5
   - pip:
     - -e ../cupid_utils
+    - -e ../externals/ILAMB
     - -e ../externals/mom6-tools
