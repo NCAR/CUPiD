@@ -51,11 +51,16 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="CUPiD base case end date",
 )
 @click.option(
+    "--run-cvdp",
+    is_flag=True,
+    default=False,
+    help="Run CVDP diagnostics"
+)
+@click.option(
     "--adf-output-root",
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
-@click.option("--run-cvdp", is_flag=True, help="Run CVDP diagnostics")
 @click.option(
     "--cupid-run-adf",
     default=None,
@@ -83,8 +88,8 @@ def generate_cupid_config(
     cupid_enddate,
     cupid_base_startdate,
     cupid_base_enddate,
+    run_cvdp,
     adf_output_root,
-    run_cvdp=False,
     ldf_output_root,
     ilamb_output_root,
     cupid_run_adf,
