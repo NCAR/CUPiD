@@ -40,59 +40,54 @@ computation_config:
 
 # All parameters under global_params get passed to all the notebooks
 
-global_params:
-  case_name: 'b.e30_beta02.BLT1850.ne30_t232.104'
-  base_case_name: 'b.e23_alpha17f.BLT1850.ne30_t232.092'
+global_params: # TODO: a lot of these params may be irrelevant/misleading for this notebook
+  case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232'
+  base_case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228'
+  case_nickname: 'BLT1850_232'
+  base_case_nickname: 'BLT1850_228'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  start_date: '0001-01-01'
-  end_date: '0100-01-01'
-  base_start_date: '0001-01-01'
-  base_end_date: '0100-01-01'
-  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
   ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
     threads_per_worker: 1
 
-timeseries:
+timeseries: # TODO: will need to update timeseries portion of this in next PR
   num_procs: 8
-  ts_done: [False,False]
-  overwrite_ts: [False,False]
-  case_name: ['b.e30_beta02.BLT1850.ne30_t232.104', 'b.e23_alpha17f.BLT1850.ne30_t232.092']
-  file_mode: 664
-  dir_mode: 775
-  file_group: cesm
-  dir_group: cesm
+  ts_done: [False, False]
+  overwrite_ts: [False, False]
+  case_name: ['b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232', 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228']
 
   atm:
-    vars: ['ACTNI', 'ACTNL', 'ACTREI', 'ACTREL', 'AODDUST']
+    vars: ['RESTOM','TS']
     derive_vars: []
-    hist_str: 'h0a'
+    hist_str: 'cam.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
+    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
 
   lnd:
-    vars: ['ALTMAX', 'COST_NACTIVE', 'DENIT', 'EFLX_DYNBAL']
+    vars: []
     derive_vars: []
-    hist_str: 'h0'
+    hist_str: 'clm2.h0a'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ocn:
-    vars: ['taux', 'tauy']
+    vars: []
     derive_vars: []
     hist_str: 'h.z'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   ice:
-    vars: ['aice', 'hi', 'hs', 'uvel', 'vvel']
+    vars: ['ICEFRAC']
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   glc:
@@ -100,15 +95,15 @@ timeseries:
     derive_vars: []
     hist_str: 'initial_hist'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
   rof:
-    vars: ['usurf', 'topg']
+    vars: []
     derive_vars: []
-    hist_str: 'initial_hist'
+    hist_str: 'h0'
     start_years: [1,1]
-    end_years: [100,100]
+    end_years: [21,45]
     level: 'lev'
 
 compute_notebooks:
@@ -117,7 +112,7 @@ compute_notebooks:
   # parameters are specified. Several examples of different
   # types of notebooks are provided.
 
-  # The second key (here Global_Ocean_Surface) is the name of the
+  # The first key (here infrastructure) is the name of the
   # notebook from nb_path_root, minus the .ipynb
 
     infrastructure:
@@ -125,38 +120,19 @@ compute_notebooks:
         parameter_groups:
           none: {}
 
-    ocn:
-      Global_Ocean_Surface:
+    atm:
+      Global_TS_RESTOM_tseries:
         parameter_groups:
           none:
-            savefigs: False
-            mom6_tools_config:
-              Fnames:
-                native: 'mom6.h.native.????-??.nc'
-                static: 'mom6.h.static.nc'
-              oce_cat: /glade/u/home/gmarques/libs/oce-catalogs/reference-datasets.yml
-
-    lnd:
-      Global_Land_Compare_Two_Cases:
-        parameter_groups:
-          none:
-            type:
-              - 1850pAD
-              - 1850pSASU
-
+            vars:
+              {'TS':'Global',
+               'RESTOM':'Global'}
     ice:
-      Hemis_seaice_visual_compare_obs_lens:
+      Lab_Sea_ICEFRAC_tseries:
         parameter_groups:
           none:
-            climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
-      Hemis_seaice_visual_compare_contour:
-        parameter_groups:
-          none:
-            climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
-
+            vars:
+              {'ICEFRAC': 'Lab Sea'}
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -180,25 +156,14 @@ book_toc:
     # Each chapter is the name of one of the notebooks that you executed
     # in compute_notebooks above, also without .ipynb
 
-    - caption: Ocean
+    - caption: Diagnostic Output from Multiple Components
       chapters:
-          - file: ocn/Global_Ocean_Surface
+        - file: atm/Global_TS_ICEFRAC_RESTOM_tseries
 
-    - caption: Land
-      chapters:
-        - file: lnd/Global_Land_Compare_Two_Cases
-
-    - caption: Sea Ice
-      chapters:
-        - file: ice/Hemis_seaice_visual_compare_obs_lens
-        - file: ice/Hemis_seaice_visual_compare_contour
 
 #####################################
 # Keys for Jupyter Book _config.yml #
 #####################################
 book_config_keys:
 
-  title: Additional Metrics   # Title of your jupyter book
-
-  # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
-  ### for many more options
+  title: CESM Intermediate Diagnostic Output   # Title of your jupyter book

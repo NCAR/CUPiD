@@ -36,9 +36,9 @@ CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
 CUPID_RUN_CVDP=`./xmlquery --value CUPID_RUN_CVDP`
+CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
 CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
-CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 
@@ -132,7 +132,6 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
-   --adf-output-root ${PWD} \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
@@ -140,7 +139,13 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-   --cupid-base-enddate ${CUPID_BASE_ENDDATE}
+   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --adf-output-root ${PWD} \
+   --ldf-output-root ${PWD} \
+   --ilamb-output-root ${PWD} \
+   --cupid-run-adf ${CUPID_RUN_ADF} \
+   --cupid-run-ldf ${CUPID_RUN_LDF} \
+   --cupid-run-ilamb ${CUPID_RUN_ILAMB}
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
