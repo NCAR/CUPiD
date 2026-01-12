@@ -193,8 +193,8 @@ def get_maturity_level_from_stat(stat_input):
 def get_yr_range(ds):
     if "time" not in ds.dims or ds.sizes["time"] == 0:
         return [None, None]
-    first_year = ds["time"].values[0].year
-    last_year = ds["time"].values[-1].year
+    first_year = ds["time"].values[0]
+    last_year = ds["time"].values[-1]
     return [first_year, last_year]
 
 
@@ -243,6 +243,11 @@ def _get_range_overlap(*ranges):
         # Validate that end >= start
         if r[1] < r[0]:
             raise ValueError(f"Range at position {i} has end < start: [{r[0]}, {r[1]}]")
+
+        # Extract the year
+        if hasattr(r[0], "year"):
+            r[0] = r[0].year
+            r[1] = r[1].year
 
     # Find the maximum start and minimum end
     result_start = max(r[0] for r in ranges)
@@ -313,8 +318,11 @@ def get_mean_map(
             case_last_yr = None
         else:
             assert "units" in map_case.attrs, RESULT_MAP_NO_UNITS_MSG
-            case_first_yr = case.cft_ds["time"].values[0].year
-            case_last_yr = case.cft_ds["time"].values[-1].year
+            case_first_yr = case.cft_ds["time"].values[0]
+            case_last_yr = case.cft_ds["time"].values[-1]
+            if hasattr(case_first_yr, "year"):
+                case_first_yr = case_first_yr.year
+                case_last_yr = case_last_yr.year
 
     # Get map_clm as difference between case and key_case, if doing so.
     # Otherwise just use map_case.

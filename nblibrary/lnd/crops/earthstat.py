@@ -25,16 +25,26 @@ def align_time(da_to_align, target_time):
     from EarthStat to the CLM Dataset.
     """
 
+    # We may want to use this with target_time DataArrays that are a DateTime type. Otherwise we'll
+    # assume that the values are just numeric years.
+    target_time_is_dt_type = hasattr(target_time.values[0], "year")
+
     # Align EarthStat with CLM axis
     orig_time = da_to_align["time"]
     first_year = min(orig_time.values).year
     last_year = max(orig_time.values).year
-    this_slice = slice(f"{first_year}-01-01", f"{last_year}-12-31")
+    if target_time_is_dt_type:
+        this_slice = slice(f"{first_year}-01-01", f"{last_year}-12-31")
+    else:
+        this_slice = slice(first_year, last_year)
     new_time_coord = target_time.sel(time=this_slice)
 
     # Slice EarthStat to match CLM time span
-    first_year_target = min(target_time.values).year
-    last_year_target = max(target_time.values).year
+    first_year_target = min(target_time.values)
+    last_year_target = max(target_time.values)
+    if target_time_is_dt_type:
+        first_year_target = first_year_target.year
+        last_year_target = last_year_target.year
     this_slice = slice(f"{first_year_target}-01-01", f"{last_year_target}-12-31")
     da_to_align = da_to_align.sel(time=this_slice)
 

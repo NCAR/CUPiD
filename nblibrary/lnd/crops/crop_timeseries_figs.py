@@ -278,19 +278,29 @@ def _plot_faostat(
         )
     fao_yield_world_thiscrop = fao_yield_world.query(f"Crop == '{crop}'")
 
+    # We may want to use this with time_da DataArrays that are a DateTime type. Otherwise we'll
+    # assume that the values are just numeric years.
+    target_time_is_dt_type = hasattr(time_da.values[0], "year")
+
     # Only include years of overlap between FAO and CLM data
     fao_years = (
         fao_yield_world_thiscrop.index.get_level_values("Year").unique().tolist()
     )
-    clm_start = time_da.time.values[0].year
-    clm_end = time_da.time.values[-1].year
+    clm_start = time_da.time.values[0]
+    clm_end = time_da.time.values[-1]
+    if target_time_is_dt_type:
+        clm_start = clm_start.year
+        clm_end = clm_end.year
     fao_start = min(fao_years)
     fao_end = max(fao_years)
     start = max(clm_start, fao_start)
     end = min(clm_end, fao_end)
     assert start <= end
 
-    time_slice = slice(f"{start}-01-01", f"{end}-12-31")
+    if target_time_is_dt_type:
+        time_slice = slice(f"{start}-01-01", f"{end}-12-31")
+    else:
+        time_slice = slice(start, end)
     ydata = fao_yield_world_thiscrop.query(f"(Year >= {start}) & (Year <= {end})")
     if do_normdetrend:
         ydata["Value"] = _normdetrend(ydata["Value"])
