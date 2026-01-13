@@ -50,7 +50,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="0101-01-01",
     help="CUPiD base case end date",
 )
-@click.option("--run-cvdp", is_flag=True, default=False, help="Run CVDP diagnostics")
 @click.option(
     "--adf-output-root",
     default=None,
@@ -71,6 +70,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Boolean flag to indicate whether to run ILAMB analysis",
 )
+@click.option("--run-cvdp", is_flag=True, default=False, help="Run CVDP diagnostics")
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -83,13 +83,13 @@ def generate_cupid_config(
     cupid_enddate,
     cupid_base_startdate,
     cupid_base_enddate,
-    run_cvdp,
     adf_output_root,
     ldf_output_root,
     ilamb_output_root,
     cupid_run_adf,
     cupid_run_ldf,
     cupid_run_ilamb,
+    run_cvdp,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
