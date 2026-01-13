@@ -31,7 +31,7 @@ for file in [
     "Contributors.md",
     "RunCESM.md",
     "RunStandalone.md",
-    "RunExternalPackages.md"
+    "RunExternalPackages.md",
 ]:
     os.system(f"cp ../{file} ./")
 

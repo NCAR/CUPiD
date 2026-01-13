@@ -26,10 +26,14 @@ Note: Anything you change in the CUPiD configuration file will overwrite default
 `
 ### Run LDF
 `../../externals/LDF/run_adf_diag ldf_config.yml`
+[More information on LDF](https://github.com/NCAR/ADF/tree/clm-diags)
 
 ### Run ADF
 `../../externals/ADF/run_adf_diag adf_config.yml`
+[More information on ADF](https://github.com/NCAR/ADF)
+
 Note: you can run CVDP by turning on `run_cvdp` in the ADF section of the config file, and then running ADF as described above.
+[More information on CVDP](https://github.com/NCAR/CVDP)
 
 ### Run ILAMB
 Follow instructions that were printed when you generated the ILAMB config file, eg something like this:
@@ -37,8 +41,10 @@ Follow instructions that were printed when you generated the ILAMB config file, 
 `export ILAMB_ROOT=../../ilamb_aux`
 `ilamb-run --config ilamb_nohoff_final_CLM_BGC.cfg --build_dir ILAMB_output/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0`
 Note: If the `ILAMB_output` directory already exists in the example, remove it before re-running ILAMB.
+[More information on ILAMB](https://github.com/rubisco-sfa/ILAMB)
 
-Note: it is best to wait to run the CUPiD Diagnostic notebooks until the webpages have been created for the external diagnostics above. Eg, these files should exist if you want external diagnostic output to be linked properly to the final cupid webpages:
+
+## Note: it is best to wait to run the CUPiD Diagnostic notebooks until the webpages have been created for the external diagnostics above. Eg, these files should exist if you want external diagnostic output to be linked properly to the final cupid webpages:
 * `ADF_output/*/website/index.html`
 * `LDF_output/*/website/index.html`
 * `CVDP_output/*/output/index.html`
@@ -46,4 +52,3 @@ Note: it is best to wait to run the CUPiD Diagnostic notebooks until the webpage
 
 ## View output
 The easiest way to view output from ALL of these packages is to continue with the [steps to run cupid diagnostic notebooks and generate a jupyter book containing output](https://ncar.github.io/CUPiD/run_standalone.html).
-
