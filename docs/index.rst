@@ -8,6 +8,7 @@ CUPiD Documentation
     Command Line Interface <cli.rst>
     API Reference <api.rst>
     Configuration File <config.md>
+    Running Standalone CUPiD on exsiting cases <run_standalone.rst>
     Running CUPiD via CESM Workflow <run_cesm.rst>
     Tips and Tricks for NCAR Machines <ncar_tips.rst>
     Publishing Notebooks <publishing_notebooks.md>
