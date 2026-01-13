@@ -13,8 +13,8 @@ class InclYrsRangesDict(dict):
     def plot_items(self):
         for k, v in super().items():
             yr_range_str = self.get_yr_range_str(k)
-            first_time_slice = f"{v[0]}-01-01"
-            last_time_slice = f"{v[1]}-12-31"
+            first_time_slice = None if (y := v[0]) is None else f"{y}-01-01"
+            last_time_slice = None if (y := v[1]) is None else f"{y}-12-31"
             time_slice = slice(first_time_slice, last_time_slice)
 
             yield (v, yr_range_str, time_slice)

@@ -297,9 +297,9 @@ class EarthStat:
         ds = ds.drop_vars(vars_to_drop)
 
         # Drop years we don't need
-        start_year = opts["start_year"]
-        end_year = opts["end_year"]
-        ds = ds.sel(time=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+        start_date = None if (y := opts["start_year"]) is None else f"{y}-01-01"
+        end_date = None if (y := opts["end_year"]) is None else f"{y}-12-31"
+        ds = ds.sel(time=slice(start_date, end_date))
 
         self[res] = ds
 
