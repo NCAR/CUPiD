@@ -52,3 +52,13 @@ please see the [Contributor's Guide](https://ncar.github.io/CUPiD/contributors_g
 
 
 CUPiD can be run either as a [standalone tool](https://ncar.github.io/CUPiD/run_standalone.html) or via the [CESM workflow](https://ncar.github.io/CUPiD/run_cesm.html).
+
+### Note:
+Occasionally users report the following error the first time they run CUPiD: `Environment cupid-analysis specified for <YOUR-NOTEBOOK>.ipynb could not be found`. The fix for this is the following:
+   ``` bash
+   $ conda activate cupid-analysis
+   (cupid-analysis) $ python -m ipykernel install --user --name=cupid-analysis
+   ```
+If you have an existing conda environment and want to update it, you can remove it and then follow the general installation instructions, eg:
+`conda env remove -n cupid-analysis`
+`mamba env create -f environments/cupid-analysis.yml`
