@@ -35,6 +35,7 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_CVDP=`./xmlquery --value CUPID_RUN_CVDP`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
 CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
@@ -115,7 +116,19 @@ fi
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
+if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
+  if [ "${CUPID_RUN_ADF}" != "TRUE" ]; then
+    echo "ERROR: CUPID_RUN_CVDP=TRUE but CUPID_RUN_ADF=${CUPID_RUN_ADF}. CVDP is run by"
+    echo "the ADF, so that combination of flags will result in CVDP not being run."
+    echo "Either set CUPID_RUN_ADF=TRUE or CUPID_RUN_CVDP=FALSE"
+    exit 1
+  fi
+  CVDP_OPT="--run-cvdp"
+else
+  CVDP_OPT=""
+fi
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
+   ${CVDP_OPT} \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
