@@ -87,7 +87,6 @@ def generate_cupid_config(
     cupid_climo_n_year,
     cupid_base_climo_start_year,
     cupid_base_climo_n_year,
-    run_cvdp,
     adf_output_root,
     ldf_output_root,
     ilamb_output_root,
