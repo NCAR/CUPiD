@@ -26,6 +26,10 @@ CALENDAR=`./xmlquery --value CALENDAR`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
 CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
+CUPID_CLIMO_START_YEAR=`./xmlquery --value CUPID_CLIMO_START_YEAR`
+CUPID_BASE_CLIMO_START_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_START_YEAR`
+CUPID_CLIMO_N_YEAR=`./xmlquery --value CUPID_CLIMO_N_YEAR`
+CUPID_BASE_CLIMO_N_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_N_YEAR`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -35,6 +39,7 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_CVDP=`./xmlquery --value CUPID_RUN_CVDP`
 CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
 CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
@@ -115,7 +120,19 @@ fi
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
+if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
+  if [ "${CUPID_RUN_ADF}" != "TRUE" ]; then
+    echo "ERROR: CUPID_RUN_CVDP=TRUE but CUPID_RUN_ADF=${CUPID_RUN_ADF}. CVDP is run by"
+    echo "the ADF, so that combination of flags will result in CVDP not being run."
+    echo "Either set CUPID_RUN_ADF=TRUE or CUPID_RUN_CVDP=FALSE"
+    exit 1
+  fi
+  CVDP_OPT="--run-cvdp"
+else
+  CVDP_OPT=""
+fi
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
+   ${CVDP_OPT} \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
@@ -127,6 +144,10 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-climo-start-year ${CUPID_CLIMO_START_YEAR} \
+   --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
+   --cupid-base-climo-start-year ${CUPID_BASE_CLIMO_START_YEAR} \
+   --cupid-base-climo-n-year ${CUPID_BASE_CLIMO_N_YEAR} \
    --adf-output-root ${PWD} \
    --ldf-output-root ${PWD} \
    --ilamb-output-root ${PWD} \
