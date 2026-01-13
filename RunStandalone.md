@@ -4,18 +4,21 @@ CUPiD can be run either independently or via the CESM workflow. If you want to r
 ## Setup
 Install CUPiD's analysis and infrastructure environments per the [usual setup instructions](https://ncar.github.io/CUPiD/index.html#installing).
 
+Activate the `cupid-infrastructure` environment: `conda activate cupid-infrastructure`
+
 ## Adjust CUPiD configuration
 Update the [CUPiD configuration file](https://ncar.github.io/CUPiD/config.html) with values relevant to your case.
+`cd examples/key_metrics`
+
+## Request resources
+Request resources-- eg, at NCAR, this may be useful: `qinteractive -l select=1:ncpus=12:mem=120GB`. See more details for resource requests on [tips and tricks for running at NCAR](https://ncar.github.io/CUPiD/ncar_tips.html).
 
 ## Postprocessing of Files
 ### Run Timeseries, if desired
-Request resources-- eg, at NCAR, this may be useful: `qinteractive -l select=1:ncpus=12:mem=120GB`
-`conda activate cupid-infrastructure`
 `cupid-timeseries`
 
 ### Run Remapping, if desired
 [Coming soon](https://github.com/NCAR/CUPiD/pull/251)
-`conda activate cupid-infrastructure`
 `cupid-remap`
 
 ## Run Diagnostics
@@ -30,10 +33,9 @@ Packages that are integrated into CUPiD:
 ### Running CUPiD Diagnostics
 CUPiD's main example for generating diagnostics is `examples/key-metrics`. Other examples with various sets of diagnostic notebooks from `nblibrary` are also available, or you can make your own example describing a different set of notebooks-- or even [add your own](https://ncar.github.io/CUPiD/contributors_guide.html)!
 
+This will require multiple compute cores:
+
 ``` bash
-$ conda activate cupid-infrastructure
-$ cd examples/key_metrics
-$ # machine-dependent: request multiple compute cores
 $ cupid-diagnostics
 $ cupid-webpage  # Will build HTML from Jupyter Book
 ```
