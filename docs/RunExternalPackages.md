@@ -75,7 +75,8 @@ Note: If the `ILAMB_output` directory already exists in the example, remove it b
 [More information on ILAMB](https://github.com/rubisco-sfa/ILAMB)
 
 
-## Note: it is best to wait to run the CUPiD Diagnostic notebooks until the webpages have been created for the external diagnostics above. Eg, these files should exist if you want external diagnostic output to be linked properly to the final cupid webpages:
+## Note:
+It is best to wait to run the CUPiD Diagnostic notebooks until the webpages have been created for the external diagnostics above. Eg, these files should exist if you want external diagnostic output to be linked properly to the final cupid webpages:
 * `ADF_output/*/website/index.html`
 * `LDF_output/*/website/index.html`
 * `CVDP_output/*/output/index.html`

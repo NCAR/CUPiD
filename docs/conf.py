@@ -29,9 +29,6 @@ for file in [
     "README.md",
     "NCARtips.md",
     "Contributors.md",
-    "RunCESM.md",
-    "RunStandalone.md",
-    "RunExternalPackages.md",
 ]:
     os.system(f"cp ../{file} ./")
 
