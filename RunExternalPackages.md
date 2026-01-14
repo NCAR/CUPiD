@@ -35,6 +35,8 @@ Note: Anything you change in the CUPiD configuration file will overwrite default
 Note: you can run CVDP by turning on `run_cvdp` in the ADF section of the config file, and then running ADF as described above.
 [More information on CVDP](https://github.com/NCAR/CVDP)
 
+For ADF, LDF, and CVDP, you can re-run the `run_adf_diag` commands above if the run is interrupted before it finishes and the packages will look for existing files and continue computations where they left off.
+
 ### Run ILAMB
 Follow instructions that were printed when you generated the ILAMB config file, eg something like this:
 `conda activate cupid-analysis`

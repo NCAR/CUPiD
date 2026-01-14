@@ -12,6 +12,7 @@ Install cupid analysis and infrastructure environments per the [usual setup inst
 ## Adjust CUPiD configuration within CESM
 XML changes are a simple way to change the CUPiD configuration when you are running from CESM. See variables that you may want to adjust in your case directory with `./xmlquery -p CUPID`.
 Adjust any variables that you would like (eg, the base case to compare against, how long to run for, etc) with `./xmlchange <VARIABLE>=<VALUE>`
+Descriptions of XML variables and default values are also described in `CUPiD/cime_config/config_tool.xml`.
 
 ## Adjust wallclock time if needed
 You can adjust the wallclock time for CUPiD specifically by running the following command: `./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME={new time}`. You might want to do this if you are running an example with lots of computationally intensive diagnostic notebooks (for instance, a wallclock time of 6hr may be necessary for ILAMB).
