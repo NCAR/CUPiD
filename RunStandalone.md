@@ -4,14 +4,21 @@ CUPiD can be run either independently or via the CESM workflow. If you want to r
 ## Setup
 Install CUPiD's analysis and infrastructure environments per the [usual setup instructions](https://ncar.github.io/CUPiD/index.html#installing).
 
-Activate the `cupid-infrastructure` environment: `conda activate cupid-infrastructure`
+Activate the `cupid-infrastructure` environment:
+
+`conda activate cupid-infrastructure`
 
 ## Adjust CUPiD configuration
 Update the [CUPiD configuration file](https://ncar.github.io/CUPiD/config.html) with values relevant to your case.
+
 `cd examples/key_metrics`
 
 ## Request resources
-Request resources-- eg, at NCAR, this may be useful: `qinteractive -l select=1:ncpus=12:mem=120GB`. See more details for resource requests on [tips and tricks for running at NCAR](https://ncar.github.io/CUPiD/ncar_tips.html).
+Request resources-- eg, at NCAR, this may be useful:
+
+`qinteractive -l select=1:ncpus=12:mem=120GB`
+
+See more details for resource requests on [tips and tricks for running at NCAR](https://ncar.github.io/CUPiD/ncar_tips.html).
 
 ## Postprocessing of Files
 ### Run Timeseries, if desired
@@ -19,6 +26,7 @@ Request resources-- eg, at NCAR, this may be useful: `qinteractive -l select=1:n
 
 ### Run Remapping, if desired
 [Coming soon](https://github.com/NCAR/CUPiD/pull/251)
+
 `cupid-remap`
 
 ## Run Diagnostics
