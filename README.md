@@ -60,5 +60,8 @@ Occasionally users report the following error the first time they run CUPiD: `En
    (cupid-analysis) $ python -m ipykernel install --user --name=cupid-analysis
    ```
 If you have an existing conda environment and want to update it, you can remove it and then follow the general installation instructions, eg:
-`conda env remove -n cupid-analysis`
-`mamba env create -f environments/cupid-analysis.yml`
+   ``` bash
+   (cupid-analysis) $ conda deactivate
+   $ conda env remove -n cupid-analysis
+   $ mamba env create -f environments/cupid-analysis.yml
+   ```
