@@ -85,7 +85,7 @@ def get_control_dict(config_path):
     return control
 
 
-def setup_logging(config_path):
+def setup_logging(config_path, log_level):
     """
     Set up logging based on configuration file log level
     Options for log levels include debug, info, warning, and error.
@@ -93,7 +93,6 @@ def setup_logging(config_path):
     """
     control = get_control_dict(config_path)
     # default level is info if log level is not set in config
-    log_level = control["computation_config"].get("log_level", "info")
     if log_level == "debug" or log_level == "DEBUG":
         logging.basicConfig(
             level=logging.DEBUG,

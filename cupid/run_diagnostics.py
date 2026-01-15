@@ -51,6 +51,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
 @click.option("--run_dir", "-rd", default=".", help="Path to run directory where files will be created")
 @click.option("--nb_path_root", "-nb", default="../../nblibrary", help="Path to notebook directory")
+@click.option("--log_level", "-ll", default="info", help="Logging level: debug, info, warning, error (default: info)")
 @click.argument("config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks (default: config.yml)")
 def run_diagnostics(
     config_path,
@@ -63,7 +64,8 @@ def run_diagnostics(
     landice=False,
     river_runoff=False,
     run_dir=".",
-    nb_path_root="../../nblibrary"
+    nb_path_root="../../nblibrary",
+    log_level="info",
 ):
     """
     Main engine to set up running all the notebooks.
@@ -81,7 +83,7 @@ def run_diagnostics(
     # Get control structure
     control = util.get_control_dict(config_path)
     util.setup_book(config_path, run_dir)
-    logger = util.setup_logging(config_path)
+    logger = util.setup_logging(config_path, log_level)
 
     component_options = {
         "atm": atmosphere,

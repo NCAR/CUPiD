@@ -52,6 +52,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--landice", "-glc", is_flag=True, help="Remap land ice component timeseries")
 @click.option("--river-runoff", "-rof", is_flag=True, help="Remap river runoff component timeseries")
 @click.option("--run-dir", "-rd", default=".", help="Directory to use for running CUPiD processes")
+@click.option("--log-level", "-ll", default="info", help="Logging level: debug, info, warning, error")
 @click.argument("config_path", default="config.yml")
 def run_remapping(
     config_path,
@@ -62,7 +63,8 @@ def run_remapping(
     seaice=False,
     landice=False,
     river_runoff=False,
-    run_dir="."
+    run_dir=".",
+    log_level="info",
 ):
     """
     Main engine to set up running all the notebooks.
@@ -79,7 +81,7 @@ def run_remapping(
     # Get control structure
     control = util.get_control_dict(config_path)
     util.setup_book(config_path, run_dir)
-    logger = util.setup_logging(config_path)
+    logger = util.setup_logging(config_path, log_level)
 
     component_options = {
         "atm": atmosphere,

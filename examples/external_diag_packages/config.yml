@@ -13,10 +13,6 @@ computation_config:
     ### notebook in NOTEBOOK CONFIG
     default_kernel_name: cupid-analysis
 
-    # log level sets the level of how verbose logging will be.
-    # options include: debug, info, warning, error
-    log_level: 'info'
-
 ############# NOTEBOOK CONFIG #############
 
 ############################
