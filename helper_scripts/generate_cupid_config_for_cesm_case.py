@@ -56,6 +56,32 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Directory where ADF will be run (None => case root)",
 )
 @click.option("--cupid-remap", default=False, help="Remap with CUPiD")
+@click.option(
+    "--ldf-output-root",
+    default=None,
+    help="Directory where LDF will be run (None => case root)",
+)
+@click.option(
+    "--ilamb-output-root",
+    default=None,
+    help="Directory where ILAMB will be run (None => case root)",
+)
+@click.option(
+    "--cupid-run-adf",
+    default=None,
+    help="Boolean flag to indicate whether to run ADF analysis",
+)
+@click.option(
+    "--cupid-run-ldf",
+    default=None,
+    help="Boolean flag to indicate whether to run LDF analysis",
+)
+@click.option(
+    "--cupid-run-ilamb",
+    default=None,
+    help="Boolean flag to indicate whether to run ILAMB analysis",
+)
+@click.option("--run-cvdp", is_flag=True, default=False, help="Run CVDP diagnostics")
 def generate_cupid_config(
     case_root,
     cesm_root,
@@ -70,6 +96,12 @@ def generate_cupid_config(
     cupid_base_enddate,
     adf_output_root,
     cupid_remap,
+    ldf_output_root,
+    ilamb_output_root,
+    cupid_run_adf,
+    cupid_run_ldf,
+    cupid_run_ilamb,
+    run_cvdp,
 ):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
@@ -127,6 +159,22 @@ def generate_cupid_config(
 
     cupid_remap : bool
         If true, perform remapping. If false, skip remapping.
+        The root directory where ADF output will be stored (defaults to case_root).
+
+    ldf_output_root : str
+        The root directory where LDF output will be stored (defaults to case_root).
+
+    ilamb_output_root : str
+        The root directory where ILAMB output will be stored (defaults to case_root).
+
+    cupid_run_adf : Bool
+        Boolean flag to indicate whether to run ADF analysis.
+
+    cupid_run_ldf : Bool
+        Boolean flag to indicate whether to run LDF analysis.
+
+    cupid_run_ilamb : Bool
+        Boolean flag to indicate whether to run ILAMB analysis.
 
     Raises:
     -------
@@ -146,6 +194,10 @@ def generate_cupid_config(
     # Is adf_output_root provided?
     if adf_output_root is None:
         adf_output_root = case_root
+    if ldf_output_root is None:
+        ldf_output_root = case_root
+    if ilamb_output_root is None:
+        ilamb_output_root = case_root
 
     # Is cupid_example a valid value?
     if cupid_root is None:
@@ -176,9 +228,7 @@ def generate_cupid_config(
         my_dict = yaml.safe_load(f)
 
     my_dict["data_sources"]["nb_path_root"] = os.path.join(
-        cesm_root,
-        "tools",
-        "CUPiD",
+        cupid_root,
         "nblibrary",
     )
     my_dict["global_params"]["case_name"] = case
@@ -224,14 +274,67 @@ def generate_cupid_config(
                 cupid_start_year,
                 cupid_base_start_year,
             ]
+
+    if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
+        if "index" in my_dict["compute_notebooks"]["infrastructure"]:
+            del my_dict["compute_notebooks"]["infrastructure"]["index"]
+        my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+            "parameter_groups"
+        ]["none"] = {}
+        my_dict["book_toc"]["root"] = "infrastructure/summary_tables"
+        if cupid_run_adf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["adf_root"] = f"{adf_output_root}/ADF_output/"
+        if cupid_run_ldf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ldf_root"] = f"{ldf_output_root}/LDF_output/"
+        if cupid_run_ilamb:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_root"] = f"{ilamb_output_root}/ILAMB_output/"
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_vars_highlight"] = [
+                "Gross Primary Productivity",
+                "Runoff",
+                "Snow Water Equivalent",
+                "Surface Relative Humidity",
+                "Precipitation",
+            ]
+
     if "ADF" in my_dict["compute_notebooks"].get("atm", {}):
         my_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
             "adf_root"
         ] = os.path.join(adf_output_root, "ADF_output")
-    if "link_to_CVDP" in my_dict["compute_notebooks"].get("atm", {}):
-        my_dict["compute_notebooks"]["atm"]["link_to_CVDP"]["parameter_groups"]["none"][
+        if "diag_cvdp_info" in my_dict["compute_notebooks"]["atm"]["ADF"].get(
+            "external_tool",
+            {},
+        ):
+            my_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
+                "diag_cvdp_info"
+            ]["cvdp_run"] = run_cvdp
+    if "CVDP" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["CVDP"]["parameter_groups"]["none"][
             "cvdp_loc"
         ] = os.path.join(adf_output_root, "CVDP_output")
+
+    if "LDF" in my_dict["compute_notebooks"].get("lnd", {}):
+        if "external_tool" not in my_dict["compute_notebooks"]["lnd"]["LDF"]:
+            my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"] = {}
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["defaults_file"] = (
+            os.path.join(
+                cupid_root,
+                "externals",
+                "LDF",
+                "lib",
+                "ldf_variable_defaults.yaml",
+            )
+        )
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["regions_file"] = (
+            os.path.join(cupid_root, "externals", "LDF", "lib", "regions_lnd.yaml")
+        )
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",

@@ -74,15 +74,24 @@
     <default_value>0001-01-01</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>First year of output to include in CUPiD analysis</desc>
+    <desc>First year of output to include in CUPiD analysis. Format YYYY-MM-DD.</desc>
   </entry>
 
-  <entry id="CUPID_NYEARS">
+  <entry id="CUPID_STOP_OPTION">
+    <type>char</type>
+    <default_value>nyears</default_value>
+    <valid_values>ndays,nmonths,nyears</valid_values>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Sets the portion of output to include in CUPiD analysis, along with STOP_N.</desc>
+  </entry>
+
+  <entry id="CUPID_STOP_N">
     <type>integer</type>
     <default_value>1</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>Number of years of output to include in CUPiD analysis</desc>
+    <desc>Provides a numerical count for $CUPID_STOP_OPTION.</desc>
   </entry>
 
   <entry id="CUPID_BASE_STARTDATE">
@@ -90,15 +99,24 @@
     <default_value>0001-01-01</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>First year of baseline output to include in CUPiD analysis</desc>
+    <desc>First year of baseline output to include in CUPiD analysis. Format YYYY-MM-DD.</desc>
   </entry>
 
-  <entry id="CUPID_BASE_NYEARS">
+  <entry id="CUPID_BASE_STOP_OPTION">
+    <type>char</type>
+    <default_value>nyears</default_value>
+    <valid_values>ndays,nmonths,nyears</valid_values>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Sets the portion of base case output to include in CUPiD analysis, along with STOP_N.</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_STOP_N">
     <type>integer</type>
     <default_value>100</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>Number of years of baseline output to include in CUPiD analysis</desc>
+    <desc>Provides a numerical count for $CUPID_BASE_STOP_OPTION.</desc>
   </entry>
 
   <entry id="CUPID_BASELINE_CASE">
@@ -237,7 +255,16 @@
     <default_value>FALSE</default_value>
     <group>cupid_run_components</group>
     <file>env_postprocessing.xml</file>
-    <desc>Boolean value that determines whether or not ADF diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+    <desc>Boolean value that determines whether or not ADF diagnostics are run</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_CVDP">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not CVDP diagnostics are run (requires CUPID_RUN_ADF=TRUE)</desc>
   </entry>
 
   <entry id="CUPID_RUN_LDF">
@@ -246,7 +273,7 @@
     <default_value>FALSE</default_value>
     <group>cupid_run_components</group>
     <file>env_postprocessing.xml</file>
-    <desc>Boolean value that determines whether or not LDF diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+    <desc>Boolean value that determines whether or not LDF diagnostics are run</desc>
   </entry>
 
   <entry id="CUPID_RUN_ILAMB">

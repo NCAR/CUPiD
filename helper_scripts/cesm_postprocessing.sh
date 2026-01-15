@@ -6,17 +6,6 @@
 # and then update this to python as well (and take a CIME Case object as
 # an argument)
 
-# Function to add some number of years to a string that
-# is formatted as YYYY-MM-DD and print out the updated
-# string in the same format
-add_years() {
-  IFS='-' read -r YEAR MM DD <<< "$1"
-  YEAR=$((10#$YEAR))  # Force base-10
-  MM=$((10#$MM))
-  DD=$((10#$DD))
-  NEW_YEAR=`printf '%04d' "$((YEAR + $2))"`-`printf '%02d' "${MM}"`-`printf '%02d' "${DD}"`
-  echo ${NEW_YEAR}
-}
 
 # Set variables that come from environment or CESM XML files
 CASEROOT=${PWD}
@@ -32,11 +21,12 @@ CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
 CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
-CUPID_NYEARS=`./xmlquery --value CUPID_NYEARS`
-CUPID_ENDDATE=`add_years ${CUPID_STARTDATE} ${CUPID_NYEARS}`
+CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
+CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
+CALENDAR=`./xmlquery --value CALENDAR`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
-CUPID_BASE_NYEARS=`./xmlquery --value CUPID_BASE_NYEARS`
-CUPID_BASE_ENDDATE=`add_years ${CUPID_BASE_STARTDATE} ${CUPID_BASE_NYEARS}`
+CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
+CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -46,11 +36,35 @@ CUPID_RUN_ICE=`./xmlquery --value CUPID_RUN_ICE`
 CUPID_RUN_ROF=`./xmlquery --value CUPID_RUN_ROF`
 CUPID_RUN_GLC=`./xmlquery --value CUPID_RUN_GLC`
 CUPID_RUN_ADF=`./xmlquery --value CUPID_RUN_ADF`
+CUPID_RUN_CVDP=`./xmlquery --value CUPID_RUN_CVDP`
+CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_RUN_ILAMB=`./xmlquery --value CUPID_RUN_ILAMB`
 CUPID_RUN_TYPE=`./xmlquery --value CUPID_RUN_TYPE`
-CUPID_RUN_LDF=`./xmlquery --value CUPID_RUN_LDF`
 CUPID_INFRASTRUCTURE_ENV=`./xmlquery --value CUPID_INFRASTRUCTURE_ENV`
 CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
+
+# Note: on derecho, the cesmdev module creates a python conflict
+#       by setting $PYTHONPATH; since this is conda-based we
+#       want an empty PYTHONPATH environment variable
+unset PYTHONPATH
+# cupid-analysis env required for end date calculation
+conda activate ${CUPID_ANALYSIS_ENV}
+
+# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
+# calendar name needs to be changed for cftime standards
+CFTIME_CALENDAR=$CALENDAR
+CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
+CFTIME_CALENDAR="${CFTIME_CALENDAR/NO_LEAP/noleap}"
+CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_STARTDATE} \
+  --stop-option ${CUPID_STOP_OPTION} \
+  --stop-n ${CUPID_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
+CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
+  --start-date ${CUPID_BASE_STARTDATE} \
+  --stop-option ${CUPID_BASE_STOP_OPTION} \
+  --stop-n ${CUPID_BASE_STOP_N} \
+  --calendar ${CFTIME_CALENDAR}`
 
 # Note if CUPID_ROOT is not tools/CUPiD
 # (but don't complain if user adds a trailing "/")
@@ -100,18 +114,25 @@ if [ "${CUPID_RUN_ALL}" == "TRUE" ]; then
 fi
 
 # Use cupid-infrastructure environment for running these scripts
-# Note: on derecho, the cesmdev module creates a python conflict
-#       by setting $PYTHONPATH; since this is conda-based we
-#       want an empty PYTHONPATH environment variable
-unset PYTHONPATH
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 
 # 1. Generate CUPiD config file
+if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
+  if [ "${CUPID_RUN_ADF}" != "TRUE" ]; then
+    echo "ERROR: CUPID_RUN_CVDP=TRUE but CUPID_RUN_ADF=${CUPID_RUN_ADF}. CVDP is run by"
+    echo "the ADF, so that combination of flags will result in CVDP not being run."
+    echo "Either set CUPID_RUN_ADF=TRUE or CUPID_RUN_CVDP=FALSE"
+    exit 1
+  fi
+  CVDP_OPT="--run-cvdp"
+else
+  CVDP_OPT=""
+fi
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
+   ${CVDP_OPT} \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
-   --adf-output-root ${PWD} \
    --cupid-example ${CUPID_EXAMPLE} \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
@@ -121,6 +142,12 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
    --cupid-remap ${CUPID_REMAP} \
+   --adf-output-root ${PWD} \
+   --ldf-output-root ${PWD} \
+   --ilamb-output-root ${PWD} \
+   --cupid-run-adf ${CUPID_RUN_ADF} \
+   --cupid-run-ldf ${CUPID_RUN_LDF} \
+   --cupid-run-ilamb ${CUPID_RUN_ILAMB}
 
 # 2. Generate ADF config file
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
@@ -158,6 +185,9 @@ fi
 
 # 6. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_ATM}" == "FALSE" ]]; then
+    echo "WARNING: Running ADF but Atmosphere component is turned off. Turn on either CUPID_RUN_ATM or CUPID_RUN_ALL to view ADF output in final webpage"
+  fi
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
@@ -172,6 +202,9 @@ fi
 
 # 8. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
+    echo "WARNING: Running ILAMB but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
+  fi
   echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME=06:00:00) before running ILAMB"
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
@@ -180,6 +213,16 @@ if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
     echo "WARNING: ILAMB_output directory already exists. You may need to clear it before running ILAMB."
   fi
   ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir ILAMB_output/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
+fi
+
+# 8. Run LDF
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
+    echo "WARNING: Running LDF but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
+  fi
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
 fi
 
 # 9. Run CUPiD and build webpage
