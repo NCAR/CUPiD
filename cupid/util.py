@@ -139,9 +139,14 @@ def setup_book(config_path, run_dir):
 
     # write table of contents file
     toc = control["book_toc"]
+    nb_category_dict = {"atm": "Atmosphere", "lnd": "Land", "ocn": "Ocean", "ice": "Sea Ice", "rof": "River Runoff", "glc": "Land Ice"}
     with open(f"{output_dir}/_toc.yml", "w+") as fid:
         yaml.dump(toc, fid, sort_keys=False)
-        # TOD0: instead of a yaml dump we should build the book here from notebook titles in compute_notebooks
+        for nb_category in control["compute_notebooks"].values():
+            fid.write(f"- caption: {nb_category_dict.get(nb_category, 'Misc')}\n")
+            fid.write("  chapters:")
+            for nb, info in nb_category.items():
+                fid.write(f"- file: {nb}\n")
 
     # read config defaults
 
