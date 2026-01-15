@@ -56,6 +56,16 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Directory where ADF will be run (None => case root)",
 )
 @click.option(
+    "--ldf-output-root",
+    default=None,
+    help="Directory where LDF will be run (None => case root)",
+)
+@click.option(
+    "--ilamb-output-root",
+    default=None,
+    help="Directory where ILAMB will be run (None => case root)",
+)
+@click.option(
     "--cupid-run-adf",
     default=None,
     help="Boolean flag to indicate whether to run ADF analysis",
