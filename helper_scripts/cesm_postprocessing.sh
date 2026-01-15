@@ -16,6 +16,7 @@ CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
+CUPID_REMAP=`./xmlquery --value CUPID_REMAP`
 CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
@@ -140,6 +141,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-remap ${CUPID_REMAP} \
    --adf-output-root ${PWD} \
    --ldf-output-root ${PWD} \
    --ilamb-output-root ${PWD} \
@@ -157,7 +159,7 @@ fi
 
 # 3. Generate ILAMB config file
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
+  ${CUPID_ROOT}/helper_scripts/generate_ilamb_config_files.py \
      --cupid-config-loc . \
      --run-type ${CUPID_RUN_TYPE} \
      --cupid-root ${CUPID_ROOT}
@@ -176,6 +178,11 @@ if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
 fi
 
+# 5. Remapping of timeseries files
+if [ "${CUPID_REMAP}" == "TRUE" ]; then
+   ${CUPID_ROOT}/cupid/run_remapping.py ${CUPID_FLAG_STRING}
+fi
+
 # 6. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_ATM}" == "FALSE" ]]; then
@@ -186,7 +193,14 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 7. Run ILAMB
+# 7. Run LDF
+if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  conda deactivate
+  conda activate ${CUPID_ANALYSIS_ENV}
+  ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
+fi
+
+# 8. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
   if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
     echo "WARNING: Running ILAMB but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"

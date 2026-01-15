@@ -55,6 +55,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default=None,
     help="Directory where ADF will be run (None => case root)",
 )
+@click.option("--cupid-remap", default=False, help="Remap with CUPiD")
 @click.option(
     "--ldf-output-root",
     default=None,
@@ -94,6 +95,7 @@ def generate_cupid_config(
     cupid_base_startdate,
     cupid_base_enddate,
     adf_output_root,
+    cupid_remap,
     ldf_output_root,
     ilamb_output_root,
     cupid_run_adf,
@@ -153,6 +155,10 @@ def generate_cupid_config(
         The end date of the base case ("YYYY-MM-DD").
 
     adf_output_root : str
+        Location where ADF output will be generated
+
+    cupid_remap : bool
+        If true, perform remapping. If false, skip remapping.
         The root directory where ADF output will be stored (defaults to case_root).
 
     ldf_output_root : str
@@ -234,6 +240,7 @@ def generate_cupid_config(
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
+    my_dict["global_params"]["regridded_output"] = cupid_remap
 
     for component in my_dict["timeseries"]:
         if (

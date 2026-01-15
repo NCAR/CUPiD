@@ -41,6 +41,14 @@
     <desc>When TRUE, CUPiD will generate web pages from the diagnostic plots</desc>
   </entry>
 
+  <entry id="CUPID_REMAP">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will remap the timeseries files</desc>
+  </entry>
   <!-- Variables that configure conda environments used by CUPiD -->
 
   <entry id="CUPID_ANALYSIS_ENV">
