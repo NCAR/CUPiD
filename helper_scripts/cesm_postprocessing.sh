@@ -26,6 +26,10 @@ CALENDAR=`./xmlquery --value CALENDAR`
 CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
 CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
 CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
+CUPID_CLIMO_END_YEAR=`./xmlquery --value CUPID_CLIMO_END_YEAR`
+CUPID_BASE_CLIMO_END_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_END_YEAR`
+CUPID_CLIMO_N_YEAR=`./xmlquery --value CUPID_CLIMO_N_YEAR`
+CUPID_BASE_CLIMO_N_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_N_YEAR`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -140,6 +144,10 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
    --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-climo-end-year ${CUPID_CLIMO_END_YEAR} \
+   --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
+   --cupid-base-climo-end-year ${CUPID_BASE_CLIMO_END_YEAR} \
+   --cupid-base-climo-n-year ${CUPID_BASE_CLIMO_N_YEAR} \
    --adf-output-root ${PWD} \
    --ldf-output-root ${PWD} \
    --ilamb-output-root ${PWD} \
