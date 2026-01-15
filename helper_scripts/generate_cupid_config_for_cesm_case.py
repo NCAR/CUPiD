@@ -93,9 +93,9 @@ def generate_cupid_config(
     cupid_enddate,
     cupid_base_startdate,
     cupid_base_enddate,
-    cupid_climo_start_year,
+    cupid_climo_end_year,
     cupid_climo_n_year,
-    cupid_base_climo_start_year,
+    cupid_base_climo_end_year,
     cupid_base_climo_n_year,
     adf_output_root,
     ldf_output_root,
@@ -156,14 +156,14 @@ def generate_cupid_config(
     cupid_base_enddate : str
         The end date of the base case ("YYYY-MM-DD").
 
-    cupid_climo_start_year : int
-        The start year of the climatology for the case being analyzed (YYYY)
+    cupid_climo_end_year : int
+        The end year of the climatology for the case being analyzed (YYYY)
 
     cupid_climo_n_year : int
         The number of years over which the climatology should run for the case being analyzed.
 
-    cupid_base_climo_start_year : int
-        The start year of the climatology for the base case (YYYY)
+    cupid_base_climo_end_year : int
+        The end year of the climatology for the base case (YYYY)
 
     cupid_base_climo_n_year : int
         The number of years over which the climatology should run for the base case.
@@ -252,14 +252,15 @@ def generate_cupid_config(
     my_dict["global_params"]["ts_dir"] = cupid_ts_dir
     my_dict["global_params"]["base_start_date"] = cupid_base_startdate
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
-    my_dict["global_params"]["climo_start_year"] = cupid_climo_start_year
-    my_dict["global_params"]["climo_end_year"] = (
-        cupid_climo_start_year + cupid_climo_n_year
+    # Run from January of start year to December of end year
+    my_dict["global_params"]["climo_start_year"] = (
+        cupid_climo_end_year - cupid_climo_n_year + 1
     )
-    my_dict["global_params"]["base_climo_start_year"] = cupid_base_climo_start_year
-    my_dict["global_params"]["base_climo_end_year"] = (
-        cupid_base_climo_start_year + cupid_base_climo_n_year
+    my_dict["global_params"]["climo_end_year"] = cupid_climo_end_year
+    my_dict["global_params"]["base_climo_start_year"] = (
+        cupid_base_climo_end_year - cupid_base_climo_n_year + 1
     )
+    my_dict["global_params"]["base_climo_end_year"] = cupid_base_climo_end_year
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:

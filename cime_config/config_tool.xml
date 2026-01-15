@@ -111,12 +111,12 @@
     <desc>Provides a numerical count for $CUPID_BASE_STOP_OPTION.</desc>
   </entry>
 
-  <entry id="CUPID_CLIMO_START_YEAR">
+  <entry id="CUPID_CLIMO_END_YEAR">
     <type>integer</type>
-    <default_value>75</default_value>
+    <default_value>100</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>Year to start climatology, eg for LDF</desc>
+    <desc>Year to end climatology, eg for LDF</desc>
   </entry>
 
   <entry id="CUPID_CLIMO_N_YEAR">
@@ -127,12 +127,12 @@
     <desc>Number of years to use for climatology, eg for LDF</desc>
   </entry>
 
-  <entry id="CUPID_BASE_CLIMO_START_YEAR">
+  <entry id="CUPID_BASE_CLIMO_END_YEAR">
     <type>integer</type>
-    <default_value>75</default_value>
+    <default_value>100</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>Year to start base case climatology, eg for LDF</desc>
+    <desc>Year to end base case climatology, eg for LDF</desc>
   </entry>
 
   <entry id="CUPID_BASE_CLIMO_N_YEAR">
