@@ -52,7 +52,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--run_dir", "-rd", default=".", help="Path to run directory where files will be created")
 @click.option("--nb_path_root", "-nb", default="../../nblibrary", help="Path to notebook directory")
 @click.option("--log_level", "-ll", default="info", help="Logging level: debug, info, warning, error (default: info)")
-@click.argument("config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks (default: config.yml)")
+@click.argument(
+    "config_path",
+    default="config.yml",
+    help="Path to the YAML configuration file containing specifications for notebooks (default: config.yml)",
+)
 def run_diagnostics(
     config_path,
     serial=False,

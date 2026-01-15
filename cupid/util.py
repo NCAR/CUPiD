@@ -91,7 +91,6 @@ def setup_logging(config_path, log_level):
     Options for log levels include debug, info, warning, and error.
     Returns logger object
     """
-    control = get_control_dict(config_path)
     # default level is info if log level is not set in config
     if log_level == "debug" or log_level == "DEBUG":
         logging.basicConfig(
@@ -139,7 +138,14 @@ def setup_book(config_path, run_dir):
 
     # write table of contents file
     toc = control["book_toc"]
-    nb_category_dict = {"atm": "Atmosphere", "lnd": "Land", "ocn": "Ocean", "ice": "Sea Ice", "rof": "River Runoff", "glc": "Land Ice"}
+    nb_category_dict = {
+        "atm": "Atmosphere",
+        "lnd": "Land",
+        "ocn": "Ocean",
+        "ice": "Sea Ice",
+        "rof": "River Runoff",
+        "glc": "Land Ice",
+    }
     with open(f"{output_dir}/_toc.yml", "w+") as fid:
         yaml.dump(toc, fid, sort_keys=False)
         for nb_category in control["compute_notebooks"].values():

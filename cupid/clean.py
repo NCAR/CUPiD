@@ -24,14 +24,13 @@ import shutil
 
 import click
 
-try:
-    import util
-except ModuleNotFoundError:
-    import cupid.util as util
-
 
 @click.command()
-@click.argument("run_dir", default=".", help="Path to run directory where computed_notebooks will be cleaned")
+@click.argument(
+    "run_dir",
+    default=".",
+    help="Path to run directory where computed_notebooks will be cleaned",
+)
 # Entry point to this script
 def clean(run_dir):
     """Cleans the contents of the "computed_notebooks" folder at the location
