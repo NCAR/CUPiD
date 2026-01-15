@@ -178,6 +178,9 @@ fi
 
 # 6. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_ATM}" == "FALSE" ]]; then
+    echo "WARNING: Running ADF but Atmosphere component is turned off. Turn on either CUPID_RUN_ATM or CUPID_RUN_ALL to view ADF output in final webpage"
+  fi
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
@@ -185,6 +188,9 @@ fi
 
 # 7. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
+    echo "WARNING: Running ILAMB but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
+  fi
   echo "WARNING: you may need to increase wallclock time (eg, ./xmlchange --subgroup case.cupid JOB_WALLCLOCK_TIME=06:00:00) before running ILAMB"
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
@@ -197,6 +203,9 @@ fi
 
 # 8. Run LDF
 if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
+  if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
+    echo "WARNING: Running LDF but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
+  fi
   conda deactivate
   conda activate ${CUPID_ANALYSIS_ENV}
   ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
