@@ -32,6 +32,11 @@ def generate_adf_config(
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
         raise KeyError(f"Can not find config.yml in {cupid_config_loc}")
 
+    helper_scripts_path = os.path.realpath(os.path.dirname(__file__))
+    adf_root = os.path.realpath(
+        os.path.join(helper_scripts_path, "..", "externals", "ADF"),
+    )
+
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
     with open(adf_template, encoding="UTF-8") as a:
@@ -253,7 +258,7 @@ def generate_adf_config(
         a_dict["diag_cvdp_info"] = cvdp_args
         a_dict["diag_cvdp_info"][
             "cvdp_codebase_loc"
-        ] = "../../externals/ADF/lib/externals/CVDP/"
+        ] = f"{adf_root}/lib/externals/CVDP/"
         # this is where CVDP code base lives in the ADF
 
         a_dict["diag_cvdp_info"]["cvdp_loc"] = os.path.join(
