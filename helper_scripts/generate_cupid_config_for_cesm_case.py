@@ -271,9 +271,9 @@ def generate_cupid_config(
     if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
         if "index" in my_dict["compute_notebooks"]["infrastructure"]:
             del my_dict["compute_notebooks"]["infrastructure"]["index"]
-        my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
-            "parameter_groups"
-        ]["none"] = {}
+        my_dict["compute_notebooks"]["infrastructure"] = {
+            "summary_tables": {"parameter_groups": {"none": {}}},
+        }
         my_dict["book_toc"]["root"] = "infrastructure/summary_tables"
         if cupid_run_adf:
             my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
