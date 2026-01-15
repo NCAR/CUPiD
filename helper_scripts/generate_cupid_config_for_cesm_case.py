@@ -313,6 +313,22 @@ def generate_cupid_config(
             "cvdp_loc"
         ] = os.path.join(adf_output_root, "CVDP_output")
 
+    if "LDF" in my_dict["compute_notebooks"].get("lnd", {}):
+        if "external_tool" not in my_dict["compute_notebooks"]["lnd"]["LDF"]:
+            my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"] = {}
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["defaults_file"] = (
+            os.path.join(
+                cupid_root,
+                "externals",
+                "LDF",
+                "lib",
+                "ldf_variable_defaults.yaml",
+            )
+        )
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["regions_file"] = (
+            os.path.join(cupid_root, "externals", "LDF", "lib", "regions_lnd.yaml")
+        )
+
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
         {},
