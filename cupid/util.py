@@ -141,6 +141,7 @@ def setup_book(config_path, run_dir):
     toc = control["book_toc"]
     with open(f"{output_dir}/_toc.yml", "w+") as fid:
         yaml.dump(toc, fid, sort_keys=False)
+        # TOD0: instead of a yaml dump we should build the book here from notebook titles in compute_notebooks
 
     # read config defaults
 

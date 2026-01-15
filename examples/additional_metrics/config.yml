@@ -145,34 +145,9 @@ compute_notebooks:
 # Jupyter Book Table of Contents #
 ##################################
 book_toc:
-
-  # See https://jupyterbook.org/en/stable/structure/configure.html for
-  # complete documentation of Jupyter book construction options
-
   format: jb-book
-
-  # All filenames are notebook filename without the .ipynb, similar to above
-
   root: infrastructure/index # root is the notebook that will be the homepage for the book
-  parts:
-
-    # Parts group notebooks into different sections in the Jupyter book
-    # table of contents, so you can organize different parts of your project.
-    # Each chapter is the name of one of the notebooks that you executed
-    # in compute_notebooks above, also without .ipynb
-
-    - caption: Ocean
-      chapters:
-          - file: ocn/Global_Ocean_Surface
-
-    - caption: Land
-      chapters:
-        - file: lnd/Global_Land_Compare_Two_Cases
-
-    - caption: Sea Ice
-      chapters:
-        - file: ice/Hemis_seaice_visual_compare_obs_lens
-        - file: ice/Hemis_seaice_visual_compare_contour
+  parts: Ocean, Land, Sea Ice
 
 #####################################
 # Keys for Jupyter Book _config.yml #
