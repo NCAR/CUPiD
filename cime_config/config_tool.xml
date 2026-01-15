@@ -280,6 +280,7 @@
     <group>cupid_run_components</group>
     <file>env_postprocessing.xml</file>
     <desc>Boolean value that determines whether or not ADF diagnostics are run</desc>
+  </entry>
 
   <entry id="CUPID_RUN_CVDP">
     <type>char</type>
