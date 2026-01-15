@@ -14,7 +14,7 @@ dependencies:
   - distributed=2025.12.0
   - docutils=0.21.2
   - future=1.0.0
-  - geocat-comp=2025.12.1
+  - geocat-comp=2025.10.01
   - geopandas=1.1.2
   - imagesize=1.4.1
   - importlib-metadata=4.13.0
