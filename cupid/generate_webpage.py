@@ -200,7 +200,7 @@ def build(config_path, github_pages_dir, name, overwrite):
                     if os.path.isdir(f"{run_dir}/{tool_name}_output"):
                         shutil.copytree(
                             f"{run_dir}/{tool_name}_output",
-                            os.path.join(html_output_path, component, tool_name),
+                            os.path.join(html_output_path, tool_name),
                         )
                     else:
                         print(f"Warning: no directory {run_dir}/{tool_name}_output")
