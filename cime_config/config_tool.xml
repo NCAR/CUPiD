@@ -282,15 +282,6 @@
     <desc>Boolean value that determines whether or not ADF diagnostics are run</desc>
   </entry>
 
-  <entry id="CUPID_RUN_CVDP">
-    <type>char</type>
-    <valid_values>TRUE,FALSE</valid_values>
-    <default_value>FALSE</default_value>
-    <group>cupid_run_components</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Boolean value that determines whether or not CVDP diagnostics are run (requires CUPID_RUN_ADF=TRUE)</desc>
-  </entry>
-
   <entry id="CUPID_RUN_LDF">
     <type>char</type>
     <valid_values>TRUE,FALSE</valid_values>
