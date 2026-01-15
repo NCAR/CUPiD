@@ -49,7 +49,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component diagnostics")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component diagnostics")
 @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component diagnostics")
-@click.argument("config_path", default="config.yml")
+@click.option("--run_dir", "-rd", default=".", help="Path to run directory where files will be created")
+@click.option("--nb_path_root", "-nb", default="../../nblibrary", help="Path to notebook directory")
+@click.argument("config_path", default="config.yml", help="Path to the YAML configuration file containing specifications for notebooks (default: config.yml)")
 def run_diagnostics(
     config_path,
     serial=False,
@@ -60,6 +62,8 @@ def run_diagnostics(
     seaice=False,
     landice=False,
     river_runoff=False,
+    run_dir=".",
+    nb_path_root="../../nblibrary"
 ):
     """
     Main engine to set up running all the notebooks.
@@ -76,7 +80,7 @@ def run_diagnostics(
     # pylint: enable=line-too-long
     # Get control structure
     control = util.get_control_dict(config_path)
-    util.setup_book(config_path)
+    util.setup_book(config_path, run_dir)
     logger = util.setup_logging(config_path)
 
     component_options = {
@@ -109,12 +113,8 @@ def run_diagnostics(
 
     # Grab paths
 
-    run_dir = os.path.realpath(os.path.expanduser(control["data_sources"]["run_dir"]))
     output_dir = run_dir + "/computed_notebooks/"
     temp_data_path = run_dir + "/temp_data"
-    nb_path_root = os.path.realpath(
-        os.path.expanduser(control["data_sources"]["nb_path_root"]),
-    )
 
     #####################################################################
     # Managing catalog-related stuff

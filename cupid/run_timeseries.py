@@ -52,6 +52,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--seaice", "-ice", is_flag=True, help="Run sea ice component timeseries")
 @click.option("--landice", "-glc", is_flag=True, help="Run land ice component timeseries")
 @click.option("--river-runoff", "-rof", is_flag=True, help="Run river runoff component timeseries")
+@click.option("--run-dir", "-rd", default=".", help="Directory to use for running CUPiD processes")
 @click.argument("config_path", default="config.yml")
 def run_timeseries(
     config_path,
@@ -62,6 +63,7 @@ def run_timeseries(
     seaice=False,
     landice=False,
     river_runoff=False,
+    run_dir=".",
 ):
     """
     Main engine to set up running all the notebooks.
@@ -77,7 +79,7 @@ def run_timeseries(
     # pylint: enable=line-too-long
     # Get control structure
     control = util.get_control_dict(config_path)
-    util.setup_book(config_path)
+    util.setup_book(config_path, run_dir)
     logger = util.setup_logging(config_path)
 
     component_options = {

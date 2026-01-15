@@ -155,7 +155,8 @@ def github_pages_args(github_pages_dir, name, overwrite):
     is_flag=True,
     help="Overwrite existing publish directory",
 )
-def build(config_path, github_pages_dir, name, overwrite):
+@click.option("--run_dir", "-rd", default=".", help="Path to run directory where files will be created")
+def build(config_path, github_pages_dir, name, overwrite, run_dir):
     """
     Build a Jupyter book based on the TOC in CONFIG_PATH. Called by ``cupid-webpage``.
 
@@ -176,8 +177,6 @@ def build(config_path, github_pages_dir, name, overwrite):
             name,
             overwrite,
         )
-
-    run_dir = control["data_sources"]["run_dir"]
 
     subprocess.run(["jupyter-book", "clean", f"{run_dir}/computed_notebooks"])
     subprocess.run(

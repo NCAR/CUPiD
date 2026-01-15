@@ -221,10 +221,6 @@ def generate_cupid_config(
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
         my_dict = yaml.safe_load(f)
 
-    my_dict["data_sources"]["nb_path_root"] = os.path.join(
-        cupid_root,
-        "nblibrary",
-    )
     my_dict["global_params"]["case_name"] = case
     my_dict["global_params"]["start_date"] = cupid_startdate
     my_dict["global_params"]["end_date"] = cupid_enddate

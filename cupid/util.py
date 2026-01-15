@@ -119,13 +119,12 @@ def setup_logging(config_path):
     return logging.getLogger(__name__)
 
 
-def setup_book(config_path):
+def setup_book(config_path, run_dir):
     """Setup run directory and output jupyter book"""
 
     control = get_control_dict(config_path)
 
     # ensure directory
-    run_dir = os.path.expanduser(control["data_sources"]["run_dir"])
     output_root = run_dir + "/computed_notebooks"
 
     os.makedirs(output_root, exist_ok=True)
@@ -165,7 +164,6 @@ def create_ploomber_nb_task(
     nb,
     info,
     cat_path,
-    nb_path_root,
     output_dir,
     global_params,
     dag,
@@ -178,7 +176,6 @@ def create_ploomber_nb_task(
         nb: key from dict of notebooks
         info: various specifications for the notebook, originally from config.yml
         use_catalog: bool specified earlier, specifying if whole collection uses a catalog or not
-        nb_path_root: from config.yml, path to folder containing template notebooks
         output_dir: set directory where computed notebooks get put
         global_params: global parameters from config.yml
         dag: ploomber DAG to add the task to
@@ -201,7 +198,7 @@ def create_ploomber_nb_task(
         default_params = info["default_params"]
 
     for key, parms in parameter_groups.items():
-        input_path = f"{nb_path_root}/{nb}.ipynb"
+        input_path = f"{info["nb_path_root"]}/{nb}.ipynb"
         output_name = f"{nb}-{key}" if key != "none" else f"{nb}"
 
         output_path = f"{output_dir}/{output_name}"
@@ -219,7 +216,7 @@ def create_ploomber_nb_task(
         pm_params = {
             "engine_name": "md_jinja",
             "jinja_data": parms,
-            "cwd": nb_path_root,
+            "cwd": info["nb_path_root"],
         }
 
         pm.engines.papermill_engines._engines["md_jinja"] = MarkdownJinjaEngine
@@ -246,7 +243,6 @@ def create_ploomber_script_task(
     script,
     info,
     cat_path,
-    nb_path_root,
     global_params,
     dag,
     dependency=None,
@@ -258,7 +254,6 @@ def create_ploomber_script_task(
         script (str): The key from the dictionary of scripts.
         info (dict): Various specifications for the notebook, originally from config.yml.
         cat_path (str or None): Path to the catalog file if using a catalog, otherwise None.
-        nb_path_root (str): Path to the folder containing template notebooks from config.yml.
         global_params (dict): Global parameters from config.yml.
         dag (ploomber.DAG): Ploomber DAG to add the task to.
         dependency (ploomber.Task, optional): The upstream task. Defaults to None.
@@ -283,7 +278,7 @@ def create_ploomber_script_task(
         default_params = info["default_params"]
 
     for key, parms in parameter_groups.items():
-        input_path = f"{nb_path_root}/{script}.py"
+        input_path = f"{info["nb_path_root"]}/{script}.py"
         output_name = f"{script}-{key}" if key != "none" else f"{script}"
 
         # output_path = f"{output_dir}/{output_name}"

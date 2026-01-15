@@ -1,20 +1,5 @@
 ################## SETUP ##################
 
-################
-# Data Sources #
-################
-data_sources:
-    # run_dir is the path to the folder you want
-    ### all the files associated with this configuration
-    ### to be created in
-    run_dir: .
-
-    # nb_path_root is the path to the folder that cupid will
-    ### look for your template notebooks in. It doesn't have to
-    ### be inside run_dir, or be specific to this project, as
-    ### long as the notebooks are there
-    nb_path_root: ../../nblibrary
-
 ######################
 # Computation Config #
 ######################
@@ -126,7 +111,7 @@ compute_notebooks:
   # types of notebooks are provided.
 
   # The first key (here infrastructure) is the name of the
-  # notebook from nb_path_root, minus the .ipynb
+  # notebook minus the .ipynb
 
     infrastructure:
       index:
