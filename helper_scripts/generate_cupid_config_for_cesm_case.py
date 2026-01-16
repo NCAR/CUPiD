@@ -51,6 +51,26 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="CUPiD base case end date",
 )
 @click.option(
+    "--cupid-climo-end-year",
+    default=100,
+    help="CUPiD climo end year for LDF",
+)
+@click.option(
+    "--cupid-climo-n-year",
+    default=20,
+    help="Length of climatology for LDF",
+)
+@click.option(
+    "--cupid-base-climo-end-year",
+    default=100,
+    help="CUPiD climo base case end year for LDF",
+)
+@click.option(
+    "--cupid-base-climo-n-year",
+    default=20,
+    help="Length of base case climatology for LDF",
+)
+@click.option(
     "--adf-output-root",
     default=None,
     help="Directory where ADF will be run (None => case root)",
@@ -254,13 +274,13 @@ def generate_cupid_config(
     my_dict["global_params"]["base_end_date"] = cupid_base_enddate
     # Run from January of start year to December of end year
     my_dict["global_params"]["climo_start_year"] = (
-        cupid_climo_end_year - cupid_climo_n_year + 1
+        int(cupid_climo_end_year) - int(cupid_climo_n_year) + 1
     )
-    my_dict["global_params"]["climo_end_year"] = cupid_climo_end_year
+    my_dict["global_params"]["climo_end_year"] = int(cupid_climo_end_year)
     my_dict["global_params"]["base_climo_start_year"] = (
-        cupid_base_climo_end_year - cupid_base_climo_n_year + 1
+        int(cupid_base_climo_end_year) - int(cupid_base_climo_n_year) + 1
     )
-    my_dict["global_params"]["base_climo_end_year"] = cupid_base_climo_end_year
+    my_dict["global_params"]["base_climo_end_year"] = int(cupid_base_climo_end_year)
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
