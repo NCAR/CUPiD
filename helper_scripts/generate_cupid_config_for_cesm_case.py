@@ -50,7 +50,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="0101-01-01",
     help="CUPiD base case end date",
 )
-
 @click.option(
     "--cupid-climo-end-year",
     default=100,
