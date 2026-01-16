@@ -50,6 +50,27 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="0101-01-01",
     help="CUPiD base case end date",
 )
+
+@click.option(
+    "--cupid-climo-end-year",
+    default="100",
+    help="CUPiD climo end year for LDF",
+)
+@click.option(
+    "--cupid-climo-n-year",
+    default="20",
+    help="Length of climatology for LDF",
+)
+@click.option(
+    "--cupid-base-climo-end-year",
+    default="100",
+    help="CUPiD climo base case end year for LDF",
+)
+@click.option(
+    "--cupid-base-climo-n-year",
+    default="20",
+    help="Length of base case climatology for LDF",
+)
 @click.option(
     "--adf-output-root",
     default=None,
