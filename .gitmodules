@@ -1,9 +1,17 @@
 [submodule "externals/ADF"]
-	path = externals/ADF
-	url = https://github.com/NCAR/ADF.git
+    path = externals/ADF
+    url = https://github.com/NCAR/ADF.git
+[submodule "externals/ILAMB"]
+    path = externals/ILAMB
+    url = https://github.com/rubisco-sfa/ILAMB.git
+    branch = v2.7.2
+[submodule "externals/LDF"]
+    path = externals/LDF
+    url = https://github.com/NCAR/ADF
+    branch = clm-diags
 [submodule "externals/mom6-tools"]
-	path = externals/mom6-tools
-	url = https://github.com/NCAR/mom6-tools.git
+    path = externals/mom6-tools
+    url = https://github.com/NCAR/mom6-tools.git
 [submodule "externals/ctsm_postprocessing"]
-	path = externals/ctsm_postprocessing
-	url = git@github.com:samsrabin/ctsm_postprocessing.git
+    path = externals/ctsm_postprocessing
+    url = git@github.com:samsrabin/ctsm_postprocessing.git

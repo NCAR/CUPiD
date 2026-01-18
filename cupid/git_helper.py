@@ -1,6 +1,7 @@
 """
 Class useful for git stuff including publishing a git page for sharing CUPiD.
 """
+
 from __future__ import annotations
 
 import os

@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/xsl" href="definitions_variables.xsl" ?>
+
+<entry_id version="3.0">
+
+  <!-- Variables that configure where to find CUPiD which part(s) of CUPiD are run -->
+
+  <entry id="CUPID_ROOT">
+    <type>char</type>
+    <default_value>$SRCROOT/tools/CUPiD</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Location of CUPiD for CESM workflow</desc>
+  </entry>
+
+  <entry id="CUPID_GEN_TIMESERIES">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>TRUE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will generate time series files from history output</desc>
+  </entry>
+
+  <entry id="CUPID_GEN_DIAGNOSTICS">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>TRUE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will generate diagnostic plots</desc>
+  </entry>
+
+  <entry id="CUPID_GEN_HTML">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>TRUE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will generate web pages from the diagnostic plots</desc>
+  </entry>
+
+  <!-- Variables that configure conda environments used by CUPiD -->
+
+  <entry id="CUPID_ANALYSIS_ENV">
+    <type>char</type>
+    <default_value>cupid-analysis</default_value>
+    <group>cupid_environments</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Conda environment to use when running CUPiD notebooks</desc>
+  </entry>
+
+  <entry id="CUPID_INFRASTRUCTURE_ENV">
+    <type>char</type>
+    <default_value>cupid-infrastructure</default_value>
+    <group>cupid_environments</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Conda environment to use when running CUPiD tools</desc>
+  </entry>
+
+  <!-- Variables that define what parts of the case(s) are analyzed -->
+
+  <entry id="CUPID_STARTDATE">
+    <type>char</type>
+    <default_value>0001-01-01</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>First year of output to include in CUPiD analysis. Format YYYY-MM-DD.</desc>
+  </entry>
+
+  <entry id="CUPID_STOP_OPTION">
+    <type>char</type>
+    <default_value>nyears</default_value>
+    <valid_values>ndays,nmonths,nyears</valid_values>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Sets the portion of output to include in CUPiD analysis, along with STOP_N.</desc>
+  </entry>
+
+  <entry id="CUPID_STOP_N">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Provides a numerical count for $CUPID_STOP_OPTION.</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_STARTDATE">
+    <type>char</type>
+    <default_value>0001-01-01</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>First date of baseline output to include in CUPiD analysis. Format YYYY-MM-DD.</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_STOP_OPTION">
+    <type>char</type>
+    <default_value>nyears</default_value>
+    <valid_values>ndays,nmonths,nyears</valid_values>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Sets the portion of base case output to include in CUPiD analysis, along with STOP_N.</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_STOP_N">
+    <type>integer</type>
+    <default_value>100</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Provides a numerical count for $CUPID_BASE_STOP_OPTION.</desc>
+  </entry>
+
+  <entry id="CUPID_CLIMO_END_YEAR">
+    <type>integer</type>
+    <default_value>100</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Year to end climatology, eg for LDF</desc>
+  </entry>
+
+  <entry id="CUPID_CLIMO_N_YEAR">
+    <type>integer</type>
+    <default_value>25</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years to use for climatology, eg for LDF</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_CLIMO_END_YEAR">
+    <type>integer</type>
+    <default_value>100</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Year to end base case climatology, eg for LDF</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_CLIMO_N_YEAR">
+    <type>integer</type>
+    <default_value>25</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years to use for base case climatology, eg for LDF</desc>
+  </entry>
+
+  <entry id="CUPID_BASELINE_CASE">
+    <type>char</type>
+    <default_value>b.e23_alpha17f.BLT1850.ne30_t232.092</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Baseline case to use in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_BASELINE_ROOT">
+    <type>char</type>
+    <default_value>$DOUT_S_ROOT/..</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Baseline case root to use in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_TS_DIR">
+    <type>char</type>
+    <default_value>$DOUT_S_ROOT/..</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Timeseries directory for baseline case to use in generating ts. Change this in the case of directory permission issues to eg, your scratch directory</desc>
+  </entry>
+
+  <entry id="CUPID_EXAMPLE">
+    <type>char</type>
+    <default_value>key_metrics</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Example to use in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_TYPE">
+    <type>char</type>
+    <valid_values>BGC,SP</valid_values>
+    <default_value>BGC</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Type of CTSM run: either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)</desc>
+  </entry>
+
+  <!-- Variables that define which components are analyzed (and whether analysis is parallelized) -->
+
+  <entry id="CUPID_NTASKS">
+    <type>integer</type>
+    <default_value>1</default_value>
+    <group>cupid_run_components</group>
+    <file>env_mach_pes.xml</file>
+    <desc>Number of tasks used in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_MEM_PER_TASK">
+    <type>integer</type>
+    <default_value>$MEM_PER_TASK</default_value>
+    <group>cupid_run_components</group>
+    <file>env_mach_pes.xml</file>
+    <desc>Memory per task to use for postprocessing, units are specified in config_batch.xml</desc>
+  </entry>
+
+  <entry id="CUPID_TASKS_PER_NODE">
+    <type>integer</type>
+    <default_value>$MAX_MPITASKS_PER_NODE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_mach_pes.xml</file>
+    <desc>Number of mpi tasks per node used in CUPiD analysis</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ALL">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>TRUE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not diagnostics for all components are run</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ATM">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ATM diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_OCN">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not OCN diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_LND">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not LND diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ICE">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ICE diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ROF">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ROF diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_GLC">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not GLC diagnostics are run (if CUPID_RUN_ALL is FALSE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ADF">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ADF diagnostics are run</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_CVDP">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not CVDP diagnostics are run (requires CUPID_RUN_ADF=TRUE)</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_LDF">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not LDF diagnostics are run</desc>
+  </entry>
+
+  <entry id="CUPID_RUN_ILAMB">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_run_components</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Boolean value that determines whether or not ILAMB diagnostics are run</desc>
+  </entry>
+
+  <help>
+    =========================================
+    Configuring CUPiD Postprocessing
+    =========================================
+  </help>
+
+</entry_id>

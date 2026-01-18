@@ -1,4 +1,11 @@
 repos:
+  - repo: local
+    hooks:
+      - id: numeric-execution-count
+        name: numeric-execution-count
+        entry: bash -c '! (find nblibrary -name "*.ipynb" | xargs grep -l "execution_count.*[0-9]" && echo "ERROR need to clean notebooks listed above")'
+        language: system
+        pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
@@ -14,22 +21,15 @@ repos:
     hooks:
       - id: black-jupyter
 
-  - repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.12.0
-    hooks:
-    -   id: reorder-python-imports
-        args: [--py38-plus, --add-import, 'from __future__ import annotations']
-
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v3.1.0
     hooks:
     -   id: add-trailing-comma
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.2
+    rev: v3.21.2
     hooks:
     -   id: pyupgrade
-        args: [--py38-plus]
 
   - repo: https://github.com/PyCQA/flake8
     rev: 7.0.0

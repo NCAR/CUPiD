@@ -1,6 +1,7 @@
 """
 Timeseries generation tool adapted from ADF for general CUPiD use.
 """
+
 # ++++++++++++++++++++++++++++++
 # Import standard python modules
 # ++++++++++++++++++++++++++++++
@@ -24,6 +25,34 @@ def call_ncrcat(cmd):
     return subprocess.run(cmd, shell=False)
 
 
+def fix_permissions(
+    filepath,
+    file_mode,
+    dir_mode,
+    file_gid,
+    dir_gid,
+):
+    """Fix file and directory permissions and groups"""
+    os.chmod(
+        filepath,
+        file_mode,
+    )  # change permissions to group specified in config file, eg rw for all
+    os.chown(
+        filepath,
+        -1,
+        file_gid,
+    )  # change group to group specified in config file, eg, 'cesm' gid 1017
+    dirpath = ""
+    for segment in filepath.split("/")[:-1]:
+        dirpath = dirpath + "/" + segment
+    os.chmod(
+        dirpath,
+        dir_mode,
+    )  # This changes the tseries directory permission multiple times
+    #    if multiple files are in same directory, so efficiency could certainly be improved
+    os.chown(dirpath, -1, dir_gid)
+
+
 def create_time_series(
     component,
     diag_var_list,
@@ -40,9 +69,13 @@ def create_time_series(
     num_procs,
     serial,
     logger,
+    file_mode,
+    dir_mode,
+    file_gid,
+    dir_gid,
 ):
     """
-    Generate time series versions of the history file data.
+    Generate time series versions of the history file data. Called by ``cupid-timeseries``.
 
     Args
     ----
@@ -65,9 +98,9 @@ def create_time_series(
          check if time series files already exist
      - overwrite_ts: list, boolean
          check if existing time series files will bew overwritten
-     - start_years: list, str or int
+     - start_years: list of ints
          first year for desired range of years
-     - end_years: list, str or int
+     - end_years: list of ints
          last year for desired range of years
      - height_dim: str
          name of height dimension for given component, eg 'lev'
@@ -89,6 +122,7 @@ def create_time_series(
     logger.info(f"\n  Generating {component} time series files...")
 
     # Loop over cases:
+    list_of_files = []
     for case_idx, case_name in enumerate(case_names):
         # Check if particular case should be processed:
         if ts_done[case_idx]:
@@ -118,8 +152,8 @@ def create_time_series(
         # End if
 
         # Check if history files actually exist. If not then kill script:
-        if not list(starting_location.glob("*" + hist_str + ".*.nc")):
-            emsg = f"No history *{hist_str}.*.nc files found in '{starting_location}'."
+        if not list(starting_location.glob("*." + hist_str + ".*.nc")):
+            emsg = f"No history *.{hist_str}.*.nc files found in '{starting_location}'."
             emsg += " Script is ending here."
             raise FileNotFoundError(emsg)
         # End if
@@ -131,7 +165,7 @@ def create_time_series(
         for year in range(start_year, end_year + 1):
             # Add files to main file list:
             for fname in starting_location.glob(
-                f"*{hist_str}.*{str(year).zfill(4)}*.nc",
+                f"*.{hist_str}.*{str(year).zfill(4)}*.nc",
             ):
                 files_list.append(fname)
             # End for
@@ -240,7 +274,7 @@ def create_time_series(
                     )
                     continue
                 if (
-                    var in derive_vars.keys()
+                    var in derive_vars
                 ):  # TODO: dictionary implementation needs to be fixed with yaml file
                     constit_list = derive_vars[var]
                     for constit in constit_list:
@@ -326,6 +360,8 @@ def create_time_series(
                 + ["-o", ts_outfil_str]
             )
 
+            list_of_files.append(ts_outfil_str)
+
             # Add to command list for use in multi-processing pool:
             list_of_commands.append(cmd)
 
@@ -350,6 +386,10 @@ def create_time_series(
     # End cases loop
 
     # Notify user that script has ended:
+
+    for file_i in list_of_files:
+        fix_permissions(file_i, file_mode, dir_mode, file_gid, dir_gid)
+
     logger.info(
         f"  ... {component} time series file generation has finished successfully.",
     )

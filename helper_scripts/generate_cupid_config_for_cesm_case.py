@@ -1,52 +1,130 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import os
 import sys
 
+import click
 import yaml
 
-
-def _parse_args():
-    """Parse command line arguments"""
-
-    parser = argparse.ArgumentParser(
-        description="Generate config.yml based on an existing CUPID example",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-
-    # Command line argument for location of CESM source code (required)
-    parser.add_argument(
-        "--cesm-root",
-        action="store",
-        dest="cesm_root",
-        required=True,
-        help="Location of CESM source code",
-    )
-
-    # Command line argument for CUPiD example from which to get config.yml
-    parser.add_argument(
-        "--cupid-example",
-        action="store",
-        dest="cupid_example",
-        default="key_metrics",
-        help="CUPiD example to use as template for config.yml",
-    )
-
-    # Command line argument location of CESM case directory
-    parser.add_argument(
-        "--case-root",
-        action="store",
-        dest="case_root",
-        default=os.getcwd(),
-        help="CESM case directory",
-    )
-
-    return parser.parse_args()
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
-def generate_cupid_config(case_root, cesm_root, cupid_example):
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option("--cesm-root", required=True, help="Location of CESM source code")
+@click.option("--case-root", default=os.getcwd(), help="CESM case directory")
+@click.option(
+    "--cupid-root",
+    default=None,
+    help="CUPiD directory (None => CESM_ROOT/tools/CUPiD)",
+)
+@click.option(
+    "--cupid-example",
+    default="key_metrics",
+    help="CUPiD example to use as template for config.yml",
+)
+@click.option(
+    "--cupid-baseline-case",
+    default="b.e23_alpha17f.BLT1850.ne30_t232.092",
+    help="Base case name",
+)
+@click.option(
+    "--cupid-baseline-root",
+    default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+    help="Base case root directory",
+)
+@click.option(
+    "--cupid-ts-dir",
+    default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
+    help="Timeseries directory root; eg, if permission issues, use your scratch",
+)
+@click.option("--cupid-startdate", default="0001-01-01", help="CUPiD case start date")
+@click.option("--cupid-enddate", default="0101-01-01", help="CUPiD case end date")
+@click.option(
+    "--cupid-base-startdate",
+    default="0001-01-01",
+    help="CUPiD base case start date",
+)
+@click.option(
+    "--cupid-base-enddate",
+    default="0101-01-01",
+    help="CUPiD base case end date",
+)
+@click.option(
+    "--cupid-climo-end-year",
+    default=100,
+    help="CUPiD climo end year for LDF",
+)
+@click.option(
+    "--cupid-climo-n-year",
+    default=20,
+    help="Length of climatology for LDF",
+)
+@click.option(
+    "--cupid-base-climo-end-year",
+    default=100,
+    help="CUPiD climo base case end year for LDF",
+)
+@click.option(
+    "--cupid-base-climo-n-year",
+    default=20,
+    help="Length of base case climatology for LDF",
+)
+@click.option(
+    "--adf-output-root",
+    default=None,
+    help="Directory where ADF will be run (None => case root)",
+)
+@click.option(
+    "--ldf-output-root",
+    default=None,
+    help="Directory where LDF will be run (None => case root)",
+)
+@click.option(
+    "--ilamb-output-root",
+    default=None,
+    help="Directory where ILAMB will be run (None => case root)",
+)
+@click.option(
+    "--cupid-run-adf",
+    default=None,
+    help="Boolean flag to indicate whether to run ADF analysis",
+)
+@click.option(
+    "--cupid-run-ldf",
+    default=None,
+    help="Boolean flag to indicate whether to run LDF analysis",
+)
+@click.option(
+    "--cupid-run-ilamb",
+    default=None,
+    help="Boolean flag to indicate whether to run ILAMB analysis",
+)
+@click.option("--run-cvdp", is_flag=True, default=False, help="Run CVDP diagnostics")
+def generate_cupid_config(
+    case_root,
+    cesm_root,
+    cupid_root,
+    cupid_example,
+    cupid_baseline_case,
+    cupid_baseline_root,
+    cupid_ts_dir,
+    cupid_startdate,
+    cupid_enddate,
+    cupid_base_startdate,
+    cupid_base_enddate,
+    cupid_climo_end_year,
+    cupid_climo_n_year,
+    cupid_base_climo_end_year,
+    cupid_base_climo_n_year,
+    adf_output_root,
+    ldf_output_root,
+    ilamb_output_root,
+    cupid_run_adf,
+    cupid_run_ldf,
+    cupid_run_ilamb,
+    run_cvdp,
+):
     """
     Generate a CUPiD `config.yml` file based on information from a CESM case and
     a specific CUPiD example configuration (such as 'key metrics').
@@ -68,11 +146,68 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         The root directory of the CESM case from which case-specific data will be retrieved.
 
     cesm_root : str
-        The root directory of the CESM installation, where CIME scripts and CUPiD examples reside.
+        The root directory of the CESM installation, where CIME scripts reside.
+
+    cupid_root : str
+        The root directory where CUPiD examples reside (defaults to subdirectory of cesm_root).
 
     cupid_example : str
         The name of a CUPiD example (e.g., 'key metrics') to base the configuration file on.
         Must be a valid subdirectory within the CUPiD examples directory.
+
+    cupid_baseline_case : str
+        The name of the base case.
+
+    cupid_baseline_root : str
+        The root directory of the base case.
+
+    cupid_ts_dir : str
+        The root directory for the timeseries.
+
+    cupid_startdate : str
+        The start date of the case being analyzed ("YYYY-MM-DD").
+
+    cupid_enddate : str
+        The end date of the case being analyzed ("YYYY-MM-DD").
+
+    cupid_base_startdate : str
+        The start date of the base case ("YYYY-MM-DD").
+
+    cupid_base_enddate : str
+        The end date of the base case ("YYYY-MM-DD").
+
+    cupid_climo_end_year : int
+        The end year of the climatology for the case being analyzed (YYYY)
+
+    cupid_climo_n_year : int
+        The number of years over which the climatology should run for the case being analyzed.
+
+    cupid_base_climo_end_year : int
+        The end year of the climatology for the base case (YYYY)
+
+    cupid_base_climo_n_year : int
+        The number of years over which the climatology should run for the base case.
+
+    adf_output_root : str
+        The root directory where ADF output will be stored (defaults to case_root).
+
+    ldf_output_root : str
+        The root directory where LDF output will be stored (defaults to case_root).
+
+    ilamb_output_root : str
+        The root directory where ILAMB output will be stored (defaults to case_root).
+
+    run_cvdp : Bool
+        Boolean flag to indicate whether to run CVDP analysis.
+
+    cupid_run_adf : Bool
+        Boolean flag to indicate whether to run ADF analysis.
+
+    cupid_run_ldf : Bool
+        Boolean flag to indicate whether to run LDF analysis.
+
+    cupid_run_ilamb : Bool
+        Boolean flag to indicate whether to run ILAMB analysis.
 
     Raises:
     -------
@@ -89,8 +224,17 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
     sys.path.append(os.path.join(cesm_root, "cime"))
     from CIME.case import Case
 
+    # Is adf_output_root provided?
+    if adf_output_root is None:
+        adf_output_root = case_root
+    if ldf_output_root is None:
+        ldf_output_root = case_root
+    if ilamb_output_root is None:
+        ilamb_output_root = case_root
+
     # Is cupid_example a valid value?
-    cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
+    if cupid_root is None:
+        cupid_root = os.path.join(cesm_root, "tools", "CUPiD")
     cupid_examples = os.path.join(cupid_root, "examples")
     valid_examples = [
         example
@@ -107,44 +251,131 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         case = cesm_case.get_value("CASE")
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
 
-    # Additional options we need to get from env_cupid.xml
-    base_case = "b.e23_alpha17f.BLT1850.ne30_t232.092"
-    nyears = 1
-    start_date = "0001-01-01"
-    end_date = f"{nyears+1:04d}-01-01"
-    climo_nyears = nyears
-    base_case_output_dir = "/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing"
-    base_nyears = 100
-    base_end_date = f"{base_nyears+1:04d}-01-01"
+    # TODO: these sea-ice specific vars (and some glc vars) should also be added as environment vars
+    # See https://github.com/NCAR/CUPiD/issues/189
+    climo_nyears = 35
     base_climo_nyears = 40
 
+    # --------------------------------------------------------------------------------
     with open(os.path.join(cupid_root, "examples", cupid_example, "config.yml")) as f:
         my_dict = yaml.safe_load(f)
 
     my_dict["data_sources"]["nb_path_root"] = os.path.join(
-        cesm_root,
-        "tools",
-        "CUPiD",
+        cupid_root,
         "nblibrary",
     )
     my_dict["global_params"]["case_name"] = case
-    my_dict["global_params"]["start_date"] = start_date
-    my_dict["global_params"]["end_date"] = end_date
-    my_dict["global_params"]["base_case_name"] = base_case
-    my_dict["global_params"]["base_case_output_dir"] = base_case_output_dir
-    my_dict["global_params"]["base_end_date"] = base_end_date
-    my_dict["timeseries"]["case_name"] = [case, base_case]
+    my_dict["global_params"]["start_date"] = cupid_startdate
+    my_dict["global_params"]["end_date"] = cupid_enddate
+    my_dict["global_params"]["base_case_name"] = cupid_baseline_case
+    my_dict["global_params"]["base_case_output_dir"] = cupid_baseline_root
+    my_dict["global_params"]["ts_dir"] = cupid_ts_dir
+    my_dict["global_params"]["base_start_date"] = cupid_base_startdate
+    my_dict["global_params"]["base_end_date"] = cupid_base_enddate
+    # Run from January of start year to December of end year
+    my_dict["global_params"]["climo_start_year"] = (
+        int(cupid_climo_end_year) - int(cupid_climo_n_year) + 1
+    )
+    my_dict["global_params"]["climo_end_year"] = int(cupid_climo_end_year)
+    my_dict["global_params"]["base_climo_start_year"] = (
+        int(cupid_base_climo_end_year) - int(cupid_base_climo_n_year) + 1
+    )
+    my_dict["global_params"]["base_climo_end_year"] = int(cupid_base_climo_end_year)
+    my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
         if (
             isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
         ):
-            my_dict["timeseries"][component]["end_years"] = [nyears, base_nyears]
-    if "link_to_ADF" in my_dict["compute_notebooks"].get("atm", {}):
-        my_dict["compute_notebooks"]["atm"]["link_to_ADF"]["parameter_groups"]["none"][
+            # Assumption that end_year is YYYY-01-01, so we want end_year to be YYYY-1
+            cupid_end_year = int(cupid_enddate.split("-")[0]) - 1
+            cupid_base_end_year = int(cupid_base_enddate.split("-")[0]) - 1
+            my_dict["timeseries"][component]["end_years"] = [
+                cupid_end_year,
+                cupid_base_end_year,
+            ]
+        if (
+            isinstance(my_dict["timeseries"][component], dict)
+            and "start_years" in my_dict["timeseries"][component]
+        ):
+            cupid_start_year = int(cupid_startdate.split("-")[0])
+            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+            my_dict["timeseries"][component]["start_years"] = [
+                cupid_start_year,
+                cupid_base_start_year,
+            ]
+
+    if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
+        if "index" in my_dict["compute_notebooks"]["infrastructure"]:
+            del my_dict["compute_notebooks"]["infrastructure"]["index"]
+        my_dict["compute_notebooks"]["infrastructure"] = {
+            "summary_tables": {"parameter_groups": {"none": {}}},
+        }
+        my_dict["book_toc"]["root"] = "infrastructure/summary_tables"
+        if cupid_run_adf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["adf_root"] = f"{adf_output_root}/ADF_output/"
+        if cupid_run_ldf:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ldf_root"] = f"{ldf_output_root}/LDF_output/"
+        if cupid_run_ilamb:
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_root"] = f"{ilamb_output_root}/ILAMB_output/"
+            my_dict["compute_notebooks"]["infrastructure"]["summary_tables"][
+                "parameter_groups"
+            ]["none"]["ilamb_vars_highlight"] = [
+                "Gross Primary Productivity",
+                "Runoff",
+                "Snow Water Equivalent",
+                "Surface Relative Humidity",
+                "Precipitation",
+            ]
+
+    if "ADF" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["ADF"]["parameter_groups"]["none"][
             "adf_root"
-        ] = os.path.join(case_root, "ADF_output")
+        ] = os.path.join(adf_output_root, "ADF_output")
+        if "diag_cvdp_info" in my_dict["compute_notebooks"]["atm"]["ADF"].get(
+            "external_tool",
+            {},
+        ):
+            my_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
+                "diag_cvdp_info"
+            ]["cvdp_run"] = run_cvdp
+    if "CVDP" in my_dict["compute_notebooks"].get("atm", {}):
+        my_dict["compute_notebooks"]["atm"]["CVDP"]["parameter_groups"]["none"][
+            "cvdp_loc"
+        ] = os.path.join(adf_output_root, "CVDP_output")
+
+    if "LDF" in my_dict["compute_notebooks"].get("lnd", {}):
+        if "external_tool" not in my_dict["compute_notebooks"]["lnd"]["LDF"]:
+            my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"] = {}
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["defaults_file"] = (
+            os.path.join(
+                cupid_root,
+                "externals",
+                "LDF",
+                "lib",
+                "ldf_variable_defaults.yaml",
+            )
+        )
+        my_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"]["regions_file"] = (
+            os.path.join(cupid_root, "externals", "LDF", "lib", "regions_lnd.yaml")
+        )
 
     if "Greenland_SMB_visual_compare_obs" in my_dict["compute_notebooks"].get(
         "glc",
@@ -156,6 +387,13 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
         my_dict["compute_notebooks"]["glc"]["Greenland_SMB_visual_compare_obs"][
             "parameter_groups"
         ]["none"]["base_climo_nyears"] = base_climo_nyears
+
+    # Regional Ocean Open Boundary Conditions needs access to ocean input directory
+    # The ocean input directory is (hackily) accessible through the case root directory
+    if "Regional_Ocean_OBC" in my_dict["compute_notebooks"].get("ocn", {}):
+        my_dict["compute_notebooks"]["ocn"]["Regional_Ocean_OBC"]["parameter_groups"][
+            "none"
+        ]["case_root"] = case_root
 
     # replace with environment variable
     my_dict["global_params"]["CESM_output_dir"] = os.path.dirname(dout_s_root)
@@ -175,5 +413,4 @@ def generate_cupid_config(case_root, cesm_root, cupid_example):
 
 
 if __name__ == "__main__":
-    args = vars(_parse_args())
-    generate_cupid_config(**args)
+    generate_cupid_config()
