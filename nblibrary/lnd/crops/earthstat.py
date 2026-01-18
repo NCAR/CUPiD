@@ -206,7 +206,7 @@ class EarthStat:
                 earthstat_dir,
                 f"{earthstat_in_res}_clm_regrid_ds.nc",
             )
-            clm_in_ds = xr.open_dataset(clm_in_file)
+            clm_in_ds = xr.open_dataset(clm_in_file, decode_timedelta=False)
         clm_in_landarea = get_clm_landarea(clm_in_ds)
 
         for res in missing_res:
@@ -290,7 +290,7 @@ class EarthStat:
         # Open file
         print(f"Importing EarthStat yield maps for resolution {res}...")
         print(earthstat_file)
-        ds = xr.open_dataset(earthstat_file)
+        ds = xr.open_dataset(earthstat_file, decode_timedelta=False)
 
         # Drop variables we don't need
         vars_to_drop = [v for v in ds if v not in NEEDED_VARS]
