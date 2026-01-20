@@ -4,11 +4,13 @@ Utility functions for creating static HTML viewers with Bokeh controls.
 This module provides functions to create interactive HTML pages with dropdown
 menus and radio button groups for viewing figures.
 """
+
 from __future__ import annotations
 
 import base64
 import re
 from pathlib import Path
+from typing import Any
 
 from bokeh.layouts import column
 from bokeh.layouts import row
@@ -35,8 +37,52 @@ IMAGE_MAX_HEIGHT = 800  # Maximum height for displayed images in pixels
 RADIO_BUTTON_WIDTH = 200  # Width of radio button groups in pixels
 
 
-def build_figure_paths(output_dir, controls, current_combo=None):
-    """Recursively build all combinations of control options."""
+def build_figure_paths(
+    output_dir: str,
+    controls: list[dict[str, Any]],
+    current_combo: list[str] | None = None,
+) -> dict[tuple[str, ...], str]:
+    """Recursively build all combinations of control options and their file paths.
+
+    This function generates a dictionary mapping all possible combinations of
+    control options (from dropdowns and radio buttons) to their corresponding
+    figure file paths. It uses recursion to build the Cartesian product of all
+    control options.
+
+    Parameters
+    ----------
+    output_dir : str
+        Directory containing the figure files.
+    controls : list of dict
+        List of control specifications. Each dict should contain:
+        - 'type': str, either 'dropdown' or 'radio'
+        - 'title': str, the title/label for the control
+        - 'options': list of str, the options available
+        - 'default': str, the default selected value
+    current_combo : list of str, optional
+        Current combination being built (used internally for recursion).
+        Default is None, which initializes to an empty list.
+
+    Returns
+    -------
+    dict
+        Dictionary mapping tuples of option combinations to file paths.
+        Keys are tuples of strings (one element per control, in order).
+        Values are strings representing file paths in the format:
+        "{output_dir}/{sanitized_option1}_{sanitized_option2}_..._{sanitized_optionN}.png"
+
+    Examples
+    --------
+    >>> controls = [
+    ...     {'type': 'dropdown', 'title': 'Variable', 'options': ['Temp', 'Precip'],
+    ...      'default': 'Temp'},
+    ...     {'type': 'radio', 'title': 'Season', 'options': ['Summer', 'Winter'],
+    ...      'default': 'Summer'}
+    ... ]
+    >>> paths = build_figure_paths('figures', controls)
+    >>> paths[('Temp', 'Summer')]
+    'figures/temp_summer.png'
+    """
     if current_combo is None:
         current_combo = []
 
@@ -56,10 +102,12 @@ def build_figure_paths(output_dir, controls, current_combo=None):
     return result
 
 
-def sanitize_filename(name):
+def sanitize_filename(name: str) -> str:
     """Convert a figure name to a valid Unix filename prefix.
 
     Lowercases the name and replaces spaces and illegal characters with underscores.
+    Multiple consecutive underscores are collapsed to a single underscore, and
+    leading/trailing underscores are removed.
 
     Parameters
     ----------
@@ -70,6 +118,13 @@ def sanitize_filename(name):
     -------
     str
         The sanitized filename prefix.
+
+    Examples
+    --------
+    >>> sanitize_filename("Temperature (°C)")
+    'temperature_c'
+    >>> sanitize_filename("  Multiple   Spaces  ")
+    'multiple_spaces'
     """
     # Lowercase the name
     name = name.lower()
@@ -82,8 +137,12 @@ def sanitize_filename(name):
     return name
 
 
-def image_to_data_uri(image_path):
+def image_to_data_uri(image_path: str | Path) -> str:
     """Convert an image file to a base64 data URI.
+
+    Reads an image file and converts it to a base64-encoded data URI that can
+    be embedded directly in HTML. The MIME type is automatically determined
+    from the file extension.
 
     Parameters
     ----------
@@ -93,7 +152,17 @@ def image_to_data_uri(image_path):
     Returns
     -------
     str
-        Base64-encoded data URI for the image.
+        Base64-encoded data URI for the image in the format:
+        "data:{mime_type};base64,{encoded_data}"
+
+    Notes
+    -----
+    Supported image formats and their MIME types:
+    - .png: image/png
+    - .jpg, .jpeg: image/jpeg
+    - .gif: image/gif
+    - .svg: image/svg+xml
+    - Other extensions default to image/png
     """
     path = Path(image_path)
     with open(path, "rb") as f:
@@ -113,15 +182,20 @@ def image_to_data_uri(image_path):
 
 
 def create_static_html(
-    dropdown_specs=None,
-    radio_specs=None,
-    output_filename="figure_viewer.html",
-    output_dir="matplotlib_figures",
-    show_in_notebook=False,
-    embed_images=None,
-    image_max_height=IMAGE_MAX_HEIGHT,
-):
+    dropdown_specs: list[dict[str, Any]] | None = None,
+    radio_specs: list[dict[str, Any]] | None = None,
+    output_filename: str = "figure_viewer.html",
+    output_dir: str = "matplotlib_figures",
+    show_in_notebook: bool = False,
+    embed_images: bool | None = None,
+    image_max_height: int = IMAGE_MAX_HEIGHT,
+) -> None:
     """Create a static HTML file with Bokeh dropdown and radio button controls.
+
+    This function creates an interactive HTML viewer for displaying multiple figures
+    with Bokeh controls (dropdown menus and/or radio button groups). The viewer
+    allows users to select different combinations of options to display different
+    figures. Can be saved as a standalone HTML file or displayed in a Jupyter notebook.
 
     Parameters
     ----------
@@ -142,30 +216,50 @@ def create_static_html(
         Ignored if show_in_notebook is True.
     output_dir : str, optional
         Directory containing the figure files. Default is "matplotlib_figures".
+        Can be a relative or absolute path.
     show_in_notebook : bool, optional
         If True, display the viewer directly in a Jupyter notebook instead of
         saving to a file. Requires bokeh.io to be available. Default is False.
-    embed_images : bool/None, optional
+    embed_images : bool or None, optional
         If True, embed images as base64 data URIs instead of using file paths.
         This makes the HTML self-contained but increases file size. Useful for
-        embedding in Jupyter notebooks. Default is None, which will convert to
-        True or False to match show_in_notebook.
-    image_max_height : number, optional
-        Maximum height of the image displayed in the viewer. Default IMAGE_MAX_HEIGHT.
+        embedding in Jupyter notebooks or sharing single-file HTML documents.
+        Default is None, which automatically sets to True if show_in_notebook
+        is True, otherwise False.
+    image_max_height : int, optional
+        Maximum height in pixels for displayed images. Images larger than this
+        will be scaled down while maintaining aspect ratio. Default is IMAGE_MAX_HEIGHT (800).
 
     Raises
     ------
     ValueError
         If both dropdown_specs and radio_specs are None or empty.
-    ImportError
-        If show_in_notebook is True but bokeh.io is not available.
 
     Notes
     -----
     At least one of dropdown_specs or radio_specs must be provided.
+
     The figure file naming convention is:
     {output_dir}/{sanitized_option1}_{sanitized_option2}_..._{sanitized_optionN}.png
-    where options are taken in order from dropdowns first, then radio buttons.
+    where options are taken in order from dropdowns first, then radio buttons,
+    and each option is sanitized using the sanitize_filename function.
+
+    Examples
+    --------
+    Create a viewer with one dropdown and one radio button group:
+
+    >>> dropdown_specs = [
+    ...     {'title': 'Variable', 'options': ['Temperature', 'Precipitation']}
+    ... ]
+    >>> radio_specs = [
+    ...     {'title': 'Season', 'options': ['Summer', 'Winter'], 'default': 'Summer'}
+    ... ]
+    >>> create_static_html(
+    ...     dropdown_specs=dropdown_specs,
+    ...     radio_specs=radio_specs,
+    ...     output_filename='my_viewer.html',
+    ...     output_dir='my_figures'
+    ... )
     """
     if dropdown_specs is None:
         dropdown_specs = []
@@ -292,13 +386,54 @@ def create_static_html(
 
 
 def _build_js(
-    radio_specs,
-    image_max_height,
-    figure_paths,
-    image_div,
-    dropdowns,
-    radio_groups,
-):
+    radio_specs: list[dict[str, Any]],
+    image_max_height: int,
+    figure_paths: dict[tuple[str, ...], str],
+    image_div: Div,
+    dropdowns: list[Select],
+    radio_groups: list[RadioButtonGroup],
+) -> CustomJS:
+    """Build JavaScript callback for updating displayed figure based on control selections.
+
+    This internal function generates a Bokeh CustomJS callback that updates the
+    displayed image when users interact with dropdown menus or radio button groups.
+    The callback constructs a key from the current selections and looks up the
+    corresponding image path.
+
+    Parameters
+    ----------
+    radio_specs : list of dict
+        List of radio button group specifications. Each dict should contain:
+        - 'options': list of str, the options for the radio button group
+    image_max_height : int
+        Maximum height in pixels for displayed images.
+    figure_paths : dict
+        Dictionary mapping tuples of option combinations to image file paths
+        or data URIs. Generated by build_figure_paths.
+    image_div : bokeh.models.Div
+        Bokeh Div widget that displays the image.
+    dropdowns : list of bokeh.models.Select
+        List of Bokeh Select (dropdown) widgets.
+    radio_groups : list of bokeh.models.RadioButtonGroup
+        List of Bokeh RadioButtonGroup widgets.
+
+    Returns
+    -------
+    bokeh.models.CustomJS
+        Bokeh CustomJS callback object that updates the image when controls change.
+
+    Notes
+    -----
+    The JavaScript callback:
+    1. Collects current values from all dropdowns (by value)
+    2. Collects current values from all radio buttons (by mapping active index to option)
+    3. Joins these values with '|||' separator to create a lookup key
+    4. Retrieves the corresponding image path from the figure_paths dictionary
+    5. Updates the image_div HTML to display the new image
+
+    This is an internal function (indicated by leading underscore) and is not
+    intended to be called directly by users.
+    """
     # Build JavaScript code to create option-to-index mappings for radio buttons
     radio_mappings_js = []
     for spec in radio_specs:
