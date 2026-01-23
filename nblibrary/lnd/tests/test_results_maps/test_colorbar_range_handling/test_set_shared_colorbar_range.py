@@ -1,17 +1,12 @@
 """
 Unit tests for ResultsMaps._set_shared_colorbar_range() method.
 """
+
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from unittest.mock import Mock
 
-# Add parent directories to path to import results_maps
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-# pylint: disable=wrong-import-position
-from results_maps import ResultsMaps  # noqa: E402
+from ....crops.results_maps import ResultsMaps
 
 
 class TestSetSharedColorbarRange:

@@ -1,19 +1,13 @@
 """
 Unit tests for ResultsMaps._check_vrange_ok_for_key_plot() method.
 """
-from __future__ import annotations
 
-import sys
-from pathlib import Path
+from __future__ import annotations
 
 import numpy as np
 import pytest
 
-# Add parent directories to path to import results_maps
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-# pylint: disable=wrong-import-position
-from results_maps import _check_vrange_ok_for_key_plot, DEFAULT_NO_VRANGE  # noqa: E402
+from ....crops.results_maps import _check_vrange_ok_for_key_plot, DEFAULT_NO_VRANGE
 
 
 ERR_REGEX = r"unless vmin \(first value in vrange tuple\) is 0"

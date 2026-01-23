@@ -1,22 +1,16 @@
 """
 Tests for time slice intersection in the plotting_utils module.
 """
+
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from unittest.mock import Mock
 
 import cftime
 import pytest
 import xarray as xr
 
-# Add parent directories to path to import plotting_utils
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-# noqa: E402
-# pylint: disable=wrong-import-position
-from plotting_utils import (  # noqa: E402
+from ...crops.plotting_utils import (
     _get_range_overlap,
     _get_intsxn_time_slice_of_cases,
     get_instxn_time_slice_of_ds,

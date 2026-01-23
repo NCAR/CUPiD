@@ -1,19 +1,14 @@
 """
 Unit tests for _mapfig_finishup() function.
 """
+
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
-# Add parent directories to path to import results_maps
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-
-# pylint: disable=wrong-import-position
-from results_maps import _mapfig_finishup  # noqa: E402
+from ...crops.results_maps import _mapfig_finishup
 
 
 @pytest.fixture(name="mock_fig", scope="function")
