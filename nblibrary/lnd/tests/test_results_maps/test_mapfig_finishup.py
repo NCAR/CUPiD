@@ -281,8 +281,7 @@ class TestMapfigFinishup:
         mock_da = Mock()
         mock_da.attrs = {}  # No units attribute
 
-        # Should raise KeyError when trying to access units
-        with pytest.raises(KeyError):
+        with pytest.raises(AssertionError, match="Results map missing units attribute"):
             _mapfig_finishup(
                 fig=mock_fig,
                 im=mock_im,
