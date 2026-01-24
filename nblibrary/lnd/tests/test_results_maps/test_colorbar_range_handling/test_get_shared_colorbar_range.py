@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ....crops.results_maps import ResultsMaps
+from ....crops.results_maps import ResultsMaps, FALLBACK_VMIN, FALLBACK_VMAX
 
 
 class TestGetSharedColorbarRange:
@@ -118,9 +118,9 @@ class TestGetSharedColorbarRange:
 
         vmin, vmax = rm._get_shared_colorbar_range(["nan_case"], key_plot=None)
 
-        # Should keep the original values
-        assert vmin == np.inf
-        assert vmax == -np.inf
+        # Should be filled with these specific arbitrary values
+        assert vmin == FALLBACK_VMIN
+        assert vmax == FALLBACK_VMAX
 
     def test_negative_values(self):
         """Test with all negative values."""

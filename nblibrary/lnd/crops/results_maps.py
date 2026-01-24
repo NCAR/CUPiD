@@ -1,6 +1,7 @@
 """
 Container class for managing multiple map DataArrays with consistent visualization.
 """
+
 from __future__ import annotations
 
 import warnings
@@ -21,6 +22,10 @@ DEFAULT_CMAP_DIV_DIFFOFDIFF = "PiYG_r"
 DEFAULT_MPL_BACKEND = matplotlib.rcParams["backend"]
 
 DEFAULT_NO_VRANGE = (None, None)
+
+# The arbitrary colorbar range values to set in case no plot has data
+FALLBACK_VMIN = -1.0
+FALLBACK_VMAX = 1.0
 
 
 def _cut_off_antarctica(da, antarctica_border=-60):
@@ -531,8 +536,8 @@ class ResultsMaps:
         if any_subplot_has_data and (np.isinf(vmin) or np.isinf(vmax)):
             raise RuntimeError("Failed to find vmin and/or vmax")
         if not any_subplot_has_data:
-            vmin = -1.0
-            vmax = 1.0
+            vmin = FALLBACK_VMIN
+            vmax = FALLBACK_VMAX
 
         return vmin, vmax
 
