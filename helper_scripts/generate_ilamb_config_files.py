@@ -29,6 +29,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 def generate_all_cfg(cupid_config_loc, run_type, cupid_root=None):
     """Generate all files necessary to run ILAMB based on
     the CUPiD configuration file and the run type (BGC or SP)
+    also allow for BGC_subset for testing and tutorials
     by running both generate_ilamb_cfg() and generate_ilamb_model_setup().
     """
     if not os.path.exists(os.path.join(cupid_config_loc, "config.yml")):
@@ -115,10 +116,10 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
         ms.write(
-            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/{shift_str_case}\n",
+            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/{shift_str_case}\n",
         )
         ms.write(
-            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/{shift_str_base_case}\n",  # noqa: E501
+            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/{shift_str_base_case}\n",  # noqa: E501
         )
     print(f"wrote {os.path.join(cupid_config_loc, 'model_setup.txt')}")
     print(
