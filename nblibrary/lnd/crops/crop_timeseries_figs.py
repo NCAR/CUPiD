@@ -1,7 +1,10 @@
 """
 For making timeseries figures of CLM crop outputs
 """
+
 from __future__ import annotations
+
+from typing import Any
 
 import os
 import warnings
@@ -10,10 +13,14 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+
+from externals.ctsm_postprocessing.crops.cropcase import CropCase
+from externals.ctsm_postprocessing.crops.crop_case_list import CropCaseList
 
 from .bokeh_html_utils import create_static_html
 from .bokeh_html_utils import sanitize_filename
-from .earthstat import align_time
+from .earthstat import EarthStat, align_time
 from .plotting_utils import get_dummy_timeseries
 from .plotting_utils import get_maturity_level_from_stat
 from .plotting_utils import handle_exception
@@ -36,9 +43,21 @@ AREA_SOURCE_DICT = {
 }
 
 
-def get_line_plot_kwargs(opts, c):
+def get_line_plot_kwargs(opts: dict, c: int) -> dict[str, Any]:
     """
-    Given options and a case index, return a dict to be used as kwargs for plot()
+    Given options and a case index, return a dict to be used as kwargs for plot().
+
+    Parameters
+    ----------
+    opts : dict
+        Options dictionary containing 'case_name_list' and optionally 'line_colors'.
+    c : int
+        Case index.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary with plot kwargs including 'linestyle' and optionally 'color'.
     """
     plot_kwargs = {}
 
@@ -59,7 +78,23 @@ def get_line_plot_kwargs(opts, c):
     return plot_kwargs
 
 
-def setup_fig(opts):
+def setup_fig(opts: dict) -> tuple[dict[str, Any], Figure, np.ndarray]:
+    """
+    Set up figure and axes for timeseries plots.
+
+    Parameters
+    ----------
+    opts : dict
+        Options dictionary containing 'crops_to_plot'.
+
+    Returns
+    -------
+    tuple[dict[str, Any], matplotlib.figure.Figure, numpy.ndarray]
+        Tuple containing:
+        - fig_opts: Dictionary with 'hspace' and 'wspace' spacing parameters
+        - fig: Matplotlib Figure object
+        - axes: Array of Axes objects
+    """
     fig_opts = {}
 
     # Things that probably need to be optimized based on number of crops
@@ -78,18 +113,40 @@ def setup_fig(opts):
     return fig_opts, fig, axes
 
 
-def _norm(data):
+def _norm(data: xr.DataArray | pd.Series) -> xr.DataArray | pd.Series:
     """
-    Normalize timeseries by dividing by its mean
+    Normalize timeseries by dividing by its mean.
+
+    Parameters
+    ----------
+    data : xarray.DataArray | pandas.Series
+        Timeseries data to normalize.
+
+    Returns
+    -------
+    xarray.DataArray | pandas.Series
+        Normalized data (same type as input).
     """
     if isinstance(data, xr.DataArray):
         return data / data.mean().values
     return data / data.mean()
 
 
-def _detrend(data):
+def _detrend(data: xr.DataArray | pd.Series) -> xr.DataArray | pd.Series:
     """
-    Detrend using a 5-year rolling mean, after Müller et al. (2017; doi:10.5194/gmd-10-1403-2017)
+    Detrend using a 5-year rolling mean.
+
+    After Müller et al. (2017; doi:10.5194/gmd-10-1403-2017).
+
+    Parameters
+    ----------
+    data : xarray.DataArray | pandas.Series
+        Timeseries data to detrend.
+
+    Returns
+    -------
+    xarray.DataArray | pandas.Series
+        Detrended data (same type as input).
     """
     window_width = 5  # years
 
@@ -109,19 +166,55 @@ def _detrend(data):
     return data - smoothed
 
 
-def _normdetrend(data):
+def _normdetrend(data: xr.DataArray | pd.Series) -> xr.DataArray | pd.Series:
+    """
+    Normalize and detrend timeseries data.
+
+    Applies normalization followed by detrending using a 5-year rolling mean.
+
+    Parameters
+    ----------
+    data : xarray.DataArray | pandas.Series
+        Timeseries data to process.
+
+    Returns
+    -------
+    xarray.DataArray | pandas.Series
+        Normalized and detrended data (same type as input).
+    """
     return _detrend(_norm(data))
 
 
 def _plot_clm_cases(
-    case_list,
-    opts,
-    var_details,
-    crop,
-    use_earthstat_area,
-    do_normdetrend,
-    maturity,
-):
+    case_list: CropCaseList,
+    opts: dict,
+    var_details: dict[str, Any],
+    crop: str,
+    use_earthstat_area: bool,
+    do_normdetrend: bool,
+    maturity: str,
+) -> None:
+    """
+    Plot CLM data for all cases.
+
+    Parameters
+    ----------
+    case_list : CropCaseList
+        List of CropCase objects to plot.
+    opts : dict
+        Options dictionary containing 'case_legend_list', 'debug', and optionally 'line_colors'.
+    var_details : dict[str, Any]
+        Dictionary with variable details including 'function', 'da_name', 'conversion_factor',
+        and 'ctsm_units'.
+    crop : str
+        Name of the crop to plot.
+    use_earthstat_area : bool
+        Whether to use EarthStat area for calculations.
+    do_normdetrend : bool
+        Whether to normalize and detrend the data.
+    maturity : str
+        Maturity level (e.g., 'any', 'marketable', 'mature').
+    """
     for c, case in enumerate(case_list):
 
         # Get the data from this case.
@@ -172,7 +265,31 @@ def _plot_clm_cases(
         crop_data_ts.plot(**plot_kwargs)
 
 
-def _get_clm_yield(crop, case, use_earthstat_area, maturity):
+def _get_clm_yield(
+    crop: str,
+    case: CropCase,
+    use_earthstat_area: bool,
+    maturity: str,
+) -> xr.DataArray | list[str]:
+    """
+    Get CLM yield timeseries for a crop.
+
+    Parameters
+    ----------
+    crop : str
+        Name of the crop.
+    case : CropCase
+        CropCase object containing the data.
+    use_earthstat_area : bool
+        Whether to use EarthStat area for calculations.
+    maturity : str
+        Maturity level (e.g., 'any', 'marketable', 'mature').
+
+    Returns
+    -------
+    xarray.DataArray | list[str]
+        Yield timeseries DataArray, or list of missing variable names if data unavailable.
+    """
     if use_earthstat_area:
         this_area = "crop_area_es"
         this_prod = f"crop_prod_{maturity}_es"
@@ -193,7 +310,31 @@ def _get_clm_yield(crop, case, use_earthstat_area, maturity):
     return crop_yield_ts
 
 
-def _get_clm_prod(crop, case, use_earthstat_area, maturity):
+def _get_clm_prod(
+    crop: str,
+    case: CropCase,
+    use_earthstat_area: bool,
+    maturity: str,
+) -> xr.DataArray | list[str]:
+    """
+    Get CLM production timeseries for a crop.
+
+    Parameters
+    ----------
+    crop : str
+        Name of the crop.
+    case : CropCase
+        CropCase object containing the data.
+    use_earthstat_area : bool
+        Whether to use EarthStat area for calculations.
+    maturity : str
+        Maturity level (e.g., 'any', 'marketable', 'mature').
+
+    Returns
+    -------
+    xarray.DataArray | list[str]
+        Production timeseries DataArray, or list of missing variable names if data unavailable.
+    """
     if use_earthstat_area:
         this_var = f"crop_prod_{maturity}_es"
     else:
@@ -206,7 +347,31 @@ def _get_clm_prod(crop, case, use_earthstat_area, maturity):
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
-def _get_clm_area(crop, case, use_earthstat_area, *args):
+def _get_clm_area(
+    crop: str,
+    case: CropCase,
+    use_earthstat_area: bool,
+    *args,
+) -> xr.DataArray | list[str]:
+    """
+    Get CLM area timeseries for a crop.
+
+    Parameters
+    ----------
+    crop : str
+        Name of the crop.
+    case : CropCase
+        CropCase object containing the data.
+    use_earthstat_area : bool
+        Whether to use EarthStat area.
+    *args
+        Additional arguments (unused).
+
+    Returns
+    -------
+    xarray.DataArray | list[str]
+        Area timeseries DataArray, or list of missing variable names if data unavailable.
+    """
     if use_earthstat_area:
         this_var = "crop_area_es"
     else:
@@ -219,7 +384,34 @@ def _get_clm_area(crop, case, use_earthstat_area, *args):
     return da.sum(dim=[dim for dim in da.dims if dim != "time"])
 
 
-def get_legend_labels(opts, *, incl_faostat=True, incl_earthstat=True):
+def get_legend_labels(
+    opts: dict,
+    *,
+    incl_faostat: bool = True,
+    incl_earthstat: bool = True,
+) -> list[str]:
+    """
+    Get legend labels for the timeseries plot.
+
+    Parameters
+    ----------
+    opts : dict
+        Options dictionary containing 'case_legend_list' and 'obs_timeseries_linecolors'.
+    incl_faostat : bool, optional
+        Whether to include FAOSTAT in the legend. Default is True.
+    incl_earthstat : bool, optional
+        Whether to include EarthStat in the legend. Default is True.
+
+    Returns
+    -------
+    list[str]
+        List of legend labels.
+
+    Raises
+    ------
+    ValueError
+        If unrecognized keys are found in opts['obs_timeseries_linecolors'].
+    """
     labels = opts["case_legend_list"].copy()
     if incl_faostat or incl_earthstat:
         obs_timeseries_linecolors = opts["obs_timeseries_linecolors"].copy()
@@ -244,7 +436,35 @@ def get_legend_labels(opts, *, incl_faostat=True, incl_earthstat=True):
     return labels
 
 
-def finish_fig(opts, fig_opts, fig, *, incl_faostat=True, incl_earthstat=True):
+def finish_fig(
+    opts: dict,
+    fig_opts: dict,
+    fig: Figure,
+    *,
+    incl_faostat: bool = True,
+    incl_earthstat: bool = True,
+) -> list[str]:
+    """
+    Finalize figure with legend and title.
+
+    Parameters
+    ----------
+    opts : dict
+        Options dictionary.
+    fig_opts : dict
+        Figure options dictionary containing 'wspace', 'hspace', and 'title'.
+    fig : matplotlib.figure.Figure
+        Figure object to finalize.
+    incl_faostat : bool, optional
+        Whether to include FAOSTAT in the legend. Default is True.
+    incl_earthstat : bool, optional
+        Whether to include EarthStat in the legend. Default is True.
+
+    Returns
+    -------
+    list[str]
+        List of legend labels that were added.
+    """
     plt.subplots_adjust(wspace=fig_opts["wspace"], hspace=fig_opts["hspace"])
     legend_labels = get_legend_labels(
         opts,
@@ -263,14 +483,39 @@ def finish_fig(opts, fig_opts, fig, *, incl_faostat=True, incl_earthstat=True):
 
 
 def _plot_faostat(
-    fao_yield_world,
-    crop,
-    ax,
-    time_da,
-    ctsm_units,
-    do_normdetrend,
-    line_color,
-):
+    fao_yield_world: pd.DataFrame,
+    crop: str,
+    ax: plt.Axes,
+    time_da: xr.DataArray,
+    ctsm_units: str,
+    do_normdetrend: bool,
+    line_color: str,
+) -> None:
+    """
+    Plot FAOSTAT data for a crop.
+
+    Parameters
+    ----------
+    fao_yield_world : pandas.DataFrame
+        FAOSTAT data for all crops.
+    crop : str
+        Name of the crop to plot.
+    ax : matplotlib.axes.Axes
+        Axes object to plot on.
+    time_da : xarray.DataArray
+        Time coordinate DataArray for alignment.
+    ctsm_units : str
+        Units expected from CTSM (must match FAOSTAT units).
+    do_normdetrend : bool
+        Whether to normalize and detrend the data.
+    line_color : str
+        Color for the plot line.
+
+    Raises
+    ------
+    RuntimeError
+        If CTSM units don't match FAOSTAT units.
+    """
     faostat_units = fao_yield_world["Unit"].iloc[0]
     if faostat_units != ctsm_units:
         raise RuntimeError(
@@ -313,14 +558,34 @@ def _plot_faostat(
 
 
 def _plot_earthstat(
-    which,
-    earthstat_data,
-    crop,
-    ax,
-    target_time,
-    do_normdetrend,
-    line_color,
-):
+    which: str,
+    earthstat_data: EarthStat,
+    crop: str,
+    ax: plt.Axes,
+    target_time: xr.DataArray,
+    do_normdetrend: bool,
+    line_color: str,
+) -> None:
+    """
+    Plot EarthStat data for a crop.
+
+    Parameters
+    ----------
+    which : str
+        Which variable to plot ('yield', 'prod', or 'area').
+    earthstat_data : EarthStat
+        EarthStat object containing observed crop data.
+    crop : str
+        Name of the crop to plot.
+    ax : matplotlib.axes.Axes
+        Axes object to plot on.
+    target_time : xarray.DataArray
+        Time coordinate DataArray for alignment.
+    do_normdetrend : bool
+        Whether to normalize and detrend the data.
+    line_color : str
+        Color for the plot line.
+    """
     target_units = {
         "prod": "Mt",
         "area": "Mha",
@@ -367,7 +632,27 @@ def _plot_earthstat(
     )
 
 
-def _get_var_details(which, fao_data_world):
+def _get_var_details(which: str, fao_data_world: pd.DataFrame | None) -> dict[str, Any]:
+    """
+    Get variable details for plotting including units and conversion factors.
+
+    Parameters
+    ----------
+    which : str
+        Which variable to get details for ('yield', 'prod', or 'area').
+    fao_data_world : pandas.DataFrame | None
+        FAOSTAT world data to modify in place, or None if not using FAOSTAT.
+
+    Returns
+    -------
+    dict[str, Any]
+        Dictionary with keys 'da_name', 'ctsm_units', 'conversion_factor', and 'function'.
+
+    Raises
+    ------
+    NotImplementedError
+        If which is not 'yield', 'prod', or 'area'.
+    """
     var_details = {}
     if which == "yield":
         var_details["da_name"] = "Yield"
@@ -399,18 +684,41 @@ def _get_var_details(which, fao_data_world):
 
 
 def _one_fig(
-    do_normdetrend,
-    which,
-    earthstat_data,
-    case_list,
-    fao_data,
-    maturity,
-    opts,
+    do_normdetrend: bool,
+    which: str,
+    earthstat_data: EarthStat,
+    case_list: CropCaseList,
+    fao_data: pd.DataFrame | None,
+    maturity: str,
+    opts: dict,
     *,
-    use_earthstat_area=False,
-    fig_file=None,
-):
+    use_earthstat_area: bool = False,
+    fig_file: str | None = None,
+) -> None:
+    """
+    Create one timeseries figure for a specific variable and maturity level.
 
+    Parameters
+    ----------
+    do_normdetrend : bool
+        Whether to normalize and detrend the data.
+    which : str
+        Which variable to plot ('yield', 'prod', or 'area').
+    earthstat_data : EarthStat
+        EarthStat object containing observed crop data.
+    case_list : CropCaseList
+        List of CropCase objects to plot.
+    fao_data : pandas.DataFrame | None
+        FAOSTAT data, or None if not using FAOSTAT.
+    maturity : str
+        Maturity level (e.g., 'any', 'marketable', 'mature').
+    opts : dict
+        Options dictionary containing configuration settings.
+    use_earthstat_area : bool, optional
+        Whether to use EarthStat area for calculations. Default is False.
+    fig_file : str | None, optional
+        Path to save the figure, or None to not save. Default is None.
+    """
     # Get figure layout info
     fig_opts, fig, axes = setup_fig(opts)
 
@@ -515,11 +823,169 @@ def _one_fig(
     return std_dict, legend_labels
 
 
-def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
+def _print_stdev_table(
+    opts: dict,
+    maturity: str | None,
+    area_source: str,
+    std_dict: dict[str, list[float | None]],
+    legend_labels: list[str],
+) -> None:
     """
-    For making timeseries figures of CLM crop outputs
-    """
+    Print a table of standard deviations for each crop and case.
 
+    Parameters
+    ----------
+    opts : dict
+        Options dictionary containing 'crops_to_plot'.
+    maturity : str | None
+        Maturity level (e.g., 'any', 'marketable', 'mature'), or None.
+    area_source : str
+        Area source name (e.g., 'CLM', 'EarthStat').
+    std_dict : dict[str, list[float | None]]
+        Dictionary mapping crop names to lists of standard deviation values.
+    legend_labels : list[str]
+        List of legend labels corresponding to the standard deviation values.
+    """
+    index_colname = "legend_labels"
+    std_table_dict = {index_colname: legend_labels}
+    for crop in opts["crops_to_plot"]:
+        col_data = []
+        for std in std_dict[crop]:
+            if std is None:
+                col_data.append("n.d.")  # "no data"
+            else:
+                col_data.append(np.round(std, 3))
+        std_table_dict[crop] = col_data
+    df = pd.DataFrame(std_table_dict)
+    df = df.set_index(index_colname)
+    df.index.name = None
+    header = f"Standard deviation (CLM runs assuming {area_source} areas)"
+    if maturity is not None:
+        header = header.replace(")", f"; maturity '{maturity}')")
+    print(header)
+    print(df)
+    print("\n")
+
+
+def _one_stat(
+    *,
+    img_dir: str,
+    earthstat_data: EarthStat | None,
+    case_list: CropCaseList,
+    fao_dict: dict[str, pd.DataFrame] | None,
+    opts: dict,
+    this_area_source_dict: dict[str, bool],
+    stat: str,
+    stat_input: str,
+) -> None:
+    """
+    Process and plot one statistic across all area sources.
+
+    Creates timeseries figures for a single statistic (e.g., 'yield', 'prod_normdetrend') using
+    different area sources (CLM, EarthStat).
+
+    Parameters
+    ----------
+    img_dir : str
+        Directory path where output images will be saved.
+    earthstat_data : EarthStat | None
+        EarthStat object containing observed crop data, or None if not available.
+    case_list : CropCaseList
+        List of CropCase objects to plot.
+    fao_dict : dict[str, pandas.DataFrame] | None
+        Dictionary mapping statistic names to FAOSTAT DataFrames, or None if not available.
+    opts : dict
+        Options dictionary containing configuration settings.
+    this_area_source_dict : dict[str, bool]
+        Dictionary mapping area source names to whether to use EarthStat area.
+    stat : str
+        Statistic name (e.g., 'yield', 'prod_normdetrend').
+    stat_input : str
+        Statistic specification string.
+    """
+    # pylint: disable=too-many-arguments, too-many-locals
+
+    suffix = "_normdetrend"
+    do_normdetrend = suffix in stat_input
+    if do_normdetrend:
+        stat_input = stat_input.replace(suffix, "")
+
+    # Handle requested maturity level
+    stat_input, maturity = get_maturity_level_from_stat(stat_input)
+
+    # Get FAO data, if available
+    fao_data = None
+    if fao_dict is not None:
+        fao_data = fao_dict[stat_input]
+
+    for area_source, use_earthstat_area in this_area_source_dict.items():
+        # Get filename to which figure will be saved. Members of join_list must first be any
+        # dropdown menu members and then any radio button group members, in the orders given in
+        # dropdown_specs and radio_specs,respectively.
+        join_list = [stat, area_source]
+        fig_basename = sanitize_filename("_".join(join_list))
+        fig_basename += ".png"
+        fig_path = os.path.join(img_dir, fig_basename)
+
+        with warnings.catch_warnings():
+            # This suppresses some very annoying warnings when use_earthstat_area=True. I'd like to
+            # eventually resolve this properly, which will probably requiring compute()ing some of
+            # the metadata variables in the cft_ds Datasets.
+            warnings.filterwarnings(
+                "ignore",
+                message="Sending large graph.*",
+                category=UserWarning,
+            )
+            std_dict, legend_labels = _one_fig(
+                do_normdetrend,
+                stat_input,
+                earthstat_data,
+                case_list,
+                fao_data,
+                maturity,
+                opts,
+                use_earthstat_area=use_earthstat_area,
+                fig_file=fig_path,
+            )
+
+        # Print standard deviation table
+        if do_normdetrend:
+            _print_stdev_table(opts, maturity, area_source, std_dict, legend_labels)
+
+
+def main(
+    *,
+    stat_dict: dict[str, str],
+    img_dir: str,
+    earthstat_data: EarthStat | None,
+    case_list: CropCaseList,
+    fao_dict: dict[str, pd.DataFrame] | None,
+    opts: dict,
+) -> None:
+    # pylint: disable=too-many-arguments
+    """
+    Create timeseries figures of CLM crop outputs.
+
+    Generates timeseries plots comparing CLM crop statistics (yield, production, area) against
+    observational datasets (FAOSTAT, EarthStat) for multiple crops and cases.
+
+    Parameters
+    ----------
+    stat_dict : dict[str, str]
+        Dictionary mapping statistic names to their specifications (e.g., 'yield',
+        'prod_normdetrend').
+    img_dir : str
+        Directory path where output images will be saved.
+    earthstat_data : EarthStat | None
+        EarthStat object containing observed crop data, or None if not available.
+    case_list : CropCaseList
+        List of CropCase objects to plot.
+    fao_dict : dict[str, pandas.DataFrame] | None
+        Dictionary mapping statistic names to FAOSTAT DataFrames, or None if not available.
+    opts : dict
+        Options dictionary containing configuration settings including 'crops_to_plot',
+        'case_legend_list', 'obs_timeseries_linecolors', and 'debug'.
+    """
     # Make sure output dir exists
     os.makedirs(img_dir, exist_ok=True)
 
@@ -531,72 +997,16 @@ def main(stat_dict, img_dir, earthstat_data, case_list, fao_dict, opts):
     for stat, stat_input in stat_dict.items():
 
         # Handle request for detrending via stat_input
-        suffix = "_normdetrend"
-        do_normdetrend = suffix in stat_input
-        if do_normdetrend:
-            stat_input = stat_input.replace(suffix, "")
-
-        # Handle requested maturity level
-        stat_input, maturity = get_maturity_level_from_stat(stat_input)
-
-        # Get FAO data, if available
-        fao_data = None
-        if fao_dict is not None:
-            fao_data = fao_dict[stat_input]
-
-        for area_source, use_earthstat_area in this_area_source_dict.items():
-            # Get filename to which figure will be saved. Members of join_list
-            # must first be any dropdown menu members and then any radio button
-            # group members, in the orders given in dropdown_specs and radio_specs,
-            # respectively.
-            join_list = [stat, area_source]
-            fig_basename = sanitize_filename("_".join(join_list))
-            fig_basename += ".png"
-            fig_path = os.path.join(img_dir, fig_basename)
-
-            with warnings.catch_warnings():
-                # This suppresses some very annoying warnings when
-                # use_earthstat_area=True. I'd like to eventually resolve this
-                # properly, which will probably requiring compute()ing some of
-                # the metadata variables in the cft_ds Datasets.
-                warnings.filterwarnings(
-                    "ignore",
-                    message="Sending large graph.*",
-                    category=UserWarning,
-                )
-                std_dict, legend_labels = _one_fig(
-                    do_normdetrend,
-                    stat_input,
-                    earthstat_data,
-                    case_list,
-                    fao_data,
-                    maturity,
-                    opts,
-                    use_earthstat_area=use_earthstat_area,
-                    fig_file=fig_path,
-                )
-
-            # Print standard deviation table
-            if do_normdetrend:
-                index_colname = "legend_labels"
-                std_table_dict = {index_colname: legend_labels}
-                for crop in opts["crops_to_plot"]:
-                    col_data = []
-                    for std in std_dict[crop]:
-                        if std is None:
-                            col_data.append("n.d.")  # "no data"
-                        else:
-                            col_data.append(np.round(std, 3))
-                    std_table_dict[crop] = col_data
-                df = pd.DataFrame(std_table_dict)
-                df = df.set_index(index_colname)
-                df.index.name = None
-                header = f"Standard deviation (CLM runs assuming {area_source} areas)"
-                if maturity is not None:
-                    header = header.replace(")", f"; maturity '{maturity}')")
-                print(header)
-                print(df)
-                print("\n")
+        _one_stat(
+            img_dir=img_dir,
+            earthstat_data=earthstat_data,
+            case_list=case_list,
+            fao_dict=fao_dict,
+            opts=opts,
+            this_area_source_dict=this_area_source_dict,
+            stat=stat,
+            stat_input=stat_input,
+        )
 
     # Build dropdown specs
     dropdown_specs = [
