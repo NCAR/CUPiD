@@ -1,0 +1,232 @@
+################## SETUP ##################
+
+################
+# Data Sources #
+################
+data_sources:
+    # run_dir is the path to the folder you want
+    ### all the files associated with this configuration
+    ### to be created in
+    run_dir: .
+
+    # nb_path_root is the path to the folder that cupid will
+    ### look for your template notebooks in. It doesn't have to
+    ### be inside run_dir, or be specific to this project, as
+    ### long as the notebooks are there
+    nb_path_root: ../../nblibrary
+
+######################
+# Computation Config #
+######################
+
+computation_config:
+
+    # default_kernel_name is the name of the environment that
+    ### the notebooks in this configuration will be run in by default.
+    ### It must already be installed on your machine. You can also
+    ### specify a different environment than the default for any
+    ### notebook in NOTEBOOK CONFIG
+    default_kernel_name: cupid-analysis
+
+    # log level sets the level of how verbose logging will be.
+    # options include: debug, info, warning, error
+    log_level: 'info'
+
+############# NOTEBOOK CONFIG #############
+
+############################
+# Notebooks and Parameters #
+############################
+
+# All parameters under global_params get passed to all the notebooks
+
+global_params:
+  case_name: 'ctsm5.4.004_bgc_f09_131_HIST'
+  base_case_name: 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f09_124_HIST'
+  case_nickname: '131_HIST'
+  base_case_nickname: '124_HIST'
+  CESM_output_dir: /glade/derecho/scratch/wwieder/archive
+  start_date: '2000-01-01'
+  end_date: '2005-01-01'
+  climo_start_year: 2000
+  climo_end_year: 2004
+  base_start_date: '2000-01-01'
+  base_end_date: '2005-01-01'
+  base_climo_start_year: 2000
+  base_climo_end_year: 2004
+  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
+  lc_kwargs:
+    threads_per_worker: 1
+
+timeseries:
+  num_procs: 8
+  ts_done: [False, False]
+  overwrite_ts: [False, False]
+  case_name: ['ctsm5.4.004_bgc_f09_131_HIST', 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f09_124_HIST']
+  file_mode: 664
+  dir_mode: 775
+  file_group: cesm
+  dir_group: cesm
+
+  atm:
+    vars: []
+    derive_vars: []
+    hist_str: 'cam.h0a'
+    start_years: [1,1]
+    end_years: [21,45]
+    level: 'lev'
+    mapping_file: [Null, '/glade/campaign/cesm/cesmdata/inputdata/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc']
+
+  lnd:
+    vars: ['SOILWATER_10CM','FSH_TO_COUPLER']
+    derive_vars: []
+    hist_str: 'clm2.h0a'
+    start_years: [2000,2000]
+    end_years: [2004,2004]
+    level: 'lev'
+
+  ocn:
+    vars: []
+    derive_vars: []
+    hist_str: 'h.z'
+    start_years: [1,1]
+    end_years: [21,45]
+    level: 'lev'
+
+  ice:
+    vars: []
+    derive_vars: []
+    hist_str: 'cice.h'
+    start_years: [1,1]
+    end_years: [21,45]
+    level: 'lev'
+
+  glc:
+    vars: []
+    derive_vars: []
+    hist_str: 'initial_hist'
+    start_years: [1,1]
+    end_years: [21,45]
+    level: 'lev'
+
+  rof:
+    vars: []
+    derive_vars: []
+    hist_str: 'h0'
+    start_years: [2000,2000]
+    end_years: [2004,2004]
+    level: 'lev'
+
+compute_notebooks:
+
+  # This is where all the notebooks you want run and their
+  # parameters are specified. Several examples of different
+  # types of notebooks are provided.
+
+  # The first key (here infrastructure) is the name of the
+  # notebook from nb_path_root, minus the .ipynb
+
+    infrastructure:
+      index:
+        parameter_groups:
+          none: {}
+
+    rof:
+      global_discharge_gauge_compare_obs:
+        parameter_groups:
+          none:
+            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
+            analysis_name: ""
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            climo_nyears: 10
+            figureSave: True
+      global_discharge_ocean_compare_obs:
+        parameter_groups:
+          none:
+            hist_str: 'h0a'             # file tag, 'h0' or 'h0a'
+            analysis_name: ""
+            grid_name: 'f09_f09_mosart' # ROF grid name
+            climo_nyears: 10
+            figureSave: True
+
+
+    lnd:
+      #Global_TerrestrialCouplingIndex_VisualCompareObs:
+      #  parameter_groups:
+      #    none:
+      #      clmFile_h: 'clm2.h0a'
+      #      fluxnet_comparison: True
+      #      obsDir: 'lnd/analysis_datasets/ungridded/timeseries/FLUXNET2015/'
+      ILAMB:
+        parameter_groups:
+          none:
+            ilamb_root: ../../examples/land_only/ILAMB_output
+            key_plots: ["EcosystemandCarbonCycle/GrossPrimaryProductivity/FLUXCOM/*_global_bias.png",
+                        "EcosystemandCarbonCycle/LeafAreaIndex/AVHRR/*1_global_bias.png"]
+            print_table: True
+        external_tool:
+          tool_name: 'ILAMB'
+          ilamb_config_data_loc: '/glade/campaign/cesm/community/lmwg/diag/ILAMB/'
+      LDF:
+        kernel_name: cupid-analysis
+        parameter_groups:
+          none:
+            ldf_root: ../../examples/land_only/LDF_output/
+            key_plots: ["GPP_ANN_LatLon_Mean.png",
+                        "ELAI_ANN_LatLon_Mean.png",
+                        "RegionalClimo_Amazonia_RegionalClimo_Mean.png"]
+        external_tool:
+          tool_name: 'LDF'
+          vars: ['ELAI','ET','QRUNOFF_TO_COUPLER','GPP']
+          plotting_scripts:  ["global_latlon_map","polar_map",
+                              "global_mean_timeseries_lnd", "regional_climatology",
+                              "regional_timeseries"]
+          analysis_scripts: ["lmwg_table"]
+          base_regridded_output: False
+          region_list: ["Global",'CONUS','Amazonia']
+          defaults_file: ../../externals/LDF/lib/ldf_variable_defaults.yaml
+          regions_file: ../../externals/LDF/lib/regions_lnd.yaml
+
+########### JUPYTER BOOK CONFIG ###########
+
+##################################
+# Jupyter Book Table of Contents #
+##################################
+book_toc:
+
+  # See https://jupyterbook.org/en/stable/structure/configure.html for
+  # complete documentation of Jupyter book construction options
+
+  format: jb-book
+
+  # All filenames are notebook filename without the .ipynb, similar to above
+
+  root: infrastructure/index # root is the notebook that will be the homepage for the book
+  parts:
+
+    # Parts group notebooks into different sections in the Jupyter book
+    # table of contents, so you can organize different parts of your project.
+    # Each chapter is the name of one of the notebooks that you executed
+    # in compute_notebooks above, also without .ipynb
+
+    - caption: Land
+      chapters:
+        - file: lnd/Global_TerrestrialCouplingIndex_VisualCompareObs
+        - file: lnd/ILAMB
+        - file: lnd/LDF
+
+    - caption: River Runoff
+      chapters:
+        - file: rof/global_discharge_gauge_compare_obs
+        - file: rof/global_discharge_ocean_compare_obs
+
+#####################################
+# Keys for Jupyter Book _config.yml #
+#####################################
+book_config_keys:
+
+  title: CLM Key Metrics   # Title of your jupyter book
+
+  # Other keys can be added here, see https://jupyterbook.org/en/stable/customize/config.html
+  ### for many more options
