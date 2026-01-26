@@ -4,15 +4,32 @@ Useful functions for calculations related to CLM crop growing seasons
 
 from __future__ import annotations
 
+import xarray as xr
+
 from externals.ctsm_postprocessing.crops import combine_cft_to_crop
 
 # Southern Hemisphere "overwintering" means spanning Jul. 1/2
 SH_MIDWINTER_DOY = 182.5
 
 
-def cft_ds_overwintering(cft_ds):
+def cft_ds_overwintering(cft_ds: xr.Dataset) -> xr.Dataset:
     """
-    Calculate overwintering for each calendar year's harvests
+    Calculate overwintering for each calendar year's harvests.
+
+    Identifies crops that overwinter (span the winter solstice) in both Northern and Southern
+    Hemispheres. For Northern Hemisphere, overwintering means spanning Dec. 31/Jan. 1. For
+    Southern Hemisphere, overwintering means spanning Jul. 1/2.
+
+    Parameters
+    ----------
+    cft_ds : xarray.Dataset
+        Dataset containing CFT-level crop data with HDATES, SDATES_PERHARV, pfts1d_lat,
+        HARVEST_REASON_PERHARV, cft_harv_area, and cft_crop variables.
+
+    Returns
+    -------
+    xarray.Dataset
+        Dataset with added overwinter_area and overwinter_area_crop variables.
     """
 
     # Whether the crop is in the Northern or Southern Hemisphere
@@ -47,9 +64,23 @@ def cft_ds_overwintering(cft_ds):
     return cft_ds
 
 
-def cft_ds_gslen(cft_ds):
+def cft_ds_gslen(cft_ds: xr.Dataset) -> xr.Dataset:
     """
-    Calculate growing season length for each crop, combining its constituent CFTs
+    Calculate growing season length for each crop, combining its constituent CFTs.
+
+    Computes mean growing season length across CFTs within each crop, weighted by harvest area
+    and masked to only include marketable harvests.
+
+    Parameters
+    ----------
+    cft_ds : xarray.Dataset
+        Dataset containing CFT-level crop data with GSLEN_PERHARV, MARKETABLE_HARVEST,
+        cft_harv_area, and cft_crop variables.
+
+    Returns
+    -------
+    xarray.Dataset
+        Dataset with added gslen_perharv_cft and gslen_perharv_crop variables.
     """
     # Get original DataArray and units
     da = cft_ds["GSLEN_PERHARV"]
