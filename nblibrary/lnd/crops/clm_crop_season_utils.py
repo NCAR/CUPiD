@@ -1,22 +1,10 @@
 """
 Useful functions for calculations related to CLM crop growing seasons
 """
+
 from __future__ import annotations
 
-import os
-import sys
-
-externals_path = os.path.join(
-    os.path.dirname(__file__),
-    os.pardir,
-    os.pardir,
-    os.pardir,
-    "externals",
-)
-sys.path.append(externals_path)
-# pylint: disable=wrong-import-position,import-error
-
-from ctsm_postprocessing.crops import combine_cft_to_crop  # noqa: E402
+from externals.ctsm_postprocessing.crops import combine_cft_to_crop
 
 # Southern Hemisphere "overwintering" means spanning Jul. 1/2
 SH_MIDWINTER_DOY = 182.5

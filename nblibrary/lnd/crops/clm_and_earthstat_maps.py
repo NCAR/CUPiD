@@ -19,11 +19,12 @@ Helper Functions:
 from __future__ import annotations
 
 import os
-import sys
 from typing import Any
 
 import xarray as xr
 
+from externals.ctsm_postprocessing import utils
+from externals.ctsm_postprocessing.crops.cropcase import CropCase
 from .bokeh_html_utils import sanitize_filename
 from .earthstat import EarthStat
 from .parallelizable_plot_loop import get_figpath_with_keycase
@@ -34,20 +35,6 @@ from .plotting_utils import get_maturity_level_from_stat
 from .plotting_utils import get_mean_map
 from .plotting_utils import handle_exception
 from .results_maps import ResultsMaps
-
-externals_path = os.path.join(
-    os.path.dirname(__file__),
-    os.pardir,
-    os.pardir,
-    os.pardir,
-    "externals",
-)
-sys.path.append(externals_path)
-# pylint: disable=wrong-import-position,import-error
-from ctsm_postprocessing import (  # noqa: E402
-    utils,
-)
-from ctsm_postprocessing.crops.cropcase import CropCase  # noqa: E402
 
 TARGET_UNITS = {
     "prod": "Mt",

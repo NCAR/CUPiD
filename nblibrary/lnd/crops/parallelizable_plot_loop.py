@@ -4,13 +4,16 @@ This module provides functions for creating maps and plots across multiple cases
 crops, and time ranges. It supports generating comparative visualizations with
 optional key case comparisons and customizable plot parameters.
 """
+
 from __future__ import annotations
 
 import os
-import sys
 import warnings
 from dask.distributed import as_completed
 from dask.distributed import Client
+
+from externals.ctsm_postprocessing.crops.crop_case_list import CropCaseList
+from externals.ctsm_postprocessing.crops.cropcase import CropCase
 
 from .bokeh_html_utils import sanitize_filename
 from .plotting_utils import get_dummy_map
@@ -18,18 +21,6 @@ from .plotting_utils import get_key_case
 from .plotting_utils import get_mean_map
 from .results_maps import DEFAULT_NO_VRANGE
 from .results_maps import ResultsMaps
-
-externals_path = os.path.join(
-    os.path.dirname(__file__),
-    os.pardir,
-    os.pardir,
-    os.pardir,
-    "externals",
-)
-sys.path.append(externals_path)
-# pylint: disable=wrong-import-position,import-error
-from ctsm_postprocessing.crops.crop_case_list import CropCaseList  # noqa: E402
-from ctsm_postprocessing.crops.cropcase import CropCase  # noqa: E402
 
 SUBMISSION_INDENT = "   "
 

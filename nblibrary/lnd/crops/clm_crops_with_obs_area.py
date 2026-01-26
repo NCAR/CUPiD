@@ -3,34 +3,22 @@ Module for producing certain CLM crop variables as it had been planted with obse
 Note that this isn't perfect: If CLM didn't have area in a gridcell that the observed does, there
 will of course not be CLM production there.
 """
+
 # noqa: E402
 from __future__ import annotations
 
-import os
-import sys
-
 import xarray as xr
+
+from externals.ctsm_postprocessing.crops.cropcase import CropCase
+from externals.ctsm_postprocessing.crops.crop_case_list import CropCaseList
+from externals.ctsm_postprocessing.crops.extra_area_prod_yield_etc import (
+    MATURITY_LEVELS,
+)
+from externals.ctsm_postprocessing.utils import ungrid
 
 from .earthstat import check_dim_alignment
 from .earthstat import EarthStat
 from .plotting_utils import handle_exception
-
-externals_path = os.path.join(
-    os.path.dirname(__file__),
-    os.pardir,
-    os.pardir,
-    os.pardir,
-    "externals",
-)
-sys.path.append(externals_path)
-
-# pylint: disable=wrong-import-position,import-error
-# fmt: off
-from ctsm_postprocessing.crops.cropcase import CropCase  # noqa: E402
-from ctsm_postprocessing.crops.crop_case_list import CropCaseList  # noqa: E402
-from ctsm_postprocessing.crops.extra_area_prod_yield_etc import MATURITY_LEVELS  # noqa: E402
-from ctsm_postprocessing.utils import ungrid  # noqa: E402
-# fmt: on
 
 
 def process_case(
