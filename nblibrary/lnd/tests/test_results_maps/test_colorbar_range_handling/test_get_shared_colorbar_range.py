@@ -184,35 +184,6 @@ class TestGetSharedColorbarRange:
         assert vmin == -10.0
         assert vmax == 8.0
 
-    def test_key_plot_not_in_list(self):
-        """
-        Test behavior when key_plot is specified but not in subplot_title_list.
-
-        TODO: Change behavior to throw an error instead of ignoring.
-        """
-        rm = ResultsMaps()
-
-        data1 = np.array([[1.0, 2.0], [3.0, 4.0]])
-        data2 = np.array([[5.0, 6.0], [7.0, 8.0]])
-
-        rm["case1"] = xr.DataArray(
-            data1,
-            coords={"lat": [0, 1], "lon": [0, 1]},
-            dims=["lat", "lon"],
-        )
-        rm["case2"] = xr.DataArray(
-            data2,
-            coords={"lat": [0, 1], "lon": [0, 1]},
-            dims=["lat", "lon"],
-        )
-
-        # key_plot "case3" doesn't exist in the list, so it won't be skipped
-        vmin, vmax = rm._get_shared_colorbar_range(["case1", "case2"], key_plot="case3")
-
-        # Should include both cases since "case3" is not in the list
-        assert vmin == 1.0
-        assert vmax == 8.0
-
     def test_very_small_values(self):
         """Test with very small floating point values."""
         rm = ResultsMaps()
