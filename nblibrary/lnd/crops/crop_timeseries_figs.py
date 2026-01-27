@@ -351,7 +351,7 @@ def _get_clm_area(
     crop: str,
     case: CropCase,
     use_earthstat_area: bool,
-    *args,
+    *args,  # pylint: disable=unused-argument
 ) -> xr.DataArray | list[str]:
     """
     Get CLM area timeseries for a crop.
@@ -365,7 +365,7 @@ def _get_clm_area(
     use_earthstat_area : bool
         Whether to use EarthStat area.
     *args
-        Additional arguments (unused).
+        Additional arguments (ignored).
 
     Returns
     -------

@@ -52,7 +52,7 @@ def process_case(
 
     # Get EarthStat area
     try:
-        cft_ds = _get_earthstat_area(cft_ds, earthstat_data, opts)
+        cft_ds = _get_earthstat_area(cft_ds, earthstat_data)
     except Exception as e:  # pylint: disable=broad-exception-caught
         skip_msg = f"Couldn't get EarthStat areas for case {case_name} due to"
         handle_exception(opts["debug"], e, skip_msg)
@@ -159,7 +159,6 @@ def _get_prod_as_if_earthstat(cft_ds: xr.Dataset) -> xr.Dataset:
 def _get_earthstat_area(
     cft_ds: xr.Dataset,
     earthstat_data: EarthStat,
-    opts: dict,
 ) -> xr.Dataset:
     """
     Get EarthStat crop areas and add them to the dataset.
@@ -173,8 +172,6 @@ def _get_earthstat_area(
         Dataset containing crop dimension and crop_area variable.
     earthstat_data : EarthStat
         EarthStat object containing observed crop area data.
-    opts : dict
-        Options dictionary (currently unused but kept for API consistency).
 
     Returns
     -------

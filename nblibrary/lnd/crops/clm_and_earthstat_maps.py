@@ -366,7 +366,6 @@ def clm_and_earthstat_maps_1crop(
     case_list: list[CropCase],
     case_legend_list: list[str],
     earthstat_data: EarthStat,
-    verbose: bool,
     crop: str,
     key_case_dict: dict[str, str],
     clm_or_obsdiff_list: list[str],
@@ -394,9 +393,6 @@ def clm_and_earthstat_maps_1crop(
     earthstat_data : EarthStat
         EarthStat data object containing observational crop statistics.
         Must support indexing by resolution and sel() for time slicing.
-    verbose : bool
-        If True, print detailed progress information.
-        Currently not actively used in the function.
     crop : str
         Name of the crop to process (e.g., 'corn', 'wheat', 'soy').
     key_case_dict : dict
@@ -447,7 +443,6 @@ def clm_and_earthstat_maps_1crop(
     ...     case_list=[case1, case2],
     ...     case_legend_list=['Case 1', 'Case 2'],
     ...     earthstat_data=earthstat_obj,
-    ...     verbose=True,
     ...     crop='corn',
     ...     key_case_dict={"Values": None},
     ...     clm_or_obsdiff_list=['None', 'obsdiff'],
