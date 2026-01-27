@@ -16,6 +16,7 @@ Default Colormaps:
     - Diverging: coolwarm (for differences)
     - Diverging (diff-of-diff): PiYG_r (for differences of differences)
 """
+
 from __future__ import annotations
 
 import re
@@ -30,7 +31,11 @@ NO_INTSXN_TIME_SLICE = None
 RESULT_MAP_NO_UNITS_MSG = "Results map from this_fn() is missing units attribute"
 
 
-def check_grid_match(grid0, grid1, tol=0):
+def check_grid_match(
+    grid0: np.ndarray | xr.DataArray,
+    grid1: np.ndarray | xr.DataArray,
+    tol: float = 0,
+) -> tuple[bool, float | None]:
     """
     Check whether latitude or longitude values match between two grids.
 
@@ -40,19 +45,20 @@ def check_grid_match(grid0, grid1, tol=0):
 
     Parameters
     ----------
-    grid0 : array-like or xr.DataArray
+    grid0 : numpy.ndarray | xarray.DataArray
         First grid to compare (e.g., latitude or longitude values).
-    grid1 : array-like or xr.DataArray
+    grid1 : numpy.ndarray | xarray.DataArray
         Second grid to compare (e.g., latitude or longitude values).
     tol : float, optional
         Tolerance for considering values as matching. Default is 0 (exact match).
 
     Returns
     -------
-    match : bool
-        True if grids match within tolerance, False otherwise.
-    max_abs_diff : float or None
-        Maximum absolute difference between the grids. None if shapes don't match.
+    tuple[bool, float | None]
+        Tuple containing:
+        - match: True if grids match within tolerance, False otherwise
+        - max_abs_diff: Maximum absolute difference between the grids, or None if shapes don't
+          match
 
     Warnings
     --------
@@ -86,7 +92,13 @@ def check_grid_match(grid0, grid1, tol=0):
     return match, max_abs_diff
 
 
-def get_difference_map(da0, da1, *, name=None, units=None):
+def get_difference_map(
+    da0: xr.DataArray,
+    da1: xr.DataArray,
+    *,
+    name: str | None = None,
+    units: str | None = None,
+) -> xr.DataArray:
     """
     Calculate the difference between two maps (da1 - da0).
 
@@ -96,14 +108,18 @@ def get_difference_map(da0, da1, *, name=None, units=None):
 
     Parameters
     ----------
-    da0 : xr.DataArray
+    da0 : xarray.DataArray
         First DataArray (subtracted from da1).
-    da1 : xr.DataArray
+    da1 : xarray.DataArray
         Second DataArray (minuend).
+    name : str | None, optional
+        Name to assign to the difference DataArray. Default is None.
+    units : str | None, optional
+        Units to assign to the difference DataArray. Default is None.
 
     Returns
     -------
-    da_diff : xr.DataArray
+    xarray.DataArray
         Difference map (da1 - da0).
 
     Raises
@@ -136,8 +152,15 @@ def get_difference_map(da0, da1, *, name=None, units=None):
     return da_diff
 
 
-def get_dummy_map():
-    """Return a dummy 1-degree global map (xarray DataArray) with all NaN"""
+def get_dummy_map() -> xr.DataArray:
+    """
+    Return a dummy 1-degree global map (xarray DataArray) with all NaN.
+
+    Returns
+    -------
+    xarray.DataArray
+        1-degree global map with all NaN values, dimensions (lat, lon).
+    """
     lon = np.arange(-180, 180, 1)
     lat = np.arange(-90, 91, 1)
     coords = {"lat": lat, "lon": lon}
@@ -150,11 +173,49 @@ def get_dummy_map():
 
 
 def get_dummy_timeseries(ds: xr.Dataset) -> xr.DataArray:
-    """Given an xarray Dataset, return a dummy timeseries with all NaNs"""
+    """
+    Given an xarray Dataset, return a dummy timeseries with all NaNs.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing a 'time' coordinate.
+
+    Returns
+    -------
+    xarray.DataArray
+        DataArray with same time dimension as input, filled with NaN values.
+    """
     return xr.full_like(ds["time"], np.nan, dtype=np.float64)
 
 
-def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
+def interp_key_case_grid(
+    case_name: str,
+    key_case_name: str,
+    da: xr.DataArray,
+    da_key_case: xr.DataArray,
+) -> xr.DataArray:
+    """
+    Interpolate key case grid to match the grid of another case.
+
+    For now, only uses nearest-neighbor interpolation.
+
+    Parameters
+    ----------
+    case_name : str
+        Name of the case being processed.
+    key_case_name : str
+        Name of the key case.
+    da : xarray.DataArray
+        DataArray defining the target grid.
+    da_key_case : xarray.DataArray
+        Key case DataArray to interpolate.
+
+    Returns
+    -------
+    xarray.DataArray
+        Interpolated key case DataArray on the target grid.
+    """
     lats_match = check_grid_match(da["lat"], da_key_case["lat"])
     lons_match = check_grid_match(da["lon"], da_key_case["lon"])
 
@@ -163,11 +224,33 @@ def interp_key_case_grid(case_name, key_case_name, da, da_key_case):
         print(
             f"Nearest-neighbor interpolating {key_case_name} to match {case_name} grid",
         )
+        # TODO: Add different method options, or even custom interpolation functions
         da_key_case = da_key_case.interp_like(da, method="nearest")
     return da_key_case
 
 
-def get_key_diff(key_diff_abs_error, da, da_key_case):
+def get_key_diff(
+    key_diff_abs_error: bool,
+    da: xr.DataArray,
+    da_key_case: xr.DataArray,
+) -> xr.DataArray:
+    """
+    Calculate difference from key case, optionally using absolute errors.
+
+    Parameters
+    ----------
+    key_diff_abs_error : bool
+        If True, calculate difference of absolute errors. If False, calculate simple difference.
+    da : xarray.DataArray
+        DataArray for the current case.
+    da_key_case : xarray.DataArray
+        DataArray for the key case.
+
+    Returns
+    -------
+    xarray.DataArray
+        Difference DataArray with preserved attributes from da.
+    """
     da_attrs = da.attrs
     # TODO: Check for units match between da and da_key_case?
     if key_diff_abs_error:
@@ -180,9 +263,21 @@ def get_key_diff(key_diff_abs_error, da, da_key_case):
     return da
 
 
-def get_maturity_level_from_stat(stat_input):
+def get_maturity_level_from_stat(stat_input: str) -> tuple[str, str]:
     """
-    Separate maturity level from stat input string, if any
+    Extract maturity level from statistic input string.
+
+    Parameters
+    ----------
+    stat_input : str
+        Statistic input string, optionally ending with maturity level (e.g., 'yield_mature').
+
+    Returns
+    -------
+    tuple[str, str]
+        Tuple containing:
+        - stat_input: Statistic string with maturity level removed
+        - maturity: Maturity level ('any', 'marketable', or 'mature')
     """
     maturity = None
     if "@" in stat_input:
@@ -190,7 +285,20 @@ def get_maturity_level_from_stat(stat_input):
     return stat_input, maturity
 
 
-def get_yr_range(ds):
+def get_yr_range(ds: xr.Dataset) -> tuple[int, int]:
+    """
+    Get year range from a dataset's time coordinate.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing a 'time' coordinate.
+
+    Returns
+    -------
+    tuple[int, int]
+        Tuple containing (first_year, last_year).
+    """
     if "time" not in ds.dims or ds.sizes["time"] == 0:
         return [None, None]
     first_year = ds["time"].values[0]
@@ -198,7 +306,7 @@ def get_yr_range(ds):
     return [first_year, last_year]
 
 
-def _get_range_overlap(*ranges):
+def _get_range_overlap(*ranges) -> list[int] | None:
     """
     Find the overlap between an arbitrary number of year ranges.
 
@@ -207,14 +315,14 @@ def _get_range_overlap(*ranges):
 
     Parameters
     ----------
-    *ranges : list or tuple
+    *ranges : list | tuple
         Variable number of ranges, each as [start, end] or (start, end) where
         both start and end are inclusive. A range of [None, None] indicates
         no valid range.
 
     Returns
     -------
-    list or None
+    list[int] | None
         [start, end] of the overlapping range (inclusive), or None if:
         - No ranges are provided
         - Any range is [None, None]
@@ -263,18 +371,51 @@ def _get_range_overlap(*ranges):
 def get_mean_map(
     case,
     key_case,
-    key_diff_abs_error,
+    key_diff_abs_error: bool,
     this_fn,
     *args,
-    map_keycase_dict_io,
-    time_slice,
-    debug,
+    map_keycase_dict_io: DictSliceStrIndexed | None,
+    time_slice: slice | None,
+    debug: bool,
     **kwargs,
-):
+) -> tuple[int, xr.DataArray | None, int | None, int | None, DictSliceStrIndexed]:
     """
-    Note that time_slice is allowed to be unspecified, but this is NOT recommended as it can result
-    in the case mean and key case mean being taken over different years. It is only provided to
-    test for differences during development.
+    Get mean map for a case, optionally calculating difference from key case.
+
+    Note that time_slice is allowed to be unspecified, but this is NOT recommended as it can
+    result in the case mean and key case mean being taken over different years. It is only
+    provided to test for differences during development.
+
+    Parameters
+    ----------
+    case : CropCase
+        Case to process.
+    key_case : CropCase | None
+        Key case for comparison, or None if no comparison.
+    key_diff_abs_error : bool
+        Whether to calculate difference of absolute errors.
+    this_fn : Callable
+        Function to compute the mean map.
+    *args
+        Positional arguments to pass to this_fn.
+    map_keycase_dict_io : DictSliceStrIndexed | None
+        Dictionary for caching key case maps covering different time slices, or None.
+    time_slice : slice | None
+        Time slice to apply, or None for all times.
+    debug : bool
+        Whether to print debug information.
+    **kwargs
+        Keyword arguments to pass to this_fn.
+
+    Returns
+    -------
+    tuple[int, xarray.DataArray | None, int | None, int | None, DictSliceStrIndexed]
+        Tuple containing:
+        - n_timesteps: Number of timesteps in the processed data
+        - map_case: Mean map DataArray, or None if no data
+        - case_first_yr: First year in the time range, or None if no data
+        - case_last_yr: Last year in the time range, or None if no data
+        - map_keycase_dict_io: Updated key case map cache dictionary
     """
     calc_diff_from_key_case = key_case is not None and case.name != key_case.name
 
@@ -357,12 +498,23 @@ def get_mean_map(
     return n_timesteps, map_clm, case_first_yr, case_last_yr, map_keycase_dict_io
 
 
-def handle_exception(debug, e, skip_msg):
+def handle_exception(debug: bool, e: Exception, skip_msg: str) -> None:
     """
-    At various places, we want to handle errors by
-       (a) printing if it's just due to a missing xr.Dataset variable; if not,
-       (b) throwing the error if we're in debug mode; otherwise
-       (c) warning.
+    Handle exceptions with context-appropriate behavior.
+
+    At various places, we want to handle errors by:
+    (a) printing if it's just due to a missing xr.Dataset variable; if not,
+    (b) throwing the error if we're in debug mode; otherwise
+    (c) warning.
+
+    Parameters
+    ----------
+    debug : bool
+        Whether to raise exceptions instead of warning.
+    e : Exception
+        Exception that was caught.
+    skip_msg : str
+        Message to print/warn about what is being skipped.
     """
     match = re.search(
         r"No variable named '(.+)'\. Variables on the dataset include",
@@ -382,12 +534,27 @@ def handle_exception(debug, e, skip_msg):
 def _get_intsxn_time_slice_of_cases(
     case,
     key_case,
-    time_slice_in,
-    calc_diff_from_key_case,
-):
+    time_slice_in: slice,
+    calc_diff_from_key_case: bool,
+) -> slice:
     """
-    Given a case, key case, and time slice, return the time slice that is the intersection among
-    all three.
+    Get the time slice that is the intersection among case, key case, and input time slice.
+
+    Parameters
+    ----------
+    case : CropCase
+        The case to process.
+    key_case : CropCase
+        The key case for comparison.
+    time_slice_in : slice
+        The initial time slice provided by the user.
+    calc_diff_from_key_case : bool
+        Whether we are calculating a difference from the key case.
+
+    Returns
+    -------
+    slice
+        The intersection time slice.
     """
 
     if not calc_diff_from_key_case:
@@ -402,10 +569,24 @@ def _get_intsxn_time_slice_of_cases(
     return time_slice
 
 
-def get_instxn_time_slice_of_ds(time_slice_in, *args):
+def get_instxn_time_slice_of_ds(time_slice_in: slice, *args: xr.Dataset) -> slice:
     """
+    Get the time slice that is the intersection among input slice and all Datasets.
+
     Given a time slice and an arbitrary number of Datasets, return the time slice that is the
     intersection among all.
+
+    Parameters
+    ----------
+    time_slice_in : slice
+        Initial time slice.
+    *args : xarray.Dataset
+        Variable number of Datasets to find time intersection for.
+
+    Returns
+    -------
+    slice
+        Intersection time slice, or NO_INTSXN_TIME_SLICE if no intersection exists.
     """
     args = [ds.sel(time=time_slice_in) for ds in args]
     intsxn_yr_range = _get_range_overlap(*[get_yr_range(ds) for ds in args])
@@ -420,7 +601,33 @@ def get_instxn_time_slice_of_ds(time_slice_in, *args):
     return time_slice
 
 
-def get_key_case(case_legend_list, key_case_value, case_list):
+def get_key_case(
+    case_legend_list: list[str],
+    key_case_value: str | None,
+    case_list,
+) -> None:
+    """
+    Get the key case from the case list.
+
+    Parameters
+    ----------
+    case_legend_list : list[str]
+        List of case legend labels.
+    key_case_value : str | None
+        Key case identifier, or None if no key case.
+    case_list : CropCaseList
+        List of cases to search.
+
+    Returns
+    -------
+    CropCase | None
+        The key case if found, or None if key_case_value is None.
+
+    Raises
+    ------
+    RuntimeError
+        If key_case_value is not found in case_legend_list.
+    """
     key_case = None
     if key_case_value is not None:
         for c, case_legend in enumerate(case_legend_list):

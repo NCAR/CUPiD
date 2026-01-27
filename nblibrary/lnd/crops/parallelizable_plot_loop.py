@@ -7,6 +7,7 @@ optional key case comparisons and customizable plot parameters.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import os
 import warnings
 from dask.distributed import as_completed
@@ -25,19 +26,26 @@ from .results_maps import ResultsMaps
 SUBMISSION_INDENT = "   "
 
 
-def get_figpath_with_keycase(fig_path, key_case, key_case_dict):
-    """Generate a figure path with key case identifier appended.
+def get_figpath_with_keycase(fig_path: str, key_case: str, key_case_dict: dict) -> str:
+    """
+    Generate a figure path with key case identifier appended.
 
     If there is only one key case, returns the original path unchanged.
     Otherwise, appends the key case name to the filename before the extension.
 
-    Args:
-        fig_path: Original figure file path
-        key_case: Key case identifier string
-        key_case_dict: Dictionary of key cases
+    Parameters
+    ----------
+    fig_path : str
+        Original figure file path.
+    key_case : str
+        Key case identifier string.
+    key_case_dict : dict
+        Dictionary of key cases.
 
-    Returns:
-        str: Modified figure path with key case identifier if needed
+    Returns
+    -------
+    str
+        Modified figure path with key case identifier if needed.
     """
     if len(key_case_dict) == 1:
         return fig_path
@@ -53,50 +61,67 @@ def get_figpath_with_keycase(fig_path, key_case, key_case_dict):
 
 def plot_loop(
     *,
-    get_mean_fn: callable,
+    get_mean_fn: Callable,
     key_diff_abs_error: bool,
     results_da_name: str,
     img_dir: str,
-    dask_client: Client,
+    dask_client: Client | None,
     case_list: CropCaseList,
     opts: dict,
     crop_dict: dict,
     incl_yrs_ranges_dict: dict,
     key_case_dict: dict,
-    get_mean_fn_args: list = None,
-    get_mean_fn_kwargs: dict = None,
-    custom_dropdown_items: list = None,
-    custom_radio_items: list = None,
+    get_mean_fn_args: list | None = None,
+    get_mean_fn_kwargs: dict | None = None,
+    custom_dropdown_items: list | None = None,
+    custom_radio_items: list | None = None,
     vrange: tuple = DEFAULT_NO_VRANGE,
-):
-    """Generate plots for all combinations of crops, time ranges, and key cases.
+) -> None:
+    """
+    Generate plots for all combinations of crops, time ranges, and key cases.
 
-    This is the main entry point for creating a series of comparative maps across
-    multiple cases, crops, and time periods. It iterates through all combinations
-    and generates individual figures for each. Supports parallel execution via Dask
-    when a client is provided.
+    This is the main entry point for creating a series of comparative maps across multiple cases,
+    crops, and time periods. It iterates through all combinations and generates individual figures
+    for each. Supports parallel execution via Dask when a client is provided.
 
-    Args:
-        get_mean_fn: Function to compute mean values for a case
-        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
-        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
-        key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
-        results_da_name: Name for the results DataArray
-        img_dir: Directory path where images will be saved
-        dask_client: Dask distributed client for parallel execution, or None for serial
-        case_list: List of cases to process
-        opts: Dictionary of options including 'verbose' and 'case_legend_list'
-        crop_dict: Dictionary mapping crop identifiers to crop names
-        incl_yrs_ranges_dict: Dictionary of year ranges to plot
-        key_case_dict: Dictionary of key cases for comparison
-        custom_dropdown_items: Optional list of custom dropdown menu items
-        custom_radio_items: Optional list of custom radio button items
-        vrange: Optional tuple specifying value range for colorbar
+    Parameters
+    ----------
+    get_mean_fn : Callable
+        Function to compute mean values for a case.
+    key_diff_abs_error : bool
+        Whether difference from key case should be difference of absolute errors.
+    results_da_name : str
+        Name for the results DataArray.
+    img_dir : str
+        Directory path where images will be saved.
+    dask_client : dask.distributed.Client | None
+        Dask distributed client for parallel execution, or None for serial execution.
+    case_list : CropCaseList
+        List of cases to process.
+    opts : dict
+        Dictionary of options including 'verbose' and 'case_legend_list'.
+    crop_dict : dict
+        Dictionary mapping crop identifiers to crop names.
+    incl_yrs_ranges_dict : dict
+        Dictionary of year ranges to plot.
+    key_case_dict : dict
+        Dictionary of key cases for comparison.
+    get_mean_fn_args : list | None, optional
+        List of positional arguments to pass to get_mean_fn. Default is None.
+    get_mean_fn_kwargs : dict | None, optional
+        Dictionary of keyword arguments to pass to get_mean_fn. Default is None.
+    custom_dropdown_items : list | None, optional
+        Optional list of custom dropdown menu items. Default is None.
+    custom_radio_items : list | None, optional
+        Optional list of custom radio button items. Default is None.
+    vrange : tuple, optional
+        Tuple specifying value range for colorbar. Default is DEFAULT_NO_VRANGE.
 
-    Note:
-        When dask_client is provided, figures are generated in parallel using Dask's
-        distributed scheduler. The function waits for all tasks to complete and
-        performs cleanup to free worker memory.
+    Notes
+    -----
+    When dask_client is provided, figures are generated in parallel using Dask's distributed
+    scheduler. The function waits for all tasks to complete and performs cleanup to free worker
+    memory.
     """
 
     # To avoid pylint "dangerous default value" warning
@@ -174,7 +199,19 @@ def plot_loop(
         wait_for_jobs_to_finish(dask_client, opts, futures)
 
 
-def wait_for_jobs_to_finish(dask_client, opts, futures):
+def wait_for_jobs_to_finish(dask_client: Client, opts: dict, futures: list) -> None:
+    """
+    Wait for all Dask futures to complete and clean up resources.
+
+    Parameters
+    ----------
+    dask_client : dask.distributed.Client
+        Dask distributed client.
+    opts : dict
+        Options dictionary containing 'verbose' flag.
+    futures : list
+        List of Dask futures to wait for.
+    """
     if opts["verbose"]:
         print("Processing...")
     n_futures = len(futures)
@@ -197,7 +234,7 @@ def wait_for_jobs_to_finish(dask_client, opts, futures):
 
 def _one_figure(
     *,
-    get_mean_fn: callable,
+    get_mean_fn: Callable,
     get_mean_fn_args: list,
     get_mean_fn_kwargs: dict,
     key_diff_abs_error: bool,
@@ -207,44 +244,62 @@ def _one_figure(
     vrange: tuple,
     crop: str,
     case_list_thiscrop: CropCaseList,
-    incl_yrs_range_input,
+    incl_yrs_range_input: list[int],
     yr_range_str: str,
     time_slice: slice,
-    suptitle: str,
-    key_case_value: str,
+    suptitle: str | None,
+    key_case_value: str | None,
 ) -> str:
-    """Generate a single figure for a specific crop, time range, and key case.
+    """
+    Generate a single figure for a specific crop, time range, and key case.
 
-    This function processes all cases for a given crop and time period, creating
-    a multi-panel figure with one panel per case. It handles key case comparisons
-    and saves the resulting figure to disk. Designed to be called either serially
-    or as a Dask task for parallel execution.
+    This function processes all cases for a given crop and time period, creating a multi-panel
+    figure with one panel per case. It handles key case comparisons and saves the resulting
+    figure to disk. Designed to be called either serially or as a Dask task for parallel
+    execution.
 
-    Note that any print() statements here won't be seen during or after parallel execution, but
-    warnings will be unless suppressed at the Client level.
+    Parameters
+    ----------
+    get_mean_fn : Callable
+        Function to compute mean values for a case.
+    get_mean_fn_args : list
+        List of positional arguments to pass to get_mean_fn.
+    get_mean_fn_kwargs : dict
+        Dictionary of keyword arguments to pass to get_mean_fn.
+    key_diff_abs_error : bool
+        Whether difference from key case should be difference of absolute errors.
+    results_da_name : str
+        Name for the results DataArray.
+    fig_path : str
+        File path where figure will be saved.
+    opts : dict
+        Dictionary of options including 'verbose', 'case_legend_list', and 'key_case'.
+    vrange : tuple
+        Tuple specifying value range for colorbar.
+    crop : str
+        Crop name for this figure.
+    case_list_thiscrop : CropCaseList
+        List of cases filtered for this crop.
+    incl_yrs_range_input : list[int]
+        Year range input specification as [start_year, end_year].
+    yr_range_str : str
+        String representation of year range.
+    time_slice : slice
+        Time slice object for data selection.
+    suptitle : str | None
+        Super title for the figure, or None to auto-generate.
+    key_case_value : str | None
+        Value/configuration for the key case, or None if no key case.
 
-    Args:
-        get_mean_fn: Function to compute mean values for a case
-        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
-        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
-        key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
-        results_da_name: Name for the results DataArray
-        fig_path: File path where figure will be saved
-        opts: Dictionary of options including 'verbose', 'case_legend_list', and 'key_case'
-        custom_dropdown_items: List of custom dropdown menu items
-        custom_radio_items: List of custom radio button items
-        vrange: Tuple specifying value range for colorbar
-        crop: Crop name for this figure
-        case_list_thiscrop: List of cases filtered for this crop
-        incl_yrs_range_input: Year range input specification
-        yr_range_str: String representation of year range
-        time_slice: Time slice object for data selection
-        suptitle: Super title for the figure (or None to auto-generate)
-        key_case_key: Key identifier for the key case
-        key_case_value: Value/configuration for the key case
+    Returns
+    -------
+    str
+        The figure's super title, used for completion status messages.
 
-    Returns:
-        str: The figure's super title, used for completion status messages
+    Notes
+    -----
+    Any print() statements here won't be seen during or after parallel execution, but warnings
+    will be unless suppressed at the Client level.
     """
 
     # Get key case, if needed
@@ -293,7 +348,7 @@ def _one_figure(
 
 def _one_case(
     *,
-    get_mean_fn: callable,
+    get_mean_fn: Callable,
     get_mean_fn_args: list,
     get_mean_fn_kwargs: dict,
     key_diff_abs_error: bool,
@@ -302,43 +357,67 @@ def _one_case(
     crop: str,
     yr_range_str: str,
     time_slice: slice,
-    suptitle: str,
-    key_case: CropCase,
+    suptitle: str | None,
+    key_case: CropCase | None,
     results: ResultsMaps,
     case_incl_yr_dict: dict,
     c: int,
     case: CropCase,
-    map_keycase_dict_io: dict,
-) -> str:
-    """Process a single case and add its results to the ResultsMaps object.
+    map_keycase_dict_io: dict | None,
+) -> tuple[ResultsMaps, dict, str]:
+    """
+    Process a single case and add its results to the ResultsMaps object.
 
-    This function computes the mean map for one case, stores timing information,
-    adds the results to the ResultsMaps collection, and generates/returns the
-    figure super title.
+    This function computes the mean map for one case, stores timing information, adds the results
+    to the ResultsMaps collection, and generates/returns the figure super title.
 
-    Note that any print() statements here won't be seen during or after parallel execution, but
-    warnings will be unless suppressed at the Client level.
+    Parameters
+    ----------
+    get_mean_fn : Callable
+        Function to compute mean values for a case.
+    get_mean_fn_args : list
+        List of positional arguments to pass to get_mean_fn.
+    get_mean_fn_kwargs : dict
+        Dictionary of keyword arguments to pass to get_mean_fn.
+    key_diff_abs_error : bool
+        Whether difference from key case should be difference of absolute errors.
+    results_da_name : str
+        Name for the results DataArray.
+    opts : dict
+        Dictionary of options including 'case_legend_list' and 'debug'.
+    crop : str
+        Crop name being processed.
+    yr_range_str : str
+        String representation of year range.
+    time_slice : slice
+        Time slice object for data selection.
+    suptitle : str | None
+        Existing super title, or None to generate new one.
+    key_case : CropCase | None
+        Key case CropCase object for comparison, or None if no key case.
+    results : ResultsMaps
+        ResultsMaps object to store this case's results.
+    case_incl_yr_dict : dict
+        Dictionary to store year range info per case.
+    c : int
+        Index of current case in case list.
+    case : CropCase
+        CropCase object being processed.
+    map_keycase_dict_io : dict | None
+        Dictionary for key case map caching, or None.
 
-    Args:
-        get_mean_fn: Function to compute mean values for a case
-        get_mean_fn_args: List of positional arguments to pass to get_mean_fn
-        get_mean_fn_kwargs: Dictionary of keyword arguments to pass to get_mean_fn
-        key_diff_abs_error: Whether difference from key case should be diff. of absolute errors
-        results_da_name: Name for the results DataArray
-        opts: Dictionary of options including 'case_legend_list'
-        crop: Crop name being processed
-        yr_range_str: String representation of year range
-        time_slice: Time slice object for data selection
-        suptitle: Existing super title (or None to generate new one)
-        key_case: Key case CropCase object for comparison (or None)
-        results: ResultsMaps object to store this case's results
-        case_incl_yr_dict: Dictionary to store year range info per case
-        c: Index of current case in case list
-        case: CropCase object being processed
-        map_keycase_dict_io: Dictionary for key case map caching (or None)
+    Returns
+    -------
+    tuple[ResultsMaps, dict, str]
+        Tuple containing:
+        - results: Updated ResultsMaps object
+        - case_incl_yr_dict: Updated dictionary with year range info
+        - suptitle: Super title for the figure
 
-    Returns:
-        str: Super title for the figure
+    Notes
+    -----
+    Any print() statements here won't be seen during or after parallel execution, but warnings
+    will be unless suppressed at the Client level.
     """
     case_legend = opts["case_legend_list"][c]
 

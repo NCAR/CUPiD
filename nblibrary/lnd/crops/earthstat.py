@@ -1,6 +1,7 @@
 """
 Classes to handle importing and working with EarthStat data
 """
+
 from __future__ import annotations
 
 import os
@@ -18,11 +19,25 @@ REFERENCE_EARTHSTAT_RES = "f09"
 NEEDED_VARS = ["HarvestArea", "Production", "Yield", "LandMask"]
 
 
-def align_time(da_to_align, target_time):
+def align_time(da_to_align: xr.DataArray, target_time: xr.DataArray) -> xr.DataArray:
     """
-    EarthStat and CLM time axes don't match. This function gives the EarthStat data the time axis of
-    the CLM outputs. If you don't do this, you will get all NaNs when you try to assign something
-    from EarthStat to the CLM Dataset.
+    Align EarthStat time axis with CLM time axis.
+
+    EarthStat and CLM time axes don't match. This function gives the EarthStat data the time axis
+    of the CLM outputs. If you don't do this, you will get all NaNs when you try to assign
+    something from EarthStat to the CLM Dataset.
+
+    Parameters
+    ----------
+    da_to_align : xarray.DataArray
+        EarthStat DataArray to align.
+    target_time : xarray.DataArray
+        CLM time coordinate DataArray to align to.
+
+    Returns
+    -------
+    xarray.DataArray
+        DataArray with time axis aligned to target_time.
     """
 
     # We may want to use this with target_time DataArrays that are a DateTime type. Otherwise we'll
@@ -51,9 +66,26 @@ def align_time(da_to_align, target_time):
     return da_to_align.assign_coords({"time": new_time_coord})
 
 
-def check_dim_alignment(earthstat_ds, clm_ds):
+def check_dim_alignment(earthstat_ds: xr.Dataset, clm_ds: xr.Dataset) -> xr.Dataset:
     """
-    Ensure that EarthStat and CLM datasets are aligned on all dimensions
+    Ensure that EarthStat and CLM datasets are aligned on all dimensions.
+
+    Parameters
+    ----------
+    earthstat_ds : xarray.Dataset
+        EarthStat dataset to align.
+    clm_ds : xarray.Dataset
+        CLM dataset to align to.
+
+    Returns
+    -------
+    xarray.Dataset
+        EarthStat dataset with dimensions aligned to CLM dataset.
+
+    Raises
+    ------
+    RuntimeError
+        If dimensions cannot be aligned (except for time, where CLM can have more timesteps).
     """
     # Align crop coordinates
     if "crop" not in earthstat_ds.coords:
@@ -75,24 +107,56 @@ def check_dim_alignment(earthstat_ds, clm_ds):
     return earthstat_ds
 
 
-def get_clm_landarea(ds):
+def get_clm_landarea(ds: xr.Dataset) -> xr.DataArray:
+    """
+    Calculate CLM land area from gridcell area and land fraction.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing 'area' and 'landfrac' variables.
+
+    Returns
+    -------
+    xarray.DataArray
+        Land area calculated as gridcell area * landfrac.
+    """
     return ds["area"] * ds["landfrac"]
 
 
 class EarthStat:
     """
-    A class to handle importing EarthStat data
+    A class to handle importing EarthStat data.
+
+    Attributes
+    ----------
+    crops : list[str]
+        List of crop names available in EarthStat.
+    _data : dict[str, xarray.Dataset]
+        Dictionary mapping resolution names to EarthStat datasets.
     """
 
     def __init__(
         self,
-        earthstat_dir,
-        sim_resolutions,
-        opts,
-    ):
+        earthstat_dir: str,
+        sim_resolutions: dict[str, xr.Dataset],
+        opts: dict,
+    ) -> None:
+        """
+        Initialize EarthStat instance.
+
+        Parameters
+        ----------
+        earthstat_dir : str
+            Directory containing EarthStat data files.
+        sim_resolutions : dict[str, xarray.Dataset]
+            Dictionary mapping resolution names to CLM datasets for regridding.
+        opts : dict
+            Options dictionary containing 'crops_to_plot', 'start_year', and 'end_year'.
+        """
         # Define variables
-        self.crops = []
-        self._data = {}
+        self.crops: list[str] = []
+        self._data: dict[str, xr.Dataset] = {}
 
         # Import EarthStat crop list
         self._get_crop_list(earthstat_dir, opts["crops_to_plot"])
@@ -100,34 +164,78 @@ class EarthStat:
         # Import EarthStat maps
         self._import_all_resolutions(earthstat_dir, sim_resolutions, opts)
 
-    def __getitem__(self, key):
-        """instance[key] syntax should return corresponding value in data dict"""
+    def __getitem__(self, key: str) -> xr.Dataset:
+        """
+        Get dataset for a resolution using instance[key] syntax.
+
+        Parameters
+        ----------
+        key : str
+            Resolution name.
+
+        Returns
+        -------
+        xarray.Dataset
+            Dataset for the specified resolution.
+        """
         return self._data[key]
 
-    def __setitem__(self, key: str, value: xr.Dataset):
-        """instance[key]=value syntax should set corresponding key=value in data dict"""
+    def __setitem__(self, key: str, value: xr.Dataset) -> None:
+        """
+        Set dataset for a resolution using instance[key]=value syntax.
+
+        Parameters
+        ----------
+        key : str
+            Resolution name.
+        value : xarray.Dataset
+            Dataset to store for this resolution.
+        """
         self._data[key] = value
 
-    def __print__(self):
+    def __print__(self) -> None:
+        """
+        Print information about available resolutions.
+        """
         print(
             f"Dict with Datasets for the following resolutions: {','.join(self._data.keys())}",
         )
 
     def keys(self):
         """
-        Return keys of the _data dict
+        Return keys of the _data dict.
+
+        Returns
+        -------
+        dict_keys
+            Keys (resolution names) of the internal data dictionary.
         """
         return self._data.keys()
 
     def items(self):
         """
-        Return items (key-value pairs) of the _data dict
+        Return items (key-value pairs) of the _data dict.
+
+        Returns
+        -------
+        dict_items
+            Items (resolution name, dataset pairs) of the internal data dictionary.
         """
         return self._data.items()
 
-    def _get_crop_list(self, earthstat_dir, clm_crops_to_plot):
+    def _get_crop_list(self, earthstat_dir: str, clm_crops_to_plot: list[str]) -> None:
         """
-        Get the list of crops in EarthStat
+        Get the list of crops in EarthStat.
+
+        Reads the crop list from EARTHSTATMIRCAUNFAO_croplist.txt and renames some crops to
+        match CLM conventions.
+
+        Parameters
+        ----------
+        earthstat_dir : str
+            Directory containing EarthStat data files.
+        clm_crops_to_plot : list[str]
+            List of CLM crop names to check against EarthStat crops.
         """
         earthstat_crop_list_file = os.path.join(
             earthstat_dir,
@@ -160,9 +268,23 @@ class EarthStat:
             if crop not in self.crops:
                 print(f"WARNING: {crop} not found in self.crops")
 
-    def _import_all_resolutions(self, earthstat_dir, sim_resolutions, opts):
+    def _import_all_resolutions(
+        self,
+        earthstat_dir: str,
+        sim_resolutions: dict[str, xr.Dataset],
+        opts: dict,
+    ) -> None:
         """
-        Import EarthStat maps corresponding to simulated CLM resolutions
+        Import EarthStat maps corresponding to simulated CLM resolutions.
+
+        Parameters
+        ----------
+        earthstat_dir : str
+            Directory containing EarthStat data files.
+        sim_resolutions : dict[str, xarray.Dataset]
+            Dictionary mapping resolution names to CLM datasets.
+        opts : dict
+            Options dictionary containing configuration settings.
         """
         for res in sim_resolutions.keys():
             self._import_one_resolution(earthstat_dir, opts, res)
@@ -174,8 +296,32 @@ class EarthStat:
 
         print("Done.")
 
-    def _get_all_missing(self, earthstat_dir, sim_resolutions, opts, missing_res):
-        """Interpolate EarthStat data to all missing resolutions"""
+    def _get_all_missing(
+        self,
+        earthstat_dir: str,
+        sim_resolutions: dict[str, xr.Dataset],
+        opts: dict,
+        missing_res: list[str],
+    ) -> None:
+        """
+        Interpolate EarthStat data to all missing resolutions.
+
+        Parameters
+        ----------
+        earthstat_dir : str
+            Directory containing EarthStat data files.
+        sim_resolutions : dict[str, xarray.Dataset]
+            Dictionary mapping resolution names to CLM datasets.
+        opts : dict
+            Options dictionary containing configuration settings.
+        missing_res : list[str]
+            List of resolution names that need to be interpolated.
+
+        Raises
+        ------
+        FileNotFoundError
+            If no EarthStat files were successfully read.
+        """
         # Get base resolution to do regridding from
         if REFERENCE_EARTHSTAT_RES not in self.keys():
             self._import_one_resolution(
@@ -221,13 +367,33 @@ class EarthStat:
     def _get_one_missing(
         self,
         *,
-        sim_resolutions,
-        earthstat_in_ds,
-        earthstat_in_res,
-        res,
-        clm_in_landarea,
-    ):
-        """Interpolate EarthStat data to one missing resolution"""
+        sim_resolutions: dict[str, xr.Dataset],
+        earthstat_in_ds: xr.Dataset,
+        earthstat_in_res: str,
+        res: str,
+        clm_in_landarea: xr.DataArray,
+    ) -> None:
+        """
+        Interpolate EarthStat data to one missing resolution.
+
+        Parameters
+        ----------
+        sim_resolutions : dict[str, xarray.Dataset]
+            Dictionary mapping resolution names to CLM datasets.
+        earthstat_in_ds : xarray.Dataset
+            Source EarthStat dataset to interpolate from.
+        earthstat_in_res : str
+            Source resolution name.
+        res : str
+            Target resolution name.
+        clm_in_landarea : xarray.DataArray
+            CLM land area at source resolution.
+
+        Raises
+        ------
+        ValueError
+            If interpolation method is not defined for a variable.
+        """
         print(f"Interpolating EarthStat data from {earthstat_in_res} to {res}")
         clm_out_ds = sim_resolutions[res]
         clm_out_landarea = get_clm_landarea(clm_out_ds)
@@ -280,7 +446,19 @@ class EarthStat:
         area_units = self[res]["HarvestArea"].attrs["units"]
         self[res]["Yield"].attrs["units"] = f"{prod_units}/{area_units}"
 
-    def _import_one_resolution(self, earthstat_dir, opts, res):
+    def _import_one_resolution(self, earthstat_dir: str, opts: dict, res: str) -> None:
+        """
+        Import EarthStat maps for one resolution.
+
+        Parameters
+        ----------
+        earthstat_dir : str
+            Directory containing EarthStat data files.
+        opts : dict
+            Options dictionary containing 'start_year' and 'end_year'.
+        res : str
+            Resolution name to import.
+        """
         earthstat_file = os.path.join(earthstat_dir, res + ".nc")
         # Skip (but warn) if EarthStat file not found.
         if not os.path.exists(earthstat_file):
@@ -303,11 +481,39 @@ class EarthStat:
 
         self[res] = ds
 
-    def get_data(self, res, stat_input, crop, target_unit):
+    def get_data(
+        self,
+        res: str,
+        stat_input: str,
+        crop: str,
+        target_unit: str,
+    ) -> xr.DataArray:
         """
-        Get data from EarthStat
-        """
+        Get data from EarthStat for a specific resolution, statistic, and crop.
 
+        Parameters
+        ----------
+        res : str
+            Resolution name (e.g., 'f09', 'f19').
+        stat_input : str
+            Statistic to retrieve ('yield', 'prod', or 'area').
+        crop : str
+            Crop name.
+        target_unit : str
+            Target unit for the data ('tonnes/ha' for yield, 'Mt' for prod, 'Mha' for area).
+
+        Returns
+        -------
+        xarray.DataArray
+            DataArray with the requested data in the target units.
+
+        Raises
+        ------
+        NotImplementedError
+            If stat_input is not 'yield', 'prod', or 'area', or if target_unit is not supported.
+        RuntimeError
+            If the units in the data don't match expected units.
+        """
         # First, check whether this crop is even in EarthStat. Return early if not.
         earthstat_crop_idx = self.crops.index(crop)
 
@@ -341,9 +547,31 @@ class EarthStat:
         data_obs.attrs["units"] = converting[1]
         return data_obs
 
-    def get_map(self, res, stat_input, crop, target_unit):
+    def get_map(
+        self,
+        res: str,
+        stat_input: str,
+        crop: str,
+        target_unit: str,
+    ) -> xr.DataArray:
         """
-        Get map from EarthStat for comparing with CLM output
+        Get time-averaged map from EarthStat for comparing with CLM output.
+
+        Parameters
+        ----------
+        res : str
+            Resolution name (e.g., 'f09', 'f19').
+        stat_input : str
+            Statistic to retrieve ('yield', 'prod', or 'area').
+        crop : str
+            Crop name.
+        target_unit : str
+            Target unit for the data.
+
+        Returns
+        -------
+        xarray.DataArray
+            Time-averaged map of the requested statistic. For yield, this is area-weighted.
         """
         # Actually get the map
         data_obs = self.get_data(res, stat_input, crop, target_unit)
@@ -358,10 +586,16 @@ class EarthStat:
         return map_obs
 
     @classmethod
-    def _create_empty(cls):
+    def _create_empty(cls) -> EarthStat:
         """
-        Create an empty EarthStat object without going through the normal initialization (i.e.,
-        import). Used internally by sel() and isel() for creating copies.
+        Create an empty EarthStat object without going through normal initialization.
+
+        Used internally by sel() and isel() for creating copies.
+
+        Returns
+        -------
+        EarthStat
+            Empty EarthStat instance with initialized _data dict.
         """
         # Create instance without calling __init__
         instance = cls.__new__(cls)
@@ -369,10 +603,19 @@ class EarthStat:
         instance._data = {}
         return instance
 
-    def _copy_other_attributes(self, dest_earthstat):
+    def _copy_other_attributes(self, dest_earthstat: EarthStat) -> EarthStat:
         """
-        Copy all CropCaseList attributes from self to destination EarthStat object, except
-        for _data dict.
+        Copy all EarthStat attributes from self to destination, except for _data dict.
+
+        Parameters
+        ----------
+        dest_earthstat : EarthStat
+            Destination EarthStat object to copy attributes to.
+
+        Returns
+        -------
+        EarthStat
+            The destination EarthStat object with copied attributes.
         """
         for attr in [a for a in dir(self) if not a.startswith("__")]:
             if attr == "_data":
@@ -383,9 +626,21 @@ class EarthStat:
             setattr(dest_earthstat, attr, getattr(self, attr))
         return dest_earthstat
 
-    def sel(self, *args, **kwargs):
+    def sel(self, *args, **kwargs) -> EarthStat:
         """
-        Makes a copy of this EarthStat object, applying Dataset.sel() with the given arguments.
+        Make a copy of this EarthStat object, applying Dataset.sel() with the given arguments.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments passed to Dataset.sel().
+        **kwargs
+            Keyword arguments passed to Dataset.sel().
+
+        Returns
+        -------
+        EarthStat
+            New EarthStat object with sel() applied to each resolution's dataset.
         """
         new_earthstat = self._create_empty()
 
@@ -398,9 +653,21 @@ class EarthStat:
 
         return new_earthstat
 
-    def isel(self, *args, **kwargs):
+    def isel(self, *args, **kwargs) -> EarthStat:
         """
-        Makes a copy of this EarthStat object, applying Dataset.isel() with the given arguments.
+        Make a copy of this EarthStat object, applying Dataset.isel() with the given arguments.
+
+        Parameters
+        ----------
+        *args
+            Positional arguments passed to Dataset.isel().
+        **kwargs
+            Keyword arguments passed to Dataset.isel().
+
+        Returns
+        -------
+        EarthStat
+            New EarthStat object with isel() applied to each resolution's dataset.
         """
         new_earthstat = self._create_empty()
 

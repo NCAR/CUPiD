@@ -1,6 +1,7 @@
 """
 Module for regridding EarthStat data.
 """
+
 from __future__ import annotations
 
 import gc
@@ -18,7 +19,7 @@ INDENT = "    "
 EARTH_RADIUS_KM = 6371.0
 
 
-def _calculate_gridcell_area(da):
+def _calculate_gridcell_area(da: xr.DataArray | xr.Dataset) -> xr.DataArray:
     """
     Calculate gridcell area from lat/lon coordinates using spherical geometry.
 
@@ -27,13 +28,18 @@ def _calculate_gridcell_area(da):
 
     Parameters
     ----------
-    ds : xarray.DataArray or xarray.Dataset
-        Containing 'lat' and 'lon' coordinates
+    da : xarray.DataArray | xarray.Dataset
+        Containing 'lat' and 'lon' coordinates. If Dataset, uses the 'area' variable.
 
     Returns
     -------
     xarray.DataArray
-        Calculated gridcell areas in km^2
+        Calculated gridcell areas in km^2.
+
+    Raises
+    ------
+    AssertionError
+        If input area units are not 'km^2' or if calculated area contains NaN values.
     """
     if isinstance(da, xr.Dataset):
         da = da["area"]
@@ -79,8 +85,33 @@ def _calculate_gridcell_area(da):
     return area_calculated
 
 
-def _get_regridder_and_mask(da_in, mask_in, ds_target, method):
-    """Get regridder and mask"""
+def _get_regridder_and_mask(
+    da_in: xr.DataArray,
+    mask_in: xr.DataArray,
+    ds_target: xr.Dataset,
+    method: str,
+) -> tuple[xe.Regridder, xr.DataArray]:
+    """
+    Get regridder and regridded mask for interpolation.
+
+    Parameters
+    ----------
+    da_in : xarray.DataArray
+        Input data to be regridded.
+    mask_in : xarray.DataArray
+        Mask for the input data.
+    ds_target : xarray.Dataset
+        Target dataset defining the output grid.
+    method : str
+        Regridding method (e.g., 'conservative', 'bilinear').
+
+    Returns
+    -------
+    tuple[xesmf.Regridder, xarray.DataArray]
+        Tuple containing:
+        - regridder: xESMF Regridder object
+        - mask_regridded: Regridded mask DataArray
+    """
     # Create mask
     mask = xr.where(~mask_in.notnull() | (mask_in == 0), 0.0, 1.0)
 
@@ -112,15 +143,44 @@ def _get_regridder_and_mask(da_in, mask_in, ds_target, method):
 
 def regrid_to_clm(
     *,
-    ds_in,
-    var,
-    ds_target,
-    method="conservative",
-    area_in=None,
-    area_out=None,
-    mask_var=None,
-):
-    """Regrid an observational dataset to a CLM target grid using conservative regridding"""
+    ds_in: xr.Dataset,
+    var: str,
+    ds_target: xr.Dataset,
+    method: str = "conservative",
+    area_in: xr.DataArray | None = None,
+    area_out: xr.DataArray | None = None,
+    mask_var: str | None = None,
+) -> xr.DataArray:
+    """
+    Regrid an observational dataset to a CLM target grid using conservative regridding.
+
+    Parameters
+    ----------
+    ds_in : xarray.Dataset
+        Input dataset to regrid.
+    var : str
+        Variable name to regrid.
+    ds_target : xarray.Dataset
+        Target CLM dataset defining the output grid.
+    method : str, optional
+        Regridding method. Default is 'conservative'.
+    area_in : xarray.DataArray | None, optional
+        Input gridcell areas. If None, areas are calculated from coordinates.
+    area_out : xarray.DataArray | None, optional
+        Output gridcell areas. If None, areas are calculated from coordinates.
+    mask_var : str | None, optional
+        Variable name to use for masking. If None, uses var.
+
+    Returns
+    -------
+    xarray.DataArray
+        Regridded data on the target grid.
+
+    Raises
+    ------
+    AssertionError
+        If area_in and area_out are not both None or both provided, or if output contains NaN.
+    """
 
     # Deep copy ds_in so it doesn't get modified
     ds_in = deepcopy(ds_in)

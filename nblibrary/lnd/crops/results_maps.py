@@ -28,7 +28,10 @@ FALLBACK_VMIN = -1.0
 FALLBACK_VMAX = 1.0
 
 
-def _cut_off_antarctica(da, antarctica_border=-60):
+def _cut_off_antarctica(
+    da: xr.DataArray,
+    antarctica_border: float = -60,
+) -> xr.DataArray:
     """
     Remove Antarctica from a map by cutting off latitudes south of a threshold.
 
@@ -38,7 +41,7 @@ def _cut_off_antarctica(da, antarctica_border=-60):
 
     Parameters
     ----------
-    da : xr.DataArray
+    da : xarray.DataArray
         Input DataArray with a 'lat' coordinate.
     antarctica_border : float, optional
         Latitude threshold (in degrees) below which data is excluded.
@@ -46,7 +49,7 @@ def _cut_off_antarctica(da, antarctica_border=-60):
 
     Returns
     -------
-    da : xr.DataArray
+    xarray.DataArray
         DataArray with Antarctica removed (latitudes >= antarctica_border).
 
     Notes
@@ -71,7 +74,15 @@ def _cut_off_antarctica(da, antarctica_border=-60):
     return da
 
 
-def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
+def _mapfig_finishup(
+    *,
+    fig: Figure,
+    im: matplotlib.image.AxesImage,
+    da: xr.DataArray,
+    suptitle: str,
+    layout: dict,
+    one_colorbar: bool,
+) -> None:
     """
     Finalize a multi-panel map figure with title and colorbar.
 
@@ -84,7 +95,7 @@ def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
         The figure object to finalize.
     im : matplotlib.image.AxesImage
         The image object from the last subplot (used for colorbar).
-    da : xr.DataArray
+    da : xarray.DataArray
         DataArray containing units information for colorbar label.
     suptitle : str
         Super title for the entire figure.
@@ -123,12 +134,44 @@ def _mapfig_finishup(*, fig, im, da, suptitle, layout, one_colorbar):
         fig.subplots_adjust(top=0.96)
 
 
-def _check_vrange_is_2elem_tuple(vrange):
+def _check_vrange_is_2elem_tuple(vrange: tuple) -> None:
+    """
+    Check that vrange is a two-element tuple.
+
+    Parameters
+    ----------
+    vrange : tuple
+        Value range to check.
+
+    Raises
+    ------
+    AssertionError
+        If vrange is not a tuple or doesn't have exactly 2 elements.
+    """
     msg = "ResultsMaps.vrange must be a two-element tuple"
     assert isinstance(vrange, tuple) and len(vrange) == 2, msg
 
 
-def _check_vrange_ok_for_key_plot(vrange):
+def _check_vrange_ok_for_key_plot(vrange: tuple) -> None:
+    """
+    Check that vrange is compatible with key plot visualization.
+
+    Parameters
+    ----------
+    vrange : tuple
+        Value range (vmin, vmax) to check.
+
+    Raises
+    ------
+    NotImplementedError
+        If vrange is specified but doesn't meet requirements for key plot (vmin must be 0).
+
+    Notes
+    -----
+    When showing differences from a key plot, the key plot itself uses a sequential colorbar.
+    Due to colorbar handling implementation, custom vrange is only supported if vmin=0, in which
+    case vrange applies to the key plot and (-vmax, vmax) applies to other plots.
+    """
     msg = (
         "If you want to show differences from a key plot (key_plot is not falsy), plot() will"
         " also include the key plot itself with a sequential colorbar. Because of how colorbar"
@@ -197,12 +240,25 @@ class ResultsMaps:
     def __init__(
         self,
         *,
-        symmetric_0=False,
-        vrange=DEFAULT_NO_VRANGE,
-        cut_off_antarctica=True,
-        incl_yrs_range=None,
-    ):
-        """Initialize ResultsMaps with specified colorbar and display options."""
+        symmetric_0: bool = False,
+        vrange: tuple = DEFAULT_NO_VRANGE,
+        cut_off_antarctica: bool = True,
+        incl_yrs_range: list[int] | None = None,
+    ) -> None:
+        """
+        Initialize ResultsMaps with specified colorbar and display options.
+
+        Parameters
+        ----------
+        symmetric_0 : bool, optional
+            If True, use a diverging colormap with symmetric range around zero. Default is False.
+        vrange : tuple, optional
+            Explicit (vmin, vmax) for colorbar. Default is (None, None).
+        cut_off_antarctica : bool, optional
+            If True, exclude Antarctica from plots. Default is True.
+        incl_yrs_range : list[int] | None, optional
+            First and last years requested for plots in this figure. Default is None.
+        """
 
         # Save inputs
         self.symmetric_0 = symmetric_0
@@ -231,7 +287,7 @@ class ResultsMaps:
         # Checks
         _check_vrange_is_2elem_tuple(self.vrange)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> xr.DataArray:
         """
         Enable dictionary-style access to result_dict.
 
@@ -242,12 +298,12 @@ class ResultsMaps:
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             The DataArray associated with the given key.
         """
         return self.result_dict[key]
 
-    def __setitem__(self, key: str, value: xr.DataArray):
+    def __setitem__(self, key: str, value: xr.DataArray) -> None:
         """
         Enable dictionary-style assignment to result_dict.
 
@@ -260,7 +316,7 @@ class ResultsMaps:
         """
         self.result_dict[key] = value
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Return the number of maps stored.
 
@@ -271,18 +327,21 @@ class ResultsMaps:
         """
         return len(self.result_dict)
 
-    def _get_mapfig_layout(self, one_colorbar):
+    def _get_mapfig_layout(self, one_colorbar: bool) -> dict:
         """
         Calculate figure layout parameters based on number of subplots.
-
-        This internal method determines the grid layout (rows and columns),
-        figure size, and colorbar positioning based on the number of maps
-        to display.
 
         Parameters
         ----------
         one_colorbar : bool
-            If True, adjust layout to accommodate a shared colorbar.
+            Whether a single shared colorbar will be used.
+
+        Returns
+        -------
+        dict
+            Dictionary containing layout parameters stored in self.layout, including 'ncols',
+            'nrows', 'figsize', and optionally 'subplots_adjust_colorbar_top',
+            'subplots_adjust_colorbar_bottom', and 'cbar_ax_rect'.
 
         Notes
         -----
@@ -311,14 +370,14 @@ class ResultsMaps:
     def plot(
         self,
         *,
-        subplot_title_list: list,
+        subplot_title_list: list[str],
         suptitle: str,
         one_colorbar: bool = False,
-        fig_path: str = None,
-        key_plot: str = None,
+        fig_path: str | None = None,
+        key_plot: str | None = None,
         key_diff_abs_error: bool = False,
-        case_incl_yr_dict: dict = None,
-    ):
+        case_incl_yr_dict: dict | None = None,
+    ) -> None:
         """
         Create a multi-panel map figure with all stored DataArrays.
 
@@ -328,7 +387,7 @@ class ResultsMaps:
 
         Parameters
         ----------
-        subplot_title_list : list of str
+        subplot_title_list : list[str]
             List of case names (keys in result_dict) in the order they should appear.
         suptitle : str
             Super title for the entire figure.
@@ -336,15 +395,18 @@ class ResultsMaps:
             If True, use a single shared colorbar for all subplots.
             If False, each subplot gets its own colorbar. Default is False.
             Note: Ignored if key_plot is specified.
-        fig_path : str, optional
+        fig_path : str | None, optional
             Path to save the figure. If None, the figure is displayed but not saved.
             Default is None.
-        key_plot : str, optional
+        key_plot : str | None, optional
             Name of the reference case. If provided, all other subplots will show
             differences from this case. Default is None.
         key_diff_abs_error : bool, optional
             If True and key_plot is specified, show differences in absolute error
             (|da| - |da_key|) rather than simple differences. Default is False.
+        case_incl_yr_dict : dict | None, optional
+            Dictionary mapping case names to year ranges actually included in plots.
+            Default is None.
 
         Notes
         -----
@@ -434,12 +496,32 @@ class ResultsMaps:
 
     def _finish_colorbar_ranges(
         self,
-        subplot_title_list,
-        one_colorbar,
-        key_plot,
-        images,
-    ):
+        subplot_title_list: list[str],
+        one_colorbar: bool,
+        key_plot: str | None,
+        images: dict,
+    ) -> None:
+        """
+        Finalize colorbar ranges for all subplots.
 
+        Parameters
+        ----------
+        subplot_title_list : list[str]
+            List of subplot titles.
+        one_colorbar : bool
+            Whether to use a single shared colorbar.
+        key_plot : str | None
+            Name of the key plot, or None.
+        images : dict
+            Dictionary mapping subplot titles to image objects.
+
+        Raises
+        ------
+        AssertionError
+            If incompatible options are specified (e.g., one_colorbar with plot_vranges).
+        NotImplementedError
+            If plot_vranges is specified with key_plot.
+        """
         _check_vrange_is_2elem_tuple(self.vrange)
 
         msg = (
@@ -503,15 +585,48 @@ class ResultsMaps:
                     images,
                 )
 
-    def _get_and_set_shared_colorbar_range(self, subplot_title_list, key_plot, images):
+    def _get_and_set_shared_colorbar_range(
+        self,
+        subplot_title_list: list[str],
+        key_plot: str | None,
+        images: dict,
+    ) -> None:
+        """
+        Get and set shared colorbar range for all subplots.
+
+        Parameters
+        ----------
+        subplot_title_list : list[str]
+            List of subplot titles.
+        key_plot : str | None
+            Name of the key plot, or None.
+        images : dict
+            Dictionary mapping subplot titles to image objects.
+        """
         # Get
         vrange = self._get_shared_colorbar_range(subplot_title_list, key_plot)
         # Apply
         self._set_shared_colorbar_range(subplot_title_list, key_plot, images, vrange)
 
-    def _get_shared_colorbar_range(self, subplot_title_list, key_plot):
+    def _get_shared_colorbar_range(
+        self,
+        subplot_title_list: list[str],
+        key_plot: str | None,
+    ) -> tuple[float, float]:
         """
-        Get minimum and maximum values seen across all subplots, skipping the key plot if any.
+        Calculate shared colorbar range across all subplots.
+
+        Parameters
+        ----------
+        subplot_title_list : list[str]
+            List of subplot titles.
+        key_plot : str | None
+            Name of the key plot, or None.
+
+        Returns
+        -------
+        tuple[float, float]
+            Tuple containing (vmin, vmax) for the shared colorbar range.
         """
         vmin = np.inf
         vmax = -np.inf
@@ -541,9 +656,26 @@ class ResultsMaps:
 
         return vmin, vmax
 
-    def _set_shared_colorbar_range(self, subplot_title_list, key_plot, images, vrange):
+    def _set_shared_colorbar_range(
+        self,
+        subplot_title_list: list[str],
+        key_plot: str | None,
+        images: dict,
+        vrange: tuple,
+    ) -> None:
         """
-        Apply minimum and maximum colorbar values to all plots, skipping the key plot if any.
+        Set shared colorbar range for all subplots (except that for the key plot, if any).
+
+        Parameters
+        ----------
+        subplot_title_list : list[str]
+            List of subplot titles.
+        key_plot : str | None
+            Name of the key plot, or None.
+        images : dict
+            Dictionary mapping subplot titles to image objects.
+        vrange : tuple
+            Tuple containing (vmin, vmax) for the colorbar range.
         """
         vmin, vmax = vrange
         if self.symmetric_0 or key_plot:
@@ -555,7 +687,24 @@ class ResultsMaps:
             im = images[this_subplot]
             self._update_image_colorbar_range(vmin, vmax, im)
 
-    def _update_image_colorbar_range(self, vmin, vmax, im):
+    def _update_image_colorbar_range(
+        self,
+        vmin: float,
+        vmax: float,
+        im: matplotlib.image.AxesImage,
+    ) -> None:
+        """
+        Update the colorbar range for a single image.
+
+        Parameters
+        ----------
+        vmin : float
+            Minimum value for colorbar.
+        vmax : float
+            Maximum value for colorbar.
+        im : matplotlib.image.AxesImage
+            Image object to update.
+        """
         # Sense checks
         assert vmin <= vmax, f"vmin ({vmin}) > vmax ({vmax})"
         assert not np.isinf(vmin) and not np.isinf(
@@ -568,7 +717,7 @@ class ResultsMaps:
         if hasattr(im, "colorbar") and im.colorbar is not None:
             im.colorbar.update_normal(im)
 
-    def _figure_cleanup(self):
+    def _figure_cleanup(self) -> None:
         """
         Clean up to release memory (important in parallel execution)
         """
@@ -584,13 +733,13 @@ class ResultsMaps:
     def _map_subplot(
         self,
         *,
-        ax,
-        case_name,
-        one_colorbar,
-        key_case,
-        key_diff_abs_error,
-        case_incl_yr,
-    ):
+        ax: matplotlib.axes.Axes,
+        case_name: str,
+        one_colorbar: bool,
+        key_case: str | None,
+        key_diff_abs_error: bool,
+        case_incl_yr: list[int] | None,
+    ) -> matplotlib.image.AxesImage:
         """
         Create a single map subplot.
 
@@ -606,14 +755,16 @@ class ResultsMaps:
             Name of the case to plot.
         one_colorbar : bool
             If True, don't add individual colorbar to this subplot.
-        key_case : str or None
-            Name of reference case for difference calculation.
+        key_case : str | None
+            Name of reference case for difference calculation, or None.
         key_diff_abs_error : bool
             If True, calculate difference in absolute error.
+        case_incl_yr : list[int] | None
+            Year range actually included in this plot, or None if no data.
 
         Returns
         -------
-        im : matplotlib.image.AxesImage
+        matplotlib.image.AxesImage
             The image object created by the plot.
 
         Notes
