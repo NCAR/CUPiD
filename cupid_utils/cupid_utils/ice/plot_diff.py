@@ -47,26 +47,29 @@ def plot_diff(
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=3)
-        field1_tmp = field1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
-        field2_tmp = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        field1_tmp2 = field1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
+        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
     if proj == "S":
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=9)
-        field1_tmp = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
-        field2_tmp = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        field1_tmp2 = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
+        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+
+    field1_tmp = np.where(field1_tmp2 == 0.0, np.nan, field1_tmp2)
+    field2_tmp = np.where(field2_tmp2 == 0.0, np.nan, field2_tmp2)
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
-    field_diff = field2_tmp.values - field1_tmp.values
+    field_diff = field2_tmp2.values - field1_tmp2.values
     field_std = field_diff.std()
 
     this = ax.pcolormesh(
         TLON.values,
         TLAT.values,
-        field1_tmp.values,
+        field1_tmp,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
@@ -98,7 +101,7 @@ def plot_diff(
     this = ax.pcolormesh(
         TLON.values,
         TLAT.values,
-        field2_tmp.values,
+        field2_tmp,
         norm=norm,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
