@@ -106,7 +106,6 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
 
-    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv],
@@ -154,7 +153,6 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case2 + "-" + case1, fontsize=10)
 
-    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv],
