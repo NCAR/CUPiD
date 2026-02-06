@@ -62,3 +62,4 @@ dependencies:
     - -e ../cupid_utils
     - -e ../externals/ILAMB
     - -e ../externals/mom6-tools
+    - -e ../externals/GenTS
