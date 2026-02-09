@@ -20,6 +20,8 @@ def plot_diff(
     proj,
     TLAT,
     TLON,
+    mask1_in,
+    mask2_in,
     path_HadleyOI,
 ):
     # make circular boundary for polar stereographic circular plots
@@ -49,6 +51,8 @@ def plot_diff(
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=3)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
         field2_tmp2 = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        mask1 = mask1_in.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        mask2 = mask2_in.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
     if proj == "S":
         ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
@@ -56,9 +60,11 @@ def plot_diff(
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=9)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
         field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        mask1 = mask1_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        mask2 = mask2_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
 
-    field1_tmp = np.where(field1_tmp2 == 0.0, np.nan, field1_tmp2)
-    field2_tmp = np.where(field2_tmp2 == 0.0, np.nan, field2_tmp2)
+    field1_tmp = np.where(mask1 > 0, field1_tmp2, np.nan)
+    field2_tmp = np.where(mask2 > 0, field2_tmp2, np.nan)
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
