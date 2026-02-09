@@ -8,14 +8,30 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 
 
-def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON):
+def vect_diff(
+    uvel1,
+    vvel1,
+    uvel2,
+    vvel2,
+    angle,
+    proj,
+    case1,
+    case2,
+    TLAT,
+    TLON,
+    mask1_in,
+    mask2_in,
+):
     uvel_rot1 = uvel1 * np.cos(angle) - vvel1 * np.sin(angle)
     vvel_rot1 = uvel1 * np.sin(angle) + vvel1 * np.cos(angle)
     uvel_rot2 = uvel2 * np.cos(angle) - vvel2 * np.sin(angle)
     vvel_rot2 = uvel2 * np.sin(angle) + vvel2 * np.cos(angle)
 
-    speed1 = np.sqrt(uvel1 * uvel1 + vvel1 * vvel1)
-    speed2 = np.sqrt(uvel2 * uvel2 + vvel2 * vvel2)
+    speed1_tmp = np.sqrt(uvel1 * uvel1 + vvel1 * vvel1)
+    speed2_tmp = np.sqrt(uvel2 * uvel2 + vvel2 * vvel2)
+
+    speed1 = np.where(mask1_in > 0.0, speed1_tmp, np.nan)
+    speed2 = np.where(mask2_in > 0.0, speed2_tmp, np.nan)
 
     uvel_diff = uvel_rot2 - uvel_rot1
     vvel_diff = vvel_rot2 - vvel_rot1
@@ -48,14 +64,14 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         TLAT,
         speed1,
         vmin=0.0,
-        vmax=0.5,
+        vmax=0.2,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
 
-    intv = 5
+    intv = 10
     # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv],
@@ -96,14 +112,13 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
         TLAT,
         speed2,
         vmin=0.0,
-        vmax=0.5,
+        vmax=0.2,
         cmap="ocean",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case1, fontsize=10)
 
-    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv],
@@ -151,7 +166,6 @@ def vect_diff(uvel1, vvel1, uvel2, vvel2, angle, proj, case1, case2, TLAT, TLON)
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
     plt.title(case2 + "-" + case1, fontsize=10)
 
-    intv = 5
     # add vectors
     Q = ax.quiver(
         TLON[::intv, ::intv],
