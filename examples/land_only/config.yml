@@ -41,11 +41,12 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'ctsm5.4.004_bgc_f09_131_HIST'
-  base_case_name: 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f09_124_HIST'
-  case_nickname: '131_HIST'
-  base_case_nickname: '124_HIST'
+  case_name: 'ctsm5.4.011_f19_I2000_test1'
+  base_case_name: 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f19_125_HIST'
+  case_nickname: '5.4.011'
+  base_case_nickname: '5.4 release'
   CESM_output_dir: /glade/campaign/cgd/tss/common/Land_Only_Simulations/CTSM54_DEV
+  base_case_output_dir: /glade/campaign/cgd/tss/common/Land_Only_Simulations/CTSM54_DEV
   start_date: '2000-01-01'
   end_date: '2005-01-01'
   climo_start_year: 2000
@@ -63,7 +64,7 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['ctsm5.4.004_bgc_f09_131_HIST', 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f09_124_HIST']
+  case_name: ['ctsm5.4.011_f19_I2000_test1', 'ctsm5.4.CMIP7_ciso_ctsm5.3.075_f19_125_HIST']
   file_mode: 664
   dir_mode: 775
   file_group: cesm
