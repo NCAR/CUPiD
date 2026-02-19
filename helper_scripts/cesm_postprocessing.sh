@@ -8,28 +8,11 @@
 
 
 # Set variables that come from environment or CESM XML files
-CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
-CESM_CUPID=${SRCROOT}/tools/CUPiD
 CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
-CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
-CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
-CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
-CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
-CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
-CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
-CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
-CALENDAR=`./xmlquery --value CALENDAR`
-CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
-CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
-CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
-CUPID_CLIMO_END_YEAR=`./xmlquery --value CUPID_CLIMO_END_YEAR`
-CUPID_BASE_CLIMO_END_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_END_YEAR`
-CUPID_CLIMO_N_YEAR=`./xmlquery --value CUPID_CLIMO_N_YEAR`
-CUPID_BASE_CLIMO_N_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_N_YEAR`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -50,33 +33,8 @@ CUPID_ANALYSIS_ENV=`./xmlquery --value CUPID_ANALYSIS_ENV`
 #       by setting $PYTHONPATH; since this is conda-based we
 #       want an empty PYTHONPATH environment variable
 unset PYTHONPATH
-# cupid-analysis env required for end date calculation
-conda activate ${CUPID_ANALYSIS_ENV}
 
-# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
-# calendar name needs to be changed for cftime standards
-CFTIME_CALENDAR=$CALENDAR
-CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
-CFTIME_CALENDAR="${CFTIME_CALENDAR/NO_LEAP/noleap}"
-CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
-  --start-date ${CUPID_STARTDATE} \
-  --stop-option ${CUPID_STOP_OPTION} \
-  --stop-n ${CUPID_STOP_N} \
-  --calendar ${CFTIME_CALENDAR}`
-CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
-  --start-date ${CUPID_BASE_STARTDATE} \
-  --stop-option ${CUPID_BASE_STOP_OPTION} \
-  --stop-n ${CUPID_BASE_STOP_N} \
-  --calendar ${CFTIME_CALENDAR}`
-
-# Note if CUPID_ROOT is not tools/CUPiD
-# (but don't complain if user adds a trailing "/")
-if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
-  echo "Note: Running CUPiD from ${CUPID_ROOT}, not ${CESM_CUPID}"
-fi
-
-# Create directory for running CUPiD
-mkdir -p cupid-postprocessing
+# Change to directory for running cupid postprocessing
 cd cupid-postprocessing
 
 # If CUPID_RUN_ALL is TRUE, we don't add any component flags.
@@ -131,53 +89,13 @@ if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
 else
   CVDP_OPT=""
 fi
-${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
-   ${CVDP_OPT} \
-   --case-root ${CASEROOT} \
-   --cesm-root ${SRCROOT} \
-   --cupid-root ${CUPID_ROOT} \
-   --cupid-example ${CUPID_EXAMPLE} \
-   --cupid-baseline-case ${CUPID_BASELINE_CASE} \
-   --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
-   --cupid-ts-dir ${CUPID_TS_DIR} \
-   --cupid-startdate ${CUPID_STARTDATE} \
-   --cupid-enddate ${CUPID_ENDDATE} \
-   --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
-   --cupid-climo-end-year ${CUPID_CLIMO_END_YEAR} \
-   --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
-   --cupid-base-climo-end-year ${CUPID_BASE_CLIMO_END_YEAR} \
-   --cupid-base-climo-n-year ${CUPID_BASE_CLIMO_N_YEAR} \
-   --adf-output-root ${PWD} \
-   --ldf-output-root ${PWD} \
-   --ilamb-output-root ${PWD} \
-   --cupid-run-adf ${CUPID_RUN_ADF} \
-   --cupid-run-ldf ${CUPID_RUN_LDF} \
-   --cupid-run-ilamb ${CUPID_RUN_ILAMB}
 
-# 2. Generate ADF config file
-if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
-  ${CUPID_ROOT}/helper_scripts/generate_adf_config_file.py \
-     --cupid-config-loc . \
-     --adf-template ${CUPID_ROOT}/externals/ADF/config_amwg_default_plots.yaml \
-     --out-file adf_config.yml
-fi
-
-# 3. Generate ILAMB config file
-if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
-  ${SRCROOT}/tools/CUPiD/helper_scripts/generate_ilamb_config_files.py \
-     --cupid-config-loc . \
-     --run-type ${CUPID_RUN_TYPE} \
-     --cupid-root ${CUPID_ROOT}
-fi
-
-# 4. Generate LDF config file
-if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
-  ${CUPID_ROOT}/helper_scripts/generate_ldf_config_file.py \
-     --cupid-config-loc . \
-     --ldf-template ${CUPID_ROOT}/externals/LDF/config_clm_unstructured_plots.yaml \
-     --out-file ldf_config.yml
-fi
+#
+# Steps to setup the configure files has already been done in preview_namelists
+#
+#
+# Run the CUPiD Processing
+#
 
 # 5. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
