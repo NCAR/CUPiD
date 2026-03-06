@@ -133,13 +133,14 @@ def run_timeseries(
     fmode = int(str(file_mode), base=8)
     dmode = int(str(dir_mode), base=8)
 
-    for inst in range(ninst):
-        if ninst > 1:
-            hist_str = timeseries_params[component]["hist_str"] + '_{%04d}.format(inst)'
-        else:
-            hist_str = timeseries_params[component]["hist_str"]
-        
+    for inst in range(1, ninst + 1):
         for component, comp_bool in component_options.items():
+            if ninst > 1:
+                index = timeseries_params[component]["hist_str"].find('.')
+                hist_str = timeseries_params[component]["hist_str"][:index] + f'_{inst:04}' + timeseries_params[component]["hist_str"][index:]
+            else:
+                hist_str = timeseries_params[component]["hist_str"]
+
             if comp_bool:
                 # set time series input and output directory or directories:
                 # INPUT ts dir:

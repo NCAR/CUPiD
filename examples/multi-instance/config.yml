@@ -41,17 +41,17 @@ computation_config:
 # All parameters under global_params get passed to all the notebooks
 
 global_params:
-  case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232'
+  case_name: 'CUPiD_test_ensemble'
   base_case_name: 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228'
-  case_nickname: 'BLT1850_232'
+  case_nickname: 'CUPiD_test_ensemble'
   base_case_nickname: 'BLT1850_228'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  start_date: '0001-01-01'
-  end_date: '0021-01-01'
+  CESM_output_dir: /glade/u/home/mollyw/scratch/archive/
+  start_date: '2000-01-01'
+  end_date: '2021-01-01'
   climo_start_year: 11
   climo_end_year: 21
-  base_start_date: '0001-01-01'
-  base_end_date: '0045-01-01'
+  base_start_date: '2000-01-01'
+  base_end_date: '2045-01-01'
   base_climo_start_year: 36
   base_climo_end_year: 45
   obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
@@ -63,11 +63,11 @@ timeseries:
   num_procs: 8
   ts_done: [False, False]
   overwrite_ts: [False, False]
-  case_name: ['b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232', 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228']
+  case_name: ['CUPiD_test_ensemble']
   file_mode: 664
   dir_mode: 775
-  file_group: cesm
-  dir_group: cesm
+  file_group: ncar
+  dir_group: ncar
   ninst : 3
 
   atm:
@@ -100,8 +100,8 @@ timeseries:
     vars: ['aice','hi','hs']
     derive_vars: []
     hist_str: 'cice.h'
-    start_years: [1,1]
-    end_years: [21,45]
+    start_years: [2000]
+    end_years: [2001]
     level: 'lev'
 
   glc:
