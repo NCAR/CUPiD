@@ -115,6 +115,7 @@ def run_timeseries(
     dir_mode = timeseries_params["dir_mode"]
     file_group = timeseries_params["file_group"]
     dir_group = timeseries_params["dir_group"]
+    ninst = timeseries_params["ninst"]
 
     # Get GID from group name
     file_gid = shutil._get_gid(file_group)
@@ -132,105 +133,111 @@ def run_timeseries(
     fmode = int(str(file_mode), base=8)
     dmode = int(str(dir_mode), base=8)
 
-    for component, comp_bool in component_options.items():
-        if comp_bool:
-            # set time series input and output directory or directories:
-            # INPUT ts dir:
-            #    if timeseries params contain a list of cases, make a list of input directories
-            #        if not, make one input ts directory
-            # OUTPUT ts dir:
-            #    if ts_dir is specified and there is a list of cases, make a list of output dirs;
-            #        if not, make one output ts dir
-            #    if ts_dir is not specified, default to CESM_output_dir for either a list or a single value
+    for inst in range(ninst):
+        if ninst > 1:
+            hist_str = timeseries_params[component]["hist_str"] + '_{%04d}.format(inst)'
+        else:
+            hist_str = timeseries_params[component]["hist_str"]
+        
+        for component, comp_bool in component_options.items():
+            if comp_bool:
+                # set time series input and output directory or directories:
+                # INPUT ts dir:
+                #    if timeseries params contain a list of cases, make a list of input directories
+                #        if not, make one input ts directory
+                # OUTPUT ts dir:
+                #    if ts_dir is specified and there is a list of cases, make a list of output dirs;
+                #        if not, make one output ts dir
+                #    if ts_dir is not specified, default to CESM_output_dir for either a list or a single value
 
-            # if there is a list of case names, create a list of ts input directories
-            if isinstance(timeseries_params["case_name"], list):
-                ts_input_dirs = []
-                for cname in timeseries_params["case_name"]:
-                    # use base_case_output_dir for the base case if it exists
-                    if cname == global_params["base_case_name"] and "base_case_output_dir" in global_params:
-                        ts_input_dirs.append(global_params["base_case_output_dir"]+"/"+cname+f"/{component}/hist/")
-                    # otherwise use the CESM_output_dir as a default
-                    else:
-                        ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
-            # if there is not a list of case names, just use a single CESM_output_dir to find all of the ts_input_dirs
-            else:
-                ts_input_dirs = [
-                    global_params["CESM_output_dir"] + "/" +
-                    timeseries_params["case_name"] + f"/{component}/hist/",
-                ]
-
-            # if ts_dir is specified, use it to determine where the timeseries files should be written
-            if "ts_dir" in global_params and global_params["ts_dir"] is not None:
-                # if there is a list of cases, create a list of timeseries output dirs
+                # if there is a list of case names, create a list of ts input directories
                 if isinstance(timeseries_params["case_name"], list):
-                    ts_output_dirs = []
+                    ts_input_dirs = []
                     for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.append(
+                        # use base_case_output_dir for the base case if it exists
+                        if cname == global_params["base_case_name"] and "base_case_output_dir" in global_params:
+                            ts_input_dirs.append(global_params["base_case_output_dir"]+"/"+cname+f"/{component}/hist/")
+                        # otherwise use the CESM_output_dir as a default
+                        else:
+                            ts_input_dirs.append(global_params["CESM_output_dir"]+"/"+cname+f"/{component}/hist/")
+                # if there is not a list of case names, just use a single CESM_output_dir to find all of the ts_input_dirs
+                else:
+                    ts_input_dirs = [
+                        global_params["CESM_output_dir"] + "/" +
+                        timeseries_params["case_name"] + f"/{component}/hist/",
+                    ]
+
+                # if ts_dir is specified, use it to determine where the timeseries files should be written
+                if "ts_dir" in global_params and global_params["ts_dir"] is not None:
+                    # if there is a list of cases, create a list of timeseries output dirs
+                    if isinstance(timeseries_params["case_name"], list):
+                        ts_output_dirs = []
+                        for cname in timeseries_params["case_name"]:
+                            ts_output_dirs.append(
+                                os.path.join(
+                                        global_params["ts_dir"],
+                                        cname,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            )
+                    # if there is a single case, just create one output directory using ts_dir
+                    else:
+                        ts_output_dirs = [
                             os.path.join(
                                     global_params["ts_dir"],
-                                    cname,
+                                    timeseries_params["case_name"],
                                     f"{component}", "proc", "tseries",
                             ),
-                        )
-                # if there is a single case, just create one output directory using ts_dir
+                        ]
+                # if ts_dir is not specified or is null, use CESM_output_dir to determine where to write timeseries files
                 else:
-                    ts_output_dirs = [
-                        os.path.join(
-                                global_params["ts_dir"],
-                                timeseries_params["case_name"],
-                                f"{component}", "proc", "tseries",
-                        ),
-                    ]
-            # if ts_dir is not specified or is null, use CESM_output_dir to determine where to write timeseries files
-            else:
-                # for a list of cases, use the CESM_output_dir to write a list of output ts directories
-                if isinstance(timeseries_params["case_name"], list):
-                    ts_output_dirs = []
-                    for cname in timeseries_params["case_name"]:
-                        ts_output_dirs.append(
+                    # for a list of cases, use the CESM_output_dir to write a list of output ts directories
+                    if isinstance(timeseries_params["case_name"], list):
+                        ts_output_dirs = []
+                        for cname in timeseries_params["case_name"]:
+                            ts_output_dirs.append(
+                                os.path.join(
+                                        global_params["CESM_output_dir"],
+                                        cname,
+                                        f"{component}", "proc", "tseries",
+                                ),
+                            )
+                    # for a single case, use the CESM_output_dir to write a list of one ts output dir
+                    else:
+                        ts_output_dirs = [
                             os.path.join(
                                     global_params["CESM_output_dir"],
-                                    cname,
+                                    timeseries_params["case_name"],
                                     f"{component}", "proc", "tseries",
                             ),
-                        )
-                # for a single case, use the CESM_output_dir to write a list of one ts output dir
-                else:
-                    ts_output_dirs = [
-                        os.path.join(
-                                global_params["CESM_output_dir"],
-                                timeseries_params["case_name"],
-                                f"{component}", "proc", "tseries",
-                        ),
-                    ]
-            # -----
+                        ]
+                # -----
 
-            # fmt: off
-            # pylint: disable=line-too-long
-            timeseries.create_time_series(
-                component,
-                timeseries_params[component]["vars"],
-                timeseries_params[component]["derive_vars"],
-                timeseries_params["case_name"],
-                timeseries_params[component]["hist_str"],
-                ts_input_dirs,
-                ts_output_dirs,
-                timeseries_params["ts_done"],
-                timeseries_params["overwrite_ts"],
-                timeseries_params[component]["start_years"],
-                timeseries_params[component]["end_years"],
-                timeseries_params[component]["level"],
-                num_procs,
-                serial,
-                logger,
-                fmode,
-                dmode,
-                file_gid,
-                dir_gid,
-            )
-            # fmt: on
-            # pylint: enable=line-too-long
+                # fmt: off
+                # pylint: disable=line-too-long
+                timeseries.create_time_series(
+                    component,
+                    timeseries_params[component]["vars"],
+                    timeseries_params[component]["derive_vars"],
+                    timeseries_params["case_name"],
+                    hist_str,
+                    ts_input_dirs,
+                    ts_output_dirs,
+                    timeseries_params["ts_done"],
+                    timeseries_params["overwrite_ts"],
+                    timeseries_params[component]["start_years"],
+                    timeseries_params[component]["end_years"],
+                    timeseries_params[component]["level"],
+                    num_procs,
+                    serial,
+                    logger,
+                    fmode,
+                    dmode,
+                    file_gid,
+                    dir_gid,
+                )
+                # fmt: on
+                # pylint: enable=line-too-long
 
     return None
 
