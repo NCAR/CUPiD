@@ -115,7 +115,7 @@ def run_timeseries(
     dir_mode = timeseries_params["dir_mode"]
     file_group = timeseries_params["file_group"]
     dir_group = timeseries_params["dir_group"]
-    ninst = timeseries_params["ninst"]
+    ninst = timeseries_params.get("ninst",1)
 
     # Get GID from group name
     file_gid = shutil._get_gid(file_group)
