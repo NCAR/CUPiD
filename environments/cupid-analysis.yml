@@ -34,6 +34,7 @@ dependencies:
   - ncar-jobqueue=2021.4.14
   - netcdf4=1.7.3
   - numpy=2.2.6
+  - pandas=2.3.3
   - pip=25.3
   - pluggy=1.6.0
   - pytest=9.0.2
