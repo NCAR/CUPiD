@@ -38,7 +38,7 @@ dependencies:
   - pip=25.3
   - pluggy=1.6.0
   - pytest=9.0.2
-  - python=3.13.11
+  - python=3.13.12
   - roman-numerals=4.1.0
   - roman-numerals-py=4.1.0
   - snowballstemmer=3.0.1

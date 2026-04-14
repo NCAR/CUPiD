@@ -175,7 +175,7 @@ fi
 if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
   ${CUPID_ROOT}/helper_scripts/generate_ldf_config_file.py \
      --cupid-config-loc . \
-     --ldf-template ${CUPID_ROOT}/externals/LDF/config_clm_unstructured_plots.yaml \
+     --ldf-template ${CUPID_ROOT}/externals/LDF/config_clm_structured_plots.yaml \
      --out-file ldf_config.yml
 fi
 
