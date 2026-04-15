@@ -175,6 +175,7 @@ compute_notebooks:
           none:
             obs_path: 'glc/analysis_datasets/multi_grid/annual_avg/SMB_data'
             obs_name: 'GrIS_MARv3.12_climo_1960_1999.nc'
+            init_file: 'cism.gris.initial_hist.0001-01-01-00000.nc'
             climo_nyears: 40
 
     rof:
