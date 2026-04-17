@@ -30,8 +30,8 @@ def vect_diff(
     speed1_tmp = np.sqrt(uvel1 * uvel1 + vvel1 * vvel1)
     speed2_tmp = np.sqrt(uvel2 * uvel2 + vvel2 * vvel2)
 
-    speed1 = np.where(mask1_in > 0.0, speed1_tmp, np.nan)
-    speed2 = np.where(mask2_in > 0.0, speed2_tmp, np.nan)
+    speed1 = np.where(mask1_in > 0.01, speed1_tmp, np.nan)
+    speed2 = np.where(mask2_in > 0.01, speed2_tmp, np.nan)
 
     uvel_diff = uvel_rot2 - uvel_rot1
     vvel_diff = vvel_rot2 - vvel_rot1
@@ -158,9 +158,9 @@ def vect_diff(
         TLON,
         TLAT,
         speed_diff,
-        vmin=-0.2,
-        vmax=0.2,
-        cmap="seismic",
+        vmin=-0.02,
+        vmax=0.02,
+        cmap="coolwarm",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
@@ -173,7 +173,7 @@ def vect_diff(
         uvel_diff[::intv, ::intv],
         vvel_diff[::intv, ::intv],
         color="black",
-        scale=1.0,
+        scale=0.2,
         transform=ccrs.PlateCarree(),
     )
     units = "cm/s"
@@ -181,8 +181,8 @@ def vect_diff(
         Q,
         0.85,
         0.025,
-        0.10,
-        r"10 " + units,
+        0.05,
+        r"5 " + units,
         labelpos="S",
         coordinates="axes",
         color="black",
