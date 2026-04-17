@@ -63,14 +63,14 @@ def plot_diff(
         mask1 = mask1_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
         mask2 = mask2_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
 
-    field1_tmp = np.where(mask1 > 0, field1_tmp2, np.nan)
-    field2_tmp = np.where(mask2 > 0, field2_tmp2, np.nan)
+    field1_tmp = np.where(mask1 > 0.01, field1_tmp2, np.nan)
+    field2_tmp = np.where(mask2 > 0.01, field2_tmp2, np.nan)
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
 
     field_diff = field2_tmp2.values - field1_tmp2.values
-    field_std = field_diff.std()
+    field_std = np.nanstd(field_diff)
 
     this = ax.pcolormesh(
         TLON.values,
@@ -140,9 +140,9 @@ def plot_diff(
         TLON.values,
         TLAT.values,
         field_diff,
-        cmap="seismic",
-        vmax=field_std * 2.0,
-        vmin=-field_std * 2.0,
+        vmin=-2.0 * field_std,
+        vmax=2.0 * field_std,
+        cmap="coolwarm",
         transform=ccrs.PlateCarree(),
     )
     plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
