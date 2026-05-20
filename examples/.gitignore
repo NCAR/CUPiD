@@ -1,4 +1,10 @@
+*/website
 */ADF_output
+*/LDF_output
 */CVDP_output
 */ILAMB_output
+*/ilamb_aux
 */model_setup.txt
+*/ilamb_nohoff*.cfg
+*/adf_config.yml
+*/ldf_config.yml

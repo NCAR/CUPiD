@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+"""
+CUPiD CESM case config yml file creator
+"""
+import sys, os, shutil, glob
+
+_CIMEROOT = os.environ.get("CIMEROOT")
+if _CIMEROOT is None:
+    raise SystemExit("ERROR: must set CIMEROOT environment variable")
+
+_LIBDIR = os.path.join(_CIMEROOT, "CIME", "Tools")
+sys.path.append(_LIBDIR)
+
+from standard_script_setup import *
+from CIME.case import Case
+from CIME.utils import expect, run_cmd
+
+logger = logging.getLogger(__name__)
+
+###############################################################################
+def buildnml(case, caseroot, compname):
+###############################################################################
+    """Build the CUPiD config yml files"""
+
+    # Build the component namelist
+    if compname != "postprocessor":
+        raise AttributeError
+
+    cupid_root = case.get_value("CUPID_ROOT")
+
+    rundir = case.get_value("RUNDIR")
+    caseroot = case.get_value("CASEROOT")
+
+    cupid_postprocess_dir = os.path.join(caseroot, "cupid-postprocessing")
+
+    # -----------------------------------------------------
+    # Create the config files for CUPiD
+    # -----------------------------------------------------
+
+    cmd = os.path.join(cupid_root, "helper_scripts", "cesm_preview_namelists.sh")
+
+    rc, out, err = run_cmd(cmd, from_dir=caseroot)
+    expect(rc == 0, "Command %s failed rc=%d\nout=%s\nerr=%s" % (cmd, rc, out, err))
+    if out is not None:
+        logger.debug("     %s" % out)
+    if err is not None:
+        logger.debug("     %s" % err)
+
+    # -----------------------------------------------------
+    # copy config yml files to rundir
+    # -----------------------------------------------------
+
+    if os.path.isdir(rundir):
+        if not os.path.isdir(cupid_postprocess_dir):
+            raise AttributeError
+
+        for file in glob.glob(os.path.join(cupid_postprocess_dir, "*.yml")):
+             logger.debug("CUPiD copy config file to RUNDIR: %s" % (file))
+             shutil.copy(file, rundir)
+
+###############################################################################
+def _main_func():
+
+    caseroot = parse_input(sys.argv)
+    with Case(caseroot) as case:
+        compname = "postprocessor"
+        logger.warning(
+            "WARNING: buildnml is being called a s program rather than a subroutine "
+            + "as it is expected to be in the CESM context"
+        )
+        buildnml(case, caseroot, compname)
+
+
+if __name__ == "__main__":
+    _main_func()
