@@ -33,6 +33,7 @@
  - Kate Thayer-Calder (NCAR), [@Katetc](https://github.com/Katetc)
  - Jasmine Turner (University of Utah), [@JazSpaz24](https://github.com/JazSpaz24)
  - Will Wieder (NCAR), [@wwieder](https://github.com/wwieder)
+ - Molly Wieringa (NCAR), [@mollymwieringa](https://github.com/mollymwieringa)
  - Anissa Zacharias (NCAR), [@anissa111](https://github.com/anissa111)
  - Feng Zhu (NCAR), [@fzhu2e](https://github.com/fzhu2e)
 
