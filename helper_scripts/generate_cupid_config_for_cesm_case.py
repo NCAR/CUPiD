@@ -250,6 +250,7 @@ def generate_cupid_config(
     with Case(case_root, read_only=False, record=True) as cesm_case:
         case = cesm_case.get_value("CASE")
         dout_s_root = cesm_case.get_value("DOUT_S_ROOT")
+        ninst = cesm_case.get_value("NINST")
 
     # TODO: these sea-ice specific vars (and some glc vars) should also be added as environment vars
     # See https://github.com/NCAR/CUPiD/issues/189
@@ -281,7 +282,13 @@ def generate_cupid_config(
         int(cupid_base_climo_end_year) - int(cupid_base_climo_n_year) + 1
     )
     my_dict["global_params"]["base_climo_end_year"] = int(cupid_base_climo_end_year)
-    my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
+    if cupid_baseline_case == "none":
+        my_dict["timeseries"]["case_name"] = [case]
+        my_dict["timeseries"]["overwrite_ts"] = [False]
+        my_dict["timeseries"]["ts_done"] = [False]
+    else:
+        my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
+    my_dict["timeseries"]["ninst"] = ninst
 
     for component in my_dict["timeseries"]:
         if (
@@ -289,22 +296,28 @@ def generate_cupid_config(
             and "start_years" in my_dict["timeseries"][component]
         ):
             cupid_start_year = int(cupid_startdate.split("-")[0])
-            cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
-            my_dict["timeseries"][component]["start_years"] = [
-                cupid_start_year,
-                cupid_base_start_year,
-            ]
+            if cupid_baseline_case == "none":
+                my_dict["timeseries"][component]["start_years"] = [cupid_start_year]
+            else:
+                cupid_base_start_year = int(cupid_base_startdate.split("-")[0])
+                my_dict["timeseries"][component]["start_years"] = [
+                    cupid_start_year,
+                    cupid_base_start_year,
+                ]
         if (
             isinstance(my_dict["timeseries"][component], dict)
             and "end_years" in my_dict["timeseries"][component]
         ):
             # Assumption that end_year is YYYY-01-01, so we want end_year to be YYYY-1
             cupid_end_year = int(cupid_enddate.split("-")[0]) - 1
-            cupid_base_end_year = int(cupid_base_enddate.split("-")[0]) - 1
-            my_dict["timeseries"][component]["end_years"] = [
-                cupid_end_year,
-                cupid_base_end_year,
-            ]
+            if cupid_baseline_case == "none":
+                my_dict["timeseries"][component]["end_years"] = [cupid_end_year]
+            else:
+                cupid_base_end_year = int(cupid_base_enddate.split("-")[0]) - 1
+                my_dict["timeseries"][component]["end_years"] = [
+                    cupid_end_year,
+                    cupid_base_end_year,
+                ]
         if (
             isinstance(my_dict["timeseries"][component], dict)
             and "start_years" in my_dict["timeseries"][component]
