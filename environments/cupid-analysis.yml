@@ -60,6 +60,7 @@ dependencies:
   - yaml=0.2.5
   - zarr=3.1.5
   - pip:
+    - gents==1.1.2
     - -e ../cupid_utils
     - -e ../externals/ILAMB
     - -e ../externals/mom6-tools
