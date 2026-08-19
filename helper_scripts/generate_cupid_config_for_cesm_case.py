@@ -38,6 +38,21 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     default="/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing",
     help="Timeseries directory root; eg, if permission issues, use your scratch",
 )
+@click.option(
+    "--cupid-regrid",
+    default=False,
+    help="If True, time series files will be remapped",
+)
+@click.option(
+    "--cupid-regrid-atm-file",
+    default=None,
+    help="Mapping file for regridding atmosphere time series (or None to leave on native grid)",
+)
+@click.option(
+    "--cupid-regrid-base-atm-file",
+    default=None,
+    help="Mapping file for regridding atmosphere time series from baseline (or None to leave on native grid)",
+)
 @click.option("--cupid-startdate", default="0001-01-01", help="CUPiD case start date")
 @click.option("--cupid-enddate", default="0101-01-01", help="CUPiD case end date")
 @click.option(
@@ -69,6 +84,16 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     "--cupid-base-climo-n-year",
     default=20,
     help="Length of base case climatology for LDF",
+)
+@click.option(
+    "--case-nickname",
+    default=None,
+    help="Name to use for case in plot legends",
+)
+@click.option(
+    "--base-nickname",
+    default=None,
+    help="Name to use for case in plot legends",
 )
 @click.option(
     "--adf-output-root",
@@ -109,6 +134,9 @@ def generate_cupid_config(
     cupid_baseline_case,
     cupid_baseline_root,
     cupid_ts_dir,
+    cupid_regrid,
+    cupid_regrid_atm_file,
+    cupid_regrid_base_atm_file,
     cupid_startdate,
     cupid_enddate,
     cupid_base_startdate,
@@ -117,6 +145,8 @@ def generate_cupid_config(
     cupid_climo_n_year,
     cupid_base_climo_end_year,
     cupid_base_climo_n_year,
+    case_nickname,
+    base_nickname,
     adf_output_root,
     ldf_output_root,
     ilamb_output_root,
@@ -281,6 +311,15 @@ def generate_cupid_config(
         int(cupid_base_climo_end_year) - int(cupid_base_climo_n_year) + 1
     )
     my_dict["global_params"]["base_climo_end_year"] = int(cupid_base_climo_end_year)
+    if case_nickname != "NONE":
+        my_dict["global_params"]["case_nickname"] = case_nickname
+    else:
+        my_dict["global_params"]["case_nickname"] = case
+    if base_nickname != "NONE":
+        my_dict["global_params"]["base_case_nickname"] = base_nickname
+    else:
+        my_dict["global_params"]["base_case_nickname"] = cupid_baseline_case
+
     my_dict["timeseries"]["case_name"] = [case, cupid_baseline_case]
 
     for component in my_dict["timeseries"]:
@@ -315,6 +354,31 @@ def generate_cupid_config(
                 cupid_start_year,
                 cupid_base_start_year,
             ]
+    if cupid_regrid_atm_file == "NONE":
+        cupid_regrid_atm_file = None
+    if cupid_regrid_base_atm_file == "NONE":
+        cupid_regrid_base_atm_file = None
+    if "atm" in my_dict["timeseries"]:
+        my_dict["timeseries"]["atm"]["mapping_file"] = [
+            cupid_regrid_atm_file,
+            cupid_regrid_base_atm_file,
+        ]
+
+    if cupid_regrid:
+        if "Global_PSL_NMSE_compare_obs_lens" in my_dict["compute_notebooks"].get(
+            "atm",
+            {},
+        ):
+            my_dict["compute_notebooks"]["atm"]["Global_PSL_NMSE_compare_obs_lens"][
+                "parameter_groups"
+            ]["none"]["regridded_output"] = (cupid_regrid_atm_file is not None)
+        if "TimeSeriesPlots" in my_dict["compute_notebooks"].get("atm", {}):
+            my_dict["compute_notebooks"]["atm"]["TimeSeriesPlots"]["parameter_groups"][
+                "none"
+            ]["regridded_output"] = (cupid_regrid_atm_file is not None)
+            my_dict["compute_notebooks"]["atm"]["TimeSeriesPlots"]["parameter_groups"][
+                "none"
+            ]["base_regridded_output"] = (cupid_regrid_base_atm_file is not None)
 
     if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
         if "index" in my_dict["compute_notebooks"]["infrastructure"]:

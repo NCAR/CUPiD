@@ -12,10 +12,15 @@ CASEROOT=${PWD}
 SRCROOT=`./xmlquery --value SRCROOT`
 CESM_CUPID=${SRCROOT}/tools/CUPiD
 CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
+CUPID_OUTPUT_DIR=`./xmlquery --value CUPID_OUTPUT_DIR`
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
+CUPID_REGRID=`./xmlquery --value CUPID_REGRID`
+CUPID_REGRID_ATM_FILE=`./xmlquery --value CUPID_REGRID_ATM_FILE`
+CUPID_REGRID_BASE_ATM_FILE=`./xmlquery --value CUPID_REGRID_BASE_ATM_FILE`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
+CUPID_CMORIZATION=`./xmlquery --value CUPID_CMORIZATION`
 CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
 CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
@@ -30,6 +35,8 @@ CUPID_CLIMO_END_YEAR=`./xmlquery --value CUPID_CLIMO_END_YEAR`
 CUPID_BASE_CLIMO_END_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_END_YEAR`
 CUPID_CLIMO_N_YEAR=`./xmlquery --value CUPID_CLIMO_N_YEAR`
 CUPID_BASE_CLIMO_N_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_N_YEAR`
+CUPID_NICKNAME=`./xmlquery --value CUPID_NICKNAME`
+CUPID_BASE_NICKNAME=`./xmlquery --value CUPID_BASE_NICKNAME`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -76,8 +83,8 @@ if [ "${CUPID_ROOT%/}" != "${CESM_CUPID}" ]; then
 fi
 
 # Create directory for running CUPiD
-mkdir -p cupid-postprocessing
-cd cupid-postprocessing
+mkdir -p ${CUPID_OUTPUT_DIR}
+cd ${CUPID_OUTPUT_DIR}
 
 # If CUPID_RUN_ALL is TRUE, we don't add any component flags.
 # The lack of any component flags tells CUPiD to run all components.
@@ -140,6 +147,9 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-baseline-case ${CUPID_BASELINE_CASE} \
    --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
    --cupid-ts-dir ${CUPID_TS_DIR} \
+   --cupid-regrid ${CUPID_REGRID} \
+   --cupid-regrid-atm-file ${CUPID_REGRID_ATM_FILE} \
+   --cupid-regrid-base-atm-file ${CUPID_REGRID_BASE_ATM_FILE} \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddate ${CUPID_ENDDATE} \
    --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
@@ -148,6 +158,8 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
    --cupid-base-climo-end-year ${CUPID_BASE_CLIMO_END_YEAR} \
    --cupid-base-climo-n-year ${CUPID_BASE_CLIMO_N_YEAR} \
+   --case-nickname ${CUPID_NICKNAME} \
+   --base-nickname ${CUPID_BASE_NICKNAME} \
    --adf-output-root ${PWD} \
    --ldf-output-root ${PWD} \
    --ilamb-output-root ${PWD} \
@@ -182,9 +194,17 @@ fi
 # 5. Generate timeseries files
 if [ "${CUPID_GEN_TIMESERIES}" == "TRUE" ]; then
    ${CUPID_ROOT}/cupid/run_timeseries.py ${CUPID_FLAG_STRING}
+   if [ "${CUPID_REGRID}" == "TRUE" ]; then
+      ${CUPID_ROOT}/cupid/run_remapping.py ${CUPID_FLAG_STRING}
+   fi
 fi
 
-# 6. Run ADF
+# 6. Run CMORIZATION
+if [ "${CUPID_CMORIZATION}" == "TRUE" ]; then
+  echo "NOTE: CMORIZATION has not been implemented yet!"
+fi
+
+# 7. Run ADF
 if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_ATM}" == "FALSE" ]]; then
     echo "WARNING: Running ADF but Atmosphere component is turned off. Turn on either CUPID_RUN_ATM or CUPID_RUN_ALL to view ADF output in final webpage"
@@ -194,7 +214,7 @@ if [ "${CUPID_RUN_ADF}" == "TRUE" ]; then
   ${CUPID_ROOT}/externals/ADF/run_adf_diag adf_config.yml
 fi
 
-# 7. Run ILAMB
+# 8. Run ILAMB
 if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
   if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
     echo "WARNING: Running ILAMB but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
@@ -209,7 +229,7 @@ if [ "${CUPID_RUN_ILAMB}" == "TRUE" ]; then
   ilamb-run --config ilamb_nohoff_final_CLM_${CUPID_RUN_TYPE}.cfg --build_dir ILAMB_output/ --df_errs ${ILAMB_ROOT}/quantiles_Whittaker_cmip5v6.parquet --define_regions ${ILAMB_ROOT}/DATA/regions/LandRegions.nc ${ILAMB_ROOT}/DATA/regions/Whittaker.nc --regions global --model_setup model_setup.txt --filter .clm2.h0.
 fi
 
-# 8. Run LDF
+# 9. Run LDF
 if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
   if [[ "${CUPID_RUN_ALL}" == "FALSE" ]] && [[ "${CUPID_RUN_LND}" == "FALSE" ]]; then
     echo "WARNING: Running LDF but Land component is turned off. Turn on either CUPID_RUN_LND or CUPID_RUN_ALL to view ILAMB output in final webpage"
@@ -219,7 +239,7 @@ if [ "${CUPID_RUN_LDF}" == "TRUE" ]; then
   ${CUPID_ROOT}/externals/LDF/run_adf_diag ldf_config.yml
 fi
 
-# 9. Run CUPiD and build webpage
+# 10. Run CUPiD and build webpage
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then

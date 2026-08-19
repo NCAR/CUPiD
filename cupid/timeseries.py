@@ -367,14 +367,6 @@ def create_time_series(
 
         # End variable loop
 
-        if vars_to_derive:
-            if component == "atm":
-                derive_cam_variables(
-                    logger,
-                    vars_to_derive=vars_to_derive,
-                    ts_dir=ts_dir[case_idx],
-                )
-
         if serial:
             for cmd in list_of_commands:
                 call_ncrcat(cmd)
@@ -383,6 +375,16 @@ def create_time_series(
             with mp.Pool(processes=num_procs) as mpool:
                 _ = mpool.map(call_ncrcat, list_of_commands)
             # End with
+
+        # Derived vars need the previously-generated time series files
+        if vars_to_derive:
+            if component == "atm":
+                derive_cam_variables(
+                    logger,
+                    vars_to_derive=vars_to_derive,
+                    ts_dir=ts_dir[case_idx],
+                )
+
     # End cases loop
 
     # Notify user that script has ended:
@@ -420,21 +422,24 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
                 )
                 ermsg += " Please remove PRECT from diag_var_list or find the relevant CAM files."
                 raise FileNotFoundError(ermsg)
+
             # create new file name for PRECT
-        prect_file = constit_files[0].replace("PRECC", "PRECT")
-        if Path(prect_file).is_file():
-            if overwrite:
-                Path(prect_file).unlink()
-            else:
-                logger.warning(
-                    f"[{__name__}] Warning: PRECT file was found and overwrite is False"
-                    + "Will use existing file.",
-                )
-                continue
-        # append PRECC to the file containing PRECL
-        os.system(f"ncks -A -v PRECC {constit_files[0]} {constit_files[1]}")
-        # create new file with the sum of PRECC and PRECL
-        os.system(f"ncap2 -s 'PRECT=(PRECC+PRECL)' {constit_files[1]} {prect_file}")
+            prect_file = constit_files[0].replace("PRECC", "PRECT")
+            if Path(prect_file).is_file():
+                if overwrite:
+                    Path(prect_file).unlink()
+                else:
+                    logger.warning(
+                        f"[{__name__}] Warning: PRECT file was found and overwrite is False"
+                        + "Will use existing file.",
+                    )
+                    continue
+
+            # append PRECC to the file containing PRECL
+            os.system(f"ncks -A -v PRECC {constit_files[0]} {constit_files[1]}")
+            # create new file with the sum of PRECC and PRECL
+            os.system(f"ncap2 -s 'PRECT=(PRECC+PRECL)' {constit_files[1]} {prect_file}")
+
         if var == "RESTOM":
             # RESTOM = FSNT-FLNT
             # Have to be more precise than with PRECT because FSNTOA, FSTNC, etc are valid variables
@@ -454,6 +459,7 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
                 )
                 ermsg += " Please remove RESTOM from diag_var_list or find the relevant CAM files."
                 raise FileNotFoundError(ermsg)
+
             # create new file name for RESTOM
             derived_file = constit_files[0].replace("FLNT", "RESTOM")
             if Path(derived_file).is_file():
@@ -465,6 +471,7 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
                         + "Will use existing file.",
                     )
                     continue
+
             # append FSNT to the file containing FLNT
             os.system(f"ncks -A -v FLNT {constit_files[0]} {constit_files[1]}")
             # create new file with the difference of FLNT and FSNT

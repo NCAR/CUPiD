@@ -14,6 +14,14 @@
     <desc>Location of CUPiD for CESM workflow</desc>
   </entry>
 
+  <entry id="CUPID_OUTPUT_DIR">
+    <type>char</type>
+    <default_value>$DOUT_S_ROOT/cupid</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Location of CUPiD output written by CESM workflow</desc>
+  </entry>
+
   <entry id="CUPID_GEN_TIMESERIES">
     <type>char</type>
     <valid_values>TRUE,FALSE</valid_values>
@@ -21,6 +29,15 @@
     <group>cupid_config</group>
     <file>env_postprocessing.xml</file>
     <desc>When TRUE, CUPiD will generate time series files from history output</desc>
+  </entry>
+
+  <entry id="CUPID_REGRID">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will regrid the time series files (requires CUPID_GEN_TIMESERIES=TRUE)</desc>
   </entry>
 
   <entry id="CUPID_GEN_DIAGNOSTICS">
@@ -39,6 +56,15 @@
     <group>cupid_config</group>
     <file>env_postprocessing.xml</file>
     <desc>When TRUE, CUPiD will generate web pages from the diagnostic plots</desc>
+  </entry>
+
+  <entry id="CUPID_CMORIZATION">
+    <type>char</type>
+    <valid_values>TRUE,FALSE</valid_values>
+    <default_value>FALSE</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>When TRUE, CUPiD will run the CESM-specific Climate Model Output Rewriter (CMOR) tools</desc>
   </entry>
 
   <!-- Variables that configure conda environments used by CUPiD -->
@@ -159,6 +185,22 @@
     <desc>Baseline case root to use in CUPiD analysis</desc>
   </entry>
 
+  <entry id="CUPID_NICKNAME">
+    <type>char</type>
+    <default_value>$CASE</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Label to use in plot legends to describe case</desc>
+  </entry>
+
+  <entry id="CUPID_BASE_NICKNAME">
+    <type>char</type>
+    <default_value>NONE</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Label to use in plot legends to describe baseline case</desc>
+  </entry>
+
   <entry id="CUPID_TS_DIR">
     <type>char</type>
     <default_value>$DOUT_S_ROOT/..</default_value>
@@ -169,7 +211,7 @@
 
   <entry id="CUPID_EXAMPLE">
     <type>char</type>
-    <default_value>key_metrics</default_value>
+    <default_value>intermediary_outputs</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
     <desc>Example to use in CUPiD analysis</desc>
@@ -182,6 +224,22 @@
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
     <desc>Type of CTSM run: either 'BGC' (biogeochemistry) or 'SP' (satellite phenology)</desc>
+  </entry>
+
+  <entry id="CUPID_REGRID_ATM_FILE">
+    <type>char</type>
+    <default_value>$DIN_LOC_ROOT/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>File to use to remap atmosphere time series files from case (NONE => do not remap)</desc>
+  </entry>
+
+  <entry id="CUPID_REGRID_BASE_ATM_FILE">
+    <type>char</type>
+    <default_value>$DIN_LOC_ROOT/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc</default_value>
+    <group>cupid_config</group>
+    <file>env_postprocessing.xml</file>
+    <desc>File to use to remap atmosphere time series files from baseline case (NONE => do not remap)</desc>
   </entry>
 
   <!-- Variables that define which components are analyzed (and whether analysis is parallelized) -->

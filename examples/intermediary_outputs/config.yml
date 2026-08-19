@@ -55,10 +55,15 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
   ts_done: [False, False]
   overwrite_ts: [False, False]
   case_name: ['b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.232', 'b.e30_alpha07c_cesm.B1850C_LTso.ne30_t232_wgx3.228']
+  file_mode: 664
+  dir_mode: 775
+  file_group: cesm
+  dir_group: cesm
 
   atm:
-    vars: ['RESTOM','TS']
-    derive_vars: []
+    vars: ['RESTOM','TS', 'ICEFRAC']
+    derive_vars:
+        RESTOM: ['FLNT','FSNT']
     hist_str: 'cam.h0a'
     start_years: [1,1]
     end_years: [21,45]
@@ -83,7 +88,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     level: 'lev'
 
   ice:
-    vars: ['ICEFRAC']
+    vars: []
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1]
@@ -121,18 +126,15 @@ compute_notebooks:
           none: {}
 
     atm:
-      Global_TS_RESTOM_tseries:
+      TimeSeriesPlots:
         parameter_groups:
           none:
+            regridded_output: False
+            base_regridded_output: True
             vars:
-              {'TS':'Global',
-               'RESTOM':'Global'}
-    ice:
-      Lab_Sea_ICEFRAC_tseries:
-        parameter_groups:
-          none:
-            vars:
-              {'ICEFRAC': 'Lab Sea'}
+              TS: Global
+              RESTOM: Global
+              ICEFRAC: Lab Sea
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -156,9 +158,9 @@ book_toc:
     # Each chapter is the name of one of the notebooks that you executed
     # in compute_notebooks above, also without .ipynb
 
-    - caption: Diagnostic Output from Multiple Components
+    - caption: Diagnostic Output from the Atmosphere
       chapters:
-        - file: atm/Global_TS_ICEFRAC_RESTOM_tseries
+        - file: atm/TimeSeriesPlots
 
 
 #####################################
