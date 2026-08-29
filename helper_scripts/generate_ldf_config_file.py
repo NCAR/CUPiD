@@ -71,6 +71,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
         "/glade/derecho/scratch",
         os.environ["USER"],
+        "cupid_output",
         test_case_name,
         "lnd",
         "proc",
@@ -80,6 +81,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
         "/glade/derecho/scratch",
         os.environ["USER"],
+        "cupid_output",
         test_case_name,
         "lnd",
         "proc",
@@ -153,6 +155,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
         "/glade/derecho/scratch",
         os.environ["USER"],
+        "cupid_output",
         base_case_name,
         "lnd",
         "proc",
@@ -161,6 +164,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
         "/glade/derecho/scratch",
         os.environ["USER"],
+        "cupid_output",
         base_case_name,
         "lnd",
         "proc",
@@ -207,6 +211,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
         "/glade/derecho/scratch",
         os.environ["USER"],
+        "cupid_output",
         base_case_name,
         "lnd",
         "proc",
