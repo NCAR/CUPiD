@@ -17,26 +17,27 @@ CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
 CUPID_REGRID=`./xmlquery --value CUPID_REGRID`
 CUPID_REGRID_ATM_FILE=`./xmlquery --value CUPID_REGRID_ATM_FILE`
-CUPID_REGRID_BASE_ATM_FILE=`./xmlquery --value CUPID_REGRID_BASE_ATM_FILE`
+CUPID_COMPARISON_REGRID_ATM_FILES=`./xmlquery --value CUPID_COMPARISON_REGRID_ATM_FILES`
 CUPID_GEN_DIAGNOSTICS=`./xmlquery --value CUPID_GEN_DIAGNOSTICS`
 CUPID_GEN_HTML=`./xmlquery --value CUPID_GEN_HTML`
 CUPID_CMORIZATION=`./xmlquery --value CUPID_CMORIZATION`
-CUPID_BASELINE_CASE=`./xmlquery --value CUPID_BASELINE_CASE`
-CUPID_BASELINE_ROOT=`./xmlquery --value CUPID_BASELINE_ROOT`
+CUPID_COMPARISON_CASES=`./xmlquery --value CUPID_COMPARISON_CASES`
+CUPID_COMPARISON_ROOTS=`./xmlquery --value CUPID_COMPARISON_ROOTS`
 CUPID_TS_DIR=`./xmlquery --value CUPID_TS_DIR`
 CUPID_STARTDATE=`./xmlquery --value CUPID_STARTDATE`
 CUPID_STOP_N=`./xmlquery --value CUPID_STOP_N`
 CUPID_STOP_OPTION=`./xmlquery --value CUPID_STOP_OPTION`
 CALENDAR=`./xmlquery --value CALENDAR`
-CUPID_BASE_STARTDATE=`./xmlquery --value CUPID_BASE_STARTDATE`
-CUPID_BASE_STOP_N=`./xmlquery --value CUPID_BASE_STOP_N`
-CUPID_BASE_STOP_OPTION=`./xmlquery --value CUPID_BASE_STOP_OPTION`
+CUPID_COMPARISON_STARTDATES=`./xmlquery --value CUPID_COMPARISON_STARTDATES`
+CUPID_COMPARISON_STOP_NS=`./xmlquery --value CUPID_COMPARISON_STOP_NS`
 CUPID_CLIMO_END_YEAR=`./xmlquery --value CUPID_CLIMO_END_YEAR`
-CUPID_BASE_CLIMO_END_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_END_YEAR`
+CUPID_COMPARISON_CLIMO_END_YEARS=`./xmlquery --value CUPID_COMPARISON_CLIMO_END_YEARS`
 CUPID_CLIMO_N_YEAR=`./xmlquery --value CUPID_CLIMO_N_YEAR`
-CUPID_BASE_CLIMO_N_YEAR=`./xmlquery --value CUPID_BASE_CLIMO_N_YEAR`
+CUPID_COMPARISON_CLIMO_N_YEARS=`./xmlquery --value CUPID_COMPARISON_CLIMO_N_YEARS`
+CUPID_ALIGN_YEAR=`./xmlquery --value CUPID_ALIGN_YEAR`
+CUPID_COMPARISON_ALIGN_YEARS=`./xmlquery --value CUPID_COMPARISON_ALIGN_YEARS`
 CUPID_NICKNAME=`./xmlquery --value CUPID_NICKNAME`
-CUPID_BASE_NICKNAME=`./xmlquery --value CUPID_BASE_NICKNAME`
+CUPID_COMPARISON_NICKNAMES=`./xmlquery --value CUPID_COMPARISON_NICKNAMES`
 CUPID_NTASKS=`./xmlquery --value CUPID_NTASKS`
 CUPID_RUN_ALL=`./xmlquery --value CUPID_RUN_ALL`
 CUPID_RUN_ATM=`./xmlquery --value CUPID_RUN_ATM`
@@ -60,20 +61,15 @@ unset PYTHONPATH
 # cupid-analysis env required for end date calculation
 conda activate ${CUPID_ANALYSIS_ENV}
 
-# Calculate CUPID_ENDDATE and CUPID_BASE_ENDDATE
+# Calculate CUPID_ENDDATE
 # calendar name needs to be changed for cftime standards
 CFTIME_CALENDAR=$CALENDAR
 CFTIME_CALENDAR="${CFTIME_CALENDAR/GREGORIAN/proleptic_gregorian}"
 CFTIME_CALENDAR="${CFTIME_CALENDAR/NO_LEAP/noleap}"
-CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
-  --start-date ${CUPID_STARTDATE} \
+CUPID_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddates.py \
+  --start-dates ${CUPID_STARTDATE} \
   --stop-option ${CUPID_STOP_OPTION} \
-  --stop-n ${CUPID_STOP_N} \
-  --calendar ${CFTIME_CALENDAR}`
-CUPID_BASE_ENDDATE=`${CUPID_ROOT}/helper_scripts/find_enddate.py \
-  --start-date ${CUPID_BASE_STARTDATE} \
-  --stop-option ${CUPID_BASE_STOP_OPTION} \
-  --stop-n ${CUPID_BASE_STOP_N} \
+  --stop-ns ${CUPID_STOP_N} \
   --calendar ${CFTIME_CALENDAR}`
 
 # Note if CUPID_ROOT is not tools/CUPiD
@@ -138,28 +134,46 @@ if [ "${CUPID_RUN_CVDP}" == "TRUE" ]; then
 else
   CVDP_OPT=""
 fi
+# Will we pass in cupid-comparison arguments?
+CUPID_COMPARISON_ARGS=""
+if [ ${#CUPID_COMPARISON_CASES} -gt 0 ]; then
+    # Determine end dates for the CUPiD comparison cases
+    CUPID_COMPARISON_ENDDATES=`${CUPID_ROOT}/helper_scripts/find_enddates.py \
+      --start-dates ${CUPID_COMPARISON_STARTDATES} \
+      --stop-option ${CUPID_STOP_OPTION} \
+      --stop-ns ${CUPID_COMPARISON_STOP_NS} \
+      --calendar ${CFTIME_CALENDAR} \
+      --cases ${CUPID_COMPARISON_CASES}`
+    CUPID_ENDDATES="${CUPID_ENDDATE},${CUPID_COMPARISON_ENDDATES}"
+
+    # Set up comparison arguments for generate_cupid_config_for_cesm_case.py
+    CUPID_COMPARISON_ARGS="--cupid-comparison-cases ${CUPID_COMPARISON_CASES} \
+                           --cupid-comparison-roots ${CUPID_COMPARISON_ROOTS} \
+                           --cupid-comparison-nicknames ${CUPID_COMPARISON_NICKNAMES} \
+                           --cupid-comparison-climo-end-years ${CUPID_COMPARISON_CLIMO_END_YEARS} \
+                           --cupid-comparison-climo-n-years ${CUPID_COMPARISON_CLIMO_N_YEARS} \
+                           --cupid-comparison-startdates ${CUPID_COMPARISON_STARTDATES} \
+                           --cupid-comparison-align-years ${CUPID_COMPARISON_ALIGN_YEARS} \
+                           --cupid-comparison-regrid-atm-files ${CUPID_COMPARISON_REGRID_ATM_FILES}"
+else
+    CUPID_ENDDATES="${CUPID_ENDDATE}"
+fi
+
 ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
-   ${CVDP_OPT} \
+   ${CVDP_OPT} ${CUPID_COMPARISON_ARGS} \
    --case-root ${CASEROOT} \
    --cesm-root ${SRCROOT} \
    --cupid-root ${CUPID_ROOT} \
    --cupid-example ${CUPID_EXAMPLE} \
-   --cupid-baseline-case ${CUPID_BASELINE_CASE} \
-   --cupid-baseline-root ${CUPID_BASELINE_ROOT} \
    --cupid-ts-dir ${CUPID_TS_DIR} \
    --cupid-regrid ${CUPID_REGRID} \
    --cupid-regrid-atm-file ${CUPID_REGRID_ATM_FILE} \
-   --cupid-regrid-base-atm-file ${CUPID_REGRID_BASE_ATM_FILE} \
    --cupid-startdate ${CUPID_STARTDATE} \
-   --cupid-enddate ${CUPID_ENDDATE} \
-   --cupid-base-startdate ${CUPID_BASE_STARTDATE} \
-   --cupid-base-enddate ${CUPID_BASE_ENDDATE} \
+   --cupid-enddates ${CUPID_ENDDATES} \
    --cupid-climo-end-year ${CUPID_CLIMO_END_YEAR} \
+   --cupid-align-year ${CUPID_ALIGN_YEAR} \
    --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
-   --cupid-base-climo-end-year ${CUPID_BASE_CLIMO_END_YEAR} \
-   --cupid-base-climo-n-year ${CUPID_BASE_CLIMO_N_YEAR} \
    --case-nickname ${CUPID_NICKNAME} \
-   --base-nickname ${CUPID_BASE_NICKNAME} \
    --adf-output-root ${PWD} \
    --ldf-output-root ${PWD} \
    --ilamb-output-root ${PWD} \
