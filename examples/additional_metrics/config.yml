@@ -46,9 +46,9 @@ global_params:
     - 'b.e30_alpha09d_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.380'
     - 'b.e30_alpha09e_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.392'
   case_nicknames:
-    - 'BLT1850_377'
-    - 'BLT1850_380'
-    - 'BLT1850_392'
+    - '377'
+    - '380'
+    - '392'
   CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
   start_dates:
     - '0001-01-01'

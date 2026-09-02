@@ -54,10 +54,9 @@ def plot_diff(
         norm = mpl.colors.BoundaryNorm(levels, ncolors=cmap.N)
 
     # set up the figure with a Polar Stereographic projection
-    fig = plt.figure(tight_layout=True)
+    fig = plt.figure()
     ncases = len(case_names)
-
-    gs = GridSpec(2, ncases * 2)
+    gs = GridSpec(2, ncases * 2 + 1)
 
     if proj == "N":
         ax = fig.add_subplot(gs[0, 0:2], projection=ccrs.NorthPolarStereo())
@@ -242,7 +241,7 @@ def plot_diff(
     ncases = len(case_names)
 
     del gs
-    gs = GridSpec(2, ncases * 2)
+    gs = GridSpec(2, ncases * 2 + 1)
 
     if proj == "N":
         ax = fig2.add_subplot(gs[0, 0:2], projection=ccrs.NorthPolarStereo())
