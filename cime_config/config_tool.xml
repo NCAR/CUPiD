@@ -112,31 +112,6 @@
     <desc>Provides a numerical count for $CUPID_STOP_OPTION.</desc>
   </entry>
 
-  <entry id="CUPID_BASE_STARTDATE">
-    <type>char</type>
-    <default_value>0001-01-01</default_value>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>First date of baseline output to include in CUPiD analysis. Format YYYY-MM-DD.</desc>
-  </entry>
-
-  <entry id="CUPID_BASE_STOP_OPTION">
-    <type>char</type>
-    <default_value>nyears</default_value>
-    <valid_values>ndays,nmonths,nyears</valid_values>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Sets the portion of base case output to include in CUPiD analysis, along with STOP_N.</desc>
-  </entry>
-
-  <entry id="CUPID_BASE_STOP_N">
-    <type>integer</type>
-    <default_value>100</default_value>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Provides a numerical count for $CUPID_BASE_STOP_OPTION.</desc>
-  </entry>
-
   <entry id="CUPID_CLIMO_END_YEAR">
     <type>integer</type>
     <default_value>100</default_value>
@@ -153,36 +128,12 @@
     <desc>Number of years to use for climatology, eg for LDF</desc>
   </entry>
 
-  <entry id="CUPID_BASE_CLIMO_END_YEAR">
+  <entry id="CUPID_ALIGN_YEAR">
     <type>integer</type>
-    <default_value>100</default_value>
+    <default_value>0</default_value>
     <group>cupid_analysis</group>
     <file>env_postprocessing.xml</file>
-    <desc>Year to end base case climatology, eg for LDF</desc>
-  </entry>
-
-  <entry id="CUPID_BASE_CLIMO_N_YEAR">
-    <type>integer</type>
-    <default_value>25</default_value>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Number of years to use for base case climatology, eg for LDF</desc>
-  </entry>
-
-  <entry id="CUPID_BASELINE_CASE">
-    <type>char</type>
-    <default_value>b.e23_alpha17f.BLT1850.ne30_t232.092</default_value>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Baseline case to use in CUPiD analysis</desc>
-  </entry>
-
-  <entry id="CUPID_BASELINE_ROOT">
-    <type>char</type>
-    <default_value>$DOUT_S_ROOT/..</default_value>
-    <group>cupid_analysis</group>
-    <file>env_postprocessing.xml</file>
-    <desc>Baseline case root to use in CUPiD analysis</desc>
+    <desc>Number of years offset time axis when plotting global timeseries of CESM case</desc>
   </entry>
 
   <entry id="CUPID_NICKNAME">
@@ -193,12 +144,68 @@
     <desc>Label to use in plot legends to describe case</desc>
   </entry>
 
-  <entry id="CUPID_BASE_NICKNAME">
+  <entry id="CUPID_COMPARISON_STARTDATES">
+    <type>char</type>
+    <default_value>0001-01-01</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>First date of output to include in each CUPiD comparison list. Format YYYY-MM-DD (or comma-separated list).</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_STOP_NS">
+    <type>char</type>
+    <default_value>100</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Provides a numerical count for comparison cases in units of $CUPID_STOP_OPTION. Can be single value or comma-separated list.</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_CLIMO_END_YEARS">
+    <type>char</type>
+    <default_value>100</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Year to end comparison case climatologies, eg for LDF. Can be single value for all cases or comma-separated list.</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_ALIGN_YEARS">
+    <type>char</type>
+    <default_value>0</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years offset time axis when plotting global timeseries of comparison case(s)</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_CLIMO_N_YEARS">
+    <type>char</type>
+    <default_value>25</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years to use for comparison case climatologies, eg for LDF. Can be single value for all cases or comma-separated list.</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_CASES">
+    <type>char</type>
+    <default_value></default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Space-separated list of cases to compare to current CESM case</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_ROOTS">
+    <type>char</type>
+    <default_value>$DOUT_S_ROOT/..</default_value>
+    <group>cupid_comparison</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Root of all cases being compared. Can be a single string if common across cases, otherwise space-separated list of same length as CUPID_COMPARISON_CASES</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_NICKNAMES">
     <type>char</type>
     <default_value>NONE</default_value>
-    <group>cupid_analysis</group>
+    <group>cupid_comparison</group>
     <file>env_postprocessing.xml</file>
-    <desc>Label to use in plot legends to describe baseline case</desc>
+    <desc>Label to use in plot legends to describe baseline case. Can be single value or comma-separated list.</desc>
   </entry>
 
   <entry id="CUPID_TS_DIR">
@@ -234,7 +241,7 @@
     <desc>File to use to remap atmosphere time series files from case (NONE => do not remap)</desc>
   </entry>
 
-  <entry id="CUPID_REGRID_BASE_ATM_FILE">
+  <entry id="CUPID_COMPARISON_REGRID_ATM_FILES">
     <type>char</type>
     <default_value>$DIN_LOC_ROOT/cpl/gridmaps/ne30pg3/map_ne30pg3_TO_fv0.9x1.25_blin.240826.nc</default_value>
     <group>cupid_config</group>

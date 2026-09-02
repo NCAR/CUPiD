@@ -5,6 +5,7 @@ import os
 
 import click
 import yaml
+import cupid.util as util
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -37,47 +38,46 @@ def generate_adf_config(
         os.path.join(helper_scripts_path, "..", "externals", "ADF"),
     )
 
-    with open(os.path.join(cupid_config_loc, "config.yml")) as c:
-        c_dict = yaml.safe_load(c)
+    c_dict = util.get_control_dict(os.path.join(cupid_config_loc, "config.yml"))
+
     with open(adf_template, encoding="UTF-8") as a:
         a_dict = yaml.safe_load(a)
 
     # read parameters from CUPID
     # use `get` to default to None
     CESM_output_dir = c_dict["global_params"]["CESM_output_dir"]
-    base_case_name = c_dict["global_params"]["base_case_name"]
-    test_case_name = c_dict["global_params"]["case_name"]
+    base_case_name = c_dict["global_params"]["case_names"][0]
+    test_case_name = c_dict["global_params"]["case_names"][-1]
     c_ts = c_dict["timeseries"]
-    ts_case_names = c_ts.get("case_name")
+    ts_case_names = c_dict["global_params"]["case_names"]
     ts_dir = c_dict["global_params"].get("ts_dir")
     if ts_dir is None:
         ts_dir = CESM_output_dir
-    ts_dir = os.path.join(ts_dir)
+    # ts_dir = os.path.join(ts_dir)
     if not ts_case_names:
         raise ValueError("CUPiD file does not have timeseries case_name array.")
 
     # Set case names for ADF config
     a_dict["diag_cam_climo"]["cam_case_name"] = test_case_name
     a_dict["diag_cam_baseline_climo"]["cam_case_name"] = base_case_name
-    a_dict["diag_cam_climo"]["case_nickname"] = c_dict["global_params"].get(
-        "case_nickname",
-        test_case_name,
-    )
-    a_dict["diag_cam_baseline_climo"]["case_nickname"] = c_dict["global_params"].get(
-        "base_case_nickname",
-        base_case_name,
-    )
+    a_dict["diag_cam_climo"]["case_nickname"] = c_dict["global_params"][
+        "case_nicknames"
+    ][-1]
+    a_dict["diag_cam_baseline_climo"]["case_nickname"] = c_dict["global_params"][
+        "case_nicknames"
+    ][0]
 
     # TEST CASE HISTORY FILE PATH
     a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
-        CESM_output_dir,
+        CESM_output_dir[-1],
         test_case_name,
         "atm",
         "hist",
     )
+
     # TEST CASE TIME SERIES FILE PATH
     a_dict["diag_cam_climo"]["cam_ts_loc"] = os.path.join(
-        ts_dir,
+        ts_dir[-1],
         test_case_name,
         "atm",
         "proc",
@@ -85,7 +85,7 @@ def generate_adf_config(
     )
     # TEST CASE CLIMO FILE PATH
     a_dict["diag_cam_climo"]["cam_climo_loc"] = os.path.join(
-        ts_dir,
+        ts_dir[-1],
         test_case_name,
         "atm",
         "proc",
@@ -95,7 +95,7 @@ def generate_adf_config(
     try:
         if c_dict["compute_notebooks"]["atm"]["ADF"]["external_tool"][
             "regridded_output"
-        ]:
+        ][-1]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
                 a_dict["diag_cam_climo"]["cam_hist_loc"],
                 "regrid",
@@ -124,10 +124,7 @@ def generate_adf_config(
         ts_case_names.index(base_case_name) if base_case_name in ts_case_names else None
     )
 
-    base_case_output_dir = c_dict["global_params"].get(
-        "base_case_output_dir",
-        CESM_output_dir,
-    )
+    base_case_output_dir = CESM_output_dir[0]
     base_start_date = get_date_from_ts(
         c_ts["atm"],
         "start_years",
@@ -150,14 +147,14 @@ def generate_adf_config(
         "hist",
     )
     a_dict["diag_cam_baseline_climo"]["cam_ts_loc"] = os.path.join(
-        ts_dir,
+        ts_dir[0],
         base_case_name,
         "atm",
         "proc",
         "tseries",
     )
     a_dict["diag_cam_baseline_climo"]["cam_climo_loc"] = os.path.join(
-        ts_dir,
+        ts_dir[0],
         base_case_name,
         "atm",
         "proc",
@@ -186,7 +183,7 @@ def generate_adf_config(
 
     a_dict["diag_basic_info"]["num_procs"] = c_dict["timeseries"].get("num_procs", 1)
     a_dict["diag_basic_info"]["cam_regrid_loc"] = os.path.join(
-        ts_dir,
+        ts_dir[0],
         base_case_name,
         "atm",
         "proc",
@@ -285,6 +282,8 @@ def get_date_from_ts(data: dict, keyname: str, listindex: int, default=None):
         raise TypeError(f"first argument needs to be dict, got {type(data)}")
     if keyname not in data:
         raise KeyError(f"no entry {keyname} in the dict")
+    if listindex is None:
+        return default
     x = data[keyname]
     if isinstance(x, list):
         return x[listindex]
