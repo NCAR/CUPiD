@@ -6,6 +6,8 @@ import shutil
 
 import click
 import yaml
+import cupid.util as util
+
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -42,8 +44,7 @@ def generate_ilamb_cfg(cupid_config_loc, run_type, cupid_root=None):
     """Create ILAMB config file with correct paths to ILAMB auxiliary files
     given information from CUPiD configuration file"""
 
-    with open(os.path.join(cupid_config_loc, "config.yml")) as c:
-        c_dict = yaml.safe_load(c)
+    c_dict = util.get_control_dict(os.path.join(cupid_config_loc, "config.yml"))
     if "ILAMB" in c_dict["compute_notebooks"]["lnd"].keys():
         ilamb_config_data_loc = c_dict["compute_notebooks"]["lnd"]["ILAMB"][
             "external_tool"
@@ -89,40 +90,42 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
         c_dict = yaml.safe_load(c)
-    case_output_dir = os.path.join(
-        c_dict["global_params"]["CESM_output_dir"],
-        c_dict["global_params"]["case_name"],
-    )
-    if "base_case_output_dir" in c_dict["global_params"]:
-        base_case_output_dir = os.path.join(
-            c_dict["global_params"]["base_case_output_dir"],
-            c_dict["global_params"]["base_case_name"],
-        )
-    else:
-        base_case_output_dir = os.path.join(
-            c_dict["global_params"]["CESM_output_dir"],
-            c_dict["global_params"]["base_case_name"],
-        )
 
-    shift_str_case = ""
-    shift_str_base_case = ""
-    if "1850" in c_dict["global_params"]["case_name"]:
-        shift_str_case = ", 50, 2000"
-    if "1850" in c_dict["global_params"]["base_case_name"]:
-        shift_str_base_case = ", 50, 2000"
+    case_names = c_dict["global_params"]["case_names"]
+    CESM_output_dir = c_dict["global_params"]["CESM_output_dir"]
+
+    case_dict = {}
+    for case_name, CESM_output_dir in zip(case_names, CESM_output_dir):
+        case_output_dir = os.path.join(
+            CESM_output_dir,
+            case_name,
+        )
+        shift_str_case = ""
+        if "1850" in case_name:
+            shift_str_case = ", 50, 2000"
+
+        case_dict[case_name] = {
+            "output_dir": case_output_dir,
+            "shift_str": shift_str_case,
+        }
+
     with open(os.path.join(cupid_config_loc, "model_setup.txt"), "w") as ms:
+
         ms.write(
             "# Model Name    , Location of Files                                                                    ,  Shift From,  Shift To\n",  # noqa: E501
         )
-        ms.write(
-            f"{c_dict['global_params']['case_name']}          , {case_output_dir}/lnd/hist/regrid/{shift_str_case}\n",
-        )
-        ms.write(
-            f"{c_dict['global_params']['base_case_name']}          , {base_case_output_dir}/lnd/hist/regrid/{shift_str_base_case}\n",  # noqa: E501
-        )
+
+        for case_name, case_data in case_dict.items():
+            case_output_dir = case_data["output_dir"]
+            shift_str_case = case_data["shift_str"]
+
+            ms.write(
+                f"{case_name}          , {case_output_dir}/lnd/hist/regrid/{shift_str_case}\n",
+            )
+
     print(f"wrote {os.path.join(cupid_config_loc, 'model_setup.txt')}")
     print(
-        f"""WARNING: ILAMB requires regridded output to be in {base_case_output_dir}/lnd/hist/regrid/ directory.
+        f"""WARNING: ILAMB requires regridded output to be in{CESM_output_dir[0]}/lnd/hist/regrid/ directory.
             This might be done with something like the following:
             for FILE in hist/*;
               do fname=$(basename '$FILE');

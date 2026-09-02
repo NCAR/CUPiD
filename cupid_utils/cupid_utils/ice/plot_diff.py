@@ -11,19 +11,32 @@ from matplotlib.gridspec import GridSpec
 
 
 def plot_diff(
-    field1,
-    field2,
+    case_names,
+    case_info,
+    var,
     levels,
-    case1,
-    case2,
     title,
     proj,
     TLAT,
     TLON,
-    mask1_in,
-    mask2_in,
     path_HadleyOI,
 ):
+
+    # Use first case as reference/base case
+    ref_case_name = case_names[0]
+    ref_case_nickname = case_info[ref_case_name]["case_nickname"]
+    ref_case_data = case_info[ref_case_name]
+    ref_ds = ref_case_data["ds"]
+    ref_climo_nyears = ref_case_data["climo_nyears"]
+
+    # Base/reference field
+    if var in ref_ds:
+        field1 = ref_ds[var].isel(time=slice(-ref_climo_nyears * 12, None))
+    else:
+        field1 = ref_ds["aice"].isel(time=slice(-ref_climo_nyears * 12, None)) * 0.0
+
+    mask1 = ref_ds["aice"].isel(time=slice(-ref_climo_nyears * 12, None))
+
     # make circular boundary for polar stereographic circular plots
     theta = np.linspace(0, 2 * np.pi, 100)
     center, radius = [0.5, 0.5], 0.5
@@ -42,35 +55,31 @@ def plot_diff(
 
     # set up the figure with a Polar Stereographic projection
     fig = plt.figure(tight_layout=True)
-    gs = GridSpec(2, 4)
+    ncases = len(case_names)
+
+    gs = GridSpec(2, ncases * 2)
 
     if proj == "N":
-        ax = fig.add_subplot(gs[0, :2], projection=ccrs.NorthPolarStereo())
+        ax = fig.add_subplot(gs[0, 0:2], projection=ccrs.NorthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=3)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
-        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
-        mask1 = mask1_in.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
-        mask2 = mask2_in.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        mask1_tmp = mask1.sel(time=(field1.time.dt.month == 3)).mean(dim="time")
     if proj == "S":
-        ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
+        ax = fig.add_subplot(gs[0, 0:2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=9)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
-        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
-        mask1 = mask1_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
-        mask2 = mask2_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        mask1_tmp = mask1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
 
-    field1_tmp = np.where(mask1 > 0.01, field1_tmp2, np.nan)
-    field2_tmp = np.where(mask2 > 0.01, field2_tmp2, np.nan)
+    field1_tmp = np.where(mask1_tmp > 0.01, field1_tmp2, np.nan)
+
+    del mask1_tmp
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
-
-    field_diff = field2_tmp2.values - field1_tmp2.values
-    field_std = np.nanstd(field_diff)
 
     this = ax.pcolormesh(
         TLON.values,
@@ -89,98 +98,173 @@ def plot_diff(
             colors="magenta",
             transform=ccrs.PlateCarree(),
         )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case1, fontsize=10)
+    plt.title(ref_case_nickname, fontsize=10)
 
-    if proj == "N":
-        ax = fig.add_subplot(gs[0, 2:], projection=ccrs.NorthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
-    if proj == "S":
-        ax = fig.add_subplot(gs[0, 2:], projection=ccrs.SouthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+    n = 0
+    for case_name, case_data in list(case_info.items())[1:]:
+        ds = case_data["ds"]
+        case_nickname = case_data["case_nickname"]
+        climo_nyears = case_data["climo_nyears"]
 
-    ax.set_boundary(circle, transform=ax.transAxes)
-    ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+        # Comparison field
+        if var in ds:
+            field2 = ds[var].isel(time=slice(-climo_nyears * 12, None))
+        else:
+            field2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None)) * 0.0
 
-    this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        field2_tmp,
-        norm=norm,
-        cmap="ocean",
-        transform=ccrs.PlateCarree(),
-    )
-    if aice > 0:
-        plt.contour(
-            ds_obs.lon.values,
-            ds_obs.lat.values,
-            ifrac_obs.values,
-            levels=[0.15],
-            colors="magenta",
+        mask2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None))
+
+        n = n + 2
+
+        if proj == "N":
+            ax = fig.add_subplot(gs[0, n : n + 2], projection=ccrs.NorthPolarStereo())
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+            mask2_tmp = mask2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        if proj == "S":
+            ax = fig.add_subplot(gs[0, n : n + 2], projection=ccrs.SouthPolarStereo())
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+            mask2_tmp = mask2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+
+        field2_tmp = np.where(mask2_tmp > 0.01, field2_tmp2, np.nan)
+
+        del mask2_tmp
+
+        ax.set_boundary(circle, transform=ax.transAxes)
+        ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+
+        this = ax.pcolormesh(
+            TLON.values,
+            TLAT.values,
+            field2_tmp,
+            norm=norm,
+            cmap="ocean",
             transform=ccrs.PlateCarree(),
         )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case2, fontsize=10)
+        if aice > 0:
+            plt.contour(
+                ds_obs.lon.values,
+                ds_obs.lat.values,
+                ifrac_obs.values,
+                levels=[0.15],
+                colors="magenta",
+                transform=ccrs.PlateCarree(),
+            )
+        plt.title(case_nickname, fontsize=10)
 
-    if proj == "N":
-        ax = fig.add_subplot(gs[1, 1:3], projection=ccrs.NorthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
-    if proj == "S":
-        ax = fig.add_subplot(gs[1, 1:3], projection=ccrs.SouthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
-
-    ax.set_boundary(circle, transform=ax.transAxes)
-    ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
-
-    this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        field_diff,
-        vmin=-4.0 * field_std,
-        vmax=4.0 * field_std,
-        cmap="coolwarm",
-        transform=ccrs.PlateCarree(),
+    pos = gs[0, n + 2].get_position(fig)
+    shrink_h, shrink_w = 0.8, 0.4
+    new_height = pos.height * shrink_h
+    new_width = pos.width * shrink_w
+    cbar_ax = fig.add_axes(
+        [
+            pos.x0,
+            pos.y0,
+            new_width,
+            new_height,
+        ],
     )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case2 + "-" + case1, fontsize=10)
+    plt.colorbar(this, orientation="vertical", cax=cbar_ax)
+
+    n = 0
+    for case_name, case_data in list(case_info.items())[1:]:
+        ds = case_data["ds"]
+        case_nickname = case_data["case_nickname"]
+        climo_nyears = case_data["climo_nyears"]
+
+        # Comparison field
+        if var in ds:
+            field2 = ds[var].isel(time=slice(-climo_nyears * 12, None))
+        else:
+            field2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None)) * 0.0
+
+        mask2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None))
+
+        n = n + 2
+
+        if proj == "N":
+            ax = fig.add_subplot(
+                gs[1, n - 1 : n + 1],
+                projection=ccrs.NorthPolarStereo(),
+            )
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 3)).mean(dim="time")
+        if proj == "S":
+            ax = fig.add_subplot(
+                gs[1, n - 1 : n + 1],
+                projection=ccrs.SouthPolarStereo(),
+            )
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+
+        ax.set_boundary(circle, transform=ax.transAxes)
+        ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+
+        field_diff = field2_tmp2.values - field1_tmp2.values
+        field_std = np.nanstd(field_diff)
+
+        this = ax.pcolormesh(
+            TLON.values,
+            TLAT.values,
+            field_diff,
+            vmin=-4.0 * field_std,
+            vmax=4.0 * field_std,
+            cmap="coolwarm",
+            transform=ccrs.PlateCarree(),
+        )
+
+        plt.title(case_nickname + "-" + ref_case_nickname, fontsize=10)
+
+    pos = gs[1, n + 1].get_position(fig)
+    shrink_h, shrink_w = 0.8, 0.4
+    new_height = pos.height * shrink_h
+    new_width = pos.width * shrink_w
+    cbar_ax = fig.add_axes(
+        [
+            pos.x0,
+            pos.y0,
+            new_width,
+            new_height,
+        ],
+    )
+    plt.colorbar(this, orientation="vertical", cax=cbar_ax)
 
     plt.suptitle("Max " + title)
+    plt.show()
 
     # set up the figure with a Polar Stereographic projection
-    fig = plt.figure(tight_layout=True)
-    gs = GridSpec(2, 4)
+    fig2 = plt.figure(tight_layout=True)
+    ncases = len(case_names)
+
+    del gs
+    gs = GridSpec(2, ncases * 2)
 
     if proj == "N":
-        ax = fig.add_subplot(gs[0, :2], projection=ccrs.NorthPolarStereo())
+        ax = fig2.add_subplot(gs[0, 0:2], projection=ccrs.NorthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=9)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
-        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
-        mask1 = mask1_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
-        mask2 = mask2_in.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        mask1_tmp = mask1.sel(time=(field1.time.dt.month == 9)).mean(dim="time")
     if proj == "S":
-        ax = fig.add_subplot(gs[0, :2], projection=ccrs.SouthPolarStereo())
+        ax = fig2.add_subplot(gs[0, 0:2], projection=ccrs.SouthPolarStereo())
         # sets the latitude / longitude boundaries of the plot
         ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
         ifrac_obs = ds_obs.ice_cov_prediddle.isel(month=2)
         field1_tmp2 = field1.sel(time=(field1.time.dt.month == 2)).mean(dim="time")
-        field2_tmp2 = field2.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
-        mask1 = mask1_in.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
-        mask2 = mask2_in.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
+        mask1_tmp = mask1.sel(time=(field1.time.dt.month == 2)).mean(dim="time")
 
-    field1_tmp = np.where(mask1 > 0.01, field1_tmp2, np.nan)
-    field2_tmp = np.where(mask2 > 0.01, field2_tmp2, np.nan)
+    field1_tmp = np.where(mask1_tmp > 0.01, field1_tmp2, np.nan)
+
+    del mask1_tmp
 
     ax.set_boundary(circle, transform=ax.transAxes)
     ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
-
-    field_diff = field2_tmp2.values - field1_tmp2.values
-    field_std = np.nanstd(field_diff)
 
     this = ax.pcolormesh(
         TLON.values,
@@ -199,63 +283,140 @@ def plot_diff(
             colors="magenta",
             transform=ccrs.PlateCarree(),
         )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case1, fontsize=10)
+    plt.title(ref_case_nickname, fontsize=10)
 
-    if proj == "N":
-        ax = fig.add_subplot(gs[0, 2:], projection=ccrs.NorthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
-    if proj == "S":
-        ax = fig.add_subplot(gs[0, 2:], projection=ccrs.SouthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+    n = 0
+    for case_name, case_data in list(case_info.items())[1:]:
+        ds = case_data["ds"]
+        case_nickname = case_data["case_nickname"]
+        climo_nyears = case_data["climo_nyears"]
 
-    ax.set_boundary(circle, transform=ax.transAxes)
-    ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+        # Comparison field
+        if var in ds:
+            field2 = ds[var].isel(time=slice(-climo_nyears * 12, None))
+        else:
+            field2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None)) * 0.0
 
-    this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        field2_tmp,
-        norm=norm,
-        cmap="ocean",
-        transform=ccrs.PlateCarree(),
-    )
-    if aice > 0:
-        plt.contour(
-            ds_obs.lon.values,
-            ds_obs.lat.values,
-            ifrac_obs.values,
-            levels=[0.15],
-            colors="magenta",
+        mask2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None))
+
+        n = n + 2
+
+        if proj == "N":
+            ax = fig2.add_subplot(gs[0, n : n + 2], projection=ccrs.NorthPolarStereo())
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+            mask2_tmp = mask2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        if proj == "S":
+            ax = fig2.add_subplot(gs[0, n : n + 2], projection=ccrs.SouthPolarStereo())
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
+            mask2_tmp = mask2.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
+
+        field2_tmp = np.where(mask2_tmp > 0.01, field2_tmp2, np.nan)
+
+        del mask2_tmp
+
+        ax.set_boundary(circle, transform=ax.transAxes)
+        ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+
+        this = ax.pcolormesh(
+            TLON.values,
+            TLAT.values,
+            field2_tmp,
+            norm=norm,
+            cmap="ocean",
             transform=ccrs.PlateCarree(),
         )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case2, fontsize=10)
+        if aice > 0:
+            plt.contour(
+                ds_obs.lon.values,
+                ds_obs.lat.values,
+                ifrac_obs.values,
+                levels=[0.15],
+                colors="magenta",
+                transform=ccrs.PlateCarree(),
+            )
+        plt.title(case_nickname, fontsize=10)
 
-    if proj == "N":
-        ax = fig.add_subplot(gs[1, 1:3], projection=ccrs.NorthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
-    if proj == "S":
-        ax = fig.add_subplot(gs[1, 1:3], projection=ccrs.SouthPolarStereo())
-        # sets the latitude / longitude boundaries of the plot
-        ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
-
-    ax.set_boundary(circle, transform=ax.transAxes)
-    ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
-
-    this = ax.pcolormesh(
-        TLON.values,
-        TLAT.values,
-        field_diff,
-        vmin=-4.0 * field_std,
-        vmax=4.0 * field_std,
-        cmap="coolwarm",
-        transform=ccrs.PlateCarree(),
+    pos = gs[0, n + 2].get_position(fig2)
+    shrink_h, shrink_w = 0.8, 0.4
+    new_height = pos.height * shrink_h
+    new_width = pos.width * shrink_w
+    cbar_ax = fig2.add_axes(
+        [
+            pos.x0,
+            pos.y0,
+            new_width,
+            new_height,
+        ],
     )
-    plt.colorbar(this, orientation="vertical", fraction=0.04, pad=0.01)
-    plt.title(case2 + "-" + case1, fontsize=10)
+    plt.colorbar(this, orientation="vertical", cax=cbar_ax)
+
+    n = 0
+    for case_name, case_data in list(case_info.items())[1:]:
+        ds = case_data["ds"]
+        case_nickname = case_data["case_nickname"]
+        climo_nyears = case_data["climo_nyears"]
+
+        # Comparison field
+        if var in ds:
+            field2 = ds[var].isel(time=slice(-climo_nyears * 12, None))
+        else:
+            field2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None)) * 0.0
+
+        mask2 = ds["aice"].isel(time=slice(-climo_nyears * 12, None))
+
+        n = n + 2
+
+        if proj == "N":
+            ax = fig2.add_subplot(
+                gs[1, n - 1 : n + 1],
+                projection=ccrs.NorthPolarStereo(),
+            )
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, 90, 45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 9)).mean(dim="time")
+        if proj == "S":
+            ax = fig2.add_subplot(
+                gs[1, n - 1 : n + 1],
+                projection=ccrs.SouthPolarStereo(),
+            )
+            # sets the latitude / longitude boundaries of the plot
+            ax.set_extent([0.005, 360, -90, -45], crs=ccrs.PlateCarree())
+            field2_tmp2 = field2.sel(time=(field2.time.dt.month == 2)).mean(dim="time")
+
+        ax.set_boundary(circle, transform=ax.transAxes)
+        ax.add_feature(cfeature.LAND, zorder=100, edgecolor="k")
+
+        field_diff = field2_tmp2.values - field1_tmp2.values
+        field_std = np.nanstd(field_diff)
+
+        this = ax.pcolormesh(
+            TLON.values,
+            TLAT.values,
+            field_diff,
+            vmin=-4.0 * field_std,
+            vmax=4.0 * field_std,
+            cmap="coolwarm",
+            transform=ccrs.PlateCarree(),
+        )
+
+        plt.title(case_nickname + "-" + ref_case_nickname, fontsize=10)
+
+    pos = gs[1, n + 1].get_position(fig2)
+    shrink_h, shrink_w = 0.8, 0.4
+    new_height = pos.height * shrink_h
+    new_width = pos.width * shrink_w
+    cbar_ax = fig2.add_axes(
+        [
+            pos.x0,
+            pos.y0,
+            new_width,
+            new_height,
+        ],
+    )
+    plt.colorbar(this, orientation="vertical", cax=cbar_ax)
 
     plt.suptitle("Min " + title)

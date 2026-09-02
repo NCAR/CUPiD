@@ -17,6 +17,7 @@ import ploomber
 import yaml
 from jinja2 import Template
 from papermill.engines import NBClientEngine
+import cupid.consistency_check as consistency_check
 
 
 class MarkdownJinjaEngine(NBClientEngine):
@@ -44,6 +45,8 @@ def get_control_dict(config_path):
     except FileNotFoundError:
         print(f"ERROR: {config_path} not found")
         sys.exit(1)
+
+    consistency_check.check_consistency(control)
 
     default_kernel_name = control["computation_config"].pop("default_kernel_name", None)
 
