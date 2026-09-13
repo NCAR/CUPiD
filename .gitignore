@@ -11,6 +11,10 @@
 **/ADF_config.yaml
 **/LDF_config.yaml
 
+# Image files
+*png
+*pdf
+
 # Text editor temp files
 **/*.swp
 
@@ -20,3 +24,5 @@
 /docs/NCARtips.md
 /docs/Contributors.md
 /docs/runCESM.md
+
+.vscode
