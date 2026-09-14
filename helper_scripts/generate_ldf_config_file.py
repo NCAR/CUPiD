@@ -36,10 +36,10 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
 
     # read parameters from CUPID
     # use `get` to default to None
-    base_case_DOUT = c_dict["global_params"]["CESM_output_dir"][0]
-    test_case_DOUT = c_dict["global_params"]["CESM_output_dir"][-1]
-    base_case_name = c_dict["global_params"]["case_names"][0]
-    test_case_name = c_dict["global_params"]["case_names"][-1]
+    base_case_DOUT = c_dict["global_params"]["CESM_output_dir"][-1]
+    test_case_DOUT = c_dict["global_params"]["CESM_output_dir"][0]
+    base_case_name = c_dict["global_params"]["case_names"][-1]
+    test_case_name = c_dict["global_params"]["case_names"][0]
     c_ts = c_dict["timeseries"]
     ts_case_names = c_dict["global_params"]["case_names"]
     if not ts_case_names:
@@ -51,11 +51,11 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["case_nickname"] = c_dict["global_params"].get(
         "case_nicknames",
         test_case_name,
-    )[-1]
+    )[0]
     a_dict["diag_cam_baseline_climo"]["case_nickname"] = c_dict["global_params"].get(
         "case_nicknames",
         base_case_name,
-    )[0]
+    )[-1]
 
     # Set hist strings for test & baseline climo
     a_dict["diag_cam_climo"]["hist_str"] = c_dict["timeseries"]["lnd"]["hist_str"]
@@ -92,7 +92,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     try:
         if c_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"][
             "regridded_output"
-        ][-1]:
+        ][0]:
             a_dict["diag_cam_climo"]["cam_hist_loc"] = os.path.join(
                 a_dict["diag_cam_climo"]["cam_hist_loc"],
                 "regrid",
@@ -116,12 +116,12 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_climo"]["climo_start_year"] = c_dict["global_params"].get(
         "climo_start_years",
         [start_date],
-    )[-1]
+    )[0]
     a_dict["diag_cam_climo"]["start_year"] = start_date
     a_dict["diag_cam_climo"]["climo_end_year"] = c_dict["global_params"].get(
         "climo_end_years",
         [end_date],
-    )[-1]
+    )[0]
     a_dict["diag_cam_climo"]["end_year"] = end_date
 
     # Set values for BASELINE
@@ -172,7 +172,7 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     try:
         if c_dict["compute_notebooks"]["lnd"]["LDF"]["external_tool"][
             "regridded_output"
-        ][0]:
+        ][-1]:
             a_dict["diag_cam_baseline_climo"]["cam_hist_loc"] = os.path.join(
                 a_dict["diag_cam_baseline_climo"]["cam_hist_loc"],
                 "regrid",
@@ -190,12 +190,12 @@ def generate_ldf_config(cupid_config_loc, ldf_template, out_file):
     a_dict["diag_cam_baseline_climo"]["climo_start_year"] = c_dict["global_params"].get(
         "climo_start_years",
         [start_date],
-    )[0]
+    )[-1]
     a_dict["diag_cam_baseline_climo"]["start_year"] = base_start_date
     a_dict["diag_cam_baseline_climo"]["climo_end_year"] = c_dict["global_params"].get(
         "climo_end_years",
         [end_date],
-    )[0]
+    )[-1]
     a_dict["diag_cam_baseline_climo"]["end_year"] = base_end_date
 
     a_dict["diag_basic_info"]["defaults_file"] = c_dict["compute_notebooks"]["lnd"][
