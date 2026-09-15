@@ -4,6 +4,7 @@ channels:
   - nodefaults
 dependencies:
   - black=25.12.0
+  - cftime=1.6.5
   - click=8.3.1
   - dask=2025.12.0
   - dask-jobqueue=0.9.0
@@ -14,6 +15,7 @@ dependencies:
   - jupyter-book=1.0.4.post1
   - nb_conda_kernels=2.5.1
   - nco=5.3.6
+  - netcdf4=1.7.3
   - pandas=2.3.3
   - pip=25.3
   - ploomber=0.22.3
@@ -30,3 +32,4 @@ dependencies:
   - xarray=2025.12.0
   - pip:
     - -e ../
+    - gents==1.2.0

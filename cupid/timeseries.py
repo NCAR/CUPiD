@@ -8,21 +8,11 @@ Timeseries generation tool adapted from ADF for general CUPiD use.
 from __future__ import annotations
 
 import glob
-import multiprocessing as mp
 import os
-import subprocess
 from pathlib import Path
 
-import xarray as xr
-
-
-def call_ncrcat(cmd):
-    """This is an internal function to `create_time_series`
-    It just wraps the subprocess.call() function, so it can be
-    used with the multiprocessing Pool that is constructed below.
-    It is declared as global to avoid AttributeError.
-    """
-    return subprocess.run(cmd, shell=False)
+from gents.hfcollection import HFCollection
+from gents.timeseries import TSCollection
 
 
 def fix_permissions(
@@ -77,15 +67,23 @@ def create_time_series(
     """
     Generate time series versions of the history file data. Called by ``cupid-timeseries``.
 
+    Delegates to GenTS, which discovers the history files, reads their time
+    metadata, and writes one file per variable. Output is named
+    ``{case}.{hist_str}.{var}.{YYYYMM-YYYYMM}.nc`` inside ``ts_dir``.
+
     Args
     ----
      - component: str
          name of component, eg 'cam'
-         # This could also be made into a dict and encorporate values such as height_dim
+     - diag_var_list: list
+         variables to create diagnostics (or timeseries) from; the sentinel
+         ``['process_all']`` requests every primary variable in the history files
      - derive_vars: dict
          information on derivable variables
          eg, {'PRECT': ['PRECL','PRECC'],
               'RESTOM': ['FLNT','FSNT']}
+         GenTS performs no computation, so these are derived afterwards by
+         ``derive_cam_variables``; only their constituents are generated here.
      - case_names: list, str
          name of simulaton case
      - hist_str: str
@@ -103,11 +101,11 @@ def create_time_series(
      - end_years: list of ints
          last year for desired range of years
      - height_dim: str
-         name of height dimension for given component, eg 'lev'
+         name of height dimension for given component, eg 'lev'. Unused: GenTS
+         classifies variables by dimensionality, so vertical coordinates
+         (hyam/hybm/hyai/hybi) are carried into every output file automatically.
      - num_procs: int
          number of processors
-     - diag_var_list: list
-         list of variables to create diagnostics (or timeseries) from
      - serial: bool
          if True, run in serial; if False, run in parallel
 
@@ -121,8 +119,9 @@ def create_time_series(
     # Notify user that script has started:
     logger.info(f"\n  Generating {component} time series files...")
 
-    # Loop over cases:
-    list_of_files = []
+    num_processes = 1 if serial else num_procs
+    generated_files = []
+
     for case_idx, case_name in enumerate(case_names):
         # Check if particular case should be processed:
         if ts_done[case_idx]:
@@ -132,249 +131,77 @@ def create_time_series(
             emsg += f" for case '{case_name}'.  Will rely on those files directly."
             logger.info(emsg)
             continue
-        # End if
 
         logger.info(f"\t Processing time series for case '{case_name}' :")
 
-        # Extract start and end year values:
-        start_year = start_years[case_idx]
-        end_year = end_years[case_idx]
+        hist_loc = str(Path(hist_locs[case_idx]))
+        out_dir = str(Path(ts_dir[case_idx]))
 
-        # Create path object for the history file(s) location:
-        starting_location = Path(hist_locs[case_idx])
+        try:
+            hf_collection = HFCollection(
+                hist_loc,
+                num_processes=num_processes,
+            ).include(f"*.{hist_str}.*")
+        except FileNotFoundError:
+            hf_collection = None
 
-        # Check that path actually exists:
-        if not starting_location.is_dir():
-            emsg = f"Provided 'cam_hist_loc' directory '{starting_location}' not found."
-            emsg += " Script is ending here."
+        if hf_collection is None or len(hf_collection) == 0:
+            wmsg = (
+                f"WARNING: No history files matching '*.{hist_str}.*' in '{hist_loc}'."
+            )
+            wmsg += f" No {component} time series generated for case '{case_name}'."
+            logger.warning(wmsg)
+            continue
 
-            raise FileNotFoundError(emsg)
-        # End if
+        hf_collection.pull_metadata(show_progress=False)
+        hf_collection = hf_collection.include_years(
+            start_years[case_idx],
+            end_years[case_idx],
+        )
+        if len(hf_collection) == 0:
+            wmsg = f"WARNING: No {hist_str} history files fall within years"
+            wmsg += f" {start_years[case_idx]}-{end_years[case_idx]} for case '{case_name}'."
+            logger.warning(wmsg)
+            continue
 
-        # Check if history files actually exist. If not then kill script:
-        if not list(starting_location.glob("*." + hist_str + ".*.nc")):
-            emsg = f"No history *.{hist_str}.*.nc files found in '{starting_location}'."
-            emsg += " Script is ending here."
-            raise FileNotFoundError(emsg)
-        # End if
-
-        # Create empty list:
-        files_list = []
-
-        # Loop over start and end years:
-        for year in range(start_year, end_year + 1):
-            # Add files to main file list:
-            for fname in starting_location.glob(
-                f"*.{hist_str}.*{str(year).zfill(4)}*.nc",
-            ):
-                files_list.append(fname)
-            # End for
-        # End for
-
-        # Create ordered list of CAM history files:
-        hist_files = sorted(files_list)
-
-        # Open an xarray dataset from the first model history file:
-        hist_file_ds = xr.open_dataset(
-            hist_files[0],
-            decode_cf=False,
-            decode_times=False,
+        ts_collection = TSCollection(
+            hf_collection,
+            out_dir,
+            num_processes=num_processes,
         )
 
-        # Get a list of data variables in the 1st hist file:
-        hist_file_var_list = list(hist_file_ds.data_vars)
-        # Note: could use `open_mfdataset`, but that can become very slow;
-        #      This approach effectively assumes that all files contain the same variables.
-
-        # Check what kind of vertical coordinate (if any) is being used for this model run:
-        # ------------------------
-        if height_dim in hist_file_ds:
-            # Extract vertical level attributes:
-            lev_attrs = hist_file_ds[height_dim].attrs
-
-            # First check if there is a "vert_coord" attribute:
-            if "vert_coord" in lev_attrs:
-                vert_coord_type = lev_attrs["vert_coord"]
-            else:
-                # Next check that the "long_name" attribute exists:
-                if "long_name" in lev_attrs:
-                    # Extract long name:
-                    lev_long_name = lev_attrs["long_name"]
-
-                    # Check for "keywords" in the long name:
-                    if "hybrid level" in lev_long_name:
-                        # Set model to hybrid vertical levels:
-                        vert_coord_type = "hybrid"
-                    elif "zeta level" in lev_long_name:
-                        # Set model to height (z) vertical levels:
-                        vert_coord_type = "height"
-                    else:
-                        # Print a warning, and assume that no vertical
-                        # level information is needed.
-                        wmsg = "WARNING! Unable to determine the vertical coordinate"
-                        wmsg += f" type from the {height_dim} long name, \n'{lev_long_name}'."
-                        wmsg += (
-                            "\nNo additional vertical coordinate information will be"
-                        )
-                        wmsg += (
-                            f" transferred beyond the {height_dim} dimension itself."
-                        )
-                        logger.warning(wmsg)
-
-                        vert_coord_type = None
-                    # End if
-                else:
-                    # Print a warning, and assume hybrid levels (for now):
-                    wmsg = (
-                        f"WARNING!  No long name found for the {height_dim} dimension,"
-                    )
-                    wmsg += " so no additional vertical coordinate information will be"
-                    wmsg += f" transferred beyond the {height_dim} dimension itself."
-                    logger.warning(wmsg)
-
-                    vert_coord_type = None
-                # End if (long name)
-            # End if (vert_coord)
-        else:
-            # No level dimension found, so assume there is no vertical coordinate:
-            vert_coord_type = None
-        # End if (lev, or height_dim, existence)
-        # ------------------------
-
-        # Check if time series directory exists, and if not, then create it:
-        # Use pathlib to create parent directories, if necessary.
-        Path(ts_dir[case_idx]).mkdir(parents=True, exist_ok=True)
-
-        # INPUT NAME TEMPLATE: $CASE.$scomp.[$type.][$string.]$date[$ending]
-        first_file_split = str(hist_files[0]).split(".")
-        if first_file_split[-1] == "nc":
-            time_string_start = first_file_split[-2].replace("-", "")
-        else:
-            time_string_start = first_file_split[-1].replace("-", "")
-        last_file_split = str(hist_files[-1]).split(".")
-        if last_file_split[-1] == "nc":
-            time_string_finish = last_file_split[-2].replace("-", "")
-        else:
-            time_string_finish = last_file_split[-1].replace("-", "")
-        time_string = "-".join([time_string_start, time_string_finish])
-
-        # Loop over history variables:
-        list_of_commands = []
         vars_to_derive = []
-        # create copy of var list that can be modified for derivable variables
         if diag_var_list == ["process_all"]:
             logger.info("generating time series for all variables")
-            # TODO: this does not seem to be working for ocn...
-            diag_var_list = hist_file_var_list
-        for var in diag_var_list:
-            if var not in hist_file_var_list:
-                if component == "ocn":
-                    logger.warning(
-                        "ocean vars seem to not be present in all files and thus cause errors",
-                    )
-                    continue
-                if (
-                    var in derive_vars
-                ):  # TODO: dictionary implementation needs to be fixed with yaml file
-                    constit_list = derive_vars[var]
-                    for constit in constit_list:
-                        if constit not in diag_var_list:
-                            diag_var_list.append(constit)
+        else:
+            requested = set(diag_var_list)
+            for var in diag_var_list:
+                if var in derive_vars:
+                    requested.update(derive_vars[var])
+                    requested.discard(var)
                     vars_to_derive.append(var)
-                    continue
-                msg = f"WARNING: {var} is not in the file {hist_files[0]}."
-                msg += " No time series will be generated."
-                logger.warning(msg)
-                continue
 
-            # Check if variable has a height_dim (eg, 'lev') dimension according to first file:
-            has_lev = bool(height_dim in hist_file_ds[var].dims)
+            available = {order["primary_var"] for order in ts_collection}
+            for var in sorted(requested - available):
+                wmsg = f"WARNING: {var} is not in the {hist_str} history files."
+                wmsg += " No time series will be generated."
+                logger.warning(wmsg)
 
-            # Create full path name, file name template:
-            # $cam_case_name.$hist_str.$variable.YYYYMM-YYYYMM.nc
-
-            ts_outfil_str = (
-                ts_dir[case_idx]
-                + os.sep
-                + ".".join([case_name, hist_str, var, time_string, "nc"])
+            ts_collection = ts_collection.copy(
+                ts_orders=[
+                    order
+                    for order in ts_collection
+                    if order["primary_var"] in requested
+                ],
             )
 
-            # Check if files already exist in time series directory:
-            ts_file_list = glob.glob(ts_outfil_str)
+        if overwrite_ts[case_idx]:
+            ts_collection = ts_collection.apply_overwrite("*")
 
-            # If files exist, then check if over-writing is allowed:
-            if ts_file_list:
-                if not overwrite_ts[case_idx]:
-                    # If not, then simply skip this variable:
-                    continue
+        for order in ts_collection:
+            logger.info(f"\t - time series for {order['primary_var']}")
 
-            # Notify user of new time series file:
-            logger.info(f"\t - time series for {var}")
-
-            # Variable list starts with just the variable
-            ncrcat_var_list = f"{var}"
-
-            # Determine "ncrcat" command to generate time series file:
-            if "date" in hist_file_ds[var].dims:
-                ncrcat_var_list = ncrcat_var_list + ",date"
-            if "datesec" in hist_file_ds[var].dims:
-                ncrcat_var_list = ncrcat_var_list + ",datesec"
-
-            if has_lev and vert_coord_type:
-                # For now, only add these variables if using CAM:
-                if "cam" in hist_str:  # Could also use if "cam" in component
-                    # PS might be in a different history file. If so, continue without error.
-                    ncrcat_var_list = ncrcat_var_list + ",hyam,hybm,hyai,hybi"
-
-                    if "PS" in hist_file_var_list:
-                        ncrcat_var_list = ncrcat_var_list + ",PS"
-                        logger.info("Adding PS to file")
-                    else:
-                        wmsg = "WARNING: PS not found in history file."
-                        wmsg += " It might be needed at some point."
-                        logger.warning(wmsg)
-                    # End if
-
-                    if vert_coord_type == "height":
-                        # Adding PMID here works, but significantly increases
-                        # the storage (disk usage) requirements of the ADF.
-                        # This can be alleviated in the future by figuring out
-                        # a way to determine all of the regridding targets at
-                        # the start of the ADF run, and then regridding a single
-                        # PMID file to each one of those targets separately. -JN
-                        if "PMID" in hist_file_var_list:
-                            ncrcat_var_list = ncrcat_var_list + ",PMID"
-                            logger.info("Adding PMID to file")
-                        else:
-                            wmsg = "WARNING: PMID not found in history file."
-                            wmsg += " It might be needed at some point."
-                            logger.warning(wmsg)
-                        # End if PMID
-                    # End if height
-                # End if cam
-            # End if has_lev
-
-            cmd = (
-                ["ncrcat", "-O", "-4", "-h", "--no_cll_mth", "-v", ncrcat_var_list]
-                + hist_files
-                + ["-o", ts_outfil_str]
-            )
-
-            list_of_files.append(ts_outfil_str)
-
-            # Add to command list for use in multi-processing pool:
-            list_of_commands.append(cmd)
-
-        # End variable loop
-
-        if serial:
-            for cmd in list_of_commands:
-                call_ncrcat(cmd)
-        else:  # if not serial
-            # Now run the "ncrcat" subprocesses in parallel:
-            with mp.Pool(processes=num_procs) as mpool:
-                _ = mpool.map(call_ncrcat, list_of_commands)
-            # End with
+        generated_files += ts_collection.execute(show_progress=False)
 
         # Derived vars need the previously-generated time series files
         if vars_to_derive:
@@ -387,9 +214,7 @@ def create_time_series(
 
     # End cases loop
 
-    # Notify user that script has ended:
-
-    for file_i in list_of_files:
+    for file_i in generated_files:
         fix_permissions(file_i, file_mode, dir_mode, file_gid, dir_gid)
 
     logger.info(
