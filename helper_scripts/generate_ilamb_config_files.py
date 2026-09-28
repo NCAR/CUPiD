@@ -89,7 +89,7 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
     """Create model_setup.txt file for use in ILAMB"""
 
     with open(os.path.join(cupid_config_loc, "config.yml")) as c:
-        c_dict = yaml.safe_load(c)
+        c_dict = util.get_control_dict(os.path.join(cupid_config_loc, "config.yml"))
 
     case_names = c_dict["global_params"]["case_names"]
     CESM_output_dir = c_dict["global_params"]["CESM_output_dir"]
@@ -118,7 +118,7 @@ def generate_ilamb_model_setup(cupid_config_loc, run_type):
         for case_name, case_data in case_dict.items():
             case_output_dir = case_data["output_dir"]
             shift_str_case = case_data["shift_str"]
-
+            
             ms.write(
                 f"{case_name}          , {case_output_dir}/lnd/hist/regrid/{shift_str_case}\n",
             )
