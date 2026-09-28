@@ -32,4 +32,4 @@ dependencies:
   - xarray=2025.12.0
   - pip:
     - -e ../
-    - gents==1.2.0
+    - gents==1.4.0

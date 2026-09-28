@@ -102,7 +102,8 @@ def create_time_series(
      - ts_done: list, boolean
          check if time series files already exist
      - overwrite_ts: list, boolean
-         check if existing time series files will bew overwritten
+         if True, regenerate existing time series files (and derived variables);
+         if False, skip time steps already covered by complete time series files
      - start_years: list of ints
          first year for desired range of years
      - end_years: list of ints
@@ -111,6 +112,9 @@ def create_time_series(
          name of height dimension for given component, eg 'lev'. Unused: GenTS
          classifies variables by dimensionality, so vertical coordinates
          (hyam/hybm/hyai/hybi) are carried into every output file automatically.
+     - slice_size: list of ints
+         number of years per time series file, one entry per case; windows are
+         aligned to the case's start year
      - num_procs: int
          number of processors
      - serial: bool
@@ -141,8 +145,8 @@ def create_time_series(
 
         logger.info(f"\t Processing time series for case '{case_name}' :")
 
-        hist_loc = str(Path(hist_locs[case_idx]))
-        out_dir = str(Path(ts_dir[case_idx]))
+        hist_loc = hist_locs[case_idx]
+        out_dir = ts_dir[case_idx]
 
         try:
             hf_collection = HFCollection(
@@ -160,7 +164,7 @@ def create_time_series(
             logger.warning(wmsg)
             continue
 
-        hf_collection.pull_metadata(show_progress=False)
+        hf_collection = hf_collection.pull_metadata(show_progress=False)
         hf_collection = hf_collection.include_years(
             start_years[case_idx],
             end_years[case_idx],
@@ -198,16 +202,12 @@ def create_time_series(
                 wmsg += " No time series will be generated."
                 logger.warning(wmsg)
 
-            ts_collection = ts_collection.copy(
-                ts_orders=[
-                    order
-                    for order in ts_collection
-                    if order["primary_var"] in requested
-                ],
-            )
+            ts_collection = ts_collection.include("*", var_glob=sorted(requested))
 
         if overwrite_ts[case_idx]:
             ts_collection = ts_collection.apply_overwrite("*")
+        else:
+            ts_collection = ts_collection.skip_existing()
 
         for order in ts_collection:
             logger.info(f"\t - time series for {order['primary_var']}")
@@ -221,6 +221,7 @@ def create_time_series(
                     logger,
                     vars_to_derive=vars_to_derive,
                     ts_dir=ts_dir[case_idx],
+                    overwrite=overwrite_ts[case_idx],
                 )
 
     # End cases loop
@@ -238,7 +239,8 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
     Derive variables acccording to steps given here.  Since derivations will depend on the
     variable, each variable to derive will need its own set of steps below.
 
-    Caution: this method assumes that there will be one time series file per variable
+    Each time series file of a constituent variable yields one derived file, so
+    sliced or continued output is handled per slice.
 
     If the file for the derived variable exists, the kwarg `overwrite` determines
     whether to overwrite the file (true) or exit with a warning message.
@@ -246,35 +248,38 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
 
     for var in vars_to_derive:
         if var == "PRECT":
-            # PRECT can be found by simply adding PRECL and PRECC
-            # grab file names for the PRECL and PRECC files from the case ts directory
-            if glob.glob(os.path.join(ts_dir, "*PRECC*")) and glob.glob(
-                os.path.join(ts_dir, "*PRECL*"),
-            ):
-                constit_files = sorted(glob.glob(os.path.join(ts_dir, "*PREC*")))
-            else:
+            precc_files = []
+            precl_files = []
+            for precc_file in sorted(glob.glob(os.path.join(ts_dir, "*.PRECC.*"))):
+                precl_file = precc_file.replace(".PRECC.", ".PRECL.")
+                if os.path.isfile(precl_file):
+                    precc_files.append(precc_file)
+                    precl_files.append(precl_file)
+            if not precc_files:
                 ermsg = (
                     "PRECC and PRECL were not both present; PRECT cannot be calculated."
                 )
                 ermsg += " Please remove PRECT from diag_var_list or find the relevant CAM files."
                 raise FileNotFoundError(ermsg)
 
-            # create new file name for PRECT
-            prect_file = constit_files[0].replace("PRECC", "PRECT")
-            if Path(prect_file).is_file():
-                if overwrite:
-                    Path(prect_file).unlink()
-                else:
-                    logger.warning(
-                        f"[{__name__}] Warning: PRECT file was found and overwrite is False"
-                        + "Will use existing file.",
-                    )
-                    continue
+            for precc_file, precl_file in zip(precc_files, precl_files):
+                prect_file = precc_file.replace(".PRECC.", ".PRECT.")
+                if Path(prect_file).is_file():
+                    if overwrite:
+                        Path(prect_file).unlink()
+                    else:
+                        logger.warning(
+                            f"[{__name__}] Warning: PRECT file was found and overwrite is False."
+                            + " Will use existing file.",
+                        )
+                        continue
 
-            # append PRECC to the file containing PRECL
-            os.system(f"ncks -A -v PRECC {constit_files[0]} {constit_files[1]}")
-            # create new file with the sum of PRECC and PRECL
-            os.system(f"ncap2 -s 'PRECT=(PRECC+PRECL)' {constit_files[1]} {prect_file}")
+                # Copy PRECL file to PRECT file, leaving the GenTS output untouched
+                os.system(f"cp {precl_file} {prect_file}")
+                # append PRECC to the PRECT file (it now has PRECL and PRECC)
+                os.system(f"ncks -A -v PRECC {precc_file} {prect_file}")
+                # compute PRECT = PRECC + PRECL in new file
+                os.system(f"ncap2 -A -s 'PRECT=(PRECC+PRECL)' {prect_file}")
 
         if var == "RESTOM":
             # RESTOM = FSNT-FLNT

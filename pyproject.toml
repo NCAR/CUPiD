@@ -27,7 +27,7 @@ dependencies = [
     "click",
     "dask",
     "dask-jobqueue",
-    "gents>=1.2.0",
+    "gents>=1.4.0",
     "intake",
     "intake-esm",
     "jinja2",
