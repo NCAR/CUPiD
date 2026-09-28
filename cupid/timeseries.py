@@ -165,7 +165,10 @@ def create_time_series(
             start_years[case_idx],
             end_years[case_idx],
         )
-        hf_collection = hf_collection.slice_groups(slice_size_years=slice_size[case_idx], start_year=start_years[case_idx])
+        hf_collection = hf_collection.slice_groups(
+            slice_size_years=slice_size[case_idx],
+            start_year=start_years[case_idx],
+        )
         if len(hf_collection) == 0:
             wmsg = f"WARNING: No {hist_str} history files fall within years"
             wmsg += f" {start_years[case_idx]}-{end_years[case_idx]} for case '{case_name}'."
@@ -286,14 +289,14 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
                     fsnt_files.append(fsnt_file)
                     flnt_files.append(flnt_file)
             if not fsnt_files or not flnt_files:
-            #     input_files = [
-            #         sorted(glob.glob(os.path.join(ts_dir, f"*.{v}.*")))
-            #         for v in ["FLNT", "FSNT"]
-            #     ]
-            #     constit_files = []
-            #     for elem in input_files:
-            #         constit_files += elem
-            # else:
+                #     input_files = [
+                #         sorted(glob.glob(os.path.join(ts_dir, f"*.{v}.*")))
+                #         for v in ["FLNT", "FSNT"]
+                #     ]
+                #     constit_files = []
+                #     for elem in input_files:
+                #         constit_files += elem
+                # else:
                 ermsg = (
                     "FSNT and FLNT were not both present; RESTOM cannot be calculated."
                 )
@@ -302,25 +305,27 @@ def derive_cam_variables(logger, vars_to_derive=None, ts_dir=None, overwrite=Non
 
             # create new file name for RESTOM
             for fsnt_file, flnt_file in zip(fsnt_files, flnt_files):
-              restom_file = fsnt_file.replace("FSNT", "RESTOM")
-              if Path(restom_file).is_file():
-                  if overwrite:
-                      Path(restom_file).unlink()
-                  else:
-                      logger.warning(
-                          f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
-                          + "Will use existing file.",
-                      )
-                      continue
+                restom_file = fsnt_file.replace("FSNT", "RESTOM")
+                if Path(restom_file).is_file():
+                    if overwrite:
+                        Path(restom_file).unlink()
+                    else:
+                        logger.warning(
+                            f"[{__name__}] Warning: RESTOM file was found and overwrite is False."
+                            + "Will use existing file.",
+                        )
+                        continue
 
-              # Copy FLNT file to RESTOM file
-              # TODO: this creates a RESTOM file that also contains FLNT and FSNT;
-              #       should we start by creating a temporary file and remove
-              #       those variables in the final version?
-              os.system(f"cp {flnt_file} {restom_file}")
-              # append FSNT to the RESTOM file (it now has FLNT and FSNT)
-              os.system(f"ncks -A -v FSNT {fsnt_file} {restom_file}")
-              # compute RESTOM = FSNT-FLNT in new file
-              os.system(f"ncap2 -A -s 'RESTOM=(FSNT-FLNT)' {restom_file}")
-              # modify longname attribute of RESTOM
-              os.system(f'ncatted -a long_name,RESTOM,m,c,"Residual energy flux at top of model" {restom_file}')
+                # Copy FLNT file to RESTOM file
+                # TODO: this creates a RESTOM file that also contains FLNT and FSNT;
+                #       should we start by creating a temporary file and remove
+                #       those variables in the final version?
+                os.system(f"cp {flnt_file} {restom_file}")
+                # append FSNT to the RESTOM file (it now has FLNT and FSNT)
+                os.system(f"ncks -A -v FSNT {fsnt_file} {restom_file}")
+                # compute RESTOM = FSNT-FLNT in new file
+                os.system(f"ncap2 -A -s 'RESTOM=(FSNT-FLNT)' {restom_file}")
+                # modify longname attribute of RESTOM
+                os.system(
+                    f'ncatted -a long_name,RESTOM,m,c,"Residual energy flux at top of model" {restom_file}',
+                )

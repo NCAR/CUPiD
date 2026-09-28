@@ -427,7 +427,9 @@ def generate_cupid_config(
                     my_dict["timeseries"][component]["end_years"].append(end_year)
             # Set up slice_sizes
             my_dict["timeseries"][component]["slice_size"] = []
-            for slice_size in [cupid_gents_slice_size] + cupid_comparison_gents_slice_sizes:
+            for slice_size in [
+                cupid_gents_slice_size,
+            ] + cupid_comparison_gents_slice_sizes:
                 my_dict["timeseries"][component]["slice_size"].append(int(slice_size))
 
     if "atm" in my_dict["timeseries"]:

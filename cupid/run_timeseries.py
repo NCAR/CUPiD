@@ -180,7 +180,11 @@ def run_timeseries(
                 if not isinstance(slice_size, list):
                     slice_size = len(global_params["case_names"]) * [slice_size]
             else:
-                slice_size = [(end_year - start_year) + 1 for start_year, end_year in zip(timeseries_params[component]["start_years"], timeseries_params[component]["end_years"])]
+                slice_size = [
+                    (end_year - start_year) + 1
+                    for start_year, end_year in
+                    zip(timeseries_params[component]["start_years"], timeseries_params[component]["end_years"])
+                ]
 
             # fmt: off
             # pylint: disable=line-too-long
