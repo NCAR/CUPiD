@@ -42,15 +42,38 @@ computation_config:
 
 global_params: # TODO: a lot of these params may be irrelevant/misleading for this notebook
   case_names:
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.323'
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.328'
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.327'
+    - 'b.e30_alpha09e_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.397'
+    - 'b.e30_alpha09e_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.396'
+    - 'b.e30_alpha10c.B1850C_MTso.ne30_t233_wgx3.402'
   case_nicknames:
-    - '323'
-    - '328'
-    - '327'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
+    - '397'
+    - '396'
+    - '402'
+  CESM_output_dir: ['/glade/derecho/scratch/hannay/archive',
+                    '/glade/derecho/scratch/hannay/archive',
+                    '/glade/derecho/scratch/hannay/archive']
+  start_dates:
+    - '0001-01-01'
+    - '0001-01-01'
+    - '0001-01-01'
+  end_dates:
+    - '0133-01-01'
+    - '0154-01-01'
+    - '0105-01-01'
+  climo_start_years:
+    - 97
+    - 118
+    - 69
+  climo_end_years:
+    - 132
+    - 153
+    - 104
+  case_align_years:
+    - 0
+    - 0
+    - 93
+  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  ts_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing' # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
     threads_per_worker: 1
 
@@ -94,11 +117,11 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     level: 'lev'
 
   ice:
-    vars: []
+    vars: ['aice','hi','hs']
     derive_vars: []
     hist_str: 'cice.h'
     start_years: [1,1,1]
-    end_years: [100,60,113]
+    end_years: [200,200,200]
     slice_size: [10, 10, 10]
     level: 'lev'
 
@@ -147,6 +170,21 @@ compute_notebooks:
               RESTOM: Global
               ICEFRAC: Lab Sea
 
+    ice:
+      Hemis_seaice_visual_compare_obs_lens:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+      seaice_metrics:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v2_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+
+
 ########### JUPYTER BOOK CONFIG ###########
 
 ##################################
@@ -172,6 +210,10 @@ book_toc:
     - caption: Diagnostic Output from the Atmosphere
       chapters:
         - file: atm/TimeSeriesPlots
+    - caption: Sea Ice
+      chapters:
+        - file: ice/seaice_metrics
+        - file: ice/Hemis_seaice_visual_compare_obs_lens
 
 
 #####################################
