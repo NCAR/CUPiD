@@ -51,6 +51,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Length of climatology for LDF",
 )
 @click.option(
+    "--cupid-gents-slice-size",
+    default=10,
+    help="Number of years per GenTS time series file",
+)
+@click.option(
     "--cupid-align-year",
     default="",
     help="Number of years to offset time axis for global timeseries plots of CESM case",
@@ -127,6 +132,11 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
     help="Number of years to offset time axis for global timeseries plots of comparison case(s)",
 )
 @click.option(
+    "--cupid-comparison-gents-slice-sizes",
+    default="",
+    help="Number of years per GenTS time series file for comparison case(s)",
+)
+@click.option(
     "--cupid-comparison-regrid-atm-files",
     default="",
     help="Mapping file(s) for regridding comparison cases atmosphere time series (or None to leave on native grid)",
@@ -144,6 +154,7 @@ def generate_cupid_config(
     cupid_climo_end_year,
     cupid_climo_n_year,
     cupid_align_year,
+    cupid_gents_slice_size,
     cupid_regrid_atm_file,
     adf_output_root,
     ldf_output_root,
@@ -159,6 +170,7 @@ def generate_cupid_config(
     cupid_comparison_climo_end_years,
     cupid_comparison_climo_n_years,
     cupid_comparison_align_years,
+    cupid_comparison_gents_slice_sizes,
     cupid_comparison_regrid_atm_files,
 ):
     """
@@ -307,6 +319,7 @@ def generate_cupid_config(
         cupid_comparison_climo_n_years = []
         cupid_comparison_climo_end_years = []
         cupid_comparison_align_years = []
+        cupid_comparison_gents_slice_sizes = []
     else:
         cupid_comparison_roots = standardize_cupid_comparison_field(
             cupid_comparison_roots,
@@ -341,6 +354,11 @@ def generate_cupid_config(
         cupid_comparison_align_years = standardize_cupid_comparison_field(
             cupid_comparison_align_years,
             "cupid_comparison_align_years",
+            num_cases,
+        )
+        cupid_comparison_gents_slice_sizes = standardize_cupid_comparison_field(
+            cupid_comparison_gents_slice_sizes,
+            "cupid_comparison_gents_slice_sizes",
             num_cases,
         )
     cupid_enddates = standardize_cupid_comparison_field(
@@ -388,28 +406,31 @@ def generate_cupid_config(
             )
 
     for component in my_dict["timeseries"]:
-        if (
-            isinstance(my_dict["timeseries"][component], dict)
-            and "start_years" in my_dict["timeseries"][component]
-        ):
-            my_dict["timeseries"][component]["start_years"] = []
-            for start_date in my_dict["global_params"]["start_dates"]:
-                my_dict["timeseries"][component]["start_years"].append(
-                    int(start_date.split("-")[0]),
-                )
-        if (
-            isinstance(my_dict["timeseries"][component], dict)
-            and "end_years" in my_dict["timeseries"][component]
-        ):
-            my_dict["timeseries"][component]["end_years"] = []
-            for end_date in my_dict["global_params"]["end_dates"]:
-                end_year = int(end_date.split("-")[0])
-                # If end_year is YYYY-01-01, we want end_year to be YYYY-1
-                if (int(end_date.split("-")[1]) == 1) and (
-                    int(end_date.split("-")[2]) == 1
-                ):
-                    end_year = end_year - 1
-                my_dict["timeseries"][component]["end_years"].append(end_year)
+        if isinstance(my_dict["timeseries"][component], dict):
+            # Make sure start_years is consistent in timeseries and global_params
+            if "start_years" in my_dict["timeseries"][component]:
+                my_dict["timeseries"][component]["start_years"] = []
+                for start_date in my_dict["global_params"]["start_dates"]:
+                    my_dict["timeseries"][component]["start_years"].append(
+                        int(start_date.split("-")[0]),
+                    )
+            # Make sure end_years is consistent in timeseries and global_params
+            if "end_years" in my_dict["timeseries"][component]:
+                my_dict["timeseries"][component]["end_years"] = []
+                for end_date in my_dict["global_params"]["end_dates"]:
+                    end_year = int(end_date.split("-")[0])
+                    # If end_year is YYYY-01-01, we want end_year to be YYYY-1
+                    if (int(end_date.split("-")[1]) == 1) and (
+                        int(end_date.split("-")[2]) == 1
+                    ):
+                        end_year = end_year - 1
+                    my_dict["timeseries"][component]["end_years"].append(end_year)
+            # Set up slice_sizes
+            my_dict["timeseries"][component]["slice_size"] = []
+            for slice_size in [
+                cupid_gents_slice_size,
+            ] + cupid_comparison_gents_slice_sizes:
+                my_dict["timeseries"][component]["slice_size"].append(int(slice_size))
 
     if "atm" in my_dict["timeseries"]:
         my_dict["timeseries"]["atm"]["mapping_file"] = []
