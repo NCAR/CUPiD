@@ -70,6 +70,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'cam.h0a'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
     mapping_file: [Null, Null, Null]
 
@@ -80,6 +81,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'clm2.h0a'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
 
   ocn:
@@ -88,6 +90,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'h.z'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
 
   ice:
@@ -96,6 +99,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'cice.h'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
 
   glc:
@@ -104,6 +108,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'initial_hist'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
 
   rof:
@@ -112,6 +117,7 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     hist_str: 'h0'
     start_years: [1,1,1]
     end_years: [100,60,113]
+    slice_size: [10, 10, 10]
     level: 'lev'
 
 compute_notebooks:

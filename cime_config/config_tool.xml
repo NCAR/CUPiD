@@ -136,6 +136,14 @@
     <desc>Number of years offset time axis when plotting global timeseries of CESM case</desc>
   </entry>
 
+  <entry id="CUPID_GENTS_SLICE_SIZE">
+    <type>integer</type>
+    <default_value>10</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years to include per time series file when running GenTS</desc>
+  </entry>
+
   <entry id="CUPID_NICKNAME">
     <type>char</type>
     <default_value>$CASE</default_value>
@@ -189,7 +197,7 @@
     <default_value></default_value>
     <group>cupid_comparison</group>
     <file>env_postprocessing.xml</file>
-    <desc>Space-separated list of cases to compare to current CESM case</desc>
+    <desc>Comma-separated list of cases to compare to current CESM case</desc>
   </entry>
 
   <entry id="CUPID_COMPARISON_ROOTS">
@@ -197,7 +205,15 @@
     <default_value>$DOUT_S_ROOT/..</default_value>
     <group>cupid_comparison</group>
     <file>env_postprocessing.xml</file>
-    <desc>Root of all cases being compared. Can be a single string if common across cases, otherwise space-separated list of same length as CUPID_COMPARISON_CASES</desc>
+    <desc>Root of all cases being compared. Can be a single string if common across cases, otherwise comma-separated list of same length as CUPID_COMPARISON_CASES</desc>
+  </entry>
+
+  <entry id="CUPID_COMPARISON_GENTS_SLICE_SIZES">
+    <type>char</type>
+    <default_value>10</default_value>
+    <group>cupid_analysis</group>
+    <file>env_postprocessing.xml</file>
+    <desc>Number of years to include per time series file when running GenTS for comparison cases. Can be single value for all cases or comma-separated list.</desc>
   </entry>
 
   <entry id="CUPID_COMPARISON_NICKNAMES">
