@@ -175,6 +175,17 @@ def run_timeseries(
                     )
             # -----
 
+            if "slice_size" in timeseries_params[component]:
+                slice_size = timeseries_params[component]["slice_size"]
+                if not isinstance(slice_size, list):
+                    slice_size = len(global_params["case_names"]) * [slice_size]
+            else:
+                slice_size = [
+                    (end_year - start_year) + 1
+                    for start_year, end_year in
+                    zip(timeseries_params[component]["start_years"], timeseries_params[component]["end_years"])
+                ]
+
             # fmt: off
             # pylint: disable=line-too-long
             timeseries.create_time_series(
@@ -190,6 +201,7 @@ def run_timeseries(
                 timeseries_params[component]["start_years"],
                 timeseries_params[component]["end_years"],
                 timeseries_params[component]["level"],
+                slice_size,
                 num_procs,
                 serial,
                 logger,

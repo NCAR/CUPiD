@@ -15,6 +15,8 @@ CUPID_ROOT=`./xmlquery --value CUPID_ROOT`
 CUPID_OUTPUT_DIR=`./xmlquery --value CUPID_OUTPUT_DIR`
 CUPID_EXAMPLE=`./xmlquery --value CUPID_EXAMPLE`
 CUPID_GEN_TIMESERIES=`./xmlquery --value CUPID_GEN_TIMESERIES`
+CUPID_GENTS_SLICE_SIZE=`./xmlquery --value CUPID_GENTS_SLICE_SIZE`
+CUPID_COMPARISON_GENTS_SLICE_SIZES=`./xmlquery --value CUPID_COMPARISON_GENTS_SLICE_SIZES`
 CUPID_REGRID=`./xmlquery --value CUPID_REGRID`
 CUPID_REGRID_ATM_FILE=`./xmlquery --value CUPID_REGRID_ATM_FILE`
 CUPID_COMPARISON_REGRID_ATM_FILES=`./xmlquery --value CUPID_COMPARISON_REGRID_ATM_FILES`
@@ -154,7 +156,9 @@ if [ ${#CUPID_COMPARISON_CASES} -gt 0 ]; then
                            --cupid-comparison-climo-n-years ${CUPID_COMPARISON_CLIMO_N_YEARS} \
                            --cupid-comparison-startdates ${CUPID_COMPARISON_STARTDATES} \
                            --cupid-comparison-align-years ${CUPID_COMPARISON_ALIGN_YEARS} \
-                           --cupid-comparison-regrid-atm-files ${CUPID_COMPARISON_REGRID_ATM_FILES}"
+                           --cupid-comparison-regrid-atm-files ${CUPID_COMPARISON_REGRID_ATM_FILES} \
+                           --cupid-comparison-gents-slice-sizes ${CUPID_COMPARISON_GENTS_SLICE_SIZES} \
+                          "
 else
     CUPID_ENDDATES="${CUPID_ENDDATE}"
 fi
@@ -171,6 +175,7 @@ ${CUPID_ROOT}/helper_scripts/generate_cupid_config_for_cesm_case.py \
    --cupid-startdate ${CUPID_STARTDATE} \
    --cupid-enddates ${CUPID_ENDDATES} \
    --cupid-climo-end-year ${CUPID_CLIMO_END_YEAR} \
+   --cupid-gents-slice-size ${CUPID_GENTS_SLICE_SIZE} \
    --cupid-align-year ${CUPID_ALIGN_YEAR} \
    --cupid-climo-n-year ${CUPID_CLIMO_N_YEAR} \
    --case-nickname ${CUPID_NICKNAME} \
@@ -257,6 +262,12 @@ fi
 conda deactivate
 conda activate ${CUPID_INFRASTRUCTURE_ENV}
 if [ "${CUPID_GEN_DIAGNOSTICS}" == "TRUE" ]; then
+  # clean up output from previous runs
+  if [ -d computed_notebooks ]; then
+    cd computed_notebooks
+    rm -rf infrastructure atm lnd ocn ice glc rof *.yml
+    cd ..
+  fi
   ${CUPID_ROOT}/cupid/run_diagnostics.py ${CUPID_FLAG_STRING}
 fi
 if [ "${CUPID_GEN_HTML}" == "TRUE" ]; then
