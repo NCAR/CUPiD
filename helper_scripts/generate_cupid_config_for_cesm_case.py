@@ -395,6 +395,10 @@ def generate_cupid_config(
         my_dict["global_params"]["climo_end_years"].append(int(end_year))
         climo_nyears.append(int(n_year))
 
+    my_dict["global_params"]["case_align_years"] = [int(cupid_align_year)] + [
+        int(align_year) for align_year in cupid_comparison_align_years
+    ]
+
     # Set nicknames for cases
     my_dict["global_params"]["case_nicknames"] = []
     for n, nickname in enumerate([case_nickname] + cupid_comparison_nicknames):
@@ -455,14 +459,6 @@ def generate_cupid_config(
                 ]["regridded_output"].append(
                     regrid_atm_file is not None and cupid_regrid,
                 )
-
-    # TimeSeriesPlots also needs case_align_years
-    if "TimeSeriesPlots" in my_dict["compute_notebooks"].get("atm", {}):
-        my_dict["compute_notebooks"]["atm"]["TimeSeriesPlots"]["parameter_groups"][
-            "none"
-        ]["case_align_years"] = [int(cupid_align_year)] + [
-            int(align_year) for align_year in cupid_comparison_align_years
-        ]
 
     if cupid_run_adf or cupid_run_ldf or cupid_run_ilamb:
         if "index" in my_dict["compute_notebooks"]["infrastructure"]:
