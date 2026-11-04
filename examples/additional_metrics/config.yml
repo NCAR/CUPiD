@@ -170,24 +170,24 @@ compute_notebooks:
         parameter_groups:
           none:
             climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v3_grid.nc'
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
             path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
       Hemis_seaice_visual_compare_obs_lens:
         parameter_groups:
           none:
             climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v3_grid.nc'
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
             path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
       Hemis_seaice_visual_compare_contour:
         parameter_groups:
           none:
             climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v3_grid.nc'
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
       Regional_seaice_visual_compare_obs_lens:
         parameter_groups:
           none:
             climo_nyears: 35
-            grid_file: '/glade/campaign/cesm/community/omwg/grids/tx2_3v3_grid.nc'
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
             path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
 
 
