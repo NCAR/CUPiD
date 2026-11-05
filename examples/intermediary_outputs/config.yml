@@ -42,15 +42,29 @@ computation_config:
 
 global_params: # TODO: a lot of these params may be irrelevant/misleading for this notebook
   case_names:
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.323'
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.328'
-    - 'b.e30_alpha08b.B1850C_LTso.ne30_t232_wgx3.327'
+    - 'b.e30_alpha09e_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.397'
+    - 'b.e30_alpha09e_m.B1850C_MTso_Gris_Marbl.ne30_t233_wgx3.396'
   case_nicknames:
-    - '323'
-    - '328'
-    - '327'
-  CESM_output_dir: /glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing
-  ts_dir: null # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
+    - '397'
+    - '396'
+  CESM_output_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_output_for_testing'
+  start_dates:
+    - '0001-01-01'
+    - '0001-01-01'
+  end_dates:
+    - '0154-01-01'
+    - '0201-01-01'
+  climo_start_years:
+    - 119
+    - 165
+  climo_end_years:
+    - 154
+    - 200
+  case_align_years:
+    - 0
+    - 0
+  obs_data_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_obs_data'
+  ts_dir: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CESM_timeseries_from_testing' # If this is set to null, it will default to CESM_output_dir; if you don't have permissions to write to CESM_output_dir, you can specify a directory such as your scratch arcive directory
   lc_kwargs:
     threads_per_worker: 1
 
@@ -68,56 +82,56 @@ timeseries: # TODO: will need to update timeseries portion of this in next PR
     derive_vars:
         RESTOM: ['FLNT','FSNT']
     hist_str: 'cam.h0a'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 10
     level: 'lev'
-    mapping_file: [Null, Null, Null]
+    mapping_file: Null
 
 
   lnd:
     vars: []
     derive_vars: []
     hist_str: 'clm2.h0a'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 10
     level: 'lev'
 
   ocn:
     vars: []
     derive_vars: []
     hist_str: 'h.z'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 10
     level: 'lev'
 
   ice:
-    vars: []
+    vars: ['aice','hi','hs']
     derive_vars: []
     hist_str: 'cice.h'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 10
     level: 'lev'
 
   glc:
     vars: []
     derive_vars: []
     hist_str: 'initial_hist'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 1
     level: 'lev'
 
   rof:
     vars: []
     derive_vars: []
     hist_str: 'h0'
-    start_years: [1,1,1]
-    end_years: [100,60,113]
-    slice_size: [10, 10, 10]
+    start_years: 1
+    end_years: 200
+    slice_size: 10
     level: 'lev'
 
 compute_notebooks:
@@ -141,11 +155,30 @@ compute_notebooks:
             regridded_output:
               - False
               - False
-              - False
             vars:
               TS: Global
               RESTOM: Global
               ICEFRAC: Lab Sea
+
+    ice:
+      seaice_metrics:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+      Hemis_seaice_visual_compare_obs_lens_small:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
+      Regional_seaice_visual_compare_obs_lens:
+        parameter_groups:
+          none:
+            climo_nyears: 35
+            grid_file: '/glade/campaign/cgd/oce/datasets/cesm/grids/tx2_3v3_grid.nc'
+            path_model: '/glade/campaign/cesm/development/cross-wg/diagnostic_framework/CUPiD_model_data/ice/'
 
 ########### JUPYTER BOOK CONFIG ###########
 
@@ -172,6 +205,11 @@ book_toc:
     - caption: Diagnostic Output from the Atmosphere
       chapters:
         - file: atm/TimeSeriesPlots
+    - caption: Sea Ice
+      chapters:
+        - file: ice/seaice_metrics
+        - file: ice/Hemis_seaice_visual_compare_obs_lens_small
+        - file: ice/Regional_seaice_visual_compare_obs_lens
 
 
 #####################################
