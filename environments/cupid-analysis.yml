@@ -52,7 +52,7 @@ dependencies:
   - sphinxcontrib-qthelp=2.0.0
   - sympy=1.14.0
   - tinycss2=1.4.0
-  - uxarray=2025.06.0
+  - uxarray=2026.09.1
   - widgetsnbextension=4.0.15
   - xarray=2025.6.1
   - xesmf=0.9.2
