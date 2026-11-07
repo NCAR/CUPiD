@@ -12,3 +12,6 @@
 [submodule "externals/mom6-tools"]
     path = externals/mom6-tools
     url = https://github.com/NCAR/mom6-tools.git
+[submodule "externals/cmip7-prep"]
+	path = externals/cmip7-prep
+	url = https://github.com/ESMCI/cmip7-prep.git
